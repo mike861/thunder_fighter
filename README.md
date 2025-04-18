@@ -155,4 +155,4 @@ THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
 
 ## 开发者
 
-这个游戏是作为 Python 游戏开发练习项目创建的。 
+这个游戏是作为 Python 游戏开发练习项目创建的。
