@@ -1,117 +1,125 @@
-# 雷霆战机 (Thunder Fighter)
+# Thunder Fighter
 
-一个使用 Python 和 Pygame 制作的简单太空射击游戏。
+A simple space shooter game made with Python and Pygame.
 
-## 游戏说明
+## Game Description
 
-在游戏中，玩家控制一架战斗机在太空中与敌人对抗。使用方向键控制飞机移动，空格键发射子弹。
-随着游戏时间推移，敌人会变得更加强大和频繁，而且每隔一段时间会出现一个强大的 Boss，击败它可以获得更多的分数。
+In the game, the player controls a fighter jet battling enemies in space. Use the arrow keys to control the plane's movement and the spacebar to fire bullets.
+As game time progresses, enemies become stronger and more frequent, and a powerful Boss appears periodically. Defeating the Boss yields more points.
 
-## 游戏特点
+## Game Features
 
-- 自绘的图形和粒子效果
-- 随着游戏时间增加的难度系统
-- 多种敌人类型和射击模式
-- Boss 战，具有独特的攻击模式
-- 多种道具掉落系统
-- 增强型子弹系统
-- 爆炸特效和视觉反馈
-- 标准化日志系统
-- 完整的音效和背景音乐系统
+- Custom-drawn graphics and particle effects
+- Difficulty system that increases with game time
+- Multiple enemy types and shooting patterns
+- Boss battles with unique attack patterns
+- Various item drop system
+- Enhanced bullet system
+- Explosion effects and visual feedback
+- Standardized logging system
+- Complete sound effects and background music system
+- Game pause functionality
 
-## 游戏内部机制
+## Internal Game Mechanics
 
-### 敌人系统
-- **敌人等级**: 敌人分为0-10级，等级越高，生命值、速度和攻击力越高
-- **敌人生成**: 随着游戏时间增加，生成的敌人数量和等级也会提高
-- **敌人射击**: 1级以上的敌人可以射击，射击频率和子弹速度随等级提高
-  - 低级敌人(1-4): 发射简单的红色子弹，直线下落
-  - 中级敌人(5-7): 发射橙色子弹，可能有水平移动
-  - 高级敌人(8-10): 发射蓝色或紫色子弹，可能有曲线轨迹
+### Enemy System
+- **Enemy Levels**: Enemies range from level 0-10. Higher levels mean more health, speed, and attack power.
+- **Enemy Spawning**: The number and level of enemies increase as game time progresses.
+- **Enemy Shooting**: Enemies level 1 and above can shoot. Firing rate and bullet speed increase with level.
+  - Low-level enemies (1-4): Fire simple red bullets that fall straight down.
+  - Mid-level enemies (5-7): Fire orange bullets, possibly with horizontal movement.
+  - High-level enemies (8-10): Fire blue or purple bullets, possibly with curved trajectories.
 
-### 子弹系统
-- **玩家子弹**: 根据收集的道具，最多可有4种射击路径
-- **敌人子弹**: 根据敌人等级有不同外观、速度和伤害
-- **Boss子弹**: 特殊的大型子弹，伤害较高
+### Bullet System
+- **Player Bullets**: Up to 4 shooting paths based on collected items.
+- **Enemy Bullets**: Different appearance, speed, and damage based on enemy level.
+- **Boss Bullets**: Special large bullets with higher damage.
 
-### 道具系统
-- **生命道具**: 恢复玩家生命值
-- **子弹速度道具**: 提高玩家子弹速度
-- **子弹路径道具**: 增加玩家射击路径数量
-- **道具生成**: 随着游戏进行和击败敌人获得积分，会随机生成道具
+### Item System
+- **Health Item**: Restores player health.
+- **Bullet Speed Item**: Increases player bullet speed.
+- **Bullet Path Item**: Increases the number of player shooting paths.
+- **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
 
-### Boss系统】
-- **Boss等级**: Boss分为1-3级，等级越高越强大
-- **Boss生成**: 每隔一定时间会生成一个Boss
-- **Boss攻击**: 发射多颗子弹，数量和模式随等级变化
+### Boss System
+- **Boss Levels**: Bosses range from level 1-3, becoming more powerful at higher levels.
+- **Boss Spawning**: A Boss spawns periodically.
+- **Boss Attack**: Fires multiple bullets; the number and pattern change with level.
 
-### 音效系统
-- **背景音乐**: 游戏过程中循环播放的背景音乐
-- **射击音效**: 玩家发射子弹时播放
-- **爆炸音效**: 敌人和Boss被击毁时播放
-- **受伤音效**: 玩家受到伤害时播放
-- **死亡音效**: 玩家飞机被击毁时播放
-- **道具获取音效**: 拾取道具时播放
-- **击败Boss音效**: 成功击败Boss时播放
-- **音量控制**: 可调整音效和音乐音量
+### Sound System
+- **Background Music**: Loops during gameplay.
+- **Shooting Sound**: Plays when the player fires.
+- **Explosion Sound**: Plays when enemies and Bosses are destroyed.
+- **Hit Sound**: Plays when the player takes damage.
+- **Death Sound**: Plays when the player's ship is destroyed.
+- **Item Pickup Sound**: Plays when an item is collected.
+- **Boss Defeat Sound**: Plays when a Boss is successfully defeated.
+- **Volume Control**: Sound effect and music volume can be adjusted.
 
-### 日志系统
-- 标准化的日志输出，支持不同级别(DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- 通过环境变量`THUNDER_FIGHTER_LOG_LEVEL`可调整日志级别
-- 所有游戏事件都有英文日志记录，便于调试和监控
+### Logging System
+- Standardized log output supporting different levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
+- Log level can be adjusted via the `THUNDER_FIGHTER_LOG_LEVEL` environment variable.
+- All game events are logged in English for easy debugging and monitoring.
 
-## 控制说明
+## Controls
 
-- 方向键 (↑↓←→) 或 WASD: 控制飞机移动
-- 空格键: 发射子弹
-- F3: 显示详细敌人等级分布信息
-- M: 开启/关闭背景音乐
-- S: 开启/关闭音效
-- +/-: 调整音量
-- ESC: 退出游戏
+- Arrow Keys (↑↓←→) or WASD: Control ship movement
+- Spacebar: Fire bullets
+- P: Pause/Resume game
+- F3: Show detailed enemy level distribution (Dev mode)
+- M: Toggle background music on/off
+- S: Toggle sound effects on/off
+- +/-: Adjust volume
+- ESC: Quit game
 
-## 项目结构
+## Project Structure
 
-项目采用模块化结构设计，便于维护和扩展：
+The project uses a modular structure for easier maintenance and extension:
 
 ```
 thunder_fighter/
-├── __init__.py                 # 包初始化
-├── constants.py                # 常量定义
-├── game.py                     # 游戏主逻辑
-├── graphics/                   # 图形渲染相关
+├── __init__.py                 # Package initializer
+├── constants.py                # Constant definitions
+├── game.py                     # Main game logic
+├── graphics/                   # Graphics rendering related
 │   ├── __init__.py
-│   ├── effects.py              # 特效系统
-│   └── renderers.py            # 渲染函数
-├── sprites/                    # 游戏精灵类
+│   ├── effects.py              # Effects system
+│   └── renderers.py            # Rendering functions
+├── sprites/                    # Game sprite classes
 │   ├── __init__.py
-│   ├── boss.py                 # Boss类
-│   ├── bullets.py              # 子弹类
-│   ├── enemy.py                # 敌人类
-│   ├── explosion.py            # 爆炸效果类
-│   ├── items.py                # 道具类
-│   └── player.py               # 玩家类
-├── utils/                      # 工具函数
+│   ├── boss.py                 # Boss class
+│   ├── bullets.py              # Bullet classes
+│   ├── enemy.py                # Enemy class
+│   ├── explosion.py            # Explosion effect class
+│   ├── items.py                # Item classes
+│   └── player.py               # Player class
+├── utils/                      # Utility functions
 │   ├── __init__.py
-│   ├── collisions.py           # 碰撞检测
-│   ├── logger.py               # 日志系统
-│   ├── score.py                # 分数系统
-│   ├── sound_manager.py        # 音效管理
-│   └── stars.py                # 背景星星
-└── assets/                     # 游戏资源
-    ├── sounds/                 # 音效文件
-    └── music/                  # 背景音乐
+│   ├── collisions.py           # Collision detection
+│   ├── logger.py               # Logging system
+│   ├── score.py                # Score system
+│   ├── sound_manager.py        # Sound management
+│   └── stars.py                # Background stars
+└── assets/                     # Game assets
+    ├── sounds/                 # Sound effect files
+    └── music/                  # Background music
+main.py                         # Main entry script
+requirements.txt                # Dependency list
+README_CN.md                    # Chinese README file
+README.md                       # English README file
+uml_class_diagram.md            # UML Class Diagram
+.gitignore                      # Git ignore configuration
 ```
 
-## 运行方式
+## How to Run
 
-确保安装了 Python 和 Pygame，然后运行：
+Ensure you have Python and Pygame installed, then run:
 
 ```bash
 python main.py
 ```
 
-要调整日志级别，可以设置环境变量：
+To adjust the log level, set the environment variable:
 
 ```bash
 # Windows
@@ -122,37 +130,37 @@ python main.py
 THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
 ```
 
-## 依赖项
+## Dependencies
 
 - Python 3.6+
 - Pygame 2.0+
 
-## 音效资源
+## Sound Assets
 
-游戏使用了以下音效和音乐文件：
+The game uses the following sound and music files:
 
-1. 将WAV或MP3格式的音效文件放置在`thunder_fighter/assets/sounds/`目录：
-   - player_shoot.wav - 玩家射击音效
-   - player_hit.wav - 玩家受伤音效
-   - player_death.wav - 玩家死亡音效
-   - enemy_explosion.wav - 敌人爆炸音效
-   - boss_death.wav - Boss死亡音效
-   - item_pickup.wav - 道具拾取音效
+1. Place WAV or MP3 format sound effect files in the `thunder_fighter/assets/sounds/` directory:
+   - `player_shoot.wav` - Player shooting sound
+   - `player_hit.wav` - Player hit sound
+   - `player_death.wav` - Player death sound
+   - `enemy_explosion.wav` - Enemy explosion sound
+   - `boss_death.wav` - Boss death sound
+   - `item_pickup.wav` - Item pickup sound
 
-2. 将MP3格式的背景音乐放置在`thunder_fighter/assets/music/`目录：
-   - background_music.mp3 - 游戏背景音乐
+2. Place MP3 format background music in the `thunder_fighter/assets/music/` directory:
+   - `background_music.mp3` - Game background music
 
-如果这些文件不存在，游戏会自动处理缺失音效，不会影响正常游戏。
+If these files are missing, the game will handle the missing sounds gracefully and will not affect normal gameplay.
 
-## 技术细节
+## Technical Details
 
-- 使用面向对象编程设计游戏实体
-- 精灵组(Sprite Groups)管理游戏对象碰撞检测
-- 自定义渲染系统创建游戏视觉效果
-- 标准化日志系统跟踪游戏事件
-- 音效管理器控制游戏音效播放
-- 模块化架构便于扩展和维护
+- Object-Oriented Programming used for game entity design.
+- Sprite Groups manage game objects and collision detection.
+- Custom rendering system creates game visual effects.
+- Standardized logging system tracks game events.
+- Sound manager controls game audio playback.
+- Modular architecture allows for easy extension and maintenance.
 
-## 开发者
+## Developer
 
-这个游戏是作为 Python 游戏开发练习项目创建的。
+This game was created as a Python game development practice project. 
