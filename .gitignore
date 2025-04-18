@@ -1,4 +1,5 @@
 __pycache__/
 .specstory/
 .DS_Store
-venv/ 
+venv/
+.cursorindexingignore 
