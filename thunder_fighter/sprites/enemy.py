@@ -27,6 +27,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(ENEMY_SPAWN_Y_MIN, ENEMY_SPAWN_Y_MAX)
         
+        # Add detailed logging here
+        logger.debug(f"Enemy spawned - Level: {self.level}, ENEMY_SHOOT_LEVEL: {ENEMY_SHOOT_LEVEL}")
+        
         # Adjust speed based on game time and level
         base_speed_factor = min(3.0, 1.0 + game_time / 60.0)
         level_speed_bonus = self.level * 0.2
@@ -40,7 +43,9 @@ class Enemy(pygame.sprite.Sprite):
         self.last_update = pygame.time.get_ticks()
         self.original_image = self.image.copy()
         
-        # Shooting capability
+        # Shooting capability - ensure enemies only shoot if they're level 2 or higher
+        # Since we use 0-based indexing in _determine_level (levels 0-10),
+        # and ENEMY_SHOOT_LEVEL=2 means "from level 2", we need to check if level >= 2
         self.can_shoot = self.level >= ENEMY_SHOOT_LEVEL
         logger.debug(f"Enemy ID:{id(self)} Level: {self.level}, Can Shoot: {self.can_shoot}")
         
@@ -59,7 +64,14 @@ class Enemy(pygame.sprite.Sprite):
             logger.debug(f"Enemy ID:{id(self)} Level:{self.level} Ready to shoot, Delay:{self.shoot_delay}ms")
     
     def _determine_level(self, game_time, game_level):
-        """根据游戏时间和关卡等级确定敌人等级"""
+        """根据游戏时间和关卡等级确定敌人等级
+        
+        关于等级含义:
+        - 敌人等级是0-10的整数，0是最低级别, 10是最高级别
+        - 0-1级敌人不会射击
+        - 2级及以上的敌人可以射击 (由常量ENEMY_SHOOT_LEVEL=2决定)
+        - 等级越高的敌人血量、速度和攻击能力越强
+        """
         # 基础概率（基于游戏时间）
         base_probs = [
             max(0, 0.35 - game_time * 0.05),  # 0级
@@ -108,7 +120,12 @@ class Enemy(pygame.sprite.Sprite):
         
         # 根据最终概率选择等级
         chosen_level = random.choices(range(11), weights=probs, k=1)[0]
-        logger.debug(f"Determined enemy level {chosen_level} (game_time: {game_time:.1f}, game_level: {game_level})")
+        
+        # 确保敌机等级不超过关卡等级+2
+        max_allowed_level = min(10, game_level + 2)
+        chosen_level = min(chosen_level, max_allowed_level)
+        
+        logger.debug(f"Determined enemy level {chosen_level} (game_time: {game_time:.1f}, game_level: {game_level}, max_allowed: {max_allowed_level})")
         return chosen_level
         
     def update(self):
@@ -152,8 +169,9 @@ class Enemy(pygame.sprite.Sprite):
                 logger.error(f"Error: Enemy {id(self)} missing required sprite groups for shooting.")
                 return False
 
-            # Check shooting capability again (redundant but safe)
-            if not self.can_shoot:
+            # Double-check shooting capability and level requirement
+            if not self.can_shoot or self.level < ENEMY_SHOOT_LEVEL:
+                logger.warning(f"Enemy ID:{id(self)} attempted to shoot but can_shoot={self.can_shoot}, level={self.level}, required level={ENEMY_SHOOT_LEVEL}")
                 return False
                 
             # Create bullet

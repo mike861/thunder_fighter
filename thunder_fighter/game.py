@@ -7,7 +7,7 @@ from thunder_fighter.constants import (
     BASE_ENEMY_COUNT, SCORE_THRESHOLD, BOSS_SPAWN_INTERVAL,
     FONT_NAME, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL,
     TEXT_TIME, TEXT_ENEMIES, TEXT_HIGH_LEVEL_ENEMIES, TEXT_BULLET_INFO,
-    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE
+    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL
 )
 from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
@@ -92,6 +92,7 @@ class Game:
         self.running = True
         self.paused = False  # 游戏暂停状态
         self.game_level = 1  # 游戏关卡等级
+        self.game_won = False # Game victory flag
         
         # 播放背景音乐
         sound_manager.play_background_music('background_music.mp3')
@@ -292,6 +293,14 @@ class Game:
                 # 增加游戏关卡等级
                 self.game_level += 1
                 logger.info(f"Boss defeated! Advancing to game level {self.game_level}")
+                
+                # 检查是否达到胜利条件
+                if self.game_level > MAX_GAME_LEVEL:
+                    logger.info(f"Max game level {MAX_GAME_LEVEL} reached! Player wins!")
+                    self.game_won = True
+                    # Game will stop in the next iteration via self.running check
+                    # Or we can set self.running = False here to stop immediately after this update cycle
+                    self.running = False # Stop the game loop after this update
         
         # 敌人撞到玩家
         player_collision = check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)
@@ -335,6 +344,27 @@ class Game:
     
     def render(self):
         """渲染游戏画面"""
+        # 检查是否胜利通关
+        if self.game_won:
+            self.screen.fill((20, 20, 40)) # Dark blue background for victory
+            victory_text = self.font_large.render("VICTORY!", True, GREEN)
+            text_rect = victory_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40))
+            self.screen.blit(victory_text, text_rect)
+            
+            final_level_text = self.font_medium.render(f"Cleared Level {MAX_GAME_LEVEL}", True, WHITE)
+            level_rect = final_level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 10))
+            self.screen.blit(final_level_text, level_rect)
+
+            final_score_text = self.font_medium.render(f"Final Score: {self.score.value}", True, WHITE)
+            score_rect = final_score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
+            self.screen.blit(final_score_text, score_rect)
+            
+            pygame.display.flip()
+            # Keep showing victory screen for a moment before quitting fully
+            # The game loop will terminate because self.running is False
+            # We might add a delay here if needed, but the quit process handles it.
+            return # Skip normal rendering
+
         # 绘制背景（太空黑色）
         self.screen.fill((10, 10, 20))  # 深蓝黑色的太空
         
