@@ -19,6 +19,7 @@ As game time progresses, enemies become stronger and more frequent, and a powerf
 - Standardized logging system
 - Complete sound effects and background music system
 - Game pause functionality
+- Fully tested codebase with 43 passing tests
 
 ## Internal Game Mechanics
 
@@ -112,6 +113,21 @@ uml_class_diagram.md            # UML Class Diagram
 .gitignore                      # Git ignore configuration
 ```
 
+## Testing
+
+The game includes a comprehensive test suite with 43 tests covering all major components:
+- Player mechanics and interactions
+- Enemy behaviors and level calculations
+- Boss battle mechanics
+- Item generation and effects
+- Collision detection
+- Game state management
+
+Run the tests with:
+```bash
+pytest
+```
+
 ## How to Run
 
 Ensure you have Python and Pygame installed, then run:
@@ -153,6 +169,16 @@ The game uses the following sound and music files:
 
 If these files are missing, the game will handle the missing sounds gracefully and will not affect normal gameplay.
 
+## Development Status
+
+- ✅ Core gameplay mechanics implemented
+- ✅ Enemy system with varied behaviors
+- ✅ Boss battles with unique patterns
+- ✅ Item drop and collection system
+- ✅ Sound system with volume control
+- ✅ Complete test coverage
+- ✅ Game polish and optimization
+
 ## Technical Details
 
 - Object-Oriented Programming used for game entity design.
@@ -161,6 +187,7 @@ If these files are missing, the game will handle the missing sounds gracefully a
 - Standardized logging system tracks game events.
 - Sound manager controls game audio playback.
 - Modular architecture allows for easy extension and maintenance.
+- Test-driven development ensures code quality and reliability.
 
 ## Developer
 

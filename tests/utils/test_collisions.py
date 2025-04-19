@@ -197,12 +197,14 @@ def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collid
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet]  # One bullet hit
     
+    # 模拟damage方法返回False（未被击败）
+    mock_boss.damage.return_value = False
+    
     result = check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
     
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
-    assert mock_boss.health == 90  # Should reduce health by 10
-    assert mock_boss.damage_flash == 5  # Should set damage flash frames
+    mock_boss.damage.assert_called_with(10)  # 应该调用damage(10)
     mock_explosion.assert_called_once_with(mock_bullet.rect.center, 20)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
     
@@ -222,7 +224,9 @@ def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask,
     
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet]  # One bullet hit
-    mock_boss.health = 10  # Boss has low health
+    
+    # 模拟damage方法返回True（被击败）
+    mock_boss.damage.return_value = True
     
     # Mock random positions for explosions - need 20 values (10 x-positions and 10 y-positions)
     random_positions = []
@@ -235,19 +239,16 @@ def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask,
     
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
-    assert mock_boss.health <= 0  # Should reduce health to 0 or below
-    
-    # In the actual implementation, the boss is killed implicitly when health <= 0
-    # so we won't assert kill() was called
-    
-    # Should create multiple explosions for boss defeat
-    assert mock_explosion.call_count >= 1  # At least one explosion created
-    assert all_sprites.add.call_count >= 1  # At least one sprite added
+    mock_boss.damage.assert_called_with(10)  # 应该调用damage(10)
     
     # Check result dict
     assert result['boss_hit'] is True
     assert result['boss_defeated'] is True
     assert result['damage'] == 10
+    
+    # Should create multiple explosions for boss defeat
+    assert mock_explosion.call_count >= 2  # At least 2 explosions created (一个子弹击中爆炸，一个Boss被击败爆炸)
+    assert all_sprites.add.call_count >= 2  # At least 2 sprites added
 
 @patch('pygame.sprite.spritecollide')
 def test_no_boss_bullet_collision(mock_spritecollide, mock_groups):

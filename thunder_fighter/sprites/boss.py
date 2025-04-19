@@ -44,6 +44,9 @@ class Boss(pygame.sprite.Sprite):
         self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # 等级越高，射击越快
         self.bullet_count = BOSS_BULLET_COUNT_BASE + (self.level - 1) * BOSS_BULLET_COUNT_INCREMENT
         
+        # 设置初始攻击模式
+        self.shoot_pattern = "normal"
+        
         self.last_shot = ptime.get_ticks()
         self.direction = 1  # 移动方向
         self.move_counter = 0
@@ -80,6 +83,40 @@ class Boss(pygame.sprite.Sprite):
         flash_images.append(red_image)  # 第二帧是红色版本
         
         return flash_images
+    
+    def damage(self, amount):
+        """处理Boss受到的伤害
+        
+        Args:
+            amount: 伤害值
+        
+        Returns:
+            bool: 如果Boss被摧毁返回True，否则返回False
+        """
+        self.health -= amount
+        self.damage_flash = 5  # 设置闪烁帧数
+        
+        # 检查是否生命值降至50%以下，改变攻击模式
+        health_percentage = self.health / self.max_health
+        if health_percentage <= 0.5 and self.shoot_pattern == "normal":
+            self.shoot_pattern = "aggressive"
+            # 当生命值降低时，减少射击延迟，增加攻击频率
+            self.shoot_delay = max(150, self.shoot_delay * 0.7)
+            logger.info(f"Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
+        
+        # 如果生命值进一步降低，进入最终模式
+        if health_percentage <= 0.25 and self.shoot_pattern == "aggressive":
+            self.shoot_pattern = "final"
+            # 再次减少射击延迟
+            self.shoot_delay = max(100, self.shoot_delay * 0.8)
+            logger.info(f"Boss entered final mode! Shoot delay: {self.shoot_delay}")
+        
+        # 检查是否被摧毁
+        if self.health <= 0:
+            self.kill()
+            return True
+        
+        return False
         
     def update(self):
         """更新Boss状态"""
@@ -145,19 +182,45 @@ class Boss(pygame.sprite.Sprite):
         # 由于循环引用，需要从外部导入BossBullet
         from thunder_fighter.sprites.bullets import BossBullet
         
-        # 根据等级决定子弹数量和方式
-        if self.level == 1:
-            # 1级Boss: 3颗子弹，直线发射
-            offsets = [-30, 0, 30]
-        elif self.level == 2:
-            # 2级Boss: 4颗子弹，扇形分布
-            offsets = [-45, -15, 15, 45]
-        else:
-            # 3级Boss: 5颗子弹，更密集的扇形分布
-            offsets = [-60, -30, 0, 30, 60]
+        # 根据等级和攻击模式决定子弹数量和方式
+        if self.shoot_pattern == "normal":
+            if self.level == 1:
+                # 1级Boss: 3颗子弹，直线发射
+                offsets = [-30, 0, 30]
+            elif self.level == 2:
+                # 2级Boss: 4颗子弹，扇形分布
+                offsets = [-45, -15, 15, 45]
+            else:
+                # 3级Boss: 5颗子弹，更密集的扇形分布
+                offsets = [-60, -30, 0, 30, 60]
+        elif self.shoot_pattern == "aggressive":
+            # 激进模式下，增加子弹数量和分布范围
+            if self.level == 1:
+                # 1级Boss: 4颗子弹，更宽的扇形
+                offsets = [-45, -15, 15, 45]
+            elif self.level == 2:
+                # 2级Boss: 5颗子弹，更宽的扇形
+                offsets = [-60, -30, 0, 30, 60]
+            else:
+                # 3级Boss: 6颗子弹，更密集的扇形分布
+                offsets = [-75, -45, -15, 15, 45, 75]
+        else:  # "final" 模式
+            # 最终模式下，最大范围和子弹数量
+            if self.level == 1:
+                # 1级Boss: 5颗子弹，宽扇形
+                offsets = [-60, -30, 0, 30, 60]
+            elif self.level == 2:
+                # 2级Boss: 6颗子弹，宽扇形
+                offsets = [-75, -45, -15, 15, 45, 75]
+            else:
+                # 3级Boss: 7颗子弹，几乎全屏扇形
+                offsets = [-90, -60, -30, 0, 30, 60, 90]
+            
+        # 最终使用数量不超过设定的子弹数
+        offsets = offsets[:self.bullet_count]
             
         # 发射子弹
-        for offset in offsets[:self.bullet_count]:
+        for offset in offsets:
             boss_bullet = BossBullet(self.rect.centerx + offset, self.rect.bottom)
             self.all_sprites.add(boss_bullet)
             self.boss_bullets_group.add(boss_bullet)

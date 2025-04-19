@@ -83,4 +83,4 @@ BOSS_MAX_LEVEL = 5  # Boss最大等级
 SCORE_THRESHOLD = 200  # 每1000分生成一个道具
 
 # Game balance
-MAX_GAME_LEVEL = 20 # 最高关卡等级 
+MAX_GAME_LEVEL = 10 # 最高关卡等级 

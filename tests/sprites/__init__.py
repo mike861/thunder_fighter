@@ -1,0 +1,1 @@
+# 确保tests/sprites是有效Python包 

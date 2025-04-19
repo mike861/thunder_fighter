@@ -89,14 +89,15 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
             result['damage'] = len(boss_hits) * 10  # 每颗子弹10点伤害
             
             for hit in boss_hits:
-                boss.health -= 10
-                boss.damage_flash = 5  # 设置闪烁帧数
+                # 使用boss的damage方法处理伤害
+                boss_defeated = boss.damage(10)
+                
                 # 创建小爆炸效果
                 explosion = Explosion(hit.rect.center, 20)
                 all_sprites.add(explosion)
                 
                 # 检查Boss是否被击败
-                if boss.health <= 0:
+                if boss_defeated:
                     # 创建大爆炸
                     for _ in range(10):
                         pos_x = random.randint(boss.rect.left, boss.rect.right)
@@ -104,7 +105,6 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
                         explosion = Explosion((pos_x, pos_y), 60)
                         all_sprites.add(explosion)
                     
-                    boss.kill()
                     result['boss_defeated'] = True
                     logger.info(f"Boss defeated!")
         else:
