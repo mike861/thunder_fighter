@@ -39,6 +39,7 @@ As game time progresses, enemies become stronger and more frequent, and a powerf
 - **Health Item**: Restores player health.
 - **Bullet Speed Item**: Increases player bullet speed.
 - **Bullet Path Item**: Increases the number of player shooting paths.
+- **Player Speed Item**: Increases the player's movement speed.
 - **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
 
 ### Boss System
@@ -91,7 +92,7 @@ thunder_fighter/
 │   ├── bullets.py              # Bullet classes
 │   ├── enemy.py                # Enemy class
 │   ├── explosion.py            # Explosion effect class
-│   ├── items.py                # Item classes
+│   ├── items.py                # Item classes (Health, Bullet Speed/Path, Player Speed)
 │   └── player.py               # Player class
 ├── utils/                      # Utility functions
 │   ├── __init__.py
@@ -145,7 +146,7 @@ The game uses the following sound and music files:
    - `player_death.wav` - Player death sound
    - `enemy_explosion.wav` - Enemy explosion sound
    - `boss_death.wav` - Boss death sound
-   - `item_pickup.wav` - Item pickup sound
+   - `item_pickup.wav` - Item pickup sound (Used for all item types currently)
 
 2. Place MP3 format background music in the `thunder_fighter/assets/music/` directory:
    - `background_music.mp3` - Game background music

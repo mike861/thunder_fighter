@@ -39,6 +39,7 @@
 - **生命道具**: 恢复玩家生命值
 - **子弹速度道具**: 提高玩家子弹速度
 - **子弹路径道具**: 增加玩家射击路径数量
+- **玩家速度道具**: 提升玩家移动速度。
 - **道具生成**: 随着游戏进行和击败敌人获得积分，会随机生成道具
 
 ### Boss系统
@@ -91,7 +92,7 @@ thunder_fighter/
 │   ├── bullets.py              # 子弹类
 │   ├── enemy.py                # 敌人类
 │   ├── explosion.py            # 爆炸效果类
-│   ├── items.py                # 道具类
+│   ├── items.py                # 道具类 (生命, 子弹速度/路径, 玩家速度)
 │   └── player.py               # 玩家类
 ├── utils/                      # 工具函数
 │   ├── __init__.py
@@ -145,7 +146,7 @@ THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
    - player_death.wav - 玩家死亡音效
    - enemy_explosion.wav - 敌人爆炸音效
    - boss_death.wav - Boss死亡音效
-   - item_pickup.wav - 道具拾取音效
+   - item_pickup.wav - 道具拾取音效 (目前所有道具类型共用)
 
 2. 将MP3格式的背景音乐放置在`thunder_fighter/assets/music/`目录：
    - background_music.mp3 - 游戏背景音乐

@@ -338,4 +338,33 @@ def draw_health_bar(surface, x, y, width, height, health, max_health, border_col
     pygame.draw.rect(surface, color, (x, y, health_width, height))
     
     # 绘制血条边框
-    pygame.draw.rect(surface, border_color, (x, y, width, height), 1) 
+    pygame.draw.rect(surface, border_color, (x, y, width, height), 1)
+
+def create_player_speed_item():
+    """创建玩家速度提升道具表面"""
+    item_surface = pygame.Surface((30, 30), pygame.SRCALPHA)
+    
+    # 绘制圆形背景 (绿色系)
+    pygame.draw.circle(item_surface, (0, 200, 0), (15, 15), 15)
+    
+    # 绘制内部图案 - 向上箭头
+    arrow_points = [
+        (15, 5),  # 箭头顶部
+        (22, 15), # 右肩
+        (18, 15), # 右颈
+        (18, 25), # 右底
+        (12, 25), # 左底
+        (12, 15), # 左颈
+        (8, 15)   # 左肩
+    ]
+    pygame.draw.polygon(item_surface, WHITE, arrow_points)
+    
+    # 添加发光效果
+    glow_surface = pygame.Surface((40, 40), pygame.SRCALPHA)
+    pygame.draw.circle(glow_surface, (100, 255, 100, 70), (20, 20), 18)
+    item_surface.blit(glow_surface, (-5, -5), special_flags=pygame.BLEND_ALPHA_SDL2)
+    
+    # 添加白色边缘
+    pygame.draw.circle(item_surface, WHITE, (15, 15), 15, 2)
+    
+    return item_surface 

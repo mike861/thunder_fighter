@@ -2,7 +2,7 @@ import pygame
 import random
 from thunder_fighter.sprites.explosion import Explosion
 from thunder_fighter.sprites.enemy import Enemy
-from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem
+from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
 from thunder_fighter.utils.logger import logger
 
@@ -222,6 +222,10 @@ def check_items_player_collisions(player, items, all_sprites):
             item_type = getattr(hit, 'type', 'unknown')
             result['item_types'].append(item_type)
             
+            # Default effect values
+            color = (255, 255, 255, 150) # Default white
+            effect_size = 30
+            
             # 根据道具类型执行不同操作
             if item_type == 'health':
                 # 恢复生命值
@@ -245,15 +249,18 @@ def check_items_player_collisions(player, items, all_sprites):
                 # 黄色弹道效果
                 color = (255, 255, 0, 150)
                 effect_size = 40
-                
-            else:
-                # 未知道具，默认效果
-                color = (255, 255, 255, 150)
-                effect_size = 30
             
+            elif item_type == 'player_speed': # Handle new item type
+                # 增加玩家移动速度
+                speed_increase = getattr(hit, 'speed_increase', 1)
+                new_speed = player.increase_player_speed(speed_increase)
+                # 绿色速度效果 (use a distinct green)
+                color = (0, 200, 0, 180) 
+                effect_size = 38
+                
             # 创建道具效果
             explosion = Explosion(hit.rect.center, effect_size)
-            explosion.image.fill((0, 0, 0, 0))
+            explosion.image.fill((0, 0, 0, 0)) # Make background transparent
             pygame.draw.circle(explosion.image, color, 
                               (explosion.size // 2, explosion.size // 2), 
                               explosion.size // 2)
