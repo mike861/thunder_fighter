@@ -19,7 +19,10 @@
 - 标准化日志系统
 - 完整的音效和背景音乐系统
 - 游戏暂停功能
+<<<<<<< HEAD
+=======
 - 完整测试覆盖，通过43个测试用例
+>>>>>>> origin/init
 
 ## 游戏内部机制
 
@@ -40,7 +43,10 @@
 - **生命道具**: 恢复玩家生命值
 - **子弹速度道具**: 提高玩家子弹速度
 - **子弹路径道具**: 增加玩家射击路径数量
+<<<<<<< HEAD
+=======
 - **玩家速度道具**: 提升玩家移动速度。
+>>>>>>> origin/init
 - **道具生成**: 随着游戏进行和击败敌人获得积分，会随机生成道具
 
 ### Boss系统
@@ -93,7 +99,11 @@ thunder_fighter/
 │   ├── bullets.py              # 子弹类
 │   ├── enemy.py                # 敌人类
 │   ├── explosion.py            # 爆炸效果类
+<<<<<<< HEAD
+│   ├── items.py                # 道具类
+=======
 │   ├── items.py                # 道具类 (生命, 子弹速度/路径, 玩家速度)
+>>>>>>> origin/init
 │   └── player.py               # 玩家类
 ├── utils/                      # 工具函数
 │   ├── __init__.py
@@ -147,13 +157,19 @@ THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
    - player_death.wav - 玩家死亡音效
    - enemy_explosion.wav - 敌人爆炸音效
    - boss_death.wav - Boss死亡音效
+<<<<<<< HEAD
+   - item_pickup.wav - 道具拾取音效
+=======
    - item_pickup.wav - 道具拾取音效 (目前所有道具类型共用)
+>>>>>>> origin/init
 
 2. 将MP3格式的背景音乐放置在`thunder_fighter/assets/music/`目录：
    - background_music.mp3 - 游戏背景音乐
 
 如果这些文件不存在，游戏会自动处理缺失音效，不会影响正常游戏。
 
+<<<<<<< HEAD
+=======
 ## 开发状态
 
 - ✅ 核心游戏机制已实现
@@ -179,6 +195,7 @@ THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
 pytest
 ```
 
+>>>>>>> origin/init
 ## 技术细节
 
 - 使用面向对象编程设计游戏实体
@@ -187,7 +204,10 @@ pytest
 - 标准化日志系统跟踪游戏事件
 - 音效管理器控制游戏音效播放
 - 模块化架构便于扩展和维护
+<<<<<<< HEAD
+=======
 - 测试驱动开发确保代码质量与可靠性
+>>>>>>> origin/init
 
 ## 开发者
 

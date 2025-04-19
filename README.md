@@ -19,7 +19,10 @@ As game time progresses, enemies become stronger and more frequent, and a powerf
 - Standardized logging system
 - Complete sound effects and background music system
 - Game pause functionality
+<<<<<<< HEAD
+=======
 - Fully tested codebase with 43 passing tests
+>>>>>>> origin/init
 
 ## Internal Game Mechanics
 
@@ -40,7 +43,10 @@ As game time progresses, enemies become stronger and more frequent, and a powerf
 - **Health Item**: Restores player health.
 - **Bullet Speed Item**: Increases player bullet speed.
 - **Bullet Path Item**: Increases the number of player shooting paths.
+<<<<<<< HEAD
+=======
 - **Player Speed Item**: Increases the player's movement speed.
+>>>>>>> origin/init
 - **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
 
 ### Boss System
@@ -93,7 +99,11 @@ thunder_fighter/
 │   ├── bullets.py              # Bullet classes
 │   ├── enemy.py                # Enemy class
 │   ├── explosion.py            # Explosion effect class
+<<<<<<< HEAD
+│   ├── items.py                # Item classes
+=======
 │   ├── items.py                # Item classes (Health, Bullet Speed/Path, Player Speed)
+>>>>>>> origin/init
 │   └── player.py               # Player class
 ├── utils/                      # Utility functions
 │   ├── __init__.py
@@ -113,6 +123,8 @@ uml_class_diagram.md            # UML Class Diagram
 .gitignore                      # Git ignore configuration
 ```
 
+<<<<<<< HEAD
+=======
 ## Testing
 
 The game includes a comprehensive test suite with 43 tests covering all major components:
@@ -128,6 +140,7 @@ Run the tests with:
 pytest
 ```
 
+>>>>>>> origin/init
 ## How to Run
 
 Ensure you have Python and Pygame installed, then run:
@@ -162,13 +175,19 @@ The game uses the following sound and music files:
    - `player_death.wav` - Player death sound
    - `enemy_explosion.wav` - Enemy explosion sound
    - `boss_death.wav` - Boss death sound
+<<<<<<< HEAD
+   - `item_pickup.wav` - Item pickup sound
+=======
    - `item_pickup.wav` - Item pickup sound (Used for all item types currently)
+>>>>>>> origin/init
 
 2. Place MP3 format background music in the `thunder_fighter/assets/music/` directory:
    - `background_music.mp3` - Game background music
 
 If these files are missing, the game will handle the missing sounds gracefully and will not affect normal gameplay.
 
+<<<<<<< HEAD
+=======
 ## Development Status
 
 - ✅ Core gameplay mechanics implemented
@@ -179,6 +198,7 @@ If these files are missing, the game will handle the missing sounds gracefully a
 - ✅ Complete test coverage
 - ✅ Game polish and optimization
 
+>>>>>>> origin/init
 ## Technical Details
 
 - Object-Oriented Programming used for game entity design.
@@ -187,7 +207,10 @@ If these files are missing, the game will handle the missing sounds gracefully a
 - Standardized logging system tracks game events.
 - Sound manager controls game audio playback.
 - Modular architecture allows for easy extension and maintenance.
+<<<<<<< HEAD
+=======
 - Test-driven development ensures code quality and reliability.
+>>>>>>> origin/init
 
 ## Developer
 

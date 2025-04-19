@@ -2,7 +2,11 @@ import pygame
 import random
 import math
 from thunder_fighter.constants import WIDTH, HEIGHT
+<<<<<<< HEAD
+from thunder_fighter.graphics.renderers import create_health_item, create_bullet_speed_item, create_bullet_path_item
+=======
 from thunder_fighter.graphics.renderers import create_health_item, create_bullet_speed_item, create_bullet_path_item, create_player_speed_item
+>>>>>>> origin/init
 from thunder_fighter.utils.logger import logger
 
 class HealthItem(pygame.sprite.Sprite):
@@ -110,6 +114,8 @@ class BulletPathItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+<<<<<<< HEAD
+=======
 class PlayerSpeedItem(pygame.sprite.Sprite):
     """Player speed boost item class"""
     def __init__(self):
@@ -146,11 +152,23 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+>>>>>>> origin/init
 def create_random_item(game_time, all_sprites, items_group):
     """Creates a random item based on game time and adds it to groups."""
     # Probabilities based on game time (adjust as needed)
     time_factor = min(1.0, game_time / 10.0) # Max probability reached after 10 mins
     
+<<<<<<< HEAD
+    prob_health = 0.4 + 0.1 * time_factor
+    prob_speed = 0.3 + 0.1 * time_factor
+    prob_path = 0.3 + 0.1 * time_factor
+    
+    # Normalize probabilities
+    total_prob = prob_health + prob_speed + prob_path
+    prob_health /= total_prob
+    prob_speed /= total_prob
+    # prob_path = 1.0 - prob_health - prob_speed # Ensure sum is 1
+=======
     # Add probability for the new player speed item
     prob_health = 0.35 + 0.1 * time_factor
     prob_bullet_speed = 0.25 + 0.1 * time_factor
@@ -163,6 +181,7 @@ def create_random_item(game_time, all_sprites, items_group):
     prob_bullet_speed /= total_prob
     prob_bullet_path /= total_prob
     prob_player_speed /= total_prob # Normalize new probability
+>>>>>>> origin/init
 
     rand_val = random.random()
     x = random.randrange(50, WIDTH - 50)
@@ -173,6 +192,16 @@ def create_random_item(game_time, all_sprites, items_group):
     if rand_val < prob_health:
         item_type = 'health'
         item = HealthItem()
+<<<<<<< HEAD
+    elif rand_val < prob_health + prob_speed:
+        item_type = 'bullet_speed'
+        # Assign a speed increase value (can be randomized or fixed)
+        speed_increase = 1 + random.randint(0, 1) # Increase speed by 1 or 2
+        item = BulletSpeedItem()
+    else:
+        item_type = 'bullet_path'
+        item = BulletPathItem()
+=======
     elif rand_val < prob_health + prob_bullet_speed:
         item_type = 'bullet_speed'
         item = BulletSpeedItem()
@@ -182,11 +211,17 @@ def create_random_item(game_time, all_sprites, items_group):
     else: # The remaining probability is for player_speed
         item_type = 'player_speed'
         item = PlayerSpeedItem()
+>>>>>>> origin/init
         
     if item:
         all_sprites.add(item)
         items_group.add(item)
+<<<<<<< HEAD
+        # Log item creation (changed from print)
+        logger.info(f"Created random item: Type='{item_type}', Pos=({x}, {y})")
+=======
         logger.info(f"Created random item: Type='{item_type}', Pos=({item.rect.centerx}, {item.rect.centery})")
+>>>>>>> origin/init
     else:
         logger.warning("Failed to create random item.")
     
