@@ -11,7 +11,7 @@ from thunder_fighter.utils.logger import logger
 
 class Boss(pygame.sprite.Sprite):
     """Boss类"""
-    def __init__(self, all_sprites, boss_bullets_group, level=None):
+    def __init__(self, all_sprites, boss_bullets_group, level=None, game_level=1):
         pygame.sprite.Sprite.__init__(self)
         
         # 确定Boss等级 - 如果未指定，根据游戏进度随机生成
@@ -19,6 +19,8 @@ class Boss(pygame.sprite.Sprite):
             self.level = random.randint(1, BOSS_MAX_LEVEL)
         else:
             self.level = min(level, BOSS_MAX_LEVEL)
+            
+        self.game_level = game_level # Store the overall game level
         
         # 记录原始图像 - 用于闪烁效果时恢复
         self.original_image = create_boss_ship(self.level)
@@ -50,6 +52,10 @@ class Boss(pygame.sprite.Sprite):
         # 预先创建闪烁图像
         self.flash_images = self._create_flash_images()
         
+        # 定义基础移动速度和范围
+        self.base_speedx = 2
+        self.move_margin = 10 # Minimum margin from screen edge
+
         # 精灵组
         self.all_sprites = all_sprites
         self.boss_bullets_group = boss_bullets_group
@@ -83,19 +89,33 @@ class Boss(pygame.sprite.Sprite):
         else:
             # 左右移动
             self.move_counter += 1
-            if self.move_counter >= 100:
+            if self.move_counter >= 100: # Change direction periodically
                 self.direction *= -1
                 self.move_counter = 0
             
-            self.rect.x += self.speedx * self.direction
+            # Calculate dynamic movement boundaries based on game_level
+            # Higher game_level allows moving closer to the edges
+            max_movement_range = (WIDTH - self.rect.width - 2 * self.move_margin)
+            # Reduce margin based on game level, but keep at least a small margin
+            current_margin = max(5, self.move_margin + 50 - self.game_level * 5)
             
-            # 防止Boss飞出屏幕
-            if self.rect.left < 0:
-                self.rect.left = 0
-                self.direction = 1
-            if self.rect.right > WIDTH:
-                self.rect.right = WIDTH
-                self.direction = -1
+            left_boundary = current_margin
+            right_boundary = WIDTH - self.rect.width - current_margin
+
+            # Adjust speed slightly based on game level
+            current_speedx = self.base_speedx + (self.game_level - 1) * 0.1
+
+            self.rect.x += current_speedx * self.direction
+            
+            # 防止Boss飞出动态边界
+            if self.rect.left < left_boundary:
+                self.rect.left = left_boundary
+                self.direction = 1 # Force move right
+                self.move_counter = 0 # Reset move counter to prevent getting stuck
+            if self.rect.right > right_boundary:
+                self.rect.right = right_boundary
+                self.direction = -1 # Force move left
+                self.move_counter = 0 # Reset move counter
         
         # Boss射击
         now = ptime.get_ticks()

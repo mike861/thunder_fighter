@@ -15,11 +15,11 @@ import traceback
 
 class Enemy(pygame.sprite.Sprite):
     """Enemy class"""
-    def __init__(self, game_time=0, all_sprites=None, enemy_bullets_group=None):
+    def __init__(self, game_time=0, game_level=1, all_sprites=None, enemy_bullets_group=None):
         pygame.sprite.Sprite.__init__(self)
         
-        # Determine level
-        self.level = self._determine_level(game_time)
+        # Determine level based on game time and game level
+        self.level = self._determine_level(game_time, game_level)
         
         # Create image based on level
         self.image = create_enemy_ship(self.level)
@@ -58,27 +58,47 @@ class Enemy(pygame.sprite.Sprite):
             self.last_shot = pygame.time.get_ticks() - self.shoot_delay + random.randint(0, 1000)
             logger.debug(f"Enemy ID:{id(self)} Level:{self.level} Ready to shoot, Delay:{self.shoot_delay}ms")
     
-    def _determine_level(self, game_time):
-        """根据游戏时间确定敌人等级"""
-        # 计算每个等级的基础概率
+    def _determine_level(self, game_time, game_level):
+        """根据游戏时间和关卡等级确定敌人等级"""
+        # 基础概率（基于游戏时间）
         base_probs = [
-            0.35 - game_time * 0.05,  # 0级，随时间降低概率
-            0.25 - game_time * 0.03,  # 1级，随时间略微降低概率
-            0.15,                     # 2级，基础概率保持不变
-            0.10 + game_time * 0.01,  # 3级，随时间增加概率
-            0.05 + game_time * 0.015, # 4级
-            0.05 + game_time * 0.015, # 5级
-            0.02 + game_time * 0.01,  # 6级
-            0.02 + game_time * 0.01,  # 7级
-            0.01 + game_time * 0.005, # 8级
-            0.00 + game_time * 0.003, # 9级
-            0.00 + game_time * 0.002  # 10级
+            max(0, 0.35 - game_time * 0.05),  # 0级
+            max(0, 0.25 - game_time * 0.03),  # 1级
+            max(0, 0.15),                     # 2级
+            max(0, 0.10 + game_time * 0.01),  # 3级
+            max(0, 0.05 + game_time * 0.015), # 4级
+            max(0, 0.05 + game_time * 0.015), # 5级
+            max(0, 0.02 + game_time * 0.01),  # 6级
+            max(0, 0.02 + game_time * 0.01),  # 7级
+            max(0, 0.01 + game_time * 0.005), # 8级
+            max(0, 0.00 + game_time * 0.003), # 9级
+            max(0, 0.00 + game_time * 0.002)  # 10级
         ]
+
+        # 关卡等级影响 - 增加高等级敌人的概率
+        # 每增加一级关卡，高等级敌人出现概率轻微提升
+        level_boost = (game_level - 1) * 0.02 # 每关增加2%的高级敌人倾向
         
-        # 确保概率范围在0-1之间
+        # 将提升的概率从低等级转移到高等级 (简单线性转移)
+        transfer_prob = 0.0
         for i in range(len(base_probs)):
-            base_probs[i] = max(0, min(base_probs[i], 1))
-        
+            # 从0-4级敌人转移概率
+            if i < 5:
+                reduction = base_probs[i] * level_boost * (5 - i) / 5 # 低等级减少更多
+                reduction = min(base_probs[i], reduction) # 不能减少超过本身概率
+                base_probs[i] -= reduction
+                transfer_prob += reduction
+            # 将概率添加到5-10级敌人
+            elif i >= 5:
+                # 按比例分配转移过来的概率
+                boost_share = transfer_prob / max(1, len(base_probs) - 5) # 平均分配
+                base_probs[i] += boost_share
+                transfer_prob -= boost_share # 更新剩余转移概率
+                
+        # 确保概率不为负，并进行细微调整防止全0
+        for i in range(len(base_probs)):
+            base_probs[i] = max(0.001, base_probs[i]) # 保证每个等级都有极小概率出现
+
         # 归一化概率总和为1
         total = sum(base_probs)
         if total > 0:
@@ -86,21 +106,10 @@ class Enemy(pygame.sprite.Sprite):
         else:
             probs = [1/len(base_probs)] * len(base_probs)
         
-        # 游戏前3分钟，提高2-4级敌人的生成几率，确保玩家能看到射击效果
-        if game_time < 3:
-            # 强制至少30%的敌人是2级及以上
-            shooting_enemies_prob = sum(probs[2:5])
-            if shooting_enemies_prob < 0.3:
-                # 提高2-4级敌人概率
-                boost_factor = 0.3 / max(0.01, shooting_enemies_prob)
-                for i in range(2, 5):
-                    probs[i] *= boost_factor
-                # 重新归一化
-                total = sum(probs)
-                probs = [p / total for p in probs]
-        
-        # 根据概率选择等级
-        return random.choices(range(11), weights=probs, k=1)[0]
+        # 根据最终概率选择等级
+        chosen_level = random.choices(range(11), weights=probs, k=1)[0]
+        logger.debug(f"Determined enemy level {chosen_level} (game_time: {game_time:.1f}, game_level: {game_level})")
+        return chosen_level
         
     def update(self):
         """更新敌人状态"""

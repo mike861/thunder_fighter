@@ -91,16 +91,17 @@ class Game:
         # 游戏状态
         self.running = True
         self.paused = False  # 游戏暂停状态
+        self.game_level = 1  # 游戏关卡等级
         
         # 播放背景音乐
         sound_manager.play_background_music('background_music.mp3')
         
         logger.info("Game initialization complete.")
     
-    def spawn_enemy(self, game_time=0):
+    def spawn_enemy(self, game_time=0, game_level=1):
         """生成新敌人"""
         try:
-            enemy = Enemy(game_time, self.all_sprites, self.enemy_bullets)
+            enemy = Enemy(game_time, game_level, self.all_sprites, self.enemy_bullets)
             self.all_sprites.add(enemy)
             self.enemies.add(enemy)
             
@@ -123,7 +124,7 @@ class Game:
                 # 计算游戏进行时间（分钟）
                 game_time = (time.time() - self.game_start_time) / 60.0
                 
-                # 根据游戏时间决定Boss等级
+                # 根据游戏时间决定Boss等级 (注意: 这是Boss自身的等级, 不是游戏关卡等级)
                 if game_time < 3:
                     boss_level = 1
                 elif game_time < 7:
@@ -131,8 +132,8 @@ class Game:
                 else:
                     boss_level = 3
                     
-                # 创建相应等级的Boss
-                self.boss = Boss(self.all_sprites, self.boss_bullets, boss_level)
+                # 创建相应等级的Boss, 传入游戏关卡等级
+                self.boss = Boss(self.all_sprites, self.boss_bullets, boss_level, self.game_level)
                 self.all_sprites.add(self.boss)
                 self.boss_active = True
                 self.boss_spawn_timer = time.time()  # 重置计时器
@@ -142,7 +143,7 @@ class Game:
                 logger.debug(f"Boss dimensions: {self.boss.rect.width}x{self.boss.rect.height}")
                 
                 # 通知玩家Boss出现
-                logger.info(f"Level {boss_level} Boss has appeared!")
+                logger.info(f"Level {boss_level} Boss has appeared! (Game Level: {self.game_level})")
             except Exception as e:
                 logger.error(f"Error spawning boss: {e}", exc_info=True)
         else:
@@ -227,7 +228,8 @@ class Game:
         
         # 检查是否需要生成新敌人
         if current_time - self.enemy_spawn_timer >= spawn_interval and len(self.enemies) < target_enemy_count:
-            new_enemy = self.spawn_enemy(game_time)
+            # Pass current game level to spawn_enemy
+            new_enemy = self.spawn_enemy(game_time, self.game_level)
             self.enemy_spawn_timer = current_time
         
         # 定期检查是否生成随机道具
@@ -286,6 +288,10 @@ class Game:
                 self.score.update(100)  # Boss奖励100分
                 # 播放击败Boss音效
                 sound_manager.play_sound('boss_death')
+                
+                # 增加游戏关卡等级
+                self.game_level += 1
+                logger.info(f"Boss defeated! Advancing to game level {self.game_level}")
         
         # 敌人撞到玩家
         player_collision = check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)
@@ -345,6 +351,10 @@ class Game:
         
         # 绘制分数
         self.score.draw(self.screen)
+        
+        # 绘制关卡等级
+        level_display_text = self.font_medium.render(f"Level: {self.game_level}", True, WHITE)
+        self.screen.blit(level_display_text, (10, 10)) # Display level at top-left
         
         # 绘制生命值条
         draw_health_bar(self.screen, WIDTH - 110, 10, 100, 20, self.player.health, 100)
