@@ -177,8 +177,37 @@ class Player(pygame.sprite.Sprite):
             self.bullet_paths += 1
         return self.bullet_paths
 
+    def increase_speed(self):
+        """
+        增加玩家移动速度 
+        
+        Returns:
+            bool: 是否成功增加速度
+        """
+        # 检查是否已达到最大速度
+        if self.speed >= PLAYER_MAX_SPEED:
+            return False
+        
+        self.speed += PLAYER_SPEED_UPGRADE_AMOUNT
+        # 玩家移动速度的增加应该在游戏UI中提示玩家，而不是仅作为日志输出
+        logger.info(f"Player speed increased to: {self.speed}")
+        return True
+        
     def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
-        """增加玩家移动速度"""
+        """
+        增加玩家移动速度 - 与collisions.py中调用的方法名匹配
+        
+        Args:
+            amount: 增加的速度值
+            
+        Returns:
+            float: 当前玩家速度
+        """
+        # 检查是否已达到最大速度
+        if self.speed >= PLAYER_MAX_SPEED:
+            return self.speed
+            
+        # 增加速度但不超过最大值
         self.speed = min(self.max_speed, self.speed + amount)
         logger.info(f"Player speed increased to: {self.speed}")
         return self.speed 

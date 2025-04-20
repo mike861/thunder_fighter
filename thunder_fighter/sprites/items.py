@@ -186,7 +186,8 @@ def create_random_item(game_time, all_sprites, items_group):
     if item:
         all_sprites.add(item)
         items_group.add(item)
-        logger.info(f"Created random item: Type='{item_type}', Pos=({item.rect.centerx}, {item.rect.centery})")
+        # 道具创建的信息应该在游戏UI中显示，不仅仅是日志
+        logger.debug(f"Created random item: Type='{item_type}', Pos=({item.rect.centerx}, {item.rect.centery})")
     else:
         logger.warning("Failed to create random item.")
     

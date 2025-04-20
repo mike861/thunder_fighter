@@ -1,194 +1,153 @@
 # Thunder Fighter
 
-A simple space shooter game made with Python and Pygame.
+A classic vertical scrolling space shooter game built with Pygame.
 
-## Game Description
+## Description
 
-In the game, the player controls a fighter jet battling enemies in space. Use the arrow keys to control the plane's movement and the spacebar to fire bullets.
-As game time progresses, enemies become stronger and more frequent, and a powerful Boss appears periodically. Defeating the Boss yields more points.
+In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. Use the arrow keys or WASD to move and the spacebar to shoot. As the game progresses, enemies become stronger and more numerous, with powerful Bosses appearing periodically. Defeat enemies and Bosses to score points and collect power-ups.
 
-## Game Features
+## Features
 
-- Custom-drawn graphics and particle effects
-- Difficulty system that increases with game time
-- Multiple enemy types and shooting patterns
-- Boss battles with unique attack patterns
-- Various item drop system
-- Enhanced bullet system
-- Explosion effects and visual feedback
-- Standardized logging system
-- Complete sound effects and background music system
-- Game pause functionality
-- Fully tested codebase with 43 passing tests
+- Dynamic level progression with increasing difficulty
+- Multiple enemy types with different behaviors
+- Epic boss battles with changing attack patterns
+- Power-up system (health, speed, bullet enhancements)
+- Particle effects and animations for explosions and impacts
+- Dynamic UI with stacked notifications
+- Multi-language support (currently English and Chinese)
+- Responsive controls and collision detection
+- Background music and sound effects with volume control
+- Comprehensive logging system
+- Fully tested codebase (43 tests passing)
 
-## Internal Game Mechanics
+For more detailed information on game mechanics, assets, and technical aspects, see [Project Details](docs/DETAILS.md).
 
-### Enemy System
-- **Enemy Levels**: Enemies range from level 0-10. Higher levels mean more health, speed, and attack power.
-- **Enemy Spawning**: The number and level of enemies increase as game time progresses.
-- **Enemy Shooting**: Enemies level 1 and above can shoot. Firing rate and bullet speed increase with level.
-  - Low-level enemies (1-4): Fire simple red bullets that fall straight down.
-  - Mid-level enemies (5-7): Fire orange bullets, possibly with horizontal movement.
-  - High-level enemies (8-10): Fire blue or purple bullets, possibly with curved trajectories.
+## Screenshots
 
-### Bullet System
-- **Player Bullets**: Up to 4 shooting paths based on collected items.
-- **Enemy Bullets**: Different appearance, speed, and damage based on enemy level.
-- **Boss Bullets**: Special large bullets with higher damage.
+_(Add gameplay screenshots here if available)_ 
+<!-- ![Gameplay Screenshot](screenshots/gameplay.png) -->
 
-### Item System
-- **Health Item**: Restores player health.
-- **Bullet Speed Item**: Increases player bullet speed.
-- **Bullet Path Item**: Increases the number of player shooting paths.
-- **Player Speed Item**: Increases the player's movement speed.
-- **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
+## Requirements
 
-### Boss System
-- **Boss Levels**: Bosses range from level 1-3, becoming more powerful at higher levels.
-- **Boss Spawning**: A Boss spawns periodically.
-- **Boss Attack**: Fires multiple bullets; the number and pattern change with level.
+- Python 3.7+
+- Pygame 2.0.0+
+- Other dependencies listed in `requirements.txt`
 
-### Sound System
-- **Background Music**: Loops during gameplay.
-- **Shooting Sound**: Plays when the player fires.
-- **Explosion Sound**: Plays when enemies and Bosses are destroyed.
-- **Hit Sound**: Plays when the player takes damage.
-- **Death Sound**: Plays when the player's ship is destroyed.
-- **Item Pickup Sound**: Plays when an item is collected.
-- **Boss Defeat Sound**: Plays when a Boss is successfully defeated.
-- **Volume Control**: Sound effect and music volume can be adjusted.
+## Installation
 
-### Logging System
-- Standardized log output supporting different levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-- Log level can be adjusted via the `THUNDER_FIGHTER_LOG_LEVEL` environment variable.
-- All game events are logged in English for easy debugging and monitoring.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/thunder_fighter.git
+    cd thunder_fighter
+    ```
+    (Replace `yourusername` with the actual repository path)
 
-## Controls
+2.  **Create and activate a virtual environment:**
+    ```bash
+    python -m venv venv
+    # On Windows:
+    # venv\Scripts\activate
+    # On macOS/Linux:
+    source venv/bin/activate
+    ```
 
-- Arrow Keys (↑↓←→) or WASD: Control ship movement
-- Spacebar: Fire bullets
-- P: Pause/Resume game
-- F3: Show detailed enemy level distribution (Dev mode)
-- M: Toggle background music on/off
-- S: Toggle sound effects on/off
-- +/-: Adjust volume
-- ESC: Quit game
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Project Structure
+## How to Play
 
-The project uses a modular structure for easier maintenance and extension:
+1.  **Run the game:**
+    ```bash
+    python main.py
+    ```
 
-```
-thunder_fighter/
-├── __init__.py                 # Package initializer
-├── constants.py                # Constant definitions
-├── game.py                     # Main game logic
-├── graphics/                   # Graphics rendering related
-│   ├── __init__.py
-│   ├── effects.py              # Effects system
-│   └── renderers.py            # Rendering functions
-├── sprites/                    # Game sprite classes
-│   ├── __init__.py
-│   ├── boss.py                 # Boss class
-│   ├── bullets.py              # Bullet classes
-│   ├── enemy.py                # Enemy class
-│   ├── explosion.py            # Explosion effect class
-│   ├── items.py                # Item classes (Health, Bullet Speed/Path, Player Speed)
-│   └── player.py               # Player class
-├── utils/                      # Utility functions
-│   ├── __init__.py
-│   ├── collisions.py           # Collision detection
-│   ├── logger.py               # Logging system
-│   ├── score.py                # Score system
-│   ├── sound_manager.py        # Sound management
-│   └── stars.py                # Background stars
-└── assets/                     # Game assets
-    ├── sounds/                 # Sound effect files
-    └── music/                  # Background music
-main.py                         # Main entry script
-requirements.txt                # Dependency list
-README_CN.md                    # Chinese README file
-README.md                       # English README file
-uml_class_diagram.md            # UML Class Diagram
-.gitignore                      # Git ignore configuration
-```
+2.  **Adjust Log Level (Optional):**
+    Set the `THUNDER_FIGHTER_LOG_LEVEL` environment variable (e.g., `DEBUG`, `INFO`, `WARNING`).
+    ```bash
+    # Windows
+    # set THUNDER_FIGHTER_LOG_LEVEL=DEBUG
+    # python main.py
+    
+    # Linux/macOS
+    # THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
+    ```
+
+### Controls
+
+-   **Movement:** Arrow Keys (↑↓←→) or WASD
+-   **Shoot:** Spacebar
+-   **Pause/Resume:** P
+-   **Toggle Music:** M
+-   **Toggle Sound Effects:** S
+-   **Adjust Volume:** +/- (Plus/Minus keys)
+-   **Switch Language:** L (Toggles between English and Chinese)
+-   **Quit Game:** ESC
+-   **(Dev Mode) Show Enemy Levels:** F3
 
 ## Testing
 
-The game includes a comprehensive test suite with 43 tests covering all major components:
-- Player mechanics and interactions
-- Enemy behaviors and level calculations
-- Boss battle mechanics
-- Item generation and effects
-- Collision detection
-- Game state management
+The project includes a comprehensive test suite covering game mechanics, collisions, and components. All 43 tests are currently passing.
 
-Run the tests with:
-```bash
-pytest
+-   **Run all tests:**
+    ```bash
+    pytest
+    ```
+
+-   **Run tests in a specific file:**
+    ```bash
+    pytest tests/sprites/test_boss.py
+    ```
+
+## Project Structure
+
+```
+thunder_fighter/
+├── assets/         # Game assets (images, sounds, music)
+├── docs/           # Detailed documentation
+│   └── DETAILS.md
+├── graphics/       # Rendering, effects, UI
+├── localization/   # Language files (en.py, zh.py)
+├── sprites/        # Game entities (player, enemies, boss, etc.)
+├── tests/          # Unit tests
+├── utils/          # Helper functions, managers (sound, score, etc.)
+├── __init__.py
+├── config.py       # Game configuration
+├── constants.py    # Game constants
+└── game.py         # Main game class
+main.py             # Main entry point script
+requirements.txt    # Python dependencies
+README.md           # This file
+README_CN.md        # Chinese README
+.gitignore
+LICENSE             # Project License
 ```
 
-## How to Run
+## Development
 
-Ensure you have Python and Pygame installed, then run:
+### Multi-language Support
 
-```bash
-python main.py
-```
+The game supports multiple languages via `thunder_fighter/localization/`. 
 
-To adjust the log level, set the environment variable:
+1.  Language files (e.g., `en.py`, `zh.py`) store key-value pairs for text strings.
+2.  The `LanguageManager` loads the appropriate language based on `config.py`.
+3.  In-game text is retrieved using the `_()` function (e.g., `_("Game Over")`).
+4.  Switch languages in-game using the 'L' key.
 
-```bash
-# Windows
-set THUNDER_FIGHTER_LOG_LEVEL=DEBUG
-python main.py
+**To add a new language:**
 
-# Linux/macOS
-THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
-```
+1.  Create a new language file (e.g., `es.py` for Spanish) in `thunder_fighter/localization/` by copying `en.py`.
+2.  Translate all the string values in the new file.
+3.  Add the language code (e.g., `'es'`) to the `AVAILABLE_LANGUAGES` list in `thunder_fighter/config.py`.
+4.  Update the `LanguageManager` if any special handling is needed (unlikely for simple additions).
 
-## Dependencies
+## License
 
-- Python 3.6+
-- Pygame 2.0+
+This project is licensed under the MIT License - see the `LICENSE` file for details.
 
-## Sound Assets
+## Acknowledgments
 
-The game uses the following sound and music files:
-
-1. Place WAV or MP3 format sound effect files in the `thunder_fighter/assets/sounds/` directory:
-   - `player_shoot.wav` - Player shooting sound
-   - `player_hit.wav` - Player hit sound
-   - `player_death.wav` - Player death sound
-   - `enemy_explosion.wav` - Enemy explosion sound
-   - `boss_death.wav` - Boss death sound
-   - `item_pickup.wav` - Item pickup sound (Used for all item types currently)
-
-2. Place MP3 format background music in the `thunder_fighter/assets/music/` directory:
-   - `background_music.mp3` - Game background music
-
-If these files are missing, the game will handle the missing sounds gracefully and will not affect normal gameplay.
-
-## Development Status
-
-- ✅ Core gameplay mechanics implemented
-- ✅ Enemy system with varied behaviors
-- ✅ Boss battles with unique patterns
-- ✅ Item drop and collection system
-- ✅ Sound system with volume control
-- ✅ Complete test coverage
-- ✅ Game polish and optimization
-
-## Technical Details
-
-- Object-Oriented Programming used for game entity design.
-- Sprite Groups manage game objects and collision detection.
-- Custom rendering system creates game visual effects.
-- Standardized logging system tracks game events.
-- Sound manager controls game audio playback.
-- Modular architecture allows for easy extension and maintenance.
-- Test-driven development ensures code quality and reliability.
-
-## Developer
-
-This game was created as a Python game development practice project. 
+-   Pygame Community
+-   Open-source game development resources
+-   Contributors and testers 

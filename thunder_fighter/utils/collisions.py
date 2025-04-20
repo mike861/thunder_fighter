@@ -47,7 +47,8 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
                 
                 last_score_checkpoint = current_score_checkpoint
                 result['generated_item'] = True
-                logger.info(f"Score milestone reached: {score.value}. Item spawned.")
+                # 得分里程碑达成的信息应该显示在游戏UI中，不仅仅是日志
+                logger.debug(f"Score milestone reached: {score.value}. Item spawned.")
         
         result['score_checkpoint'] = last_score_checkpoint
         return result

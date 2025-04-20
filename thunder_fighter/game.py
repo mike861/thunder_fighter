@@ -7,13 +7,13 @@ from thunder_fighter.constants import (
     BASE_ENEMY_COUNT, SCORE_THRESHOLD, BOSS_SPAWN_INTERVAL,
     FONT_NAME, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL,
     TEXT_TIME, TEXT_ENEMIES, TEXT_HIGH_LEVEL_ENEMIES, TEXT_BULLET_INFO,
-    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL
+    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH
 )
 from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.boss import Boss
 from thunder_fighter.sprites.items import HealthItem, create_random_item
-from thunder_fighter.utils.stars import create_stars
+from thunder_fighter.utils.stars import create_stars, Star
 from thunder_fighter.utils.score import Score
 from thunder_fighter.utils.collisions import (
     check_bullet_enemy_collisions,
@@ -26,6 +26,8 @@ from thunder_fighter.utils.collisions import (
 from thunder_fighter.graphics.renderers import draw_health_bar
 from thunder_fighter.utils.logger import logger
 from thunder_fighter.utils.sound_manager import sound_manager
+from thunder_fighter.graphics.ui_manager import PlayerUIManager
+from thunder_fighter.localization import change_language, _
 
 class Game:
     def __init__(self):
@@ -62,17 +64,6 @@ class Game:
         # 创建分数
         self.score = Score()
         
-        # 初始化字体
-        try:
-            self.font_large = pygame.font.SysFont(FONT_NAME, FONT_SIZE_LARGE)
-            self.font_medium = pygame.font.SysFont(FONT_NAME, FONT_SIZE_MEDIUM)
-            self.font_small = pygame.font.SysFont(FONT_NAME, FONT_SIZE_SMALL)
-        except pygame.error as e:
-            logger.error(f"Failed to load system font '{FONT_NAME}'. Using default. Error: {e}")
-            self.font_large = pygame.font.Font(None, FONT_SIZE_LARGE + 6)
-            self.font_medium = pygame.font.Font(None, FONT_SIZE_MEDIUM + 4)
-            self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL + 2)
-        
         # 道具生成相关变量
         self.last_score_checkpoint = 0
         self.item_spawn_timer = time.time()
@@ -97,6 +88,26 @@ class Game:
         # 播放背景音乐
         sound_manager.play_background_music('background_music.mp3')
         
+        # 初始化UI管理器
+        self.ui_manager = PlayerUIManager(self.screen)
+        
+        # 更新UI管理器的初始状态
+        self.ui_manager.update_game_state(
+            level=self.game_level,
+            paused=self.paused,
+            game_time=0,
+            victory=self.game_won,
+            defeat=False
+        )
+        
+        self.ui_manager.update_player_info(
+            health=self.player.health,
+            max_health=PLAYER_HEALTH,
+            bullet_paths=self.player.bullet_paths,
+            bullet_speed=self.player.bullet_speed,
+            speed=self.player.speed
+        )
+        
         logger.info("Game initialization complete.")
     
     def spawn_enemy(self, game_time=0, game_level=1):
@@ -110,7 +121,7 @@ class Game:
             level = enemy.get_level()
             self.enemy_levels[level] += 1
             
-            # 添加调试输出
+            # 添加调试输出（仅开发人员需要）
             logger.debug(f"Spawned enemy level {level} (can_shoot: {enemy.can_shoot})")
             
             return enemy
@@ -143,8 +154,20 @@ class Game:
                 logger.debug(f"Boss spawned at: ({self.boss.rect.centerx}, {self.boss.rect.centery})")
                 logger.debug(f"Boss dimensions: {self.boss.rect.width}x{self.boss.rect.height}")
                 
-                # 通知玩家Boss出现
-                logger.info(f"Level {boss_level} Boss has appeared! (Game Level: {self.game_level})")
+                # 向玩家显示Boss出现通知
+                self.ui_manager.show_boss_appeared(boss_level)
+                
+                # 同时更新UI管理器中的Boss信息
+                self.ui_manager.update_boss_info(
+                    active=True,
+                    health=self.boss.health,
+                    max_health=self.boss.max_health,
+                    level=self.boss.level,
+                    mode=self.boss.shoot_pattern
+                )
+                
+                # 仅在debug级别记录信息
+                logger.debug(f"Level {boss_level} Boss has appeared! (Game Level: {self.game_level})")
             except Exception as e:
                 logger.error(f"Error spawning boss: {e}", exc_info=True)
         else:
@@ -154,7 +177,7 @@ class Game:
         """Generate a random item"""
         try:
             # Pass all required parameters to create_random_item
-            create_random_item(game_time, self.all_sprites, self.items)
+            item = create_random_item(game_time, self.all_sprites, self.items)
             # Item is already added to groups inside create_random_item
             logger.debug(f"Random item spawned at game time {game_time:.1f}m")
         except Exception as e:
@@ -171,12 +194,15 @@ class Game:
                 # 暂停/恢复游戏 (P键)
                 elif event.key == pygame.K_p:
                     self.paused = not self.paused
+                    # 更新UI管理器的暂停状态
+                    self.ui_manager.update_game_state(paused=self.paused)
+                    
                     if self.paused:
-                        logger.info("Game paused")
+                        logger.debug("Game paused")
                         # 暂停时降低音乐音量
                         sound_manager.set_music_volume(max(0.1, sound_manager.music_volume / 2))
                     else:
-                        logger.info("Game resumed")
+                        logger.debug("Game resumed")
                         # 恢复时恢复音乐音量
                         sound_manager.set_music_volume(min(1.0, sound_manager.music_volume * 2))
                 # 音效控制快捷键
@@ -194,18 +220,34 @@ class Game:
                     current_volume = sound_manager.sound_volume
                     sound_manager.set_sound_volume(current_volume + 0.1)
                     sound_manager.set_music_volume(current_volume + 0.1)
-                    logger.info(f"Volume increased to {sound_manager.sound_volume:.1f}")
+                    logger.debug(f"Volume increased to {sound_manager.sound_volume:.1f}")
                 elif event.key == pygame.K_MINUS:
                     # 减小音量
                     current_volume = sound_manager.sound_volume
                     sound_manager.set_sound_volume(current_volume - 0.1)
                     sound_manager.set_music_volume(current_volume - 0.1)
-                    logger.info(f"Volume decreased to {sound_manager.sound_volume:.1f}")
+                    logger.debug(f"Volume decreased to {sound_manager.sound_volume:.1f}")
+                # 语言切换 (L键)
+                elif event.key == pygame.K_l:
+                    # 切换语言（英文/中文）
+                    current_lang = 'en' if self.ui_manager.current_language == 'zh' else 'zh'
+                    change_language(current_lang)
+                    self.ui_manager.current_language = current_lang
+                    # 显示语言切换通知
+                    language_name = "English" if current_lang == 'en' else "中文"
+                    self.ui_manager.add_notification(f"Language changed to {language_name}", "achievement")
+                    logger.debug(f"Language changed to: {language_name}")
     
     def update(self):
         """更新游戏状态"""
         # 计算游戏进行时间（分钟）
         game_time = (time.time() - self.game_start_time) / 60.0
+        
+        # 更新UI管理器的游戏时间
+        self.ui_manager.update_game_state(game_time=game_time)
+        
+        # 更新UI元素
+        self.ui_manager.update()
         
         # 更新星星
         for star in self.stars:
@@ -253,7 +295,26 @@ class Game:
                     self.enemy_levels[level] -= 1
         
         # 检测碰撞
-        # 子弹击中敌人
+        self.handle_collisions(game_time)
+        
+        # 更新玩家状态到UI管理器
+        self.ui_manager.update_player_info(
+            health=self.player.health
+        )
+        
+        # 如果Boss激活，更新Boss状态到UI管理器
+        if self.boss_active and self.boss:
+            self.ui_manager.update_boss_info(
+                active=True,
+                health=self.boss.health,
+                mode=self.boss.shoot_pattern
+            )
+        elif not self.boss_active or not self.boss:
+            self.ui_manager.update_boss_info(active=False)
+    
+    def handle_collisions(self, game_time):
+        """处理所有碰撞检测"""
+        # 检查子弹和敌人碰撞
         hit_result = check_bullet_enemy_collisions(
             self.enemies, self.bullets, self.all_sprites, self.score,
             self.last_score_checkpoint, SCORE_THRESHOLD, self.items
@@ -262,8 +323,13 @@ class Game:
         if hit_result['enemy_hit']:
             # 播放敌人爆炸音效
             sound_manager.play_sound('enemy_explosion')
-            
+        
+        # 保存最新的得分检查点
         self.last_score_checkpoint = hit_result['score_checkpoint']
+        
+        # 显示生成道具的通知
+        if hit_result.get('generated_item'):
+            self.ui_manager.show_score_milestone(self.score.value)
         
         # 子弹击中Boss
         if self.boss_active and self.boss:
@@ -276,31 +342,52 @@ class Game:
             boss_result = check_bullet_boss_collisions(self.boss, self.bullets, self.all_sprites)
             
             if boss_result['boss_hit']:
-                # 有子弹击中了Boss
+                # 仅在debug级别记录技术细节
                 logger.debug(f"Boss hit! Damage: {boss_result['damage']}, Health remaining: {self.boss.health}")
-                sound_manager.play_sound('enemy_explosion')  # 使用敌人爆炸音效
+                sound_manager.play_sound('enemy_explosion')
+                
+                # 更新UI中的Boss信息
+                self.ui_manager.update_boss_info(
+                    active=True,
+                    health=self.boss.health,
+                    mode=self.boss.shoot_pattern
+                )
                 
             if boss_result['boss_defeated']:
                 # Boss被击败
-                logger.info(f"Boss defeated!")
+                logger.debug(f"Boss defeated!")
                 self.boss_active = False
                 self.boss_defeated = True
-                self.boss = None  # 清除Boss实例引用
-                self.score.update(100)  # Boss奖励100分
+                boss_level = self.boss.level
+                score_reward = 100 * boss_level  # Boss奖励分数
+                self.score.update(score_reward)
+                
+                # 通知玩家
+                self.ui_manager.show_boss_defeated(boss_level, score_reward)
+                
+                # 更新UI中的Boss信息
+                self.ui_manager.update_boss_info(active=False)
+                
+                # 清除Boss实例引用
+                self.boss = None
+                
                 # 播放击败Boss音效
                 sound_manager.play_sound('boss_death')
                 
                 # 增加游戏关卡等级
                 self.game_level += 1
-                logger.info(f"Boss defeated! Advancing to game level {self.game_level}")
+                
+                # 更新UI中的游戏状态
+                self.ui_manager.update_game_state(level=self.game_level)
                 
                 # 检查是否达到胜利条件
                 if self.game_level > MAX_GAME_LEVEL:
-                    logger.info(f"Max game level {MAX_GAME_LEVEL} reached! Player wins!")
+                    logger.debug(f"Max game level {MAX_GAME_LEVEL} reached! Player wins!")
                     self.game_won = True
-                    # Game will stop in the next iteration via self.running check
-                    # Or we can set self.running = False here to stop immediately after this update cycle
-                    self.running = False # Stop the game loop after this update
+                    # 更新UI中的胜利状态
+                    self.ui_manager.update_game_state(victory=True)
+                    # 停止游戏循环
+                    self.running = False
         
         # 敌人撞到玩家
         player_collision = check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)
@@ -308,9 +395,16 @@ class Game:
             # 播放玩家受伤音效
             sound_manager.play_sound('player_hit')
             
+            # 更新UI中的玩家信息
+            self.ui_manager.update_player_info(health=self.player.health)
+            
         if player_collision['game_over']:
             # 玩家死亡
             sound_manager.play_sound('player_death')
+            
+            # 更新UI中的游戏状态
+            self.ui_manager.update_game_state(defeat=True)
+            
             self.running = False
         
         # Boss子弹击中玩家
@@ -320,9 +414,16 @@ class Game:
                 # 播放玩家受伤音效
                 sound_manager.play_sound('player_hit')
                 
+                # 更新UI中的玩家信息
+                self.ui_manager.update_player_info(health=self.player.health)
+                
             if boss_bullet_hit['game_over']:
                 # 玩家死亡
                 sound_manager.play_sound('player_death')
+                
+                # 更新UI中的游戏状态
+                self.ui_manager.update_game_state(defeat=True)
+                
                 self.running = False
         
         # 敌人子弹击中玩家
@@ -331,9 +432,16 @@ class Game:
             # 播放玩家受伤音效
             sound_manager.play_sound('player_hit')
             
+            # 更新UI中的玩家信息
+            self.ui_manager.update_player_info(health=self.player.health)
+                
         if enemy_bullet_hit['game_over']:
             # 玩家死亡
             sound_manager.play_sound('player_death')
+            
+            # 更新UI中的游戏状态
+            self.ui_manager.update_game_state(defeat=True)
+            
             self.running = False
         
         # 玩家拾取道具
@@ -341,30 +449,21 @@ class Game:
         if item_pickup['item_collected']:
             # 播放道具拾取音效
             sound_manager.play_sound('item_pickup')
+            
+            # 更新玩家各种属性到UI
+            self.ui_manager.update_player_info(
+                health=self.player.health,
+                bullet_paths=self.player.bullet_paths,
+                bullet_speed=self.player.bullet_speed,
+                speed=self.player.speed
+            )
+            
+            # 显示对应的道具拾取通知
+            for item_type in item_pickup['item_types']:
+                self.ui_manager.show_item_collected(item_type)
     
     def render(self):
         """渲染游戏画面"""
-        # 检查是否胜利通关
-        if self.game_won:
-            self.screen.fill((20, 20, 40)) # Dark blue background for victory
-            victory_text = self.font_large.render("VICTORY!", True, GREEN)
-            text_rect = victory_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40))
-            self.screen.blit(victory_text, text_rect)
-            
-            final_level_text = self.font_medium.render(f"Cleared Level {MAX_GAME_LEVEL}", True, WHITE)
-            level_rect = final_level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 10))
-            self.screen.blit(final_level_text, level_rect)
-
-            final_score_text = self.font_medium.render(f"Final Score: {self.score.value}", True, WHITE)
-            score_rect = final_score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
-            self.screen.blit(final_score_text, score_rect)
-            
-            pygame.display.flip()
-            # Keep showing victory screen for a moment before quitting fully
-            # The game loop will terminate because self.running is False
-            # We might add a delay here if needed, but the quit process handles it.
-            return # Skip normal rendering
-
         # 绘制背景（太空黑色）
         self.screen.fill((10, 10, 20))  # 深蓝黑色的太空
         
@@ -375,42 +474,23 @@ class Game:
         # 绘制所有精灵
         self.all_sprites.draw(self.screen)
         
-        # 绘制Boss血条
-        if self.boss_active:
-            self.boss.draw_health_bar(self.screen)
-        
-        # 绘制分数
-        self.score.draw(self.screen)
-        
-        # 绘制关卡等级
-        level_display_text = self.font_medium.render(f"Level: {self.game_level}", True, WHITE)
-        self.screen.blit(level_display_text, (10, 10)) # Display level at top-left
-        
-        # 绘制生命值条
-        draw_health_bar(self.screen, WIDTH - 110, 10, 100, 20, self.player.health, 100)
-        
-        # 绘制游戏时间
+        # 使用UI管理器绘制所有界面元素
+        # 计算当前目标敌人数量
         game_time = (time.time() - self.game_start_time) / 60.0
-        time_text = self.font_medium.render(TEXT_TIME.format(int(game_time)), True, WHITE)
-        self.screen.blit(time_text, (10, 50))
-        
-        # 绘制敌人数量和级别信息
         target_enemy_count = int(BASE_ENEMY_COUNT + game_time * 3)
-        enemy_text = self.font_medium.render(TEXT_ENEMIES.format(len(self.enemies), target_enemy_count), True, WHITE)
-        self.screen.blit(enemy_text, (10, 90))
         
-        # 绘制敌人等级分布
-        # 计算当前高级敌人(5级以上)的数量
+        # 计算当前高级敌人数量
         high_level_enemies = sum(self.enemy_levels[i] for i in range(5, 11))
-        level_text = self.font_medium.render(TEXT_HIGH_LEVEL_ENEMIES.format(high_level_enemies), True, WHITE)
-        self.screen.blit(level_text, (10, 130))
         
-        # 绘制玩家子弹信息
-        bullet_info = self.font_medium.render(
-            TEXT_BULLET_INFO.format(self.player.bullet_paths, self.player.bullet_speed), 
-            True, WHITE
+        # 调用UI管理器的绘制方法
+        self.ui_manager.draw(
+            score=self.score.value,
+            level=self.game_level, 
+            game_time=game_time,
+            enemy_count=len(self.enemies), 
+            target_enemy_count=target_enemy_count,
+            max_level=MAX_GAME_LEVEL
         )
-        self.screen.blit(bullet_info, (WIDTH - 220, 50))
         
         # 在开发模式下显示更详细的敌人等级分布
         if pygame.key.get_pressed()[pygame.K_F3]:  # F3键查看详细数据
@@ -418,30 +498,9 @@ class Game:
             for level in range(11):
                 count = self.enemy_levels[level]
                 if count > 0:
-                    level_detail = self.font_small.render(TEXT_ENEMY_LEVEL_DETAIL.format(level, count), True, WHITE)
+                    level_detail = self.ui_manager.font_small.render(TEXT_ENEMY_LEVEL_DETAIL.format(level, count), True, WHITE)
                     self.screen.blit(level_detail, (15, y_offset))
                     y_offset += 20
-                    
-        # 绘制暂停界面
-        if self.paused:
-            # 创建半透明覆盖层
-            pause_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            pause_overlay.fill((0, 0, 0, 150))  # 半透明黑色
-            self.screen.blit(pause_overlay, (0, 0))
-            
-            # 绘制暂停文本
-            pause_text = self.font_large.render("GAME PAUSED", True, WHITE)
-            text_rect = pause_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 30))
-            self.screen.blit(pause_text, text_rect)
-            
-            # 绘制提示文本
-            tip_text = self.font_medium.render("Press P to resume", True, WHITE)
-            tip_rect = tip_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20))
-            self.screen.blit(tip_text, tip_rect)
-            
-            controls_text = self.font_small.render("ESC: Quit  M: Music  S: Sound", True, WHITE)
-            controls_rect = controls_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 60))
-            self.screen.blit(controls_text, controls_rect)
         
         # 更新显示
         pygame.display.flip()

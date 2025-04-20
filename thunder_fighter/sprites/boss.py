@@ -63,7 +63,8 @@ class Boss(pygame.sprite.Sprite):
         self.all_sprites = all_sprites
         self.boss_bullets_group = boss_bullets_group
         
-        logger.info(f"Boss level {self.level} initialized with {self.health} health")
+        # Boss初始化信息应该显示在游戏UI中，而不仅仅是日志
+        logger.debug(f"Boss level {self.level} initialized with {self.health} health")
     
     def _create_flash_images(self):
         """预先创建闪烁效果的图像序列"""
@@ -102,14 +103,16 @@ class Boss(pygame.sprite.Sprite):
             self.shoot_pattern = "aggressive"
             # 当生命值降低时，减少射击延迟，增加攻击频率
             self.shoot_delay = max(150, self.shoot_delay * 0.7)
-            logger.info(f"Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
+            # Boss进入激进模式的信息应该在游戏UI中显示
+            logger.debug(f"Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
         
         # 如果生命值进一步降低，进入最终模式
         if health_percentage <= 0.25 and self.shoot_pattern == "aggressive":
             self.shoot_pattern = "final"
             # 再次减少射击延迟
             self.shoot_delay = max(100, self.shoot_delay * 0.8)
-            logger.info(f"Boss entered final mode! Shoot delay: {self.shoot_delay}")
+            # Boss进入最终模式的信息应该在游戏UI中显示
+            logger.debug(f"Boss entered final mode! Shoot delay: {self.shoot_delay}")
         
         # 检查是否被摧毁
         if self.health <= 0:
