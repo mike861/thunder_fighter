@@ -11,7 +11,11 @@ from thunder_fighter.utils.logger import logger
 
 class Boss(pygame.sprite.Sprite):
     """Boss类"""
+<<<<<<< HEAD
+    def __init__(self, all_sprites, boss_bullets_group, level=None):
+=======
     def __init__(self, all_sprites, boss_bullets_group, level=None, game_level=1):
+>>>>>>> origin/init
         pygame.sprite.Sprite.__init__(self)
         
         # 确定Boss等级 - 如果未指定，根据游戏进度随机生成
@@ -19,8 +23,11 @@ class Boss(pygame.sprite.Sprite):
             self.level = random.randint(1, BOSS_MAX_LEVEL)
         else:
             self.level = min(level, BOSS_MAX_LEVEL)
+<<<<<<< HEAD
+=======
             
         self.game_level = game_level # Store the overall game level
+>>>>>>> origin/init
         
         # 记录原始图像 - 用于闪烁效果时恢复
         self.original_image = create_boss_ship(self.level)
@@ -44,9 +51,12 @@ class Boss(pygame.sprite.Sprite):
         self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # 等级越高，射击越快
         self.bullet_count = BOSS_BULLET_COUNT_BASE + (self.level - 1) * BOSS_BULLET_COUNT_INCREMENT
         
+<<<<<<< HEAD
+=======
         # 设置初始攻击模式
         self.shoot_pattern = "normal"
         
+>>>>>>> origin/init
         self.last_shot = ptime.get_ticks()
         self.direction = 1  # 移动方向
         self.move_counter = 0
@@ -55,10 +65,13 @@ class Boss(pygame.sprite.Sprite):
         # 预先创建闪烁图像
         self.flash_images = self._create_flash_images()
         
+<<<<<<< HEAD
+=======
         # 定义基础移动速度和范围
         self.base_speedx = 2
         self.move_margin = 10 # Minimum margin from screen edge
 
+>>>>>>> origin/init
         # 精灵组
         self.all_sprites = all_sprites
         self.boss_bullets_group = boss_bullets_group
@@ -84,6 +97,8 @@ class Boss(pygame.sprite.Sprite):
         flash_images.append(red_image)  # 第二帧是红色版本
         
         return flash_images
+<<<<<<< HEAD
+=======
     
     def damage(self, amount):
         """处理Boss受到的伤害
@@ -120,6 +135,7 @@ class Boss(pygame.sprite.Sprite):
             return True
         
         return False
+>>>>>>> origin/init
         
     def update(self):
         """更新Boss状态"""
@@ -129,6 +145,21 @@ class Boss(pygame.sprite.Sprite):
         else:
             # 左右移动
             self.move_counter += 1
+<<<<<<< HEAD
+            if self.move_counter >= 100:
+                self.direction *= -1
+                self.move_counter = 0
+            
+            self.rect.x += self.speedx * self.direction
+            
+            # 防止Boss飞出屏幕
+            if self.rect.left < 0:
+                self.rect.left = 0
+                self.direction = 1
+            if self.rect.right > WIDTH:
+                self.rect.right = WIDTH
+                self.direction = -1
+=======
             if self.move_counter >= 100: # Change direction periodically
                 self.direction *= -1
                 self.move_counter = 0
@@ -156,6 +187,7 @@ class Boss(pygame.sprite.Sprite):
                 self.rect.right = right_boundary
                 self.direction = -1 # Force move left
                 self.move_counter = 0 # Reset move counter
+>>>>>>> origin/init
         
         # Boss射击
         now = ptime.get_ticks()
@@ -185,6 +217,21 @@ class Boss(pygame.sprite.Sprite):
         # 由于循环引用，需要从外部导入BossBullet
         from thunder_fighter.sprites.bullets import BossBullet
         
+<<<<<<< HEAD
+        # 根据等级决定子弹数量和方式
+        if self.level == 1:
+            # 1级Boss: 3颗子弹，直线发射
+            offsets = [-30, 0, 30]
+        elif self.level == 2:
+            # 2级Boss: 4颗子弹，扇形分布
+            offsets = [-45, -15, 15, 45]
+        else:
+            # 3级Boss: 5颗子弹，更密集的扇形分布
+            offsets = [-60, -30, 0, 30, 60]
+            
+        # 发射子弹
+        for offset in offsets[:self.bullet_count]:
+=======
         # 根据等级和攻击模式决定子弹数量和方式
         if self.shoot_pattern == "normal":
             if self.level == 1:
@@ -224,6 +271,7 @@ class Boss(pygame.sprite.Sprite):
             
         # 发射子弹
         for offset in offsets:
+>>>>>>> origin/init
             boss_bullet = BossBullet(self.rect.centerx + offset, self.rect.bottom)
             self.all_sprites.add(boss_bullet)
             self.boss_bullets_group.add(boss_bullet)
