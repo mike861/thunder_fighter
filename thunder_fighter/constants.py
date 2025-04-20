@@ -40,17 +40,11 @@ TEXT_ENEMY_LEVEL_DETAIL = "Level {}: {} units"
 TEXT_GAME_TITLE = "Thunder Fighter"
 
 # 玩家设置
-<<<<<<< HEAD
-PLAYER_HEALTH = 50
-PLAYER_SHOOT_DELAY = 250
-PLAYER_SPEED = 8  # 玩家移动速度
-=======
 PLAYER_HEALTH = 100
 PLAYER_SHOOT_DELAY = 250
 PLAYER_SPEED = 6 # 玩家移动速度
 PLAYER_MAX_SPEED = 15 # 玩家最大移动速度
 PLAYER_SPEED_UPGRADE_AMOUNT = 1 # 玩家速度升级增量
->>>>>>> origin/init
 PLAYER_FLASH_FRAMES = 20  # 玩家受伤闪烁帧数
 PLAYER_HEAL_AMOUNT = 10  # 玩家回血量
 
@@ -65,17 +59,10 @@ BULLET_ANGLE_SPREAD_LARGE = 25  # 大角度扩散
 BULLET_SPEED_UPGRADE_AMOUNT = 1  # 子弹速度升级增量
 
 # 敌人设置
-<<<<<<< HEAD
-BASE_ENEMY_COUNT = 8
-ENEMY_MIN_SHOOT_DELAY = 200  # 敌人最小射击延迟
-ENEMY_MAX_SHOOT_DELAY = 800  # 敌人最大射击延迟降低到800ms
-ENEMY_SHOOT_LEVEL = 2  # 降低射击等级要求，从1级开始就能射击
-=======
 BASE_ENEMY_COUNT = 6
 ENEMY_MIN_SHOOT_DELAY = 500  # 敌人最小射击延迟
 ENEMY_MAX_SHOOT_DELAY = 2000  # 敌人最大射击延迟降低到2000ms
 ENEMY_SHOOT_LEVEL = 2  # 降低射击等级要求，从2级开始就能射击
->>>>>>> origin/init
 ENEMY_SPAWN_Y_MIN = -80  # 减少敌人生成的最小Y坐标，使其更快进入屏幕
 ENEMY_SPAWN_Y_MAX = -20  # 减少敌人生成的最大Y坐标，使其更快进入屏幕
 ENEMY_HORIZONTAL_MOVE_MIN = -3  # 敌人水平移动最小速度
@@ -86,22 +73,14 @@ ENEMY_SCREEN_BOUNDS = 25  # 敌人离开屏幕边界的距离
 # Boss设置
 BOSS_MAX_HEALTH = 300
 BOSS_SHOOT_DELAY = 1000
-<<<<<<< HEAD
-BOSS_SPAWN_INTERVAL = 30  # 生成间隔
-=======
 BOSS_SPAWN_INTERVAL = 50  # Boss生成间隔（秒）, 120秒 = 2分钟
->>>>>>> origin/init
 BOSS_HEALTH_MULTIPLIER = 1.5  # 每级Boss血量增加倍数
 BOSS_BULLET_COUNT_BASE = 3  # 基础子弹数量
 BOSS_BULLET_COUNT_INCREMENT = 1  # 每级增加的子弹数量
 BOSS_MAX_LEVEL = 5  # Boss最大等级
 
 # 得分设置
-<<<<<<< HEAD
-SCORE_THRESHOLD = 100  # 每200分可能生成一个道具 
-=======
 SCORE_THRESHOLD = 200  # 每1000分生成一个道具
 
 # Game balance
 MAX_GAME_LEVEL = 10 # 最高关卡等级 
->>>>>>> origin/init
