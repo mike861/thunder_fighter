@@ -4,7 +4,11 @@ import random
 import math
 from thunder_fighter.constants import (
     WIDTH, HEIGHT, PLAYER_HEALTH, PLAYER_SHOOT_DELAY, WHITE, RED,
+<<<<<<< HEAD
+    PLAYER_SPEED, PLAYER_FLASH_FRAMES, PLAYER_HEAL_AMOUNT,
+=======
     PLAYER_SPEED, PLAYER_MAX_SPEED, PLAYER_SPEED_UPGRADE_AMOUNT, PLAYER_FLASH_FRAMES, PLAYER_HEAL_AMOUNT,
+>>>>>>> origin/init
     BULLET_SPEED_DEFAULT, BULLET_SPEED_MAX, BULLET_PATHS_DEFAULT, BULLET_PATHS_MAX,
     BULLET_ANGLE_STRAIGHT, BULLET_ANGLE_SPREAD_SMALL, BULLET_ANGLE_SPREAD_LARGE,
     BULLET_SPEED_UPGRADE_AMOUNT
@@ -25,8 +29,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
         self.rect.bottom = HEIGHT - 10
+<<<<<<< HEAD
+=======
         self.speed = PLAYER_SPEED # Use self.speed for current player speed
         self.max_speed = PLAYER_MAX_SPEED
+>>>>>>> origin/init
         self.speedx = 0
         self.speedy = 0
         self.health = PLAYER_HEALTH
@@ -62,6 +69,15 @@ class Player(pygame.sprite.Sprite):
         # 获取按键
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
+<<<<<<< HEAD
+            self.speedx = -PLAYER_SPEED
+        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
+            self.speedx = PLAYER_SPEED
+        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
+            self.speedy = -PLAYER_SPEED
+        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
+            self.speedy = PLAYER_SPEED
+=======
             self.speedx = -self.speed # Use current speed
         if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
             self.speedx = self.speed # Use current speed
@@ -69,6 +85,7 @@ class Player(pygame.sprite.Sprite):
             self.speedy = -self.speed # Use current speed
         if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
             self.speedy = self.speed # Use current speed
+>>>>>>> origin/init
         
         # 射击
         if keystate[pygame.K_SPACE]:
@@ -175,10 +192,43 @@ class Player(pygame.sprite.Sprite):
         """增加弹道数量"""
         if self.bullet_paths < self.max_bullet_paths:
             self.bullet_paths += 1
+<<<<<<< HEAD
+        return self.bullet_paths 
+=======
         return self.bullet_paths
 
+    def increase_speed(self):
+        """
+        增加玩家移动速度 
+        
+        Returns:
+            bool: 是否成功增加速度
+        """
+        # 检查是否已达到最大速度
+        if self.speed >= PLAYER_MAX_SPEED:
+            return False
+        
+        self.speed += PLAYER_SPEED_UPGRADE_AMOUNT
+        # 玩家移动速度的增加应该在游戏UI中提示玩家，而不是仅作为日志输出
+        logger.info(f"Player speed increased to: {self.speed}")
+        return True
+        
     def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
-        """增加玩家移动速度"""
+        """
+        增加玩家移动速度 - 与collisions.py中调用的方法名匹配
+        
+        Args:
+            amount: 增加的速度值
+            
+        Returns:
+            float: 当前玩家速度
+        """
+        # 检查是否已达到最大速度
+        if self.speed >= PLAYER_MAX_SPEED:
+            return self.speed
+            
+        # 增加速度但不超过最大值
         self.speed = min(self.max_speed, self.speed + amount)
         logger.info(f"Player speed increased to: {self.speed}")
         return self.speed 
+>>>>>>> origin/init

@@ -2,7 +2,11 @@ import pygame
 import random
 from thunder_fighter.sprites.explosion import Explosion
 from thunder_fighter.sprites.enemy import Enemy
+<<<<<<< HEAD
+from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem
+=======
 from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
+>>>>>>> origin/init
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
 from thunder_fighter.utils.logger import logger
 
@@ -47,7 +51,8 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
                 
                 last_score_checkpoint = current_score_checkpoint
                 result['generated_item'] = True
-                logger.info(f"Score milestone reached: {score.value}. Item spawned.")
+                # 得分里程碑达成的信息应该显示在游戏UI中，不仅仅是日志
+                logger.debug(f"Score milestone reached: {score.value}. Item spawned.")
         
         result['score_checkpoint'] = last_score_checkpoint
         return result
@@ -89,15 +94,24 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
             result['damage'] = len(boss_hits) * 10  # 每颗子弹10点伤害
             
             for hit in boss_hits:
+<<<<<<< HEAD
+                boss.health -= 10
+                boss.damage_flash = 5  # 设置闪烁帧数
+=======
                 # 使用boss的damage方法处理伤害
                 boss_defeated = boss.damage(10)
                 
+>>>>>>> origin/init
                 # 创建小爆炸效果
                 explosion = Explosion(hit.rect.center, 20)
                 all_sprites.add(explosion)
                 
                 # 检查Boss是否被击败
+<<<<<<< HEAD
+                if boss.health <= 0:
+=======
                 if boss_defeated:
+>>>>>>> origin/init
                     # 创建大爆炸
                     for _ in range(10):
                         pos_x = random.randint(boss.rect.left, boss.rect.right)
@@ -105,6 +119,10 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
                         explosion = Explosion((pos_x, pos_y), 60)
                         all_sprites.add(explosion)
                     
+<<<<<<< HEAD
+                    boss.kill()
+=======
+>>>>>>> origin/init
                     result['boss_defeated'] = True
                     logger.info(f"Boss defeated!")
         else:
@@ -222,10 +240,13 @@ def check_items_player_collisions(player, items, all_sprites):
             item_type = getattr(hit, 'type', 'unknown')
             result['item_types'].append(item_type)
             
+<<<<<<< HEAD
+=======
             # Default effect values
             color = (255, 255, 255, 150) # Default white
             effect_size = 30
             
+>>>>>>> origin/init
             # 根据道具类型执行不同操作
             if item_type == 'health':
                 # 恢复生命值
@@ -249,6 +270,17 @@ def check_items_player_collisions(player, items, all_sprites):
                 # 黄色弹道效果
                 color = (255, 255, 0, 150)
                 effect_size = 40
+<<<<<<< HEAD
+                
+            else:
+                # 未知道具，默认效果
+                color = (255, 255, 255, 150)
+                effect_size = 30
+            
+            # 创建道具效果
+            explosion = Explosion(hit.rect.center, effect_size)
+            explosion.image.fill((0, 0, 0, 0))
+=======
             
             elif item_type == 'player_speed': # Handle new item type
                 # 增加玩家移动速度
@@ -261,6 +293,7 @@ def check_items_player_collisions(player, items, all_sprites):
             # 创建道具效果
             explosion = Explosion(hit.rect.center, effect_size)
             explosion.image.fill((0, 0, 0, 0)) # Make background transparent
+>>>>>>> origin/init
             pygame.draw.circle(explosion.image, color, 
                               (explosion.size // 2, explosion.size // 2), 
                               explosion.size // 2)

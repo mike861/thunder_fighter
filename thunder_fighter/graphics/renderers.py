@@ -338,6 +338,9 @@ def draw_health_bar(surface, x, y, width, height, health, max_health, border_col
     pygame.draw.rect(surface, color, (x, y, health_width, height))
     
     # 绘制血条边框
+<<<<<<< HEAD
+    pygame.draw.rect(surface, border_color, (x, y, width, height), 1) 
+=======
     pygame.draw.rect(surface, border_color, (x, y, width, height), 1)
 
 def create_player_speed_item():
@@ -368,3 +371,4 @@ def create_player_speed_item():
     pygame.draw.circle(item_surface, WHITE, (15, 15), 15, 2)
     
     return item_surface 
+>>>>>>> origin/init
