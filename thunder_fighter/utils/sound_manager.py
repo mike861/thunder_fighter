@@ -138,7 +138,7 @@ class SoundManager:
             return
             
         self.sound_enabled = not self.sound_enabled
-        logger.info(f"Sound {'enabled' if self.sound_enabled else 'disabled'}")
+        logger.debug(f"Sound {'enabled' if self.sound_enabled else 'disabled'}")
         
         # 如果关闭音效，同时也停止背景音乐
         if not self.sound_enabled:
@@ -155,7 +155,7 @@ class SoundManager:
             self.stop_music()
         else:
             # 重新播放背景音乐
-            logger.info(f"Music {'enabled' if self.music_enabled else 'disabled'}")
+            logger.deubg(f"Music {'enabled' if self.music_enabled else 'disabled'}")
 
 # 全局音效管理器实例
 sound_manager = SoundManager() 
