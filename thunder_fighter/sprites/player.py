@@ -11,6 +11,8 @@ from thunder_fighter.constants import (
 )
 from thunder_fighter.graphics.renderers import create_player_ship
 from thunder_fighter.sprites.bullets import Bullet
+from thunder_fighter.sprites.wingman import Wingman
+from thunder_fighter.sprites.missile import TrackingMissile
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
 # 导入音效管理器
 from thunder_fighter.utils.sound_manager import sound_manager
@@ -18,13 +20,18 @@ from thunder_fighter.utils.logger import logger
 
 class Player(pygame.sprite.Sprite):
     """玩家类"""
-    def __init__(self, all_sprites, bullets_group):
+    def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group):
         pygame.sprite.Sprite.__init__(self)
+        self.game = game
         # 使用自绘图形代替矩形
         self.image = create_player_ship()
         self.rect = self.image.get_rect()
-        self.rect.centerx = WIDTH // 2
-        self.rect.bottom = HEIGHT - 10
+        
+        # Position (float for precision)
+        self.x = float(WIDTH // 2)
+        self.y = float(HEIGHT - 10)
+        self.rect.centerx = int(self.x)
+        self.rect.bottom = int(self.y)
         self.speed = PLAYER_SPEED # Use self.speed for current player speed
         self.max_speed = PLAYER_MAX_SPEED
         self.speedx = 0
@@ -53,6 +60,14 @@ class Player(pygame.sprite.Sprite):
         # 动画效果
         self.angle = 0  # 用于旋转动画
         
+        #僚机
+        self.wingmen = pygame.sprite.Group()
+        self.wingmen_list = []
+        self.missiles_group = missiles_group
+        self.enemies_group = enemies_group
+        self.last_missile_shot = ptime.get_ticks()
+        self.missile_shoot_delay = 2000 # 2 seconds
+        
     def update(self):
         """更新玩家状态"""
         # 移动速度重置
@@ -73,20 +88,36 @@ class Player(pygame.sprite.Sprite):
         # 射击
         if keystate[pygame.K_SPACE]:
             self.shoot()
+        
+        # 发射导弹
+        self.shoot_missiles()
             
         # 移动玩家
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+        self.x += self.speedx
+        self.y += self.speedy
+        
+        # 飞机轻微的浮动动画
+        self.angle = (self.angle + 1) % 360
+        dy = math.sin(math.radians(self.angle)) * 0.5  # 微小的上下浮动
+        self.y += dy
+        
+        # 更新最终的rect位置
+        self.rect.centerx = int(self.x)
+        self.rect.centery = int(self.y)
         
         # 限制玩家不要出界
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
+            self.x = self.rect.centerx
         if self.rect.left < 0:
             self.rect.left = 0
+            self.x = self.rect.centerx
         if self.rect.top < 0:
             self.rect.top = 0
+            self.y = self.rect.centery
         if self.rect.bottom > HEIGHT:
             self.rect.bottom = HEIGHT
+            self.y = self.rect.centery
             
         # 更新推进器动画
         self.thrust = (self.thrust + 1) % 10
@@ -99,15 +130,16 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.original_image.copy()
             else:
                 self.image = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
-                self.image.fill((0, 0, 0, 0))  # 完全透明
             
             # 减少计时器
             self.flash_timer -= 1
+        else:
+            #确保在闪烁结束后恢复原始图像
+            if self.image != self.original_image:
+                 self.image = self.original_image.copy()
         
-        # 飞机轻微的浮动动画
-        self.angle = (self.angle + 1) % 360
-        dy = math.sin(math.radians(self.angle)) * 0.5  # 微小的上下浮动
-        self.rect.y += dy
+        # 更新僚机位置
+        self.wingmen.update()
             
     def shoot(self):
         """发射子弹"""
@@ -145,9 +177,76 @@ class Player(pygame.sprite.Sprite):
                 bullet4 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE)  # 右斜射
                 self.all_sprites.add(bullet1, bullet2, bullet3, bullet4)
                 self.bullets_group.add(bullet1, bullet2, bullet3, bullet4)
-    
+
+    def shoot_missiles(self):
+        """Fires missiles from wingmen with intelligent targeting."""
+        now = ptime.get_ticks()
+        if not self.wingmen_list or now - self.last_missile_shot < self.missile_shoot_delay:
+            return
+
+        self.last_missile_shot = now
+        
+        # Access the game object to check for a boss
+        game = self.game
+        if not game:
+            return
+
+        targets = []
+        # Prioritize the boss if it's active
+        if game.boss and game.boss.alive():
+            targets = [game.boss] * len(self.wingmen_list)
+        else:
+            # If no boss, assign unique enemies to each wingman
+            if not self.enemies_group:
+                return
+
+            # Sort enemies by distance to the player
+            sorted_enemies = sorted(self.enemies_group.sprites(),
+                                    key=lambda e: pygame.math.Vector2(self.rect.center).distance_to(e.rect.center))
+            
+            # Assign the closest enemies to the wingmen
+            targets = sorted_enemies[:len(self.wingmen_list)]
+
+        # Fire missiles
+        for i, wingman in enumerate(self.wingmen_list):
+            if i < len(targets):
+                target = targets[i]
+                wingman.shoot(self.all_sprites, self.missiles_group, target)
+
+    def add_wingman(self):
+        """增加僚机"""
+        if len(self.wingmen_list) >= 2:
+            return False # 已达到最大数量
+        
+        # 决定新僚机的位置
+        if not self.wingmen_list:
+            side = 'left'
+        else:
+            # 如果已经有一个，检查是哪边的
+            existing_side = self.wingmen_list[0].side
+            side = 'right' if existing_side == 'left' else 'left'
+
+        wingman = Wingman(self, side)
+        self.all_sprites.add(wingman)
+        self.wingmen.add(wingman)
+        self.wingmen_list.append(wingman)
+        return True
+
     def take_damage(self, damage=10):
-        """玩家受到伤害"""
+        """玩家受到伤害，优先消耗僚机"""
+        if self.wingmen_list:
+            # 消耗一个僚机
+            wingman_to_remove = self.wingmen_list.pop()
+            wingman_to_remove.kill()
+            
+            # 创建爆炸效果
+            explosion = create_explosion(wingman_to_remove.rect.center, 'sm')
+            self.all_sprites.add(explosion)
+            
+            # 播放音效
+            sound_manager.play_sound('explosion')
+            return False # 玩家未死亡
+
         self.health -= damage
         
         # 受伤闪烁效果

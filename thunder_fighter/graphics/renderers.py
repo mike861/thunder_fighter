@@ -318,28 +318,6 @@ def create_bullet_path_item():
     
     return item_surface
 
-def draw_health_bar(surface, x, y, width, height, health, max_health, border_color=WHITE):
-    """绘制血条"""
-    # 血条背景
-    pygame.draw.rect(surface, DARK_GRAY, (x, y, width, height))
-    
-    # 计算当前血量对应的血条宽度
-    health_width = int(health / max_health * width)
-    
-    # 根据血量变化血条颜色
-    if health > max_health * 0.6:
-        color = GREEN
-    elif health > max_health * 0.3:
-        color = YELLOW
-    else:
-        color = RED
-        
-    # 绘制血条
-    pygame.draw.rect(surface, color, (x, y, health_width, height))
-    
-    # 绘制血条边框
-    pygame.draw.rect(surface, border_color, (x, y, width, height), 1)
-
 def create_player_speed_item():
     """创建玩家速度提升道具表面"""
     item_surface = pygame.Surface((30, 30), pygame.SRCALPHA)
@@ -367,4 +345,78 @@ def create_player_speed_item():
     # 添加白色边缘
     pygame.draw.circle(item_surface, WHITE, (15, 15), 15, 2)
     
-    return item_surface 
+    return item_surface
+
+def create_wingman():
+    """创建僚机表面"""
+    wingman_surface = pygame.Surface((20, 25), pygame.SRCALPHA)
+    
+    # 主体
+    pygame.draw.polygon(wingman_surface, (0, 180, 255), [(10, 0), (0, 25), (20, 25)])
+    # 细节
+    pygame.draw.polygon(wingman_surface, (200, 200, 200), [(10, 5), (5, 20), (15, 20)])
+    
+    return wingman_surface
+
+def create_tracking_missile():
+    """Creates the surface for a tracking missile."""
+    missile_surface = pygame.Surface((6, 12), pygame.SRCALPHA)
+    pygame.draw.rect(missile_surface, ORANGE, (0, 0, 6, 9))
+    pygame.draw.polygon(missile_surface, RED, [(0, 9), (6, 9), (3, 12)])
+    pygame.draw.line(missile_surface, YELLOW, (3, 0), (3, 7), 1)
+    return missile_surface
+
+def create_wingman_item():
+    """Creates the surface for a wingman power-up item."""
+    item_surface = pygame.Surface((30, 30), pygame.SRCALPHA)
+    
+    # 背景
+    pygame.draw.circle(item_surface, (255, 255, 255), (15, 15), 15)
+    pygame.draw.circle(item_surface, (0, 180, 255), (15, 15), 15, 2)
+
+    # 绘制僚机的小图标
+    wingman_icon = create_wingman()
+    wingman_icon = pygame.transform.scale(wingman_icon, (18, 22))
+    
+    rect = wingman_icon.get_rect(center=(15, 15))
+    item_surface.blit(wingman_icon, rect)
+    
+    return item_surface
+
+def draw_health_bar(surface, x, y, width, height, health, max_health, border_color=WHITE):
+    """绘制血条"""
+    # 血条背景
+    pygame.draw.rect(surface, DARK_GRAY, (x, y, width, height))
+    
+    # 计算当前血量对应的血条宽度
+    health_width = int(health / max_health * width)
+    
+    # 根据血量变化血条颜色
+    if health > max_health * 0.6:
+        color = GREEN
+    elif health > max_health * 0.3:
+        color = YELLOW
+    else:
+        color = RED
+        
+    # 绘制血条
+    pygame.draw.rect(surface, color, (x, y, health_width, height))
+    
+    # 绘制血条边框
+    pygame.draw.rect(surface, border_color, (x, y, width, height), 1)
+
+def draw_text(surface, text, size, x, y, color=WHITE, font_name='arial'):
+    """绘制文本"""
+    try:
+        font = pygame.font.Font(pygame.font.match_font(font_name), size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        surface.blit(text_surface, text_rect)
+    except pygame.error:
+        print(f"找不到字体: {font_name}, 使用默认字体")
+        font = pygame.font.Font(None, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        surface.blit(text_surface, text_rect)

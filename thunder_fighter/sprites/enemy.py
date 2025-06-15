@@ -133,6 +133,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         
+        # Reverse horizontal direction if enemy hits the screen edges
+        if self.rect.right > WIDTH or self.rect.left < 0:
+            self.speedx = -self.speedx
+        
         # 旋转动画（仅对快速移动的敌人）
         if abs(self.speedx) > 1:
             now = pygame.time.get_ticks()

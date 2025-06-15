@@ -4,8 +4,15 @@ from thunder_fighter.sprites.explosion import Explosion
 import math
 from thunder_fighter.constants import WIDTH, HEIGHT, WHITE, YELLOW, RED, GREEN
 
-def create_explosion(center, size=40):
-    """创建爆炸效果"""
+def create_explosion(center, size_str):
+    """Creates an explosion sprite based on a size string."""
+    size_map = {
+        'sm': 30,
+        'md': 50,
+        'lg': 80,
+        'player': 120,
+    }
+    size = size_map.get(size_str.lower(), 60) # Default to 60 if key not found
     return Explosion(center, size)
 
 def create_hit_effect(x, y, size=20):

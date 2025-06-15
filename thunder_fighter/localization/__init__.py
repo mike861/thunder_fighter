@@ -2,7 +2,8 @@
 Localization module for Thunder Fighter
 Handles loading and managing text in different languages
 """
-import importlib
+import json
+import os
 from thunder_fighter.utils.logger import logger
 
 try:
@@ -25,37 +26,36 @@ class LanguageManager:
         self.load_language(self.language_code)
     
     def load_language(self, language_code):
-        """Load a specific language file
+        """Load a specific language file from JSON
         
         Args:
-            language_code: Two-letter language code (e.g., 'en', 'zh', 'es')
+            language_code: Two-letter language code (e.g., 'en', 'zh')
         
         Returns:
             bool: True if language loaded successfully, False otherwise
         """
         try:
-            # Import the language module dynamically
-            lang_module = importlib.import_module(f"thunder_fighter.localization.{language_code}")
+            # Construct the path to the JSON file
+            # Note: This assumes the script runs from the project root.
+            # A more robust solution might use __file__ to get the package path.
+            file_path = os.path.join(os.path.dirname(__file__), f'{language_code}.json')
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                self.text = json.load(f)
             
-            # Get all uppercase variables (text constants)
-            self.text = {
-                name: value for name, value in vars(lang_module).items()
-                if name.isupper() and isinstance(value, str)
-            }
-            
-            # Reset missing keys tracking when language changes
             self.missing_keys_warned = set()
-            
             self.language_code = language_code
             logger.info(f"Loaded language: {language_code}")
             return True
             
-        except ImportError:
-            logger.error(f"Language file not found: {language_code}")
-            # If requested language isn't available, fall back to English
+        except FileNotFoundError:
+            logger.error(f"Language file not found: {file_path}")
             if language_code != 'en':
                 logger.info("Falling back to English")
                 return self.load_language('en')
+            return False
+        except json.JSONDecodeError:
+            logger.error(f"Error decoding JSON from language file: {file_path}")
             return False
         except Exception as e:
             logger.error(f"Error loading language file: {e}")
