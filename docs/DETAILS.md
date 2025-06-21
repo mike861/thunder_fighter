@@ -5,7 +5,7 @@ This document contains more detailed information about the Thunder Fighter game 
 ## Internal Game Mechanics
 
 ### Player System
-- **Wingmen**: The player can have up to two wingmen, collected via the `WingmanItem`. Wingmen absorb one hit for the player, sacrificing themselves.
+- **Wingmen**: The player can have a configurable number of wingmen (default max is 2), collected via the `WingmanItem`. Wingmen absorb one hit for the player, sacrificing themselves. The initial number, maximum count, and formation spacing are all configurable in `constants.py`.
 - **Missiles**: Wingmen fire tracking missiles periodically. These missiles seek out the nearest enemies, prioritizing the Boss if one is active.
 
 ### Enemy System
@@ -49,6 +49,7 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Item Pickup Sound**: Plays when an item is collected.
 - **Boss Defeat Sound**: Plays when a Boss is successfully defeated.
 - **Volume Control**: Sound effect and music volume can be adjusted.
+- **System Stability**: The sound system includes a robust health check and auto-recovery mechanism. It periodically checks its status and automatically reinitializes if issues are detected (e.g., if background music stops unexpectedly). This ensures high reliability during long gameplay sessions.
 
 ### Logging System
 - Standardized log output supporting different levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
@@ -77,11 +78,12 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - ✅ Enemy system with varied behaviors
 - ✅ Boss battles with unique patterns
 - ✅ Item drop and collection system
-- ✅ Sound system with volume control
-- ✅ Good test coverage (33 tests passing)
+- ✅ Sound system with enhanced stability and volume control
+- ✅ Good test coverage (39 tests passing)
 - ✅ Refined visual feedback system (explosions vs. damage flashes)
 - ✅ Multi-language support (English, Chinese)
 - ✅ Dynamic UI with notifications
+- ✅ Configurable game parameters (wingmen, enemy counts, etc.)
 
 ## Technical Details
 
@@ -90,7 +92,7 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - Custom rendering system creates game visual effects.
 - Centralized `FlashEffectManager` for handling entity damage flashes.
 - Standardized logging system tracks game events.
-- Sound manager controls game audio playback.
+- Sound manager controls game audio playback, featuring a robust health-check and auto-recovery system.
 - Modular architecture allows for easy extension and maintenance.
 - Test-driven development ensures code quality and reliability.
 - Localization system for multi-language support. 

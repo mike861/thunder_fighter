@@ -19,7 +19,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - Responsive controls and collision detection
 - Background music and sound effects with volume control
 - Comprehensive logging system
-- Fully tested codebase (33 tests passing)
+- Fully tested codebase (39 tests passing)
 - **Localization**: All user-facing UI text is loaded via the localization module, with translations available in English and Chinese.
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
@@ -95,10 +95,11 @@ Starting from game level 3, a new power-up item may appear. Collecting this item
 -   **Firepower**: Each wingman automatically fires tracking missiles at nearby enemies, prioritizing the Boss when active.
 -   **Shields**: Wingmen act as shields, absorbing enemy fire. They will be destroyed after taking a certain amount of damage.
 -   **Limits**: You can have a maximum of two wingmen at a time.
+-   **Configuration**: The initial number of wingmen, maximum number, and formation spacing are all configurable in `thunder_fighter/constants.py`.
 
 ## Testing
 
-The project includes a comprehensive test suite covering game mechanics, collisions, and components. All 33 tests are currently passing.
+The project includes a comprehensive test suite covering game mechanics, collisions, and components. All 39 tests are currently passing.
 
 -   **Run all tests:**
     ```bash
@@ -122,24 +123,14 @@ thunder_fighter/
 │   ├── graphics/   # Rendering, effects, UI
 │   ├── localization/ # Language files (en.json, zh.json)
 │   ├── sprites/    # Game entities (player, enemies, boss, etc.)
-│   ├── tests/      # Unit tests
 │   ├── utils/      # Helper functions and managers
 │   ├── config.py   # Game configuration
 │   ├── constants.py# Game constants
 │   └── game.py     # Main game class
+├── tests/          # Unit tests
 ├── main.py         # Main entry point script
 ├── requirements.txt # Python dependencies
 ├── README.md       # This file
 ├── README_ZH.md    # Chinese README
 └── LICENSE         # Project License
 ```
-
-## Development
-
-### Multi-language Support
-
-The game supports multiple languages via the `thunder_fighter/localization/json/` directory.
-
-1.  Language files (e.g., `en.json`, `zh.json`) store key-value pairs for text strings in JSON format.
-2.  The `Localization` class in `localization/__init__.py` loads the appropriate language based on `config.py`.
-3.  In-game text is retrieved using the `_()` function (e.g., `
