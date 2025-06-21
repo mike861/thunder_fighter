@@ -20,8 +20,9 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - Background music and sound effects with volume control
 - Comprehensive logging system
 - Fully tested codebase (33 tests passing)
+- **Localization**: All user-facing UI text is loaded via the localization module, with translations available in English and Chinese.
 
-For more detailed information on game mechanics, assets, and technical aspects, see [Project Details](docs/DETAILS.md).
+For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
 ## Screenshots
 
@@ -113,28 +114,24 @@ The project includes a comprehensive test suite covering game mechanics, collisi
 
 ```
 thunder_fighter/
-├── assets/         # Game assets (images, sounds, music)
 ├── docs/           # Detailed documentation
-│   └── DETAILS.md
-├── graphics/       # Rendering, effects, UI
-├── localization/   # Language files
-│   ├── json/
-│   │   ├── en.json
-│   │   └── zh.json
-│   └── __init__.py # Language loader
-├── sprites/        # Game entities (player, enemies, boss, items, wingmen, missiles, etc.)
-├── tests/          # Unit tests
-├── utils/          # Helper functions, managers (sound, score, etc.)
-├── __init__.py
-├── config.py       # Game configuration
-├── constants.py    # Game constants
-└── game.py         # Main game class
-main.py             # Main entry point script
-requirements.txt    # Python dependencies
-README.md           # This file
-README_CN.md        # Chinese README
-.gitignore
-LICENSE             # Project License
+│   ├── DETAILS.md
+│   └── DETAILS_ZH.md
+├── thunder_fighter/
+│   ├── assets/     # Game assets (sounds, music)
+│   ├── graphics/   # Rendering, effects, UI
+│   ├── localization/ # Language files (en.json, zh.json)
+│   ├── sprites/    # Game entities (player, enemies, boss, etc.)
+│   ├── tests/      # Unit tests
+│   ├── utils/      # Helper functions and managers
+│   ├── config.py   # Game configuration
+│   ├── constants.py# Game constants
+│   └── game.py     # Main game class
+├── main.py         # Main entry point script
+├── requirements.txt # Python dependencies
+├── README.md       # This file
+├── README_ZH.md    # Chinese README
+└── LICENSE         # Project License
 ```
 
 ## Development
@@ -145,21 +142,4 @@ The game supports multiple languages via the `thunder_fighter/localization/json/
 
 1.  Language files (e.g., `en.json`, `zh.json`) store key-value pairs for text strings in JSON format.
 2.  The `Localization` class in `localization/__init__.py` loads the appropriate language based on `config.py`.
-3.  In-game text is retrieved using the `_()` function (e.g., `_("Game Over")`).
-4.  Switch languages in-game using the 'L' key.
-
-**To add a new language:**
-
-1.  Create a new JSON file (e.g., `es.json` for Spanish) in `thunder_fighter/localization/json/` by copying `en.json`.
-2.  Translate all the string values in the new file.
-3.  Add the language code (e.g., `'es'`) to the `AVAILABLE_LANGUAGES` list in `thunder_fighter/config.py`.
-
-## License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## Acknowledgments
-
--   Pygame Community
--   Open-source game development resources
--   Contributors and testers 
+3.  In-game text is retrieved using the `_()` function (e.g., `

@@ -3,8 +3,9 @@ import random
 from thunder_fighter.sprites.explosion import Explosion
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
-from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
+from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect, flash_manager
 from thunder_fighter.utils.logger import logger
+from thunder_fighter.constants import WHITE, RED, YELLOW
 
 SCORE_THRESHOLD = 200  # Every 200 points might spawn an item
 
@@ -21,9 +22,11 @@ def check_missile_enemy_collisions(missiles, enemies, all_sprites, score):
                     all_sprites.add(explosion)
                     score.update(500) # Bonus for boss kill with missile
                 else:
-                    # Hit but not destroyed
-                    hit_effect = create_hit_effect(*missile.rect.center)
-                    all_sprites.add(hit_effect)
+                    # Hit but not destroyed - still use explosion for missile
+                    explosion = create_explosion(missile.rect.center, 'md')
+                    all_sprites.add(explosion)
+                    # Boss has its own built-in flash effect from damage() method
+                    # create_flash_effect(enemy, RED)  # Removed to avoid conflicts
             else:
                 # It's a regular enemy, kill it.
                 enemy.kill()
@@ -54,7 +57,7 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
             score.update(score_value)
             
             # Create explosion effect
-            explosion = Explosion(hit.rect.center, 40)
+            explosion = Explosion(hit.rect.center)
             all_sprites.add(explosion)
             
             # Check if we need to generate item based on score checkpoints
@@ -117,20 +120,19 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
             result['damage'] = len(boss_hits) * 10  # 每颗子弹10点伤害
             
             for hit in boss_hits:
-                # 使用boss的damage方法处理伤害
+                # Use boss's damage method to handle damage
                 boss_defeated = boss.damage(10)
                 
-                # 创建小爆炸效果
-                explosion = Explosion(hit.rect.center, 20)
-                all_sprites.add(explosion)
+                # Boss has its own built-in flash effect, no need for external flash
+                # create_flash_effect(boss, YELLOW)  # Removed to avoid conflicts
                 
-                # 检查Boss是否被击败
+                # Check if Boss is defeated
                 if boss_defeated:
-                    # 创建大爆炸
+                    # Create big explosion when boss is defeated
                     for _ in range(10):
                         pos_x = random.randint(boss.rect.left, boss.rect.right)
                         pos_y = random.randint(boss.rect.top, boss.rect.bottom)
-                        explosion = Explosion((pos_x, pos_y), 60)
+                        explosion = Explosion((pos_x, pos_y))
                         all_sprites.add(explosion)
                     
                     result['boss_defeated'] = True
@@ -162,8 +164,8 @@ def check_enemy_player_collisions(player, enemies, all_sprites):
             player.health -= damage
             result['damage'] += damage
             
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 40)
+            # Create explosion
+            explosion = Explosion(hit.rect.center)
             all_sprites.add(explosion)
             
             # 如果玩家生命值为0，游戏结束
@@ -186,15 +188,14 @@ def check_boss_bullet_player_collisions(player, boss_bullets, all_sprites):
     try:
         hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         result['was_hit'] = bool(hits)
-        result['damage'] = len(hits) * 15  # 每颗Boss子弹15点伤害
+        result['damage'] = len(hits) * 15  # Each boss bullet does 15 damage
         
         for hit in hits:
             player.health -= 15
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 30)
-            all_sprites.add(explosion)
+            # Create flash effect for boss bullet hit
+            create_flash_effect(player, RED)
             
-            # 如果玩家生命值为0，游戏结束
+            # If player health is 0, game over
             if player.health <= 0:
                 result['game_over'] = True
         
@@ -216,19 +217,18 @@ def check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites):
         result['was_hit'] = bool(hits)
         
         for hit in hits:
-            # 根据敌人子弹等级计算伤害
-            enemy_level = getattr(hit, 'enemy_level', 0)  # 获取子弹等级，默认为0
-            damage = 5 + enemy_level * 1  # 基础伤害5，每级额外1点伤害
+            # Calculate damage based on enemy bullet level
+            enemy_level = getattr(hit, 'enemy_level', 0)  # Get bullet level, default to 0
+            damage = 5 + enemy_level * 1  # Base damage 5, extra 1 per level
             
-            # 使用take_damage处理伤害和效果
+            # Use take_damage to handle damage and effects
             if player.take_damage(damage):
                 result['game_over'] = True
             
             result['damage'] += damage
             
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 20 + enemy_level)
-            all_sprites.add(explosion)
+            # Create small flash effect for bullet hit
+            create_flash_effect(player, WHITE)
         
         return result
     except Exception as e:

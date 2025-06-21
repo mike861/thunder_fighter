@@ -4,13 +4,17 @@ This document contains more detailed information about the Thunder Fighter game 
 
 ## Internal Game Mechanics
 
+### Player System
+- **Wingmen**: The player can have up to two wingmen, collected via the `WingmanItem`. Wingmen absorb one hit for the player, sacrificing themselves.
+- **Missiles**: Wingmen fire tracking missiles periodically. These missiles seek out the nearest enemies, prioritizing the Boss if one is active.
+
 ### Enemy System
 - **Enemy Levels**: Enemies range from level 0-10. Higher levels mean more health, speed, and attack power.
-- **Enemy Spawning**: The number and level of enemies increase as game time progresses.
-- **Enemy Shooting**: Enemies level 1 and above can shoot. Firing rate and bullet speed increase with level.
-  - Low-level enemies (1-4): Fire simple red bullets that fall straight down.
-  - Mid-level enemies (5-7): Fire orange bullets, possibly with horizontal movement.
-  - High-level enemies (8-10): Fire blue or purple bullets, possibly with curved trajectories.
+- **Enemy Spawning**: The number and level of enemies increase as the game progresses and the game level increases.
+- **Enemy Shooting**: Enemies level 2 and above can shoot (configurable via the `ENEMY_SHOOT_LEVEL` constant). Firing rate and bullet speed increase with level.
+  - Low-level enemies: Fire simple bullets that fall straight down.
+  - Mid-level enemies: Fire faster bullets, possibly with more complex patterns.
+  - High-level enemies: Fire faster and more damaging bullets.
 
 ### Bullet System
 - **Player Bullets**: Up to 4 shooting paths based on collected items.
@@ -22,6 +26,7 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Bullet Speed Item**: Increases player bullet speed.
 - **Bullet Path Item**: Increases the number of player shooting paths.
 - **Player Speed Item**: Increases the player's movement speed.
+- **Wingman Item**: Adds a wingman to fight alongside the player.
 - **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
 
 ### Boss System
@@ -29,10 +34,16 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Boss Spawning**: A Boss spawns periodically.
 - **Boss Attack**: Fires multiple bullets; the number and pattern change with level.
 
+### Visual Effects System
+- **Explosions**: Occur when an entity (enemy, wingman) is destroyed, or when a missile hits a target.
+- **Flash Effects**: Used for non-lethal damage. The entity itself flashes a specific color to indicate it was hit. This provides clearer feedback without cluttering the screen.
+    - Player Hit: Flashes white.
+    - Boss Hit (by Bullet): Flashes yellow.
+    - Boss Hit (by Missile): Flashes red (in addition to the missile's explosion).
+
 ### Sound System
 - **Background Music**: Loops during gameplay.
-- **Shooting Sound**: Plays when the player fires.
-- **Explosion Sound**: Plays when enemies and Bosses are destroyed.
+- **Explosion Sound**: Plays when enemies are destroyed.
 - **Hit Sound**: Plays when the player takes damage.
 - **Death Sound**: Plays when the player's ship is destroyed.
 - **Item Pickup Sound**: Plays when an item is collected.
@@ -41,22 +52,21 @@ This document contains more detailed information about the Thunder Fighter game 
 
 ### Logging System
 - Standardized log output supporting different levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-- Log level can be adjusted via the `THUNDER_FIGHTER_LOG_LEVEL` environment variable (See [How to Run](#how-to-run) in README.md).
+- Log level can be adjusted via the `THUNDER_FIGHTER_LOG_LEVEL` environment variable (See [How to Run](#how-to-run) in `README.md`).
 - All game events are logged in English for easy debugging and monitoring.
 
 ## Sound Assets
 
-The game uses the following sound and music files located in the `thunder_fighter/assets/` directory:
+The game uses the following sound and music files located in the `assets/` directory:
 
-1. **Sounds (`sounds/`)**: WAV or MP3 format
-   - `player_shoot.wav` - Player shooting sound
+1. **Sounds (`sounds/`)**:
    - `player_hit.wav` - Player hit sound
    - `player_death.wav` - Player death sound
    - `enemy_explosion.wav` - Enemy explosion sound
    - `boss_death.wav` - Boss death sound
-   - `item_pickup.wav` - Item pickup sound (Used for all item types currently)
+   - `item_pickup.wav` - Item pickup sound
 
-2. **Music (`music/`)**: MP3 format
+2. **Music (`music/`)**:
    - `background_music.mp3` - Game background music
 
 If these files are missing, the game will handle the missing sounds gracefully, logging a warning but not affecting gameplay.
@@ -68,8 +78,8 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - ✅ Boss battles with unique patterns
 - ✅ Item drop and collection system
 - ✅ Sound system with volume control
-- ✅ Complete test coverage (43 tests passing)
-- ✅ Game polish and optimization
+- ✅ Good test coverage (33 tests passing)
+- ✅ Refined visual feedback system (explosions vs. damage flashes)
 - ✅ Multi-language support (English, Chinese)
 - ✅ Dynamic UI with notifications
 
@@ -78,6 +88,7 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - Object-Oriented Programming used for game entity design.
 - Pygame Sprite Groups manage game objects and collision detection.
 - Custom rendering system creates game visual effects.
+- Centralized `FlashEffectManager` for handling entity damage flashes.
 - Standardized logging system tracks game events.
 - Sound manager controls game audio playback.
 - Modular architecture allows for easy extension and maintenance.

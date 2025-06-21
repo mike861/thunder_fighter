@@ -74,14 +74,27 @@ class Boss(pygame.sprite.Sprite):
         base_image = self.original_image.copy()
         flash_images.append(base_image)  # 第一帧是原始图像
         
-        # 创建发光红色效果图像
-        red_image = base_image.copy()
-        # 创建叠加用的红色表面
-        red_overlay = pygame.Surface(red_image.get_size(), pygame.SRCALPHA)
-        red_overlay.fill((255, 0, 0, 100))  # 半透明红色
-        # 应用叠加
-        red_image.blit(red_overlay, (0, 0))
-        flash_images.append(red_image)  # 第二帧是红色版本
+        # 创建多种闪烁效果图像
+        # 方法1: 强烈红色叠加
+        red_image = self.original_image.copy()
+        red_overlay = pygame.Surface(red_image.get_size())
+        red_overlay.fill((255, 80, 80))  # 非常亮的红色
+        red_image.blit(red_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
+        flash_images.append(red_image)
+        
+        # 方法2: 纯白色高亮（最明显的闪烁效果）
+        white_image = self.original_image.copy()
+        white_overlay = pygame.Surface(white_image.get_size())
+        white_overlay.fill((180, 180, 180))  # 非常亮的白色叠加
+        white_image.blit(white_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
+        flash_images.append(white_image)
+        
+        # 方法3: 黄色警告效果（额外的闪烁变化）
+        yellow_image = self.original_image.copy()
+        yellow_overlay = pygame.Surface(yellow_image.get_size())
+        yellow_overlay.fill((200, 200, 0))  # 亮黄色
+        yellow_image.blit(yellow_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
+        flash_images.append(yellow_image)
         
         return flash_images
     
@@ -95,7 +108,7 @@ class Boss(pygame.sprite.Sprite):
             bool: 如果Boss被摧毁返回True，否则返回False
         """
         self.health -= amount
-        self.damage_flash = 5  # 设置闪烁帧数
+        self.damage_flash = 12  # 增加闪烁帧数，使效果更明显
         
         # 检查是否生命值降至50%以下，改变攻击模式
         health_percentage = self.health / self.max_health
@@ -167,18 +180,25 @@ class Boss(pygame.sprite.Sprite):
         if self.damage_flash > 0:
             self.damage_flash -= 1
             
-            # 使用预先创建的闪烁图像序列
-            if self.damage_flash % 2 == 0:  # 每隔一帧闪烁
-                self.image = self.flash_images[1]  # 红色版本
+            # 使用更强烈和多样化的闪烁效果
+            if self.damage_flash > 0:
+                # 根据闪烁帧数选择不同的效果，创造更动态的闪烁
+                flash_cycle = self.damage_flash % 6
+                if flash_cycle == 0:
+                    self.image = self.flash_images[2]  # 白色高亮版本（最明显）
+                elif flash_cycle == 1:
+                    self.image = self.flash_images[3]  # 黄色警告版本
+                elif flash_cycle == 2:
+                    self.image = self.flash_images[2]  # 再次白色高亮
+                elif flash_cycle == 3:
+                    self.image = self.flash_images[1]  # 红色版本
+                elif flash_cycle == 4:
+                    self.image = self.flash_images[0]  # 原始版本
+                else:  # flash_cycle == 5
+                    self.image = self.flash_images[1]  # 红色版本
             else:
-                self.image = self.flash_images[0]  # 原始版本
-                
-            # 当闪烁结束时确保恢复原始图像
-            if self.damage_flash == 0:
-                self.image = self.original_image
-                
-            # 每次更新图像后更新碰撞掩码
-            self.mask = pygame.mask.from_surface(self.image)
+                # 当闪烁结束时确保恢复原始图像
+                self.image = self.original_image.copy()  # Use copy to avoid reference issues
     
     def shoot(self):
         """发射子弹"""

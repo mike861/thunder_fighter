@@ -7,23 +7,23 @@ from thunder_fighter.constants import (
     PLAYER_SPEED, PLAYER_MAX_SPEED, PLAYER_SPEED_UPGRADE_AMOUNT, PLAYER_FLASH_FRAMES, PLAYER_HEAL_AMOUNT,
     BULLET_SPEED_DEFAULT, BULLET_SPEED_MAX, BULLET_PATHS_DEFAULT, BULLET_PATHS_MAX,
     BULLET_ANGLE_STRAIGHT, BULLET_ANGLE_SPREAD_SMALL, BULLET_ANGLE_SPREAD_LARGE,
-    BULLET_SPEED_UPGRADE_AMOUNT
+    BULLET_SPEED_UPGRADE_AMOUNT, PLAYER_MAX_WINGMEN, WINGMAN_FORMATION_SPACING
 )
 from thunder_fighter.graphics.renderers import create_player_ship
 from thunder_fighter.sprites.bullets import Bullet
 from thunder_fighter.sprites.wingman import Wingman
 from thunder_fighter.sprites.missile import TrackingMissile
-from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
-# 导入音效管理器
+from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect
+# Import sound manager
 from thunder_fighter.utils.sound_manager import sound_manager
 from thunder_fighter.utils.logger import logger
 
 class Player(pygame.sprite.Sprite):
-    """玩家类"""
+    """Player class"""
     def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
-        # 使用自绘图形代替矩形
+        # Use custom graphics instead of rectangle
         self.image = create_player_ship()
         self.rect = self.image.get_rect()
         
@@ -39,28 +39,28 @@ class Player(pygame.sprite.Sprite):
         self.health = PLAYER_HEALTH
         self.shoot_delay = PLAYER_SHOOT_DELAY
         self.last_shot = ptime.get_ticks()
-        # 添加推进器动画效果
+        # Add thruster animation effect
         self.thrust = 0
         
-        # 子弹属性
+        # Bullet attributes
         self.bullet_speed = BULLET_SPEED_DEFAULT
         self.max_bullet_speed = BULLET_SPEED_MAX
         self.bullet_paths = BULLET_PATHS_DEFAULT
         self.max_bullet_paths = BULLET_PATHS_MAX
         
-        # 精灵组
+        # Sprite groups
         self.all_sprites = all_sprites
         self.bullets_group = bullets_group
         
-        # 视觉效果
+        # Visual effects
         self.flash_timer = 0
         self.flash_duration = 0
         self.original_image = self.image.copy()
         
-        # 动画效果
-        self.angle = 0  # 用于旋转动画
+        # Animation effects
+        self.angle = 0  # For rotation animation
         
-        #僚机
+        # Wingmen
         self.wingmen = pygame.sprite.Group()
         self.wingmen_list = []
         self.missiles_group = missiles_group
@@ -69,12 +69,12 @@ class Player(pygame.sprite.Sprite):
         self.missile_shoot_delay = 2000 # 2 seconds
         
     def update(self):
-        """更新玩家状态"""
-        # 移动速度重置
+        """Update player state"""
+        # Reset movement speed
         self.speedx = 0
         self.speedy = 0
         
-        # 获取按键
+        # Get key states
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
             self.speedx = -self.speed # Use current speed
@@ -85,27 +85,27 @@ class Player(pygame.sprite.Sprite):
         if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
             self.speedy = self.speed # Use current speed
         
-        # 射击
+        # Shooting
         if keystate[pygame.K_SPACE]:
             self.shoot()
         
-        # 发射导弹
+        # Fire missiles
         self.shoot_missiles()
             
-        # 移动玩家
+        # Move player
         self.x += self.speedx
         self.y += self.speedy
         
-        # 飞机轻微的浮动动画
+        # Slight floating animation for the aircraft
         self.angle = (self.angle + 1) % 360
-        dy = math.sin(math.radians(self.angle)) * 0.5  # 微小的上下浮动
+        dy = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
         self.y += dy
         
-        # 更新最终的rect位置
+        # Update final rect position
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
         
-        # 限制玩家不要出界
+        # Keep player within bounds
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.x = self.rect.centerx
@@ -119,62 +119,62 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT
             self.y = self.rect.centery
             
-        # 更新推进器动画
+        # Update thruster animation
         self.thrust = (self.thrust + 1) % 10
         
-        # 闪烁效果
+        # Flash effect
         current_time = ptime.get_ticks()
         if self.flash_timer > 0:
-            # 每100毫秒切换一次可见性
+            # Toggle visibility every 100 milliseconds
             if (current_time // 100) % 2 == 0:
                 self.image = self.original_image.copy()
             else:
                 self.image = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
             
-            # 减少计时器
+            # Decrease timer
             self.flash_timer -= 1
         else:
-            #确保在闪烁结束后恢复原始图像
+            # Ensure original image is restored after flashing ends
             if self.image != self.original_image:
                  self.image = self.original_image.copy()
         
-        # 更新僚机位置
+        # Update wingmen positions
         self.wingmen.update()
             
     def shoot(self):
-        """发射子弹"""
+        """Fire bullets"""
         now = ptime.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
             
-            # 播放射击音效
-            sound_manager.play_sound('player_shoot')
+            # Play shooting sound effect
+            # sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
             
-            # 根据弹道数量创建不同数量和角度的子弹
+            # Create different numbers and angles of bullets based on bullet paths
             if self.bullet_paths == 1:
-                # 单发直射
+                # Single straight shot
                 bullet = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
                 self.all_sprites.add(bullet)
                 self.bullets_group.add(bullet)
             elif self.bullet_paths == 2:
-                # 双发平行
+                # Double parallel shots
                 bullet1 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
                 bullet2 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
                 self.all_sprites.add(bullet1, bullet2)
                 self.bullets_group.add(bullet1, bullet2)
             elif self.bullet_paths == 3:
-                # 三发：一直射，两斜射
-                bullet1 = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # 中间直射
-                bullet2 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_SMALL)  # 左斜射
-                bullet3 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_SMALL)  # 右斜射
+                # Three shots: one straight, two angled
+                bullet1 = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Center straight
+                bullet2 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_SMALL)  # Left angled
+                bullet3 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_SMALL)  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3)
                 self.bullets_group.add(bullet1, bullet2, bullet3)
             elif self.bullet_paths >= 4:
-                # 四发或更多（最大限制为4）：两直射，两斜射
-                bullet1 = Bullet(self.rect.centerx - 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # 左中直射
-                bullet2 = Bullet(self.rect.centerx + 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # 右中直射
-                bullet3 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_LARGE)  # 左斜射
-                bullet4 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE)  # 右斜射
+                # Four or more shots (max limit is 4): two straight, two angled
+                bullet1 = Bullet(self.rect.centerx - 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Left center straight
+                bullet2 = Bullet(self.rect.centerx + 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Right center straight
+                bullet3 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_LARGE)  # Left angled
+                bullet4 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE)  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3, bullet4)
                 self.bullets_group.add(bullet1, bullet2, bullet3, bullet4)
 
@@ -214,15 +214,15 @@ class Player(pygame.sprite.Sprite):
                 wingman.shoot(self.all_sprites, self.missiles_group, target)
 
     def add_wingman(self):
-        """增加僚机"""
-        if len(self.wingmen_list) >= 2:
-            return False # 已达到最大数量
+        """Add a wingman"""
+        if len(self.wingmen_list) >= PLAYER_MAX_WINGMEN:
+            return False # Maximum number reached
         
-        # 决定新僚机的位置
+        # Determine position for new wingman
         if not self.wingmen_list:
             side = 'left'
         else:
-            # 如果已经有一个，检查是哪边的
+            # If there's already one, check which side it's on
             existing_side = self.wingmen_list[0].side
             side = 'right' if existing_side == 'left' else 'left'
 
@@ -233,80 +233,79 @@ class Player(pygame.sprite.Sprite):
         return True
 
     def take_damage(self, damage=10):
-        """玩家受到伤害，优先消耗僚机"""
+        """Player takes damage, consume wingman first"""
         if self.wingmen_list:
-            # 消耗一个僚机
+            # Consume one wingman
             wingman_to_remove = self.wingmen_list.pop()
             wingman_to_remove.kill()
             
-            # 创建爆炸效果
+            # Create explosion effect
             explosion = create_explosion(wingman_to_remove.rect.center, 'sm')
             self.all_sprites.add(explosion)
             
-            # 播放音效
-            sound_manager.play_sound('explosion')
-            return False # 玩家未死亡
+            # Play sound effect
+            sound_manager.play_sound('enemy_explosion')
+            return False # Player not dead
 
         self.health -= damage
         
-        # 受伤闪烁效果
+        # Damage flash effect
         self.flash_timer = PLAYER_FLASH_FRAMES
         
-        # 创建受伤特效
-        hit_effect = create_hit_effect(self.rect.centerx, self.rect.centery)
-        self.all_sprites.add(hit_effect)
+        # Create flash effect instead of hit effect
+        create_flash_effect(self, WHITE)
         
-        # 播放受伤音效
+        # Play hit sound effect
         sound_manager.play_sound('player_hit')
         
-        return self.health <= 0  # 返回是否死亡
+        return self.health <= 0  # Return whether dead
     
     def heal(self, amount=PLAYER_HEAL_AMOUNT):
-        """玩家回血"""
+        """Player heals"""
         self.health = min(PLAYER_HEALTH, self.health + amount)
     
     def increase_bullet_speed(self, amount=BULLET_SPEED_UPGRADE_AMOUNT):
-        """增加子弹速度"""
+        """Increase bullet speed"""
         self.bullet_speed = min(self.max_bullet_speed, self.bullet_speed + amount)
         return self.bullet_speed
         
     def increase_bullet_paths(self):
-        """增加弹道数量"""
+        """Increase bullet paths"""
         if self.bullet_paths < self.max_bullet_paths:
             self.bullet_paths += 1
         return self.bullet_paths
 
     def increase_speed(self):
         """
-        增加玩家移动速度 
+        Increase player movement speed
         
         Returns:
-            bool: 是否成功增加速度
+            bool: Whether speed was successfully increased
         """
-        # 检查是否已达到最大速度
+        # Check if already at max speed
         if self.speed >= PLAYER_MAX_SPEED:
             return False
         
         self.speed += PLAYER_SPEED_UPGRADE_AMOUNT
-        # 玩家移动速度的增加应该在游戏UI中提示玩家，而不是仅作为日志输出
+        # Player speed increase should be shown in game UI, not just logged
         logger.info(f"Player speed increased to: {self.speed}")
         return True
         
     def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
         """
-        增加玩家移动速度 - 与collisions.py中调用的方法名匹配
+        Increase player movement speed - matches method name called in collisions.py
         
         Args:
-            amount: 增加的速度值
+            amount: Speed increase amount
             
         Returns:
-            float: 当前玩家速度
+            float: Current player speed
         """
-        # 检查是否已达到最大速度
+        # Check if already at max speed
         if self.speed >= PLAYER_MAX_SPEED:
             return self.speed
             
-        # 增加速度但不超过最大值
+        # Increase speed but not exceed max
         self.speed = min(self.max_speed, self.speed + amount)
         logger.info(f"Player speed increased to: {self.speed}")
         return self.speed 

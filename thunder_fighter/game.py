@@ -7,7 +7,8 @@ from thunder_fighter.constants import (
     BASE_ENEMY_COUNT, SCORE_THRESHOLD, BOSS_SPAWN_INTERVAL,
     FONT_NAME, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL,
     TEXT_TIME, TEXT_ENEMIES, TEXT_HIGH_LEVEL_ENEMIES, TEXT_BULLET_INFO,
-    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH
+    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH,
+    PLAYER_INITIAL_WINGMEN
 )
 from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
@@ -28,19 +29,20 @@ from thunder_fighter.graphics.renderers import draw_health_bar
 from thunder_fighter.utils.logger import logger
 from thunder_fighter.utils.sound_manager import sound_manager
 from thunder_fighter.graphics.ui_manager import PlayerUIManager
+from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
 
 class Game:
     def __init__(self):
-        # 初始化pygame
+        # Initialize pygame
         pygame.init()
         
-        # 创建游戏窗口
+        # Create game window
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TEXT_GAME_TITLE)
         self.clock = pygame.time.Clock()
         
-        # 创建精灵组
+        # Create sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
@@ -49,49 +51,52 @@ class Game:
         self.items = pygame.sprite.Group()
         self.missiles = pygame.sprite.Group()
         
-        # 敌人等级追踪
+        # Enemy level tracking
         self.enemy_levels = {i: 0 for i in range(11)}
         
-        # 创建玩家
+        # Create player
         self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies)
         self.all_sprites.add(self.player)
-        self.player.add_wingman()
         
-        # 创建敌人
+        # Add initial wingmen based on configuration
+        for _ in range(PLAYER_INITIAL_WINGMEN):
+            self.player.add_wingman()
+        
+        # Create enemies
         for i in range(BASE_ENEMY_COUNT):
             self.spawn_enemy()
         
-        # 创建背景星星
+        # Create background stars
         self.stars = create_stars(50)
         
-        # 创建分数
+        # Create score
         self.score = Score()
         
-        # 道具生成相关变量
+        # Item spawn related variables
         self.last_score_checkpoint = 0
         self.item_spawn_timer = time.time()
         self.item_spawn_interval = 30
         
-        # Boss相关变量
+        # Boss related variables
         self.boss = None
         self.boss_spawn_timer = time.time()
         self.boss_active = False
         self.boss_defeated = False
         
-        # 游戏时间和敌人生成相关变量
+        # Game time and enemy spawn related variables
         self.game_start_time = time.time()
         self.enemy_spawn_timer = time.time()
         
-        # 游戏状态
+        # Game state
         self.running = True
         self.paused = False
         self.game_level = 1
         self.game_won = False
         
-        # 播放背景音乐
-        sound_manager.play_background_music('background_music.mp3')
+        # Play background music
+        sound_manager.play_music('background_music.mp3')
         
-        # 初始化UI管理器
+        # Initialize UI manager
         self.ui_manager = PlayerUIManager(self.screen, self.player, self)
         
         self.update_ui_state()
@@ -106,6 +111,8 @@ class Game:
             victory=self.game_won,
             defeat=self.player.health <= 0
         )
+        # Update persistent info with current score
+        self.ui_manager.persistent_info['score'] = self.score.value
         self.ui_manager.update_player_info(
             health=self.player.health,
             max_health=PLAYER_HEALTH,
@@ -125,9 +132,17 @@ class Game:
         else:
             self.ui_manager.update_boss_info(active=False)
 
+    def _check_sound_system(self):
+        """Check and fix sound system if needed"""
+        if not sound_manager.is_healthy():
+            logger.warning("Sound system unhealthy, attempting to fix...")
+            sound_manager.reinitialize()
+        else:
+            # Even if system is healthy, ensure music is playing
+            sound_manager.ensure_music_playing()
     
     def spawn_enemy(self, game_time=0, game_level=1):
-        """生成新敌人"""
+        """Spawn a new enemy"""
         try:
             enemy = Enemy(game_time, game_level, self.all_sprites, self.enemy_bullets)
             self.all_sprites.add(enemy)
@@ -143,7 +158,7 @@ class Game:
             return None
     
     def spawn_boss(self):
-        """生成Boss"""
+        """Spawn a Boss"""
         if not self.boss_active and self.boss is None:
             try:
                 game_time = (time.time() - self.game_start_time) / 60.0
@@ -181,7 +196,7 @@ class Game:
             logger.error(f"Error spawning random item: {e}", exc_info=True)
     
     def handle_events(self):
-        """处理游戏事件"""
+        """Handle game events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -200,8 +215,8 @@ class Game:
                         sound_manager.set_music_volume(min(1.0, sound_manager.music_volume * 2))
                 elif event.key == pygame.K_m:
                     sound_manager.toggle_music()
-                    if sound_manager.music_enabled and sound_manager.sound_enabled:
-                        sound_manager.play_background_music('background_music.mp3')
+                    if sound_manager.music_enabled:
+                        sound_manager.play_music('background_music.mp3')
                 elif event.key == pygame.K_s:
                     sound_manager.toggle_sound()
                 elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
@@ -223,19 +238,33 @@ class Game:
                     logger.debug(f"Language changed to: {language_name}")
     
     def update(self):
-        """更新游戏状态"""
+        """Update game state"""
         game_time = (time.time() - self.game_start_time) / 60.0
         
         self.update_ui_state()
         self.ui_manager.update()
+        
+        # Update flash effects
+        flash_manager.update()
+        
+        # Check sound system health periodically (every 2 seconds)
+        if hasattr(self, '_last_sound_check'):
+            if time.time() - self._last_sound_check > 2:
+                self._check_sound_system()
+                self._last_sound_check = time.time()
+        else:
+            self._last_sound_check = time.time()
 
         if self.paused:
             return
         
         self.all_sprites.update()
         
-        if len(self.enemies) < BASE_ENEMY_COUNT + self.game_level:
-            if time.time() - self.enemy_spawn_timer > 1:
+        # Calculate target enemy count with more gradual increase
+        target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
+        
+        if len(self.enemies) < target_enemy_count:
+            if time.time() - self.enemy_spawn_timer > 2:  # Increased from 1 to 2 seconds
                 self.spawn_enemy(game_time, self.game_level)
                 self.enemy_spawn_timer = time.time()
         
@@ -256,7 +285,7 @@ class Game:
             self.game_over()
 
     def handle_collisions(self, game_time):
-        """处理所有碰撞检测"""
+        """Handle all collision detection"""
         hit_result = check_bullet_enemy_collisions(
             self.enemies, self.bullets, self.all_sprites, self.score, 
             self.last_score_checkpoint, SCORE_THRESHOLD, self.items, self.player
@@ -289,7 +318,7 @@ class Game:
             
             check_missile_enemy_collisions(self.missiles, pygame.sprite.GroupSingle(self.boss), self.all_sprites, self.score)
 
-            if self.boss and self.boss.health <= 0: #Re-check boss after missile collision
+            if self.boss and self.boss.health <= 0: # Re-check boss after missile collision
                 self.boss_defeated = True
                 self.boss.kill()
                 self.boss_active = False
@@ -297,7 +326,7 @@ class Game:
                 self.ui_manager.update_boss_info(active=False)
 
     def level_up(self):
-        """提升游戏难度等级"""
+        """Increase game difficulty level"""
         if self.game_level < MAX_GAME_LEVEL:
             self.game_level += 1
             self.enemy_spawn_timer = time.time()
@@ -310,7 +339,7 @@ class Game:
         self.running = False
 
     def render(self):
-        """渲染游戏画面"""
+        """Render game screen"""
         self.screen.fill(DARK_GRAY)
         for star in self.stars:
             star.draw(self.screen)
@@ -335,7 +364,7 @@ class Game:
         pygame.display.flip()
 
     def run(self):
-        """游戏主循环"""
+        """Main game loop"""
         while self.running:
             self.clock.tick(FPS)
             self.handle_events()

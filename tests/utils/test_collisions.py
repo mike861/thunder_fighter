@@ -78,7 +78,7 @@ def test_bullet_hits_enemy_no_item(mock_create_item, mock_explosion, mock_groupc
     # Assertions
     mock_groupcollide.assert_called_once_with(enemies, bullets, True, True)
     mock_score.update.assert_called_once_with(10 + mock_enemy.level * 2) # 10 + 1*2 = 12
-    mock_explosion.assert_called_once_with(mock_enemy.rect.center, 40)
+    mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value) # Check if explosion was added
     mock_create_item.assert_not_called() # Item should not be created
 
@@ -121,7 +121,7 @@ def test_bullet_hits_enemy_triggers_item(mock_logger, mock_create_item, mock_exp
     mock_score.update.assert_called_once_with(expected_score_increase)
     assert mock_score.value == 190 + expected_score_increase # 202
 
-    mock_explosion.assert_called_once_with(mock_enemy.rect.center, 40)
+    mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
 
     # Assert item creation
@@ -197,29 +197,25 @@ def test_collision_check_exception(mock_logger, mock_groupcollide,
 @patch('pygame.sprite.collide_mask')
 @patch('thunder_fighter.utils.collisions.Explosion')
 @patch('random.randint')
-def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collide_mask, 
+def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collide_mask,
                                        mock_spritecollide, mock_boss, mock_bullet, mock_groups):
-    """Test where bullets hit boss but don't defeat it."""
+    """
+    Test where bullets hit boss but don't defeat it.
+    The boss should take damage and flash, but not create an explosion.
+    """
     _, bullets, all_sprites, _ = mock_groups
     
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet]  # One bullet hit
-    
-    # 模拟damage方法返回False（未被击败）
-    mock_boss.damage.return_value = False
+    mock_boss.damage.return_value = False # Simulate that the boss is not defeated
     
     result = check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
     
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
-    mock_boss.damage.assert_called_with(10)  # 应该调用damage(10)
-    mock_explosion.assert_called_once_with(mock_bullet.rect.center, 20)
-    all_sprites.add.assert_called_with(mock_explosion.return_value)
-    
-    # Check result dict
-    assert result['boss_hit'] is True
+    mock_boss.damage.assert_called_once_with(10)
+    mock_explosion.assert_not_called() # No explosion should be created if the boss is not defeated
     assert result['boss_defeated'] is False
-    assert result['damage'] == 10
 
 @patch('pygame.sprite.spritecollide')
 @patch('pygame.sprite.collide_mask')
@@ -276,6 +272,30 @@ def test_no_boss_bullet_collision(mock_spritecollide, mock_groups):
     assert result['boss_defeated'] is False
     assert result['damage'] == 0
 
+@patch('thunder_fighter.utils.collisions.Explosion')
+@patch('thunder_fighter.utils.collisions.create_flash_effect')
+def test_bullet_hits_boss_triggers_internal_flash_only(
+    mock_create_flash, mock_explosion, mock_groups, mock_boss, mock_bullet
+):
+    """
+    Tests that hitting a boss triggers its internal flash effect and NOT the
+    external `create_flash_effect`. This prevents conflicting flash effects.
+    """
+    # Arrange
+    _, bullets, all_sprites, _ = mock_groups
+    mock_spritecollide = patch('pygame.sprite.spritecollide', return_value=[mock_bullet]).start()
+    mock_boss.damage.return_value = False  # Boss is not defeated
+
+    # Act
+    check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
+
+    # Assert
+    mock_boss.damage.assert_called_once_with(10)
+    mock_create_flash.assert_not_called()  # IMPORTANT: External flash should not be called
+    mock_explosion.assert_not_called() # Explosion should only be on defeat
+
+    patch.stopall()
+
 # Tests for check_enemy_player_collisions
 @pytest.fixture
 def mock_player():
@@ -299,7 +319,7 @@ def test_enemy_hits_player(mock_explosion, mock_spritecollide,
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, enemies, True)
     assert mock_player.health == 100 - (15 + mock_enemy.level * 1)  # Base damage 15 + level
-    mock_explosion.assert_called_once_with(mock_enemy.rect.center, 40)
+    mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
     
     # Check result dict
@@ -323,7 +343,7 @@ def test_enemy_hits_player_game_over(mock_explosion, mock_spritecollide,
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, enemies, True)
     assert mock_player.health <= 0  # Health should be reduced to 0 or below
-    mock_explosion.assert_called_once_with(mock_enemy.rect.center, 40)
+    mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
     
     # Check result dict

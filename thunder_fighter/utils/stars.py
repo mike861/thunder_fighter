@@ -1,27 +1,28 @@
-import random
 import pygame
-from thunder_fighter.constants import WIDTH, HEIGHT
+import random
+from thunder_fighter.constants import WIDTH, HEIGHT, WHITE
 
 class Star:
-    """背景星星类"""
+    """Background star class"""
     def __init__(self):
-        self.x = random.randrange(WIDTH)
-        self.y = random.randrange(HEIGHT)
-        self.size = random.randrange(1, 3)
-        self.speed = random.randrange(1, 3)
-        self.color = random.choice([(200, 200, 200), (220, 220, 220), (255, 255, 255)])
-        
+        self.x = random.randint(0, WIDTH)
+        self.y = random.randint(0, HEIGHT)
+        self.speed = random.uniform(0.5, 2)
+        self.size = random.randint(1, 3)
+        self.brightness = random.randint(100, 255)
+    
     def update(self):
-        """更新星星位置"""
+        """Update star position"""
         self.y += self.speed
         if self.y > HEIGHT:
             self.y = 0
-            self.x = random.randrange(WIDTH)
-            
-    def draw(self, surf):
-        """绘制星星"""
-        pygame.draw.circle(surf, self.color, (self.x, self.y), self.size)
+            self.x = random.randint(0, WIDTH)
+    
+    def draw(self, screen):
+        """Draw star"""
+        color = (self.brightness, self.brightness, self.brightness)
+        pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
 
-def create_stars(count=50):
-    """创建指定数量的星星"""
+def create_stars(count):
+    """Create specified number of stars"""
     return [Star() for _ in range(count)] 

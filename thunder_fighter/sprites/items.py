@@ -177,7 +177,7 @@ class WingmanItem(pygame.sprite.Sprite):
             self.kill()
 
 def create_random_item(game_time, game_level, all_sprites, items_group, player):
-    """根据游戏时间和玩家状态动态创建道具"""
+    """Create items dynamically based on game time and player status"""
 
     weights = {
         HealthItem: 15,
@@ -187,9 +187,9 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
         WingmanItem: 3,
     }
 
-    # 动态调整权重
+    # Dynamically adjust weights
     if player.health >= 100:
-        weights[HealthItem] = 1  # 大幅降低生命恢复道具的权重
+        weights[HealthItem] = 1  # Greatly reduce health recovery item weight
     if player.speed >= 10:
         weights[PlayerSpeedItem] = 1
     if player.bullet_speed >= 15:
@@ -199,11 +199,11 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
     if len(player.wingmen_list) >= 2:
         weights[WingmanItem] = 0
 
-    # 僚机道具只在游戏第三关及以后出现
+    # Wingman items only appear after level 3
     if game_level < 3:
         weights[WingmanItem] = 0
         
-    # 过滤掉权重为0的道具
+    # Filter out items with zero weight
     available_items = {item: weight for item, weight in weights.items() if weight > 0}
     if not available_items:
         return None
@@ -211,10 +211,10 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
     item_classes = list(available_items.keys())
     item_weights = list(available_items.values())
 
-    # 根据权重随机选择一个道具类型
+    # Randomly select an item type based on weights
     chosen_item_class = random.choices(item_classes, weights=item_weights, k=1)[0]
     
-    # 创建道具实例
+    # Create item instance
     item = chosen_item_class()
     all_sprites.add(item)
     items_group.add(item)
