@@ -1,25 +1,35 @@
 import pygame
-from thunder_fighter.constants import WHITE, FONT_NAME, FONT_SIZE_LARGE, TEXT_SCORE
+from thunder_fighter.constants import FONT_NAME, FONT_SIZE_MEDIUM, WHITE
 
 class Score:
-    """游戏分数类"""
+    """Game score class"""
     def __init__(self):
-        self.value = 0
-        # 尝试加载系统字体，如果失败则使用默认字体
+        # Try to load system font, fall back to default if it fails
         try:
-            self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE_LARGE)
+            self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE_MEDIUM)
         except:
-            self.font = pygame.font.Font(None, FONT_SIZE_LARGE)
-        
+            self.font = pygame.font.Font(None, FONT_SIZE_MEDIUM)
+        self.value = 0
+        self.text = None
+        self.rect = None
+        self.update_display()
+    
     def update(self, points):
-        """增加分数"""
+        """Add points to score"""
         self.value += points
-        
-    def draw(self, surface, x=10, y=10):
-        """显示分数"""
-        score_text = self.font.render(TEXT_SCORE.format(self.value), True, WHITE)
-        surface.blit(score_text, (x, y))
-        
+        self.update_display()
+    
+    def draw(self, screen):
+        """Display score"""
+        if self.text:
+            screen.blit(self.text, self.rect)
+    
     def get_value(self):
-        """获取当前分数"""
-        return self.value 
+        """Get current score"""
+        return self.value
+    
+    def update_display(self):
+        """Update score display"""
+        self.text = self.font.render(f"Score: {self.value}", True, WHITE)
+        self.rect = self.text.get_rect()
+        self.rect.topleft = (10, 10) 

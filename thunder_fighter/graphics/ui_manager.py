@@ -5,6 +5,7 @@ from thunder_fighter.graphics.effects import Notification, WarningNotification, 
 from thunder_fighter.localization import _  # Import the text localization function
 import logging
 from thunder_fighter.utils.logger import logger
+from unittest.mock import MagicMock
 
 class DummyFont:
     """A dummy font class for use in tests when pygame font isn't available"""
@@ -33,45 +34,42 @@ class DummyFont:
 class PlayerUIManager:
     """管理所有面向玩家的UI界面元素和信息显示"""
     
-    def __init__(self, screen):
-        """初始化UI管理器
+    def __init__(self, screen, player, game):
+        """
+        初始化UI管理器
         
         Args:
-            screen: pygame屏幕对象，用于绘制UI
+            screen: pygame.Surface - 游戏屏幕
+            player: Player - 玩家对象
+            game: Game - 游戏主对象
         """
         self.screen = screen
-        
-        # 初始化字体
+        self.player = player
+        self.game = game
         try:
-            # First try to initialize the font module if it's not already initialized
-            if not pygame.font.get_init():
-                try:
-                    pygame.font.init()
-                except:
-                    pass
-                    
-            # Try to create the fonts
-            if pygame.font.get_init():
-                self.font_large = pygame.font.SysFont(FONT_NAME, FONT_SIZE_LARGE)
-                self.font_medium = pygame.font.SysFont(FONT_NAME, FONT_SIZE_MEDIUM)
-                self.font_small = pygame.font.SysFont(FONT_NAME, FONT_SIZE_SMALL)
-            else:
-                # If font module not initialized, use dummy font for testing
-                self.font_large = DummyFont(FONT_NAME, FONT_SIZE_LARGE)
-                self.font_medium = DummyFont(FONT_NAME, FONT_SIZE_MEDIUM)
-                self.font_small = DummyFont(FONT_NAME, FONT_SIZE_SMALL)
-                
+            self.font_s = pygame.font.Font(None, 24)
+            self.font_m = pygame.font.Font(None, 36)
+            self.font_l = pygame.font.Font(None, 48)
         except pygame.error:
-            # Font loading failed - try a default font
-            try:
-                self.font_large = pygame.font.Font(None, FONT_SIZE_LARGE + 6)
-                self.font_medium = pygame.font.Font(None, FONT_SIZE_MEDIUM + 4)
-                self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL + 2)
-            except:
-                # If all else fails, use dummy font (for testing)
-                self.font_large = DummyFont(None, FONT_SIZE_LARGE + 6)
-                self.font_medium = DummyFont(None, FONT_SIZE_MEDIUM + 4)
-                self.font_small = DummyFont(None, FONT_SIZE_SMALL + 2)
+            # Fallback for test environments where pygame.font is not initialized
+            self.font_s = self.font_m = self.font_l = MagicMock()
+            self.font_s.render.return_value = MagicMock()
+            
+        self.font_small = self.font_s # Alias for compatibility
+        self.font_medium = self.font_m # Alias for compatibility
+        self.font_large = self.font_l # Alias for compatibility
+        self.text_color = WHITE
+        
+        # Health/Boss bar settings
+        self.bar_length = 200
+        self.bar_height = 20
+        self.bar_bg_color = (50, 50, 50)
+        self.player_hp_color = (0, 255, 0)
+        self.boss_hp_color = (255, 0, 0)
+
+        # Notifications
+        self.notifications = []
+        self.notification_duration = 2000  # 2 seconds in milliseconds
         
         # 当前语言
         self.current_language = 'en'
@@ -106,7 +104,8 @@ class PlayerUIManager:
             'max_health': 100,
             'bullet_paths': 1,
             'bullet_speed': 7,
-            'speed': 5
+            'speed': 5,
+            'wingmen': 0
         }
         
         # 最近的伤害/恢复事件
@@ -170,7 +169,7 @@ class PlayerUIManager:
             elif mode == "final":
                 self.add_notification(_("BOSS_ENTERED_FINAL"), "warning")
     
-    def update_player_info(self, health=None, max_health=None, bullet_paths=None, bullet_speed=None, speed=None):
+    def update_player_info(self, health=None, max_health=None, bullet_paths=None, bullet_speed=None, speed=None, wingmen=None):
         """更新玩家状态信息
         
         Args:
@@ -179,6 +178,7 @@ class PlayerUIManager:
             bullet_paths: 玩家子弹路径数
             bullet_speed: 玩家子弹速度
             speed: 玩家移动速度
+            wingmen: 僚机数量
         """
         if health is not None:
             # 计算血量变化
@@ -234,6 +234,9 @@ class PlayerUIManager:
                 # Skip notification in tests
                 pass
             self.player_info['speed'] = speed
+        
+        if wingmen is not None:
+            self.player_info['wingmen'] = wingmen
     
     def update_game_state(self, level=None, paused=None, game_time=None, victory=None, defeat=None):
         """更新游戏状态
@@ -403,104 +406,81 @@ class PlayerUIManager:
         text_rect = value_text.get_rect(center=(x + width//2, y + height//2))
         self.screen.blit(value_text, text_rect)
     
+    def draw_player_stats(self):
+        """在屏幕左上角绘制玩家的详细状态"""
+        x, y = 10, 10
+        
+        # 绘制血条
+        self.draw_health_bar(x, y, 150, 20, self.player_info['health'], self.player_info['max_health'])
+        
+        # 绘制子弹信息
+        bullet_text = _("PLAYER_BULLET_INFO", self.player_info['bullet_paths'], self.player_info['bullet_speed'])
+        bullet_surf = self.font_small.render(bullet_text, True, WHITE)
+        self.screen.blit(bullet_surf, (x, y + 25))
+        
+        # 绘制移动速度
+        speed_text = _("PLAYER_SPEED_INFO", self.player_info['speed'])
+        speed_surf = self.font_small.render(speed_text, True, WHITE)
+        self.screen.blit(speed_surf, (x, y + 45))
+
+        # 绘制僚机信息
+        wingmen_text = _("PLAYER_WINGMEN_INFO", self.player_info['wingmen'])
+        wingmen_surf = self.font_small.render(wingmen_text, True, WHITE)
+        self.screen.blit(wingmen_surf, (x, y + 65))
+
     def draw_player_status(self, x, y):
-        """绘制玩家状态信息区域
-        
-        Args:
-            x, y: 起始位置坐标
-        """
-        # 绘制玩家生命值条
-        self.draw_health_bar(x, y, 150, 20, 
-                           self.player_info['health'], 
-                           self.player_info['max_health'],
-                           WHITE, GREEN)
-        
-        # 绘制其他玩家状态信息
-        bullet_info = self.font_medium.render(
-            _("BULLET_PATHS_SPEED", self.player_info['bullet_paths'], self.player_info['bullet_speed']), 
-            True, WHITE
-        )
-        self.screen.blit(bullet_info, (x, y + 30))
-        
-        speed_info = self.font_medium.render(
-            _("PLAYER_SPEED", self.player_info['speed']), 
-            True, WHITE
-        )
-        self.screen.blit(speed_info, (x, y + 60))
+        # This method seems to be redundant with draw_player_stats, 
+        # but we'll keep it for now in case it's used elsewhere.
+        # For now, it delegates to the new method.
+        self.draw_player_stats()
     
-    def draw_boss_status(self, x, y, width):
-        """绘制Boss状态信息
+    def draw_notifications(self):
+        """绘制所有临时通知"""
+        self.arrange_notifications()
         
-        Args:
-            x, y: 位置坐标
-            width: 宽度
-        """
-        if not self.boss_info['active']:
-            return
+        for notification in self.notifications:
+            notification.draw(self.screen)
+
+    def draw_boss_status(self):
+        """Draws the boss's health bar."""
+        if self.game.boss and self.game.boss.alive():
+            boss = self.game.boss
+            health_percent = boss.health / boss.max_health
+            bar_width = self.bar_length * health_percent
             
-        # 绘制Boss标题
-        boss_title = self.font_medium.render(
-            _("BOSS_TITLE", self.boss_info['level']), 
-            True, RED if self.boss_info['mode'] == 'final' else YELLOW
-        )
-        title_rect = boss_title.get_rect(center=(x + width//2, y))
-        self.screen.blit(boss_title, title_rect)
-        
-        # 绘制Boss生命值条
-        self.draw_health_bar(x, y + 30, width, 20, 
-                           self.boss_info['health'], 
-                           self.boss_info['max_health'],
-                           WHITE, RED)
-        
-        # 显示Boss模式
-        mode_text = _("BOSS_NORMAL_MODE")
-        mode_color = WHITE
-        
-        if self.boss_info['mode'] == 'aggressive':
-            mode_text = _("BOSS_AGGRESSIVE_MODE")
-            mode_color = YELLOW
-        elif self.boss_info['mode'] == 'final':
-            mode_text = _("BOSS_FINAL_MODE") 
-            mode_color = RED
+            # Position the boss bar at the top center
+            bar_x = (WIDTH - self.bar_length) / 2
+            bar_y = 10 
             
-        # 最终模式闪烁显示
-        if self.boss_info['mode'] == 'final' and not self.show_blink_text:
-            pass  # 闪烁期间不显示
-        else:
-            mode_info = self.font_small.render(mode_text, True, mode_color)
-            mode_rect = mode_info.get_rect(center=(x + width//2, y + 60))
-            self.screen.blit(mode_info, mode_rect)
-    
-    def draw_game_info(self, x, y, score, level, game_time, enemy_count=None, target_enemy_count=None):
-        """绘制游戏信息区域
-        
-        Args:
-            x, y: 起始位置坐标
-            score: 当前分数
-            level: 游戏关卡
-            game_time: 游戏时间（分钟）
-            enemy_count: 当前敌人数量
-            target_enemy_count: 目标敌人数量
-        """
-        # 绘制分数
-        score_text = self.font_medium.render(_("SCORE_TEXT", score), True, WHITE)
-        self.screen.blit(score_text, (x, y))
-        
-        # 绘制游戏关卡
-        level_text = self.font_medium.render(_("LEVEL_TEXT", level), True, WHITE)
-        self.screen.blit(level_text, (x, y + 30))
-        
-        # 绘制游戏时间
-        time_text = self.font_medium.render(_("TIME_TEXT", int(game_time)), True, WHITE)
-        self.screen.blit(time_text, (x, y + 60))
-        
-        # 如果提供了敌人数量信息，则显示
-        if enemy_count is not None and target_enemy_count is not None:
-            enemy_text = self.font_medium.render(_("ENEMIES_TEXT", enemy_count, target_enemy_count), True, WHITE)
-            self.screen.blit(enemy_text, (x, y + 90))
-    
+            # Draw the background
+            pygame.draw.rect(self.screen, self.bar_bg_color, [bar_x, bar_y, self.bar_length, self.bar_height])
+            # Draw the health bar
+            pygame.draw.rect(self.screen, self.boss_hp_color, [bar_x, bar_y, bar_width, self.bar_height])
+            
+            # Draw the text
+            boss_health_text = _("BOSS_HEALTH", boss.health, boss.max_health)
+            text_surface = self.font_s.render(boss_health_text, True, self.text_color)
+            text_rect = text_surface.get_rect(center=(WIDTH / 2, bar_y + self.bar_height / 2))
+            self.screen.blit(text_surface, text_rect)
+
+    def draw_game_info(self):
+        """在屏幕右上角绘制游戏信息"""
+        x, y = WIDTH - 200, 10
+        score_text = _("SCORE", self.persistent_info.get('score', 0))
+        level_text = _("LEVEL", self.game_state.get('level', 1))
+        time_text = _("TIME", self.game_state.get('game_time', 0))
+
+        score_surf = self.font_small.render(score_text, True, WHITE)
+        level_surf = self.font_small.render(level_text, True, WHITE)
+        time_surf = self.font_small.render(time_text, True, WHITE)
+
+        self.screen.blit(score_surf, (x, y))
+        self.screen.blit(level_surf, (x, y + 25))
+        self.screen.blit(time_surf, (x, y + 50))
+
     def draw_pause_screen(self):
-        """绘制游戏暂停界面"""
+        """绘制暂停画面"""
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         if not self.game_state['paused']:
             return
             
@@ -651,21 +631,20 @@ class PlayerUIManager:
             return
         
         # 绘制左上角游戏信息
-        self.draw_game_info(10, 10, score, level, game_time, enemy_count, target_enemy_count)
+        self.draw_game_info()
         
         # 绘制右上角玩家状态
         self.draw_player_status(WIDTH - 200, 10)
         
         # 如果Boss激活，绘制Boss状态
         if self.boss_info['active']:
-            self.draw_boss_status(WIDTH // 2 - 100, 10, 200)
+            self.draw_boss_status()
         
         # 先更新通知的排列，确保不会重叠
         self.arrange_notifications()
         
         # 绘制所有通知
-        for notification in self.notifications:
-            notification.draw(self.screen)
+        self.draw_notifications()
         
         # 绘制关卡变化动画
         self.draw_level_change_animation(level)

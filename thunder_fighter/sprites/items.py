@@ -1,8 +1,8 @@
 import pygame
 import random
 import math
-from thunder_fighter.constants import WIDTH, HEIGHT
-from thunder_fighter.graphics.renderers import create_health_item, create_bullet_speed_item, create_bullet_path_item, create_player_speed_item
+from thunder_fighter.constants import WIDTH, HEIGHT, PLAYER_MAX_SPEED, BULLET_SPEED_MAX, BULLET_PATHS_MAX
+from thunder_fighter.graphics.renderers import create_health_item, create_bullet_speed_item, create_bullet_path_item, create_player_speed_item, create_wingman_item
 from thunder_fighter.utils.logger import logger
 
 class HealthItem(pygame.sprite.Sprite):
@@ -146,49 +146,78 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
-def create_random_item(game_time, all_sprites, items_group):
-    """Creates a random item based on game time and adds it to groups."""
-    # Probabilities based on game time (adjust as needed)
-    time_factor = min(1.0, game_time / 10.0) # Max probability reached after 10 mins
-    
-    # Add probability for the new player speed item
-    prob_health = 0.35 + 0.1 * time_factor
-    prob_bullet_speed = 0.25 + 0.1 * time_factor
-    prob_bullet_path = 0.20 + 0.1 * time_factor
-    prob_player_speed = 0.20 + 0.05 * time_factor # New item probability
-    
-    # Normalize probabilities
-    total_prob = prob_health + prob_bullet_speed + prob_bullet_path + prob_player_speed
-    prob_health /= total_prob
-    prob_bullet_speed /= total_prob
-    prob_bullet_path /= total_prob
-    prob_player_speed /= total_prob # Normalize new probability
+class WingmanItem(pygame.sprite.Sprite):
+    """Wingman item class"""
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = create_wingman_item()
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(30, WIDTH - 30)
+        self.rect.y = -30
+        self.speedy = 2.0
+        self.direction = random.choice([-1, 1])
+        self.angle = random.randrange(360)
+        self.type = "wingman"
 
-    rand_val = random.random()
-    x = random.randrange(50, WIDTH - 50)
-    y = random.randrange(-100, -50)
-    item_type = "unknown"
-    item = None
-
-    if rand_val < prob_health:
-        item_type = 'health'
-        item = HealthItem()
-    elif rand_val < prob_health + prob_bullet_speed:
-        item_type = 'bullet_speed'
-        item = BulletSpeedItem()
-    elif rand_val < prob_health + prob_bullet_speed + prob_bullet_path:
-        item_type = 'bullet_path'
-        item = BulletPathItem()
-    else: # The remaining probability is for player_speed
-        item_type = 'player_speed'
-        item = PlayerSpeedItem()
+    def update(self):
+        """Update item position"""
+        self.rect.y += self.speedy
         
-    if item:
-        all_sprites.add(item)
-        items_group.add(item)
-        # 道具创建的信息应该在游戏UI中显示，不仅仅是日志
-        logger.debug(f"Created random item: Type='{item_type}', Pos=({item.rect.centerx}, {item.rect.centery})")
-    else:
-        logger.warning("Failed to create random item.")
+        self.angle = (self.angle + 1) % 360
+        self.rect.x += self.direction * math.sin(math.radians(self.angle)) * 1.2
+        
+        if self.rect.left < 0:
+            self.rect.left = 0
+            self.direction = 1
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+            self.direction = -1
+            
+        if self.rect.top > HEIGHT:
+            self.kill()
+
+def create_random_item(game_time, game_level, all_sprites, items_group, player):
+    """Create items dynamically based on game time and player status"""
+
+    weights = {
+        HealthItem: 15,
+        PlayerSpeedItem: 10,
+        BulletSpeedItem: 10,
+        BulletPathItem: 5,
+        WingmanItem: 3,
+    }
+
+    # Dynamically adjust weights
+    if player.health >= 100:
+        weights[HealthItem] = 1  # Greatly reduce health recovery item weight
+    if player.speed >= 10:
+        weights[PlayerSpeedItem] = 1
+    if player.bullet_speed >= 15:
+        weights[BulletSpeedItem] = 1
+    if player.bullet_paths >= 3:
+        weights[BulletPathItem] = 1
+    if len(player.wingmen_list) >= 2:
+        weights[WingmanItem] = 0
+
+    # Wingman items only appear after level 3
+    if game_level < 3:
+        weights[WingmanItem] = 0
+        
+    # Filter out items with zero weight
+    available_items = {item: weight for item, weight in weights.items() if weight > 0}
+    if not available_items:
+        return None
+
+    item_classes = list(available_items.keys())
+    item_weights = list(available_items.values())
+
+    # Randomly select an item type based on weights
+    chosen_item_class = random.choices(item_classes, weights=item_weights, k=1)[0]
     
+    # Create item instance
+    item = chosen_item_class()
+    all_sprites.add(item)
+    items_group.add(item)
+    
+    logger.info(f"Created item: {item.type} at level {game_level}")
     return item 

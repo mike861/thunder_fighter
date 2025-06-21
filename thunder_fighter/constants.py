@@ -1,11 +1,18 @@
 import pygame
+import os
 
-# 游戏窗口大小
+# Get the absolute path of the directory where this file is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define the path to the assets directory
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+
+# Game window size
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
 
-# 定义颜色
+# Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -23,14 +30,14 @@ PURPLE = (128, 0, 128)
 MAGENTA = (255, 0, 255)
 PINK = (255, 182, 193)
 
-# 字体设置
-FONT_NAME = "Arial"  # 使用系统通用字体
+# Font settings
+FONT_NAME = "Arial"  # Use system common font
 FONT_SIZE_LARGE = 28
 FONT_SIZE_MEDIUM = 20
 FONT_SIZE_SMALL = 16
 
-# 游戏文本
-# 界面显示文本
+# Game text
+# UI display text
 TEXT_SCORE = "Score: {}"
 TEXT_TIME = "Time: {}m"
 TEXT_ENEMIES = "Enemies: {}/{}"
@@ -39,48 +46,53 @@ TEXT_BULLET_INFO = "Paths: {}  Speed: {}"
 TEXT_ENEMY_LEVEL_DETAIL = "Level {}: {} units"
 TEXT_GAME_TITLE = "Thunder Fighter"
 
-# 玩家设置
+# Player settings
 PLAYER_HEALTH = 100
 PLAYER_SHOOT_DELAY = 250
-PLAYER_SPEED = 6 # 玩家移动速度
-PLAYER_MAX_SPEED = 15 # 玩家最大移动速度
-PLAYER_SPEED_UPGRADE_AMOUNT = 1 # 玩家速度升级增量
-PLAYER_FLASH_FRAMES = 20  # 玩家受伤闪烁帧数
-PLAYER_HEAL_AMOUNT = 10  # 玩家回血量
+PLAYER_SPEED = 6 # Player movement speed
+PLAYER_MAX_SPEED = 15 # Player max movement speed
+PLAYER_SPEED_UPGRADE_AMOUNT = 1 # Player speed upgrade increment
+PLAYER_FLASH_FRAMES = 20  # Player damage flash frames
+PLAYER_HEAL_AMOUNT = 10  # Player heal amount
 
-# 子弹设置
-BULLET_SPEED_DEFAULT = 10  # 默认子弹速度
-BULLET_SPEED_MAX = 20  # 子弹速度上限
-BULLET_PATHS_DEFAULT = 1  # 默认弹道数量
-BULLET_PATHS_MAX = 4  # 弹道数量上限
-BULLET_ANGLE_STRAIGHT = 0  # 直射角度
-BULLET_ANGLE_SPREAD_SMALL = 15  # 小角度扩散
-BULLET_ANGLE_SPREAD_LARGE = 25  # 大角度扩散
-BULLET_SPEED_UPGRADE_AMOUNT = 1  # 子弹速度升级增量
+# Wingman settings
+PLAYER_INITIAL_WINGMEN = 1  # Initial number of wingmen at game start
+PLAYER_MAX_WINGMEN = 2  # Maximum number of wingmen allowed
+WINGMAN_FORMATION_SPACING = 45  # Distance between wingmen in formation
 
-# 敌人设置
-BASE_ENEMY_COUNT = 6
-ENEMY_MIN_SHOOT_DELAY = 500  # 敌人最小射击延迟
-ENEMY_MAX_SHOOT_DELAY = 2000  # 敌人最大射击延迟降低到2000ms
-ENEMY_SHOOT_LEVEL = 2  # 降低射击等级要求，从2级开始就能射击
-ENEMY_SPAWN_Y_MIN = -80  # 减少敌人生成的最小Y坐标，使其更快进入屏幕
-ENEMY_SPAWN_Y_MAX = -20  # 减少敌人生成的最大Y坐标，使其更快进入屏幕
-ENEMY_HORIZONTAL_MOVE_MIN = -3  # 敌人水平移动最小速度
-ENEMY_HORIZONTAL_MOVE_MAX = 4   # 敌人水平移动最大速度
-ENEMY_ROTATION_UPDATE = 50  # 敌人旋转动画更新间隔(ms)
-ENEMY_SCREEN_BOUNDS = 25  # 敌人离开屏幕边界的距离
+# Bullet settings
+BULLET_SPEED_DEFAULT = 10  # Default bullet speed
+BULLET_SPEED_MAX = 20  # Bullet speed limit
+BULLET_PATHS_DEFAULT = 1  # Default bullet paths
+BULLET_PATHS_MAX = 4  # Bullet paths limit
+BULLET_ANGLE_STRAIGHT = 0  # Straight shooting angle
+BULLET_ANGLE_SPREAD_SMALL = 15  # Small angle spread
+BULLET_ANGLE_SPREAD_LARGE = 25  # Large angle spread
+BULLET_SPEED_UPGRADE_AMOUNT = 1  # Bullet speed upgrade increment
 
-# Boss设置
+# Enemy settings
+BASE_ENEMY_COUNT = 4
+ENEMY_MIN_SHOOT_DELAY = 500  # Enemy minimum shoot delay
+ENEMY_MAX_SHOOT_DELAY = 2000  # Enemy maximum shoot delay reduced to 2000ms
+ENEMY_SHOOT_LEVEL = 2  # Lower shooting level requirement, can shoot from level 2
+ENEMY_SPAWN_Y_MIN = -80  # Reduce enemy spawn min Y coordinate for faster screen entry
+ENEMY_SPAWN_Y_MAX = -20  # Reduce enemy spawn max Y coordinate for faster screen entry
+ENEMY_HORIZONTAL_MOVE_MIN = -3  # Enemy horizontal movement min speed
+ENEMY_HORIZONTAL_MOVE_MAX = 4   # Enemy horizontal movement max speed
+ENEMY_ROTATION_UPDATE = 50  # Enemy rotation animation update interval (ms)
+ENEMY_SCREEN_BOUNDS = 25  # Distance from screen edge for enemy removal
+
+# Boss settings
 BOSS_MAX_HEALTH = 300
 BOSS_SHOOT_DELAY = 1000
-BOSS_SPAWN_INTERVAL = 50  # Boss生成间隔（秒）, 120秒 = 2分钟
-BOSS_HEALTH_MULTIPLIER = 1.5  # 每级Boss血量增加倍数
-BOSS_BULLET_COUNT_BASE = 3  # 基础子弹数量
-BOSS_BULLET_COUNT_INCREMENT = 1  # 每级增加的子弹数量
-BOSS_MAX_LEVEL = 5  # Boss最大等级
+BOSS_SPAWN_INTERVAL = 30  # Boss spawn interval (seconds), 120 seconds = 2 minutes
+BOSS_HEALTH_MULTIPLIER = 1.5  # Boss health multiplier per level
+BOSS_BULLET_COUNT_BASE = 3  # Base bullet count
+BOSS_BULLET_COUNT_INCREMENT = 1  # Bullet count increment per level
+BOSS_MAX_LEVEL = 5  # Boss max level
 
-# 得分设置
-SCORE_THRESHOLD = 200  # 每1000分生成一个道具
+# Score settings
+SCORE_THRESHOLD = 200  # Generate an item every 200 points
 
 # Game balance
-MAX_GAME_LEVEL = 10 # 最高关卡等级 
+MAX_GAME_LEVEL = 10 # Maximum game level 

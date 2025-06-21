@@ -64,64 +64,64 @@ class Enemy(pygame.sprite.Sprite):
             logger.debug(f"Enemy ID:{id(self)} Level:{self.level} Ready to shoot, Delay:{self.shoot_delay}ms")
     
     def _determine_level(self, game_time, game_level):
-        """根据游戏时间和关卡等级确定敌人等级
+        """Determine enemy level based on game time and level
         
-        关于等级含义:
-        - 敌人等级是0-10的整数，0是最低级别, 10是最高级别
-        - 0-1级敌人不会射击
-        - 2级及以上的敌人可以射击 (由常量ENEMY_SHOOT_LEVEL=2决定)
-        - 等级越高的敌人血量、速度和攻击能力越强
+        About level meanings:
+        - Enemy levels are integers from 0-10, where 0 is the lowest and 10 is the highest
+        - Level 0-1 enemies cannot shoot
+        - Level 2 and above enemies can shoot (determined by ENEMY_SHOOT_LEVEL=2 constant)
+        - Higher level enemies have more health, speed and attack power
         """
-        # 基础概率（基于游戏时间）
+        # Base probabilities (based on game time)
         base_probs = [
-            max(0, 0.35 - game_time * 0.05),  # 0级
-            max(0, 0.25 - game_time * 0.03),  # 1级
-            max(0, 0.15),                     # 2级
-            max(0, 0.10 + game_time * 0.01),  # 3级
-            max(0, 0.05 + game_time * 0.015), # 4级
-            max(0, 0.05 + game_time * 0.015), # 5级
-            max(0, 0.02 + game_time * 0.01),  # 6级
-            max(0, 0.02 + game_time * 0.01),  # 7级
-            max(0, 0.01 + game_time * 0.005), # 8级
-            max(0, 0.00 + game_time * 0.003), # 9级
-            max(0, 0.00 + game_time * 0.002)  # 10级
+            max(0, 0.35 - game_time * 0.05),  # Level 0
+            max(0, 0.25 - game_time * 0.03),  # Level 1
+            max(0, 0.15),                     # Level 2
+            max(0, 0.10 + game_time * 0.01),  # Level 3
+            max(0, 0.05 + game_time * 0.015), # Level 4
+            max(0, 0.05 + game_time * 0.015), # Level 5
+            max(0, 0.02 + game_time * 0.01),  # Level 6
+            max(0, 0.02 + game_time * 0.01),  # Level 7
+            max(0, 0.01 + game_time * 0.005), # Level 8
+            max(0, 0.00 + game_time * 0.003), # Level 9
+            max(0, 0.00 + game_time * 0.002)  # Level 10
         ]
 
-        # 关卡等级影响 - 增加高等级敌人的概率
-        # 每增加一级关卡，高等级敌人出现概率轻微提升
-        level_boost = (game_level - 1) * 0.02 # 每关增加2%的高级敌人倾向
+        # Game level influence - increase probability of high-level enemies
+        # Each game level slightly increases high-level enemy appearance rate
+        level_boost = (game_level - 1) * 0.02 # 2% increase per level
         
-        # 将提升的概率从低等级转移到高等级 (简单线性转移)
+        # Transfer probability from low to high levels (simple linear transfer)
         transfer_prob = 0.0
         for i in range(len(base_probs)):
-            # 从0-4级敌人转移概率
+            # Transfer probability from level 0-4 enemies
             if i < 5:
-                reduction = base_probs[i] * level_boost * (5 - i) / 5 # 低等级减少更多
-                reduction = min(base_probs[i], reduction) # 不能减少超过本身概率
+                reduction = base_probs[i] * level_boost * (5 - i) / 5 # Lower levels lose more
+                reduction = min(base_probs[i], reduction) # Cannot reduce more than current probability
                 base_probs[i] -= reduction
                 transfer_prob += reduction
-            # 将概率添加到5-10级敌人
+            # Add probability to level 5-10 enemies
             elif i >= 5:
-                # 按比例分配转移过来的概率
-                boost_share = transfer_prob / max(1, len(base_probs) - 5) # 平均分配
+                # Distribute transferred probability proportionally
+                boost_share = transfer_prob / max(1, len(base_probs) - 5) # Equal distribution
                 base_probs[i] += boost_share
-                transfer_prob -= boost_share # 更新剩余转移概率
+                transfer_prob -= boost_share # Update remaining transfer probability
                 
-        # 确保概率不为负，并进行细微调整防止全0
+        # Ensure probabilities are non-negative and make minor adjustments to prevent all zeros
         for i in range(len(base_probs)):
-            base_probs[i] = max(0.001, base_probs[i]) # 保证每个等级都有极小概率出现
+            base_probs[i] = max(0.001, base_probs[i]) # Ensure each level has minimal probability
 
-        # 归一化概率总和为1
+        # Normalize probabilities to sum to 1
         total = sum(base_probs)
         if total > 0:
             probs = [p / total for p in base_probs]
         else:
             probs = [1/len(base_probs)] * len(base_probs)
         
-        # 根据最终概率选择等级
+        # Choose level based on final probabilities
         chosen_level = random.choices(range(11), weights=probs, k=1)[0]
         
-        # 确保敌机等级不超过关卡等级+2
+        # Ensure enemy level doesn't exceed game level + 2
         max_allowed_level = min(10, game_level + 2)
         chosen_level = min(chosen_level, max_allowed_level)
         
@@ -129,11 +129,15 @@ class Enemy(pygame.sprite.Sprite):
         return chosen_level
         
     def update(self):
-        """更新敌人状态"""
+        """Update enemy state"""
         self.rect.y += self.speedy
         self.rect.x += self.speedx
         
-        # 旋转动画（仅对快速移动的敌人）
+        # Reverse horizontal direction if enemy hits the screen edges
+        if self.rect.right > WIDTH or self.rect.left < 0:
+            self.speedx = -self.speedx
+        
+        # Rotation animation (only for fast-moving enemies)
         if abs(self.speedx) > 1:
             now = pygame.time.get_ticks()
             if now - self.last_update > ENEMY_ROTATION_UPDATE:
@@ -190,5 +194,5 @@ class Enemy(pygame.sprite.Sprite):
             return False
     
     def get_level(self):
-        """获取敌人等级"""
+        """Get enemy level"""
         return self.level 

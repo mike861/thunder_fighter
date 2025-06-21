@@ -3,13 +3,39 @@ import random
 from thunder_fighter.sprites.explosion import Explosion
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
-from thunder_fighter.graphics.effects import create_explosion, create_hit_effect
+from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect, flash_manager
 from thunder_fighter.utils.logger import logger
+from thunder_fighter.constants import WHITE, RED, YELLOW
 
 SCORE_THRESHOLD = 200  # Every 200 points might spawn an item
 
+def check_missile_enemy_collisions(missiles, enemies, all_sprites, score):
+    """Checks missile-enemy collisions and creates appropriate effects."""
+    hits = pygame.sprite.groupcollide(missiles, enemies, True, False)
+    
+    for missile, hit_enemies in hits.items():
+        for enemy in hit_enemies:
+            if hasattr(enemy, 'damage'):
+                # It's a boss, apply damage.
+                if enemy.damage(50): # damage() returns True if boss is defeated
+                    explosion = create_explosion(enemy.rect.center, 'lg')
+                    all_sprites.add(explosion)
+                    score.update(500) # Bonus for boss kill with missile
+                else:
+                    # Hit but not destroyed - still use explosion for missile
+                    explosion = create_explosion(missile.rect.center, 'md')
+                    all_sprites.add(explosion)
+                    # Boss has its own built-in flash effect from damage() method
+                    # create_flash_effect(enemy, RED)  # Removed to avoid conflicts
+            else:
+                # It's a regular enemy, kill it.
+                enemy.kill()
+                explosion = create_explosion(enemy.rect.center, 'md')
+                all_sprites.add(explosion)
+                score.update(25) # More points for missile kill
+
 def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score, 
-                                  last_score_checkpoint, score_threshold, items_group):
+                                  last_score_checkpoint, score_threshold, items_group, player):
     """Check collisions between bullets and enemies"""
     try:
         # 返回详细的结果
@@ -31,23 +57,27 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
             score.update(score_value)
             
             # Create explosion effect
-            explosion = Explosion(hit.rect.center, 40)
+            explosion = Explosion(hit.rect.center)
             all_sprites.add(explosion)
             
             # Check if we need to generate item based on score checkpoints
             current_score_checkpoint = score.value // score_threshold
             if current_score_checkpoint > last_score_checkpoint:
-                # Get random item from factory, considering game time
                 from thunder_fighter.sprites.items import create_random_item
-                game_time = min(10, current_score_checkpoint // 2)  # Estimate game time based on score
-                
-                # Pass all required parameters to create_random_item
-                create_random_item(game_time, all_sprites, items_group)
-                # Item is already added to sprite groups in create_random_item
+                # Hack: Get game_level from a sprite's group's game reference if available
+                # This is not ideal, but avoids a large refactor to pass 'game' down.
+                game_level = 1
+                game_time = 0 # Placeholder for game_time
+                if all_sprites.sprites():
+                    game_instance = getattr(all_sprites.sprites()[0], 'game', None)
+                    if game_instance:
+                        game_level = getattr(game_instance, 'game_level', 1)
+                        game_time = getattr(game_instance, 'game_time', 0)
+
+                create_random_item(game_time, game_level, all_sprites, items_group, player)
                 
                 last_score_checkpoint = current_score_checkpoint
                 result['generated_item'] = True
-                # 得分里程碑达成的信息应该显示在游戏UI中，不仅仅是日志
                 logger.debug(f"Score milestone reached: {score.value}. Item spawned.")
         
         result['score_checkpoint'] = last_score_checkpoint
@@ -90,20 +120,19 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
             result['damage'] = len(boss_hits) * 10  # 每颗子弹10点伤害
             
             for hit in boss_hits:
-                # 使用boss的damage方法处理伤害
+                # Use boss's damage method to handle damage
                 boss_defeated = boss.damage(10)
                 
-                # 创建小爆炸效果
-                explosion = Explosion(hit.rect.center, 20)
-                all_sprites.add(explosion)
+                # Boss has its own built-in flash effect, no need for external flash
+                # create_flash_effect(boss, YELLOW)  # Removed to avoid conflicts
                 
-                # 检查Boss是否被击败
+                # Check if Boss is defeated
                 if boss_defeated:
-                    # 创建大爆炸
+                    # Create big explosion when boss is defeated
                     for _ in range(10):
                         pos_x = random.randint(boss.rect.left, boss.rect.right)
                         pos_y = random.randint(boss.rect.top, boss.rect.bottom)
-                        explosion = Explosion((pos_x, pos_y), 60)
+                        explosion = Explosion((pos_x, pos_y))
                         all_sprites.add(explosion)
                     
                     result['boss_defeated'] = True
@@ -135,8 +164,8 @@ def check_enemy_player_collisions(player, enemies, all_sprites):
             player.health -= damage
             result['damage'] += damage
             
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 40)
+            # Create explosion
+            explosion = Explosion(hit.rect.center)
             all_sprites.add(explosion)
             
             # 如果玩家生命值为0，游戏结束
@@ -159,15 +188,14 @@ def check_boss_bullet_player_collisions(player, boss_bullets, all_sprites):
     try:
         hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         result['was_hit'] = bool(hits)
-        result['damage'] = len(hits) * 15  # 每颗Boss子弹15点伤害
+        result['damage'] = len(hits) * 15  # Each boss bullet does 15 damage
         
         for hit in hits:
             player.health -= 15
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 30)
-            all_sprites.add(explosion)
+            # Create flash effect for boss bullet hit
+            create_flash_effect(player, RED)
             
-            # 如果玩家生命值为0，游戏结束
+            # If player health is 0, game over
             if player.health <= 0:
                 result['game_over'] = True
         
@@ -189,85 +217,47 @@ def check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites):
         result['was_hit'] = bool(hits)
         
         for hit in hits:
-            # 根据敌人子弹等级计算伤害
-            enemy_level = getattr(hit, 'enemy_level', 0)  # 获取子弹等级，默认为0
-            damage = 5 + enemy_level * 1  # 基础伤害5，每级额外1点伤害
-            player.health -= damage
+            # Calculate damage based on enemy bullet level
+            enemy_level = getattr(hit, 'enemy_level', 0)  # Get bullet level, default to 0
+            damage = 5 + enemy_level * 1  # Base damage 5, extra 1 per level
+            
+            # Use take_damage to handle damage and effects
+            if player.take_damage(damage):
+                result['game_over'] = True
+            
             result['damage'] += damage
             
-            # 创建爆炸
-            explosion = Explosion(hit.rect.center, 20 + enemy_level)
-            all_sprites.add(explosion)
-            
-            # 如果玩家生命值为0，游戏结束
-            if player.health <= 0:
-                result['game_over'] = True
+            # Create small flash effect for bullet hit
+            create_flash_effect(player, WHITE)
         
         return result
     except Exception as e:
         logger.error(f"Error in enemy_bullet-player collision check: {e}", exc_info=True)
         return {'was_hit': False, 'game_over': False, 'damage': 0}
     
-def check_items_player_collisions(player, items, all_sprites):
+def check_items_player_collisions(items, player, ui_manager):
     """Check collisions between items and player"""
-    result = {
-        'item_collected': False,
-        'item_types': []
-    }
     
-    try:
-        hits = pygame.sprite.spritecollide(player, items, True)
-        result['item_collected'] = bool(hits)
+    hits = pygame.sprite.spritecollide(player, items, True)
+    for hit in hits:
+        item_type = getattr(hit, 'type', 'unknown')
         
-        for hit in hits:
-            item_type = getattr(hit, 'type', 'unknown')
-            result['item_types'].append(item_type)
-            
-            # Default effect values
-            color = (255, 255, 255, 150) # Default white
-            effect_size = 30
-            
-            # 根据道具类型执行不同操作
-            if item_type == 'health':
-                # 恢复生命值
-                healing_amount = 25
-                player.health = min(100, player.health + healing_amount)
-                # 绿色恢复效果
-                color = (0, 255, 0, 150)
-                effect_size = 30
-                
-            elif item_type == 'bullet_speed':
-                # 增加子弹速度
-                speed_increase = getattr(hit, 'speed_increase', 1)
-                new_speed = player.increase_bullet_speed(speed_increase)
-                # 蓝色速度效果
-                color = (0, 191, 255, 150)
-                effect_size = 35
-                
-            elif item_type == 'bullet_path':
-                # 增加弹道数量
-                new_paths = player.increase_bullet_paths()
-                # 黄色弹道效果
-                color = (255, 255, 0, 150)
-                effect_size = 40
-            
-            elif item_type == 'player_speed': # Handle new item type
-                # 增加玩家移动速度
-                speed_increase = getattr(hit, 'speed_increase', 1)
-                new_speed = player.increase_player_speed(speed_increase)
-                # 绿色速度效果 (use a distinct green)
-                color = (0, 200, 0, 180) 
-                effect_size = 38
-                
-            # 创建道具效果
-            explosion = Explosion(hit.rect.center, effect_size)
-            explosion.image.fill((0, 0, 0, 0)) # Make background transparent
-            pygame.draw.circle(explosion.image, color, 
-                              (explosion.size // 2, explosion.size // 2), 
-                              explosion.size // 2)
-            all_sprites.add(explosion)
+        # 根据道具类型执行不同操作
+        if item_type == 'health':
+            player.heal()
+        elif item_type == 'bullet_speed':
+            player.increase_bullet_speed()
+        elif item_type == 'bullet_path':
+            player.increase_bullet_paths()
+        elif item_type == 'player_speed':
+            player.increase_player_speed()
+        elif item_type == 'wingman':
+            player.add_wingman()
         
-        return result
-    except Exception as e:
-        logger.error(f"Error in item-player collision check: {e}", exc_info=True)
-        return {'item_collected': False, 'item_types': []} 
+        # 显示通知
+        if ui_manager:
+            ui_manager.show_item_collected(item_type)
+        
+        # 播放音效
+        from thunder_fighter.utils.sound_manager import sound_manager
+        sound_manager.play_sound('item_pickup') 
