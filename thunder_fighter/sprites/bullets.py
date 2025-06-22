@@ -42,20 +42,102 @@ class Bullet(pygame.sprite.Sprite):
             
 class BossBullet(pygame.sprite.Sprite):
     """Boss子弹类"""
-    def __init__(self, x, y):
+    def __init__(self, x, y, shoot_pattern="normal", target_pos=None):
         pygame.sprite.Sprite.__init__(self)
-        self.image = create_boss_bullet()
+        self.shoot_pattern = shoot_pattern
+        
+        # 根据攻击模式创建不同外观的子弹
+        self.image = self._create_boss_bullet()
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.top = y
-        self.speedy = 5
+        
+        # 根据攻击模式设置不同的速度
+        if shoot_pattern == "normal":
+            self.base_speed = 5
+            self.damage = 15
+        elif shoot_pattern == "aggressive":
+            self.base_speed = 7
+            self.damage = 20
+        else:  # final模式
+            self.base_speed = 9
+            self.damage = 25
+        
+        # Final模式的追踪逻辑（只影响发射方向）
+        if shoot_pattern == "final" and target_pos is not None:
+            # 计算朝向玩家的方向向量
+            dx = target_pos[0] - x
+            dy = target_pos[1] - y
+            distance = math.sqrt(dx*dx + dy*dy)
+            
+            if distance > 0:
+                # 归一化方向向量并应用速度
+                self.speedx = (dx / distance) * self.base_speed * 0.3  # 水平速度较小
+                self.speedy = max(3, (dy / distance) * self.base_speed)  # 保证向下移动
+            else:
+                self.speedx = 0
+                self.speedy = self.base_speed
+        else:
+            # 普通直线移动
+            self.speedx = 0
+            self.speedy = self.base_speed
+    
+    def _create_boss_bullet(self):
+        """根据攻击模式创建不同外观的子弹"""
+        if self.shoot_pattern == "normal":
+            # 普通模式：紫色子弹
+            return self._create_bullet_sprite((255, 0, 255), (128, 0, 128))  # 紫/深紫
+        elif self.shoot_pattern == "aggressive":
+            # 激进模式：红色子弹，稍大
+            return self._create_bullet_sprite((255, 50, 0), (200, 0, 0), size_multiplier=1.2)  # 橙红/深红
+        else:  # final模式
+            # 最终模式：蓝白色追踪子弹，带特效
+            return self._create_bullet_sprite((0, 200, 255), (255, 255, 255), size_multiplier=1.5, glow=True)  # 蓝/白色带光效
+    
+    def _create_bullet_sprite(self, primary_color, secondary_color, size_multiplier=1.0, glow=False):
+        """创建子弹精灵"""
+        base_width = int(10 * size_multiplier)
+        base_height = int(20 * size_multiplier)
+        
+        bullet_surface = pygame.Surface((base_width, base_height), pygame.SRCALPHA)
+        
+        # 绘制子弹主体
+        pygame.draw.rect(bullet_surface, primary_color, (0, 0, base_width, base_height - 5))
+        pygame.draw.rect(bullet_surface, secondary_color, (0, base_height - 5, base_width, 5))
+        
+        # 添加光效边缘
+        pygame.draw.line(bullet_surface, (255, 255, 255), (base_width//2, 0), (base_width//2, base_height - 5), 2)
+        
+        # Final模式添加发光效果
+        if glow:
+            glow_surface = pygame.Surface((base_width + 8, base_height + 8), pygame.SRCALPHA)
+            # 创建发光圈
+            for i in range(3):
+                alpha = 60 - i * 20
+                glow_color = (*primary_color, alpha)
+                pygame.draw.ellipse(glow_surface, glow_color, 
+                                  (2 - i, 2 - i, base_width + 4 + i*2, base_height + 4 + i*2))
+            
+            # 将主子弹绘制到发光表面上
+            glow_surface.blit(bullet_surface, (4, 4))
+            return glow_surface
+        
+        return bullet_surface
         
     def update(self):
         """更新子弹位置"""
         self.rect.y += self.speedy
-        # 如果子弹飞出屏幕底部则删除
-        if self.rect.top > HEIGHT:
+        self.rect.x += self.speedx
+        
+        # 如果子弹飞出屏幕底部或左右边界则删除
+        if (self.rect.top > HEIGHT or 
+            self.rect.right < 0 or 
+            self.rect.left > WIDTH):
             self.kill()
+    
+    def get_damage(self):
+        """获取子弹伤害值"""
+        return self.damage
 
 class EnemyBullet(pygame.sprite.Sprite):
     """敌人子弹类"""

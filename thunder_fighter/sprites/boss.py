@@ -11,7 +11,7 @@ from thunder_fighter.utils.logger import logger
 
 class Boss(pygame.sprite.Sprite):
     """Boss类"""
-    def __init__(self, all_sprites, boss_bullets_group, level=None, game_level=1):
+    def __init__(self, all_sprites, boss_bullets_group, level=None, game_level=1, player=None):
         pygame.sprite.Sprite.__init__(self)
         
         # 确定Boss等级 - 如果未指定，根据游戏进度随机生成
@@ -21,6 +21,7 @@ class Boss(pygame.sprite.Sprite):
             self.level = min(level, BOSS_MAX_LEVEL)
             
         self.game_level = game_level # Store the overall game level
+        self.player = player  # 存储玩家引用，用于追踪
         
         # 记录原始图像 - 用于闪烁效果时恢复
         self.original_image = create_boss_ship(self.level)
@@ -110,22 +111,28 @@ class Boss(pygame.sprite.Sprite):
         self.health -= amount
         self.damage_flash = 12  # 增加闪烁帧数，使效果更明显
         
-        # 检查是否生命值降至50%以下，改变攻击模式
+        # 根据Boss等级和血量百分比决定攻击模式转换
         health_percentage = self.health / self.max_health
-        if health_percentage <= 0.5 and self.shoot_pattern == "normal":
+        
+        # 2级及以上Boss才能进入激进模式
+        if (health_percentage <= 0.5 and 
+            self.shoot_pattern == "normal" and 
+            self.level >= 2):
             self.shoot_pattern = "aggressive"
             # 当生命值降低时，减少射击延迟，增加攻击频率
             self.shoot_delay = max(150, self.shoot_delay * 0.7)
             # Boss进入激进模式的信息应该在游戏UI中显示
-            logger.debug(f"Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
+            logger.debug(f"Level {self.level} Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
         
-        # 如果生命值进一步降低，进入最终模式
-        if health_percentage <= 0.25 and self.shoot_pattern == "aggressive":
+        # 3级及以上Boss才能进入最终模式
+        if (health_percentage <= 0.25 and 
+            self.shoot_pattern == "aggressive" and 
+            self.level >= 3):
             self.shoot_pattern = "final"
             # 再次减少射击延迟
             self.shoot_delay = max(100, self.shoot_delay * 0.8)
             # Boss进入最终模式的信息应该在游戏UI中显示
-            logger.debug(f"Boss entered final mode! Shoot delay: {self.shoot_delay}")
+            logger.debug(f"Level {self.level} Boss entered final mode! Shoot delay: {self.shoot_delay}")
         
         # 检查是否被摧毁
         if self.health <= 0:
@@ -242,23 +249,82 @@ class Boss(pygame.sprite.Sprite):
         # 最终使用数量不超过设定的子弹数
         offsets = offsets[:self.bullet_count]
             
+        # 获取玩家位置（用于Final模式追踪）
+        target_pos = None
+        if self.shoot_pattern == "final" and self.player and hasattr(self.player, 'rect'):
+            target_pos = (self.player.rect.centerx, self.player.rect.centery)
+        
         # 发射子弹
         for offset in offsets:
-            boss_bullet = BossBullet(self.rect.centerx + offset, self.rect.bottom)
+            boss_bullet = BossBullet(self.rect.centerx + offset, self.rect.bottom, self.shoot_pattern, target_pos)
             self.all_sprites.add(boss_bullet)
             self.boss_bullets_group.add(boss_bullet)
     
     def draw_health_bar(self, surface):
         """绘制Boss血条"""
-        # 绘制血条背景
-        bar_width = self.rect.width
-        bar_height = 8
-        bar_x = self.rect.x
-        bar_y = self.rect.y - 15
+        # 计算血条尺寸和位置
+        bar_width = max(self.rect.width + 20, 120)  # 血条比boss稍宽一些，但至少120像素
+        bar_height = 12  # 增加血条高度
+        bar_x = self.rect.centerx - bar_width // 2  # 血条居中对齐boss
+        bar_y = self.rect.y - 25  # 血条距离boss顶部25像素
         
         # 防止血条超出屏幕顶部
-        if bar_y < 10:
-            bar_y = 10
+        if bar_y < 5:
+            bar_y = 5
+        
+        # 防止血条超出屏幕左右边界  
+        if bar_x < 5:
+            bar_x = 5
+        elif bar_x + bar_width > WIDTH - 5:
+            bar_x = WIDTH - bar_width - 5
             
+        # 绘制血条主体
         draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height, 
-                        self.health, self.max_health) 
+                        self.health, self.max_health)
+        
+        # 根据攻击模式添加血条边框效果
+        from thunder_fighter.constants import WHITE, RED, YELLOW, ORANGE
+        import pygame
+        
+        if self.shoot_pattern == "aggressive":
+            # 激进模式：黄色边框
+            pygame.draw.rect(surface, YELLOW, (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4), 2)
+        elif self.shoot_pattern == "final":
+            # 最终模式：红色闪烁边框
+            border_color = RED if (pygame.time.get_ticks() // 200) % 2 else ORANGE
+            pygame.draw.rect(surface, border_color, (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4), 3)
+        
+        # 绘制boss等级标识和模式
+        mode_indicators = {
+            "normal": "",
+            "aggressive": " [危险]",
+            "final": " [极限]"
+        }
+        level_text = f"BOSS Lv.{self.level}{mode_indicators.get(self.shoot_pattern, '')}"
+        
+        font = pygame.font.Font(None, 20)
+        
+        # 根据模式改变文字颜色
+        text_color = WHITE
+        if self.shoot_pattern == "aggressive":
+            text_color = YELLOW
+        elif self.shoot_pattern == "final":
+            text_color = RED
+            
+        level_surface = font.render(level_text, True, text_color)
+        level_rect = level_surface.get_rect()
+        level_rect.centerx = bar_x + bar_width // 2
+        level_rect.bottom = bar_y - 2  # 显示在血条上方
+        
+        # 如果等级文本超出屏幕顶部，则显示在血条下方
+        if level_rect.top < 0:
+            level_rect.top = bar_y + bar_height + 2
+            
+        surface.blit(level_surface, level_rect)
+        
+        # 绘制血量数值
+        health_text = f"{self.health}/{self.max_health}"
+        health_surface = font.render(health_text, True, WHITE)
+        health_rect = health_surface.get_rect()
+        health_rect.center = (bar_x + bar_width // 2, bar_y + bar_height // 2)
+        surface.blit(health_surface, health_rect) 

@@ -8,7 +8,7 @@ from thunder_fighter.constants import (
     FONT_NAME, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL,
     TEXT_TIME, TEXT_ENEMIES, TEXT_HIGH_LEVEL_ENEMIES, TEXT_BULLET_INFO,
     TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH,
-    PLAYER_INITIAL_WINGMEN
+    PLAYER_INITIAL_WINGMEN, INITIAL_GAME_LEVEL
 )
 from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
@@ -90,7 +90,7 @@ class Game:
         # Game state
         self.running = True
         self.paused = False
-        self.game_level = 1
+        self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
         
         # Play background music
@@ -161,16 +161,10 @@ class Game:
         """Spawn a Boss"""
         if not self.boss_active and self.boss is None:
             try:
-                game_time = (time.time() - self.game_start_time) / 60.0
-                
-                if game_time < 3:
-                    boss_level = 1
-                elif game_time < 7:
-                    boss_level = 2
-                else:
-                    boss_level = 3
+                # Boss等级是游戏等级的1/2，最小为1级
+                boss_level = max(1, (self.game_level + 1) // 2)
                     
-                self.boss = Boss(self.all_sprites, self.boss_bullets, boss_level, self.game_level)
+                self.boss = Boss(self.all_sprites, self.boss_bullets, boss_level, self.game_level, self.player)
                 self.all_sprites.add(self.boss)
                 self.boss_active = True
                 self.boss_spawn_timer = time.time()
@@ -346,13 +340,14 @@ class Game:
         
         self.all_sprites.draw(self.screen)
         
+        # 如果boss存在且存活，绘制跟随boss移动的血条
+        if self.boss and self.boss.alive():
+            self.boss.draw_health_bar(self.screen)
+        
         self.ui_manager.draw_player_stats()
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
         
-        if self.boss_active:
-            self.ui_manager.draw_boss_status()
-            
         if self.game_won:
             self.ui_manager.show_victory_screen(self.score.value)
         elif self.player.health <= 0:

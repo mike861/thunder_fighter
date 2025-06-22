@@ -188,16 +188,21 @@ def check_boss_bullet_player_collisions(player, boss_bullets, all_sprites):
     try:
         hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         result['was_hit'] = bool(hits)
-        result['damage'] = len(hits) * 15  # Each boss bullet does 15 damage
         
+        total_damage = 0
         for hit in hits:
-            player.health -= 15
+            # 使用子弹的动态伤害值
+            damage = hit.get_damage() if hasattr(hit, 'get_damage') else 15
+            total_damage += damage
+            player.health -= damage
             # Create flash effect for boss bullet hit
             create_flash_effect(player, RED)
             
             # If player health is 0, game over
             if player.health <= 0:
                 result['game_over'] = True
+        
+        result['damage'] = total_damage
         
         return result
     except Exception as e:

@@ -96,3 +96,4 @@ SCORE_THRESHOLD = 200  # Generate an item every 200 points
 
 # Game balance
 MAX_GAME_LEVEL = 10 # Maximum game level 
+INITIAL_GAME_LEVEL = 1  # Starting game level 
