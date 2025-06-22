@@ -229,10 +229,8 @@ class SoundManager:
         self.sound_enabled = not self.sound_enabled
         logger.info(f"Sound effects {'enabled' if self.sound_enabled else 'disabled'}")
         
-        # If disabling sound effects, also stop background music
-        if not self.sound_enabled:
-            self.stop_music()
-            self.music_enabled = False
+        # Sound effects and background music should be independent
+        # Do not stop music when disabling sound effects
     
     def toggle_music(self):
         """Toggle background music on/off"""

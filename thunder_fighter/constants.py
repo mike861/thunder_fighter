@@ -56,7 +56,7 @@ PLAYER_FLASH_FRAMES = 20  # Player damage flash frames
 PLAYER_HEAL_AMOUNT = 10  # Player heal amount
 
 # Wingman settings
-PLAYER_INITIAL_WINGMEN = 1  # Initial number of wingmen at game start
+PLAYER_INITIAL_WINGMEN = 0  # Initial number of wingmen at game start
 PLAYER_MAX_WINGMEN = 2  # Maximum number of wingmen allowed
 WINGMAN_FORMATION_SPACING = 45  # Distance between wingmen in formation
 
@@ -69,6 +69,7 @@ BULLET_ANGLE_STRAIGHT = 0  # Straight shooting angle
 BULLET_ANGLE_SPREAD_SMALL = 15  # Small angle spread
 BULLET_ANGLE_SPREAD_LARGE = 25  # Large angle spread
 BULLET_SPEED_UPGRADE_AMOUNT = 1  # Bullet speed upgrade increment
+BULLET_DAMAGE_TO_BOSS = 5  # Player bullet damage to boss
 
 # Enemy settings
 BASE_ENEMY_COUNT = 4
@@ -85,7 +86,7 @@ ENEMY_SCREEN_BOUNDS = 25  # Distance from screen edge for enemy removal
 # Boss settings
 BOSS_MAX_HEALTH = 300
 BOSS_SHOOT_DELAY = 1000
-BOSS_SPAWN_INTERVAL = 30  # Boss spawn interval (seconds), 120 seconds = 2 minutes
+BOSS_SPAWN_INTERVAL = 50  # Boss spawn interval (seconds), 120 seconds = 2 minutes
 BOSS_HEALTH_MULTIPLIER = 1.5  # Boss health multiplier per level
 BOSS_BULLET_COUNT_BASE = 3  # Base bullet count
 BOSS_BULLET_COUNT_INCREMENT = 1  # Bullet count increment per level
@@ -93,11 +94,11 @@ BOSS_MAX_LEVEL = 5  # Boss max level
 
 # Boss bullet settings
 BOSS_BULLET_NORMAL_SPEED = 5  # Normal mode bullet speed
-BOSS_BULLET_AGGRESSIVE_SPEED = 7  # Aggressive mode bullet speed
-BOSS_BULLET_FINAL_SPEED = 9  # Final mode bullet speed
-BOSS_BULLET_NORMAL_DAMAGE = 15  # Normal mode bullet damage
-BOSS_BULLET_AGGRESSIVE_DAMAGE = 20  # Aggressive mode bullet damage
-BOSS_BULLET_FINAL_DAMAGE = 25  # Final mode bullet damage
+BOSS_BULLET_AGGRESSIVE_SPEED = 6  # Aggressive mode bullet speed
+BOSS_BULLET_FINAL_SPEED = 7  # Final mode bullet speed
+BOSS_BULLET_NORMAL_DAMAGE = 10  # Normal mode bullet damage
+BOSS_BULLET_AGGRESSIVE_DAMAGE = 15  # Aggressive mode bullet damage
+BOSS_BULLET_FINAL_DAMAGE = 20  # Final mode bullet damage
 BOSS_BULLET_BASE_WIDTH = 10  # Base bullet width
 BOSS_BULLET_BASE_HEIGHT = 20  # Base bullet height
 BOSS_BULLET_TRACKING_HORIZONTAL_FACTOR = 0.3  # Horizontal tracking speed factor
@@ -111,7 +112,7 @@ BOSS_BULLET_AGGRESSIVE_COLOR_SECONDARY = (200, 0, 0)  # Aggressive bullet second
 BOSS_BULLET_FINAL_COLOR_PRIMARY = (0, 200, 255)  # Final bullet primary color (Cyan)
 BOSS_BULLET_FINAL_COLOR_SECONDARY = (255, 255, 255)  # Final bullet secondary color (White)
 BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER = 1.2  # Size multiplier for aggressive bullets
-BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.5  # Size multiplier for final bullets
+BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.3  # Size multiplier for final bullets
 
 # Score settings
 SCORE_THRESHOLD = 200  # Generate an item every 200 points

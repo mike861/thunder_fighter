@@ -14,7 +14,7 @@ from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.boss import Boss
 from thunder_fighter.sprites.items import HealthItem, create_random_item
-from thunder_fighter.utils.stars import create_stars, Star
+from thunder_fighter.graphics.background import DynamicBackground
 from thunder_fighter.utils.score import Score
 from thunder_fighter.utils.collisions import (
     check_bullet_enemy_collisions,
@@ -66,8 +66,8 @@ class Game:
         for i in range(BASE_ENEMY_COUNT):
             self.spawn_enemy()
         
-        # Create background stars
-        self.stars = create_stars(50)
+        # Create dynamic background
+        self.background = DynamicBackground()
         
         # Create score
         self.score = Score()
@@ -252,6 +252,9 @@ class Game:
         if self.paused:
             return
         
+        # Update background
+        self.background.update()
+        
         self.all_sprites.update()
         
         # Calculate target enemy count with more gradual increase
@@ -395,9 +398,8 @@ class Game:
 
     def render(self):
         """Render game screen"""
-        self.screen.fill(DARK_GRAY)
-        for star in self.stars:
-            star.draw(self.screen)
+        # Draw dynamic background
+        self.background.draw(self.screen)
         
         self.all_sprites.draw(self.screen)
         

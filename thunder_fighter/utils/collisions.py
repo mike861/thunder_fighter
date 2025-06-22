@@ -5,7 +5,7 @@ from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect, flash_manager
 from thunder_fighter.utils.logger import logger
-from thunder_fighter.constants import WHITE, RED, YELLOW
+from thunder_fighter.constants import WHITE, RED, YELLOW, BULLET_DAMAGE_TO_BOSS
 
 SCORE_THRESHOLD = 200  # Every 200 points might spawn an item
 
@@ -117,11 +117,11 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
                 logger.debug(f"Boss hit by {hits_count} bullets")
             
             result['boss_hit'] = bool(boss_hits)
-            result['damage'] = len(boss_hits) * 10  # 10 damage per bullet
+            result['damage'] = len(boss_hits) * BULLET_DAMAGE_TO_BOSS  # Damage per bullet from constants
             
             for hit in boss_hits:
                 # Use boss's damage method to handle damage
-                boss_defeated = boss.damage(10)
+                boss_defeated = boss.damage(BULLET_DAMAGE_TO_BOSS)
                 
                 # Boss has its own built-in flash effect, no need for external flash
                 # create_flash_effect(boss, YELLOW)  # Removed to avoid conflicts
