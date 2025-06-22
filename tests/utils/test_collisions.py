@@ -388,7 +388,8 @@ def mock_bullet_speed_item():
     return item
 
 @patch('pygame.sprite.spritecollide')
-def test_player_collects_health_item(mock_spritecollide, mock_player, mock_health_item, mock_groups):
+@patch('thunder_fighter.utils.sound_manager.sound_manager')
+def test_player_collects_health_item(mock_sound_manager, mock_spritecollide, mock_player, mock_health_item, mock_groups):
     """Test where player collects a health item."""
     _, _, ui_manager, items = mock_groups
     
@@ -402,9 +403,11 @@ def test_player_collects_health_item(mock_spritecollide, mock_player, mock_healt
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
     mock_player.heal.assert_called_once()
     ui_manager.show_item_collected.assert_called_with('health')
+    mock_sound_manager.play_sound.assert_called_with('item_pickup')
 
 @patch('pygame.sprite.spritecollide')
-def test_player_collects_bullet_speed_item(mock_spritecollide, mock_player, 
+@patch('thunder_fighter.utils.sound_manager.sound_manager')
+def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollide, mock_player, 
                                           mock_bullet_speed_item, mock_groups):
     """Test where player collects a bullet speed item."""
     _, _, ui_manager, items = mock_groups
@@ -419,9 +422,11 @@ def test_player_collects_bullet_speed_item(mock_spritecollide, mock_player,
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
     mock_player.increase_bullet_speed.assert_called_once()
     ui_manager.show_item_collected.assert_called_with('bullet_speed')
+    mock_sound_manager.play_sound.assert_called_with('item_pickup')
 
 @patch('pygame.sprite.spritecollide')
-def test_no_item_collision(mock_spritecollide, mock_player, mock_groups):
+@patch('thunder_fighter.utils.sound_manager.sound_manager')
+def test_no_item_collision(mock_sound_manager, mock_spritecollide, mock_player, mock_groups):
     """Test where no items are collected."""
     _, _, ui_manager, items = mock_groups
     
@@ -435,3 +440,4 @@ def test_no_item_collision(mock_spritecollide, mock_player, mock_groups):
     mock_player.heal.assert_not_called()
     mock_player.increase_bullet_speed.assert_not_called()
     mock_player.increase_bullet_paths.assert_not_called()
+    mock_sound_manager.play_sound.assert_not_called()

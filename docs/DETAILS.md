@@ -4,6 +4,26 @@ This document contains more detailed information about the Thunder Fighter game 
 
 ## Internal Game Mechanics
 
+### Game Victory System
+- **Victory Condition**: Players achieve victory by defeating the final boss at the maximum game level (configurable via `MAX_GAME_LEVEL` constant)
+- **Final Boss Battle**: The last boss provides enhanced challenge with double score bonus (boss level × 1000 points vs normal 500 points)
+- **Victory Processing**: 
+  - Automatic victory detection when final boss is defeated
+  - Immediate game state transition to victory mode
+  - Background music fadeout with victory sound effects
+  - Prevention of further enemy/item spawning
+- **Victory Statistics**: Comprehensive completion data including:
+  - Final score with boss defeat bonus
+  - Total survival time in minutes
+  - Levels completed
+  - Achievement notifications
+- **Victory Interface**: 
+  - Preserves game background for visual continuity
+  - Semi-transparent overlay with elegant victory panel
+  - Centered statistics display with green victory theme
+  - Blinking exit prompt for user interaction
+- **Duplicate Prevention**: Robust system prevents multiple victory processing and notification spam
+
 ### Player System
 - **Wingmen**: The player can have a configurable number of wingmen (default max is 2), collected via the `WingmanItem`. Wingmen absorb one hit for the player, sacrificing themselves. The initial number, maximum count, and formation spacing are all configurable in `constants.py`.
 - **Missiles**: Wingmen fire tracking missiles periodically. These missiles seek out the nearest enemies, prioritizing the Boss if one is active.
@@ -30,10 +50,10 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
 
 ### Boss System
-- **Boss Levels**: Bosses range from level 1-10, with level determined by game progression (game_level // 3 + random(1,2)).
-- **Boss Spawning**: A Boss spawns every 30 seconds starting from game level 2. No bosses appear during early levels (0-1).
+- **Boss Levels**: Bosses are dynamically generated based on game progression. Their level is calculated as `max(1, (game_level + 1) // 2)`. This means boss levels increase as the player advances through the game's 10 levels.
+- **Boss Spawning**: A Boss spawns every 50 seconds starting from game level 2. No bosses appear during early levels (0-1).
 - **Boss Health System**: 
-  - Base health: 100 + (level-1) × 50 points
+  - Base health: `100 + (level-1) * 50` points
   - Health bar displayed above boss with level indicator
   - Visual health bar changes color based on attack mode
 - **Boss Attack Modes**: Bosses have three distinct attack patterns that change based on health percentage:
@@ -56,21 +76,23 @@ This document contains more detailed information about the Thunder Fighter game 
   - Movement speed increases with game level
   - Movement range adapts to game progression
 - **Boss Bullets**: Special bullet system with mode-based characteristics:
-  - **Normal bullets**: Magenta color, standard speed (5 pixels/frame), 15 damage
-  - **Aggressive bullets**: Orange-red color, faster speed (7 pixels/frame), 20 damage, 20% larger
-  - **Final bullets**: Cyan color, fastest speed (9 pixels/frame), 25 damage, 50% larger, player tracking
+  - **Normal bullets**: Magenta color, standard speed (5 pixels/frame), 10 damage
+  - **Aggressive bullets**: Orange-red color, faster speed (6 pixels/frame), 15 damage, 20% larger
+  - **Final bullets**: Cyan color, fastest speed (7 pixels/frame), 20 damage, 30% larger, player tracking
 - **Visual Effects**: 
   - Multi-layer damage flash effects (white, red, yellow)
   - Attack mode indicators on health bar
   - Glowing bullet effects with multiple layers
-- **Boss Defeat Rewards**: Defeating a boss provides score bonuses (boss level × 500 points) and triggers immediate level progression.
+- **Boss Defeat Rewards**: Defeating a boss provides score bonuses (boss level × 500 points for regular bosses, boss level × 1000 points for final boss) and triggers immediate level progression or game victory.
 
 ### Level Progression System
 - **Early Game (Levels 0-1)**: Players advance through score accumulation. This provides a friendly learning phase where players can familiarize themselves with game mechanics without boss pressure.
 - **Mid-to-Late Game (Level 2+)**: Level progression is exclusively through boss defeats. Score accumulation no longer triggers level advancement, creating a skill-based progression system.
+- **Final Level Victory**: Reaching and defeating the boss at `MAX_GAME_LEVEL` triggers game completion instead of further progression.
 - **Dual Progression Mechanics**: 
   - Score-based progression: Available only for levels 0→1 and 1→2
   - Boss-defeat progression: Available from level 2 onwards, providing greater rewards and challenge
+  - Victory completion: Final boss defeat at maximum level triggers game completion
 - **Clear Progression Path**: Players receive clear visual notifications when advancing levels, including enemies cleared count and bonus scores received.
 
 ### Visual Effects System
@@ -79,21 +101,29 @@ This document contains more detailed information about the Thunder Fighter game 
     - Player Hit: Flashes white.
     - Boss Hit (by Bullet): Flashes yellow.
     - Boss Hit (by Missile): Flashes red (in addition to the missile's explosion).
+- **Victory Effects**: Special visual treatment for game completion:
+    - Background preservation for visual continuity
+    - Semi-transparent overlay system
+    - Elegant victory panel with border effects
+    - Smooth transition from gameplay to victory state
 
 ### Sound System
-- **Background Music**: Loops during gameplay.
+- **Background Music**: Loops during gameplay with automatic fadeout during victory.
 - **Explosion Sound**: Plays when enemies are destroyed.
 - **Hit Sound**: Plays when the player takes damage.
 - **Death Sound**: Plays when the player's ship is destroyed.
 - **Item Pickup Sound**: Plays when an item is collected.
 - **Boss Defeat Sound**: Plays when a Boss is successfully defeated.
-- **Volume Control**: Sound effect and music volume can be adjusted.
+- **Victory Sound**: Special audio feedback for game completion.
+- **Volume Control**: Sound effect and music volume can be adjusted independently.
 - **System Stability**: The sound system includes a robust health check and auto-recovery mechanism. It periodically checks its status and automatically reinitializes if issues are detected (e.g., if background music stops unexpectedly). This ensures high reliability during long gameplay sessions.
+- **Audio Independence**: Fixed issue where toggling sound effects would incorrectly stop background music. Music and sound effects now operate independently as intended.
 
 ### Logging System
 - Standardized log output supporting different levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
 - Log level can be adjusted via the `THUNDER_FIGHTER_LOG_LEVEL` environment variable (See [How to Run](#how-to-run) in `README.md`).
 - All game events are logged in English for easy debugging and monitoring.
+- **Victory Logging**: Comprehensive logging of victory conditions, final boss defeats, and completion statistics.
 
 ## Sound Assets
 
@@ -103,7 +133,7 @@ The game uses the following sound and music files located in the `assets/` direc
    - `player_hit.wav` - Player hit sound
    - `player_death.wav` - Player death sound
    - `enemy_explosion.wav` - Enemy explosion sound
-   - `boss_death.wav` - Boss death sound
+   - `boss_death.wav` - Boss death sound (also used for victory)
    - `item_pickup.wav` - Item pickup sound
 
 2. **Music (`music/`)**:
@@ -114,15 +144,17 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 ## Development Status
 
 - ✅ Core gameplay mechanics implemented
+- ✅ Complete victory system with final boss battles
 - ✅ Enemy system with varied behaviors
 - ✅ Boss battles with unique patterns
 - ✅ Item drop and collection system
-- ✅ Sound system with enhanced stability and volume control
-- ✅ Comprehensive test coverage (78 tests passing)
+- ✅ Enhanced sound system with stability improvements and independent audio controls
+- ✅ Comprehensive test coverage (94 tests passing)
 - ✅ Refined visual feedback system (explosions vs. damage flashes)
 - ✅ Multi-language support (English, Chinese)
-- ✅ Dynamic UI with notifications
+- ✅ Dynamic UI with notifications and victory interface
 - ✅ Configurable game parameters (wingmen, enemy counts, etc.)
+- ✅ Victory screen with background preservation and elegant statistics display
 
 ## Technical Details
 
@@ -131,7 +163,13 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - Custom rendering system creates game visual effects.
 - Centralized `FlashEffectManager` for handling entity damage flashes.
 - Standardized logging system tracks game events.
-- Sound manager controls game audio playback, featuring a robust health-check and auto-recovery system.
+- **Enhanced Sound Manager**: Controls game audio playback with robust health-check, auto-recovery system, and independent audio channel management.
+- **Victory System Architecture**:
+  - State-based victory detection with final boss recognition
+  - Duplicate prevention mechanisms for victory processing
+  - Background preservation rendering system
+  - Semi-transparent overlay composition
+  - Comprehensive statistics collection and display
 - **Advanced Boss System Architecture**:
   - State-based attack pattern management with health-triggered transitions
   - Dynamic bullet generation with mode-specific properties and targeting
@@ -142,8 +180,13 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - **Boss Bullet System**: 
   - Factory pattern for mode-specific bullet creation
   - Dynamic size and color adjustment based on attack mode
-  - Player tracking algorithms for final mode bullets
-  - Multi-layer glow effects for enhanced visual appeal
+  - Player tracking algorithms for final mode bullets. The bullet's vertical speed is capped to ensure the player can still dodge them.
+  - Multi-layer glow effects for enhanced visual appeal.
+- **UI System Enhancements**:
+  - Notification deduplication system
+  - Background-preserving overlay rendering
+  - Multi-layer transparency effects
+  - Responsive layout management
 - Modular architecture allows for easy extension and maintenance.
-- Test-driven development ensures code quality and reliability.
+- **Test-Driven Development**: Extensive test suite with 94 tests covering all game mechanics, victory conditions, collision systems, and edge cases.
 - Localization system for multi-language support. 

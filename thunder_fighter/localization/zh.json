@@ -14,8 +14,11 @@
     "VICTORY": "胜利!",
     "FINAL_SCORE": "最终得分: {}",
     "LEVEL_REACHED": "已达关卡: {}",
+    "LEVEL_CLEARED": "全部{}关卡已通关!",
     "RESTART_PROMPT": "按 R 重新开始",
     "QUIT_PROMPT": "按 Q 退出",
+    "EXIT_PROMPT": "按 ESC 键退出",
+    "SURVIVAL_TIME": "生存时间: {}分钟",
     "BOSS_APPEARED": "{}级BOSS出现!",
     "BOSS_DEFEATED": "BOSS被击败! +{}分",
     "BOSS_ENTERED_AGGRESSIVE": "BOSS进入攻击模式!",
@@ -49,5 +52,7 @@
     "LEVEL_UP": "升级! {} → {}",
     "ENEMIES_CLEARED": "敌机清空: {}",
     "BOSS_BONUS": "BOSS奖励: +{}",
-    "STAGE_COMPLETE": "关卡完成!"
+    "STAGE_COMPLETE": "关卡完成!",
+    "FINAL_BOSS_DEFEATED": "最终BOSS被击败!",
+    "GAME_COMPLETED": "恭喜！您已完成雷霆战机全部关卡！"
 } 

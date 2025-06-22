@@ -140,7 +140,7 @@ class TestBossDefeatLevelUp:
         assert game_instance.ui_manager.show_level_up_effects.call_count == 1
     
     def test_handle_boss_defeated_max_level_reached(self, game_instance):
-        """Test boss defeat when max level is already reached"""
+        """Test boss defeat when max level is reached triggers victory"""
         # Setup
         game_instance.game_level = MAX_GAME_LEVEL
         initial_level = game_instance.game_level
@@ -151,16 +151,35 @@ class TestBossDefeatLevelUp:
         game_instance.enemies.__len__.return_value = 1
         game_instance.enemies.__iter__.return_value = iter([MagicMock()])
         
-        # Call the method
-        game_instance.handle_boss_defeated()
+        # Mock the UI manager's show_victory_screen method
+        game_instance.ui_manager.show_victory_screen = MagicMock()
+        
+        # Mock sound manager to prevent segfault
+        with patch('thunder_fighter.game.sound_manager') as mock_sound_manager:
+            # Call the method
+            game_instance.handle_boss_defeated()
         
         # Verify level doesn't increase beyond max
         assert game_instance.game_level == initial_level
         
-        # But other effects still happen
+        # Verify victory is triggered
+        assert game_instance.game_won == True, "Game should be won when max level boss is defeated"
+        
+        # Verify victory screen is shown
+        game_instance.ui_manager.show_victory_screen.assert_called_once()
+        
+        # Verify final boss bonus is applied (boss_level * 1000)
+        expected_final_bonus = mock_boss.level * 1000
+        game_instance.score.update.assert_called_with(expected_final_bonus)
+        
+        # Verify boss removal
         mock_boss.kill.assert_called_once()
-        game_instance.enemies.empty.assert_called_once()
-        game_instance.ui_manager.show_level_up_effects.assert_called_once()
+        assert game_instance.boss is None
+        assert game_instance.boss_active is False
+        
+        # Verify victory sound and music fadeout
+        mock_sound_manager.play_sound.assert_called_with('boss_death.wav')
+        mock_sound_manager.fadeout_music.assert_called_with(3000)
     
     def test_handle_boss_defeated_no_boss(self, game_instance):
         """Test boss defeat handling when no boss exists"""

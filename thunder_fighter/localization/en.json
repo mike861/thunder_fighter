@@ -14,8 +14,11 @@
     "VICTORY": "VICTORY!",
     "FINAL_SCORE": "Final Score: {}",
     "LEVEL_REACHED": "Level Reached: {}",
+    "LEVEL_CLEARED": "All {} Levels Cleared!",
     "RESTART_PROMPT": "Press R to Restart",
     "QUIT_PROMPT": "Press Q to Quit",
+    "EXIT_PROMPT": "Press ESC to Exit",
+    "SURVIVAL_TIME": "Survival Time: {} minutes",
     "BOSS_APPEARED": "Level {} Boss has appeared!",
     "BOSS_DEFEATED": "Boss Defeated! +{} score",
     "BOSS_ENTERED_AGGRESSIVE": "Boss is now in AGGRESSIVE mode!",
@@ -49,5 +52,7 @@
     "LEVEL_UP": "LEVEL UP! {} → {}",
     "ENEMIES_CLEARED": "Enemies Cleared: {}",
     "BOSS_BONUS": "Boss Bonus: +{}",
-    "STAGE_COMPLETE": "Stage Complete!"
+    "STAGE_COMPLETE": "Stage Complete!",
+    "FINAL_BOSS_DEFEATED": "Final Boss Defeated!",
+    "GAME_COMPLETED": "Congratulations! You have completed Thunder Fighter!"
 } 

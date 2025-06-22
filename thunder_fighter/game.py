@@ -249,7 +249,8 @@ class Game:
         else:
             self._last_sound_check = time.time()
 
-        if self.paused:
+        # Stop game updates if game is won or paused
+        if self.paused or self.game_won:
             return
         
         # Update background
@@ -338,7 +339,27 @@ class Game:
             self.boss = None
             self.ui_manager.update_boss_info(active=False)
             
-            # Level up the game
+            # Check if this is the final boss (level 10)
+            if self.game_level >= MAX_GAME_LEVEL:
+                # Game victory!
+                self.game_won = True
+                logger.info(f"Final boss defeated at level {self.game_level}! Game won!")
+                
+                # Add final boss score bonus
+                final_boss_bonus = boss_level * 1000  # Double bonus for final boss
+                self.score.update(final_boss_bonus)
+                
+                # Show victory screen
+                self.ui_manager.show_victory_screen(self.score.value)
+                
+                # Play victory sound and fade out music
+                sound_manager.play_sound('boss_death.wav')
+                sound_manager.fadeout_music(3000)
+                
+                # Stop spawning enemies and items
+                return
+            
+            # Level up the game (only if not at max level)
             old_level = self.game_level
             if self.game_level < MAX_GAME_LEVEL:
                 self.game_level += 1
@@ -412,7 +433,7 @@ class Game:
         self.ui_manager.draw_notifications()
         
         if self.game_won:
-            self.ui_manager.show_victory_screen(self.score.value)
+            self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
         elif self.player.health <= 0:
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, (time.time() - self.game_start_time) / 60.0)
 
@@ -429,11 +450,10 @@ class Game:
             self.update()
             self.render()
             
-            if self.game_level > MAX_GAME_LEVEL and not self.game_won:
-                self.game_won = True
-                sound_manager.fadeout_music(3000)
-                time.sleep(3)
-                self.running = False
+            # Exit game if victory is achieved and player presses ESC
+            if self.game_won:
+                # Victory state - wait for player to exit
+                continue
                 
         pygame.quit()
         sys.exit()

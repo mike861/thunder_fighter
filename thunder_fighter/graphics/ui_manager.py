@@ -309,31 +309,52 @@ class PlayerUIManager:
         self.add_notification(_("BOSS_APPEARED", boss_level), "warning")
 
     def show_level_up_effects(self, old_level, new_level, enemies_cleared, score_bonus):
-        """Display level up effects and notifications
+        """Display level up effects and information
         
         Args:
-            old_level: Previous game level
-            new_level: New game level
+            old_level: Previous level
+            new_level: New level
             enemies_cleared: Number of enemies cleared
             score_bonus: Score bonus received
         """
-        # Main level up notification
-        self.add_notification(_("LEVEL_UP", old_level, new_level), "achievement")
+        # Add level up notification
+        level_up_text = _("LEVEL_UP", old_level, new_level)
+        self.add_notification(level_up_text, "achievement")
         
-        # Enemies cleared notification
+        # Add cleared enemies notification
         if enemies_cleared > 0:
-            self.add_notification(_("ENEMIES_CLEARED", enemies_cleared), "achievement")
+            cleared_text = _("ENEMIES_CLEARED", enemies_cleared)
+            self.add_notification(cleared_text, "normal")
         
-        # Score bonus notification
+        # Add score bonus notification
         if score_bonus > 0:
-            self.add_notification(_("BOSS_BONUS", score_bonus), "achievement")
+            bonus_text = _("BOSS_BONUS", score_bonus)
+            self.add_notification(bonus_text, "achievement")
         
-        # Activate level change animation
-        self.level_change_timer = time.time()
-        self.level_change_active = True
+        # Show stage complete notification
+        stage_text = _("STAGE_COMPLETE")
+        self.add_notification(stage_text, "achievement")
         
         logger.info(f"Level up effects shown: {old_level} → {new_level}, cleared {enemies_cleared} enemies, bonus {score_bonus}")
-    
+
+    def show_victory_screen(self, final_score):
+        """Show victory screen when game is won
+        
+        Args:
+            final_score: Final score achieved
+        """
+        # Set victory state
+        self.game_state['victory'] = True
+        
+        # Only add victory notifications once
+        if not hasattr(self, '_victory_notifications_added'):
+            self._victory_notifications_added = True
+            # Add victory notifications
+            self.add_notification(_("FINAL_BOSS_DEFEATED"), "achievement")
+            self.add_notification(_("GAME_COMPLETED"), "achievement")
+            
+            logger.info(f"Victory screen shown with final score: {final_score}")
+
     def update(self):
         """Update all UI element states"""
         # Update temporary notifications
@@ -539,28 +560,51 @@ class PlayerUIManager:
         if not self.game_state['victory']:
             return
             
-        # Draw dark blue background
-        self.screen.fill((20, 20, 40))
+        # Create semi-transparent overlay instead of filling the entire screen
+        victory_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        victory_overlay.fill((0, 0, 0, 120))  # Semi-transparent black overlay
+        self.screen.blit(victory_overlay, (0, 0))
+        
+        # Create a victory panel in the center
+        panel_width = 400
+        panel_height = 300
+        panel_x = (WIDTH - panel_width) // 2
+        panel_y = (HEIGHT - panel_height) // 2
+        
+        # Draw victory panel background
+        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        panel_surface.fill((20, 40, 80, 200))  # Semi-transparent blue panel
+        
+        # Draw panel border
+        pygame.draw.rect(panel_surface, GREEN, (0, 0, panel_width, panel_height), 3)
+        
+        self.screen.blit(panel_surface, (panel_x, panel_y))
         
         # Draw victory text
         victory_text = self.font_large.render(_("VICTORY"), True, GREEN)
-        text_rect = victory_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
+        text_rect = victory_text.get_rect(center=(WIDTH // 2, panel_y + 60))
         self.screen.blit(victory_text, text_rect)
         
         # Draw level cleared information
         level_text = self.font_medium.render(_("LEVEL_CLEARED", max_level), True, WHITE)
-        level_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        level_rect = level_text.get_rect(center=(WIDTH // 2, panel_y + 120))
         self.screen.blit(level_text, level_rect)
         
         # Draw final score
         score_text = self.font_medium.render(_("FINAL_SCORE", final_score), True, WHITE)
-        score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
+        score_rect = score_text.get_rect(center=(WIDTH // 2, panel_y + 160))
         self.screen.blit(score_text, score_rect)
+        
+        # Draw survival time
+        game_time = self.game_state.get('game_time', 0)
+        time_text = self.font_medium.render(_("SURVIVAL_TIME", int(game_time)), True, WHITE)
+        time_rect = time_text.get_rect(center=(WIDTH // 2, panel_y + 200))
+        self.screen.blit(time_text, time_rect)
         
         # Draw tip text
         if self.show_blink_text:  # Blinking display
             exit_text = self.font_small.render(_("EXIT_PROMPT"), True, YELLOW)
-            exit_rect = exit_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            exit_rect = exit_text.get_rect(center=(WIDTH // 2, panel_y + 250))
             self.screen.blit(exit_text, exit_rect)
     
     def draw_game_over_screen(self, final_score, level_reached, game_time):
