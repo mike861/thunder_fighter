@@ -1,6 +1,7 @@
 import pygame
 import pygame.time as ptime
 import random
+from typing import Optional
 from thunder_fighter.constants import (
     WIDTH, BOSS_MAX_HEALTH, BOSS_SHOOT_DELAY,
     BOSS_HEALTH_MULTIPLIER, BOSS_BULLET_COUNT_BASE,
@@ -10,131 +11,135 @@ from thunder_fighter.graphics.renderers import create_boss_ship, draw_health_bar
 from thunder_fighter.utils.logger import logger
 
 class Boss(pygame.sprite.Sprite):
-    """Boss类"""
-    def __init__(self, all_sprites, boss_bullets_group, level=None, game_level=1, player=None):
-        pygame.sprite.Sprite.__init__(self)
+    """Boss class representing the main enemy with multiple attack patterns and health bar display"""
+
+    def __init__(self, all_sprites: pygame.sprite.Group, boss_bullets_group: pygame.sprite.Group, 
+                 level: Optional[int] = None, game_level: int = 1, player: Optional[object] = None) -> None:
+        super().__init__()
         
-        # 确定Boss等级 - 如果未指定，根据游戏进度随机生成
+        # Determine Boss level - if not specified, generate randomly based on game progress
         if level is None:
-            self.level = random.randint(1, BOSS_MAX_LEVEL)
+            # Random level assignment based on game progression
+            self.level = min(max(1, game_level // 3 + random.randint(1, 2)), 10)
         else:
-            self.level = min(level, BOSS_MAX_LEVEL)
-            
-        self.game_level = game_level # Store the overall game level
-        self.player = player  # 存储玩家引用，用于追踪
+            self.level = max(1, min(level, 10))
         
-        # 记录原始图像 - 用于闪烁效果时恢复
-        self.original_image = create_boss_ship(self.level)
+        self.game_level = game_level
+        self.player = player  # Store player reference for tracking
         
-        # 根据等级调整属性
-        self.image = self.original_image
+        # Store original image - used to restore during flash effects
+        self.image = create_boss_ship(self.level)
+        self.original_image = self.image.copy()
+        
+        # Adjust attributes based on level
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
-        self.rect.y = -self.rect.height
-        self.speedx = 2
-        self.speedy = 1
+        self.rect.y = 20
         
-        # 创建碰撞掩码 - 用于更精确的碰撞检测
+        # Calculate speed based on level (faster at higher levels)
+        self.speedx = 1 + (self.level - 1) * 0.5
+        
+        # Create collision mask - used for more precise collision detection
         self.mask = pygame.mask.from_surface(self.image)
         
-        # 根据等级调整血量
-        self.max_health = int(BOSS_MAX_HEALTH * (1 + (self.level - 1) * BOSS_HEALTH_MULTIPLIER))
+        # Adjust health based on level
+        base_health = 100
+        self.max_health = base_health + (self.level - 1) * 50
         self.health = self.max_health
         
-        # 根据等级调整射击
-        self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # 等级越高，射击越快
-        self.bullet_count = BOSS_BULLET_COUNT_BASE + (self.level - 1) * BOSS_BULLET_COUNT_INCREMENT
+        # Adjust shooting based on level
+        self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # Higher levels shoot faster
         
-        # 设置初始攻击模式
+        # Set initial attack mode
         self.shoot_pattern = "normal"
         
         self.last_shot = ptime.get_ticks()
-        self.direction = 1  # 移动方向
+        self.direction = 1  # Movement direction
         self.move_counter = 0
         self.damage_flash = 0
         
-        # 预先创建闪烁图像
+        # Pre-create flash images
         self.flash_images = self._create_flash_images()
         
-        # 定义基础移动速度和范围
+        # Define base movement speed and range
         self.base_speedx = 2
         self.move_margin = 10 # Minimum margin from screen edge
 
-        # 精灵组
+        # Sprite groups
         self.all_sprites = all_sprites
         self.boss_bullets_group = boss_bullets_group
         
-        # Boss初始化信息应该显示在游戏UI中，而不仅仅是日志
+        # Boss initialization info should be displayed in game UI, not just logs
         logger.debug(f"Boss level {self.level} initialized with {self.health} health")
     
     def _create_flash_images(self):
-        """预先创建闪烁效果的图像序列"""
+        """Pre-create flash effect image sequence"""
         flash_images = []
         
-        # 创建原始图像的副本
+        # Create copy of original image
         base_image = self.original_image.copy()
-        flash_images.append(base_image)  # 第一帧是原始图像
+        flash_images.append(base_image)  # First frame is original image
         
-        # 创建多种闪烁效果图像
-        # 方法1: 强烈红色叠加
+        # Create multiple flash effect images
+        # Method 1: Strong red overlay
         red_image = self.original_image.copy()
         red_overlay = pygame.Surface(red_image.get_size())
-        red_overlay.fill((255, 80, 80))  # 非常亮的红色
+        red_overlay.fill((255, 80, 80))  # Very bright red
         red_image.blit(red_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
         flash_images.append(red_image)
         
-        # 方法2: 纯白色高亮（最明显的闪烁效果）
+        # Method 2: Pure white highlight (most obvious flash effect)
         white_image = self.original_image.copy()
         white_overlay = pygame.Surface(white_image.get_size())
-        white_overlay.fill((180, 180, 180))  # 非常亮的白色叠加
+        white_overlay.fill((180, 180, 180))  # Very bright white overlay
         white_image.blit(white_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
         flash_images.append(white_image)
         
-        # 方法3: 黄色警告效果（额外的闪烁变化）
+        # Method 3: Yellow warning effect (additional flash variation)
         yellow_image = self.original_image.copy()
         yellow_overlay = pygame.Surface(yellow_image.get_size())
-        yellow_overlay.fill((200, 200, 0))  # 亮黄色
+        yellow_overlay.fill((200, 200, 0))  # Bright yellow
         yellow_image.blit(yellow_overlay, (0, 0), special_flags=pygame.BLEND_ADD)
         flash_images.append(yellow_image)
         
         return flash_images
     
     def damage(self, amount):
-        """处理Boss受到的伤害
+        """Handle Boss damage taken
         
         Args:
-            amount: 伤害值
+            amount: Damage value
         
         Returns:
-            bool: 如果Boss被摧毁返回True，否则返回False
+            bool: Returns True if Boss is destroyed, otherwise False
         """
         self.health -= amount
-        self.damage_flash = 12  # 增加闪烁帧数，使效果更明显
+        self.damage_flash = 12  # Increase flash frames for more obvious effect
         
-        # 根据Boss等级和血量百分比决定攻击模式转换
+        # Determine attack mode transitions based on Boss level and health percentage
         health_percentage = self.health / self.max_health
         
-        # 2级及以上Boss才能进入激进模式
+        # Level 2+ Bosses can enter aggressive mode
         if (health_percentage <= 0.5 and 
             self.shoot_pattern == "normal" and 
             self.level >= 2):
             self.shoot_pattern = "aggressive"
-            # 当生命值降低时，减少射击延迟，增加攻击频率
+            # When health decreases, reduce shooting delay to increase attack frequency
             self.shoot_delay = max(150, self.shoot_delay * 0.7)
-            # Boss进入激进模式的信息应该在游戏UI中显示
+            # Boss entering aggressive mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
         
-        # 3级及以上Boss才能进入最终模式
+        # Level 3+ Bosses can enter final mode
         if (health_percentage <= 0.25 and 
             self.shoot_pattern == "aggressive" and 
             self.level >= 3):
             self.shoot_pattern = "final"
-            # 再次减少射击延迟
+            # Reduce shooting delay again
             self.shoot_delay = max(100, self.shoot_delay * 0.8)
-            # Boss进入最终模式的信息应该在游戏UI中显示
+            # Boss entering final mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered final mode! Shoot delay: {self.shoot_delay}")
         
-        # 检查是否被摧毁
+        # Check if destroyed
         if self.health <= 0:
             self.kill()
             return True
@@ -142,12 +147,12 @@ class Boss(pygame.sprite.Sprite):
         return False
         
     def update(self):
-        """更新Boss状态"""
-        # Boss入场动画
+        """Update Boss state"""
+        # Boss entrance animation
         if self.rect.top < 50:
             self.rect.y += 2
         else:
-            # 左右移动
+            # Left-right movement
             self.move_counter += 1
             if self.move_counter >= 100: # Change direction periodically
                 self.direction *= -1
@@ -167,7 +172,7 @@ class Boss(pygame.sprite.Sprite):
 
             self.rect.x += current_speedx * self.direction
             
-            # 防止Boss飞出动态边界
+            # Prevent Boss from flying out of dynamic boundaries
             if self.rect.left < left_boundary:
                 self.rect.left = left_boundary
                 self.direction = 1 # Force move right
@@ -177,134 +182,131 @@ class Boss(pygame.sprite.Sprite):
                 self.direction = -1 # Force move left
                 self.move_counter = 0 # Reset move counter
         
-        # Boss射击
+        # Boss shooting
         now = ptime.get_ticks()
         if now - self.last_shot > self.shoot_delay and self.rect.top >= 0:
             self.last_shot = now
             self.shoot()
         
-        # 受伤闪烁效果
+        # Damage flash effect
         if self.damage_flash > 0:
             self.damage_flash -= 1
             
-            # 使用更强烈和多样化的闪烁效果
+            # Use stronger and more varied flash effects
             if self.damage_flash > 0:
-                # 根据闪烁帧数选择不同的效果，创造更动态的闪烁
+                # Select different effects based on flash frame count to create more dynamic flashing
                 flash_cycle = self.damage_flash % 6
                 if flash_cycle == 0:
-                    self.image = self.flash_images[2]  # 白色高亮版本（最明显）
+                    self.image = self.flash_images[2]  # White highlight version (most obvious)
                 elif flash_cycle == 1:
-                    self.image = self.flash_images[3]  # 黄色警告版本
+                    self.image = self.flash_images[3]  # Yellow warning version
                 elif flash_cycle == 2:
-                    self.image = self.flash_images[2]  # 再次白色高亮
+                    self.image = self.flash_images[2]  # White highlight again
                 elif flash_cycle == 3:
-                    self.image = self.flash_images[1]  # 红色版本
+                    self.image = self.flash_images[1]  # Red version
                 elif flash_cycle == 4:
-                    self.image = self.flash_images[0]  # 原始版本
+                    self.image = self.flash_images[0]  # Original version
                 else:  # flash_cycle == 5
-                    self.image = self.flash_images[1]  # 红色版本
+                    self.image = self.flash_images[1]  # Red version
             else:
-                # 当闪烁结束时确保恢复原始图像
+                # When flashing ends, ensure original image is restored
                 self.image = self.original_image.copy()  # Use copy to avoid reference issues
     
     def shoot(self):
-        """发射子弹"""
-        # 由于循环引用，需要从外部导入BossBullet
+        """Fire bullets"""
+        # Due to circular import, need to import BossBullet externally
         from thunder_fighter.sprites.bullets import BossBullet
         
-        # 根据等级和攻击模式决定子弹数量和方式
+        # Determine bullet count and pattern based on level and attack mode
         if self.shoot_pattern == "normal":
             if self.level == 1:
-                # 1级Boss: 3颗子弹，直线发射
+                # Level 1 Boss: 3 bullets, straight fire
                 offsets = [-30, 0, 30]
             elif self.level == 2:
-                # 2级Boss: 4颗子弹，扇形分布
+                # Level 2 Boss: 4 bullets, fan distribution
                 offsets = [-45, -15, 15, 45]
             else:
-                # 3级Boss: 5颗子弹，更密集的扇形分布
+                # Level 3 Boss: 5 bullets, denser fan distribution
                 offsets = [-60, -30, 0, 30, 60]
         elif self.shoot_pattern == "aggressive":
-            # 激进模式下，增加子弹数量和分布范围
+            # In aggressive mode, increase bullet count and distribution range
             if self.level == 1:
-                # 1级Boss: 4颗子弹，更宽的扇形
+                # Level 1 Boss: 4 bullets, wider fan
                 offsets = [-45, -15, 15, 45]
             elif self.level == 2:
-                # 2级Boss: 5颗子弹，更宽的扇形
+                # Level 2 Boss: 5 bullets, wider fan
                 offsets = [-60, -30, 0, 30, 60]
             else:
-                # 3级Boss: 6颗子弹，更密集的扇形分布
+                # Level 3 Boss: 6 bullets, denser fan distribution
                 offsets = [-75, -45, -15, 15, 45, 75]
-        else:  # "final" 模式
-            # 最终模式下，最大范围和子弹数量
+        else:  # "final" mode
+            # In final mode, maximum range and bullet count
             if self.level == 1:
-                # 1级Boss: 5颗子弹，宽扇形
+                # Level 1 Boss: 5 bullets, wide fan
                 offsets = [-60, -30, 0, 30, 60]
             elif self.level == 2:
-                # 2级Boss: 6颗子弹，宽扇形
+                # Level 2 Boss: 6 bullets, wide fan
                 offsets = [-75, -45, -15, 15, 45, 75]
             else:
-                # 3级Boss: 7颗子弹，几乎全屏扇形
+                # Level 3 Boss: 7 bullets, almost full-screen fan
                 offsets = [-90, -60, -30, 0, 30, 60, 90]
             
-        # 最终使用数量不超过设定的子弹数
-        offsets = offsets[:self.bullet_count]
-            
-        # 获取玩家位置（用于Final模式追踪）
+        # Get player position (for Final mode tracking)
         target_pos = None
         if self.shoot_pattern == "final" and self.player and hasattr(self.player, 'rect'):
             target_pos = (self.player.rect.centerx, self.player.rect.centery)
         
-        # 发射子弹
+        # Fire bullets
         for offset in offsets:
             boss_bullet = BossBullet(self.rect.centerx + offset, self.rect.bottom, self.shoot_pattern, target_pos)
             self.all_sprites.add(boss_bullet)
             self.boss_bullets_group.add(boss_bullet)
     
     def draw_health_bar(self, surface):
-        """绘制Boss血条"""
-        # 计算血条尺寸和位置
-        bar_width = max(self.rect.width + 20, 120)  # 血条比boss稍宽一些，但至少120像素
-        bar_height = 12  # 增加血条高度
-        bar_x = self.rect.centerx - bar_width // 2  # 血条居中对齐boss
-        bar_y = self.rect.y - 25  # 血条距离boss顶部25像素
+        """Draw Boss health bar"""
+        # Calculate health bar size and position
+        bar_width = max(self.rect.width + 20, 120)  # Health bar slightly wider than boss, but at least 120 pixels
+        bar_height = 12  # Increase health bar height
+        bar_x = self.rect.centerx - bar_width // 2  # Center health bar with boss
+        bar_y = self.rect.y - 25  # Health bar 25 pixels above boss top
         
-        # 防止血条超出屏幕顶部
+        # Prevent health bar from going off top of screen
         if bar_y < 5:
             bar_y = 5
         
-        # 防止血条超出屏幕左右边界  
+        # Prevent health bar from going off left/right edges of screen
         if bar_x < 5:
             bar_x = 5
         elif bar_x + bar_width > WIDTH - 5:
             bar_x = WIDTH - bar_width - 5
             
-        # 绘制血条主体
+        # Draw health bar body
         draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height, 
                         self.health, self.max_health)
         
-        # 根据攻击模式添加血条边框效果
+        # Add health bar border effects based on attack mode
         from thunder_fighter.constants import WHITE, RED, YELLOW, ORANGE
         import pygame
         
         if self.shoot_pattern == "aggressive":
-            # 激进模式：黄色边框
+            # Aggressive mode: yellow border
             pygame.draw.rect(surface, YELLOW, (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4), 2)
         elif self.shoot_pattern == "final":
-            # 最终模式：红色闪烁边框
+            # Final mode: flashing red border
             border_color = RED if (pygame.time.get_ticks() // 200) % 2 else ORANGE
             pygame.draw.rect(surface, border_color, (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4), 3)
         
-        # 绘制boss等级标识和模式
+        # Draw boss level indicator and mode
         mode_indicators = {
             "normal": "",
-            "aggressive": " [危险]",
-            "final": " [极限]"
+            "aggressive": " [Danger]",
+            "final": " [Extreme]"
         }
         level_text = f"BOSS Lv.{self.level}{mode_indicators.get(self.shoot_pattern, '')}"
         
         font = pygame.font.Font(None, 20)
         
-        # 根据模式改变文字颜色
+        # Change text color based on mode
         text_color = WHITE
         if self.shoot_pattern == "aggressive":
             text_color = YELLOW
@@ -314,15 +316,15 @@ class Boss(pygame.sprite.Sprite):
         level_surface = font.render(level_text, True, text_color)
         level_rect = level_surface.get_rect()
         level_rect.centerx = bar_x + bar_width // 2
-        level_rect.bottom = bar_y - 2  # 显示在血条上方
+        level_rect.bottom = bar_y - 2  # Display above health bar
         
-        # 如果等级文本超出屏幕顶部，则显示在血条下方
+        # If level text goes off top of screen, display below health bar
         if level_rect.top < 0:
             level_rect.top = bar_y + bar_height + 2
             
         surface.blit(level_surface, level_rect)
         
-        # 绘制血量数值
+        # Draw health value
         health_text = f"{self.health}/{self.max_health}"
         health_surface = font.render(health_text, True, WHITE)
         health_rect = health_surface.get_rect()

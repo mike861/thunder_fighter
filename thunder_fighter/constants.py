@@ -91,6 +91,28 @@ BOSS_BULLET_COUNT_BASE = 3  # Base bullet count
 BOSS_BULLET_COUNT_INCREMENT = 1  # Bullet count increment per level
 BOSS_MAX_LEVEL = 5  # Boss max level
 
+# Boss bullet settings
+BOSS_BULLET_NORMAL_SPEED = 5  # Normal mode bullet speed
+BOSS_BULLET_AGGRESSIVE_SPEED = 7  # Aggressive mode bullet speed
+BOSS_BULLET_FINAL_SPEED = 9  # Final mode bullet speed
+BOSS_BULLET_NORMAL_DAMAGE = 15  # Normal mode bullet damage
+BOSS_BULLET_AGGRESSIVE_DAMAGE = 20  # Aggressive mode bullet damage
+BOSS_BULLET_FINAL_DAMAGE = 25  # Final mode bullet damage
+BOSS_BULLET_BASE_WIDTH = 10  # Base bullet width
+BOSS_BULLET_BASE_HEIGHT = 20  # Base bullet height
+BOSS_BULLET_TRACKING_HORIZONTAL_FACTOR = 0.3  # Horizontal tracking speed factor
+BOSS_BULLET_MINIMUM_VERTICAL_SPEED = 3  # Minimum vertical speed for tracking bullets
+BOSS_BULLET_GLOW_EFFECT_SIZE = 8  # Glow effect additional size
+BOSS_BULLET_GLOW_LAYERS = 3  # Number of glow layers
+BOSS_BULLET_NORMAL_COLOR_PRIMARY = (255, 0, 255)  # Normal bullet primary color (Magenta)
+BOSS_BULLET_NORMAL_COLOR_SECONDARY = (128, 0, 128)  # Normal bullet secondary color (Dark Magenta)
+BOSS_BULLET_AGGRESSIVE_COLOR_PRIMARY = (255, 50, 0)  # Aggressive bullet primary color (Orange-Red)
+BOSS_BULLET_AGGRESSIVE_COLOR_SECONDARY = (200, 0, 0)  # Aggressive bullet secondary color (Dark Red)
+BOSS_BULLET_FINAL_COLOR_PRIMARY = (0, 200, 255)  # Final bullet primary color (Cyan)
+BOSS_BULLET_FINAL_COLOR_SECONDARY = (255, 255, 255)  # Final bullet secondary color (White)
+BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER = 1.2  # Size multiplier for aggressive bullets
+BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.5  # Size multiplier for final bullets
+
 # Score settings
 SCORE_THRESHOLD = 200  # Generate an item every 200 points
 

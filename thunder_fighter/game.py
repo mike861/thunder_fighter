@@ -262,7 +262,8 @@ class Game:
                 self.spawn_enemy(game_time, self.game_level)
                 self.enemy_spawn_timer = time.time()
         
-        if time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
+        # Only spawn boss after reaching level 2 (after score-based progression)
+        if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
             if not self.boss or not self.boss.alive():
                 self.spawn_boss()
         
@@ -272,8 +273,15 @@ class Game:
         
         self.handle_collisions(game_time)
         
-        if self.score.value // SCORE_THRESHOLD >= self.game_level:
+        # Only allow score-based level up for levels 0-1 (before boss appears)
+        if self.game_level <= 1 and self.score.value // SCORE_THRESHOLD >= self.game_level:
             self.level_up()
+
+        # Reset boss defeat processing flag after delay
+        if hasattr(self, '_boss_defeat_reset_time') and time.time() >= self._boss_defeat_reset_time:
+            if hasattr(self, '_boss_defeat_processed'):
+                delattr(self, '_boss_defeat_processed')
+            delattr(self, '_boss_defeat_reset_time')
 
         if self.player.health <= 0 and not self.game_won:
             self.game_over()
@@ -301,11 +309,7 @@ class Game:
         if self.boss and self.boss.alive():
             boss_hit_result = check_bullet_boss_collisions(self.boss, self.bullets, self.all_sprites)
             if boss_hit_result['boss_defeated']:
-                self.boss_defeated = True
-                self.boss.kill()
-                self.boss_active = False
-                self.boss = None
-                self.ui_manager.update_boss_info(active=False)
+                self.handle_boss_defeated()
 
             if check_boss_bullet_player_collisions(self.player, self.boss_bullets, self.all_sprites)['was_hit']:
                 if self.player.health <= 0: self.game_over()
@@ -313,19 +317,76 @@ class Game:
             check_missile_enemy_collisions(self.missiles, pygame.sprite.GroupSingle(self.boss), self.all_sprites, self.score)
 
             if self.boss and self.boss.health <= 0: # Re-check boss after missile collision
-                self.boss_defeated = True
+                self.handle_boss_defeated()
+
+    def handle_boss_defeated(self):
+        """Handle boss defeat: level up, clear enemies, and show effects"""
+        if not hasattr(self, '_boss_defeat_processed'):
+            self._boss_defeat_processed = True
+            
+            # Store boss level for scoring before removing boss
+            boss_level = self.boss.level if self.boss else 1
+            
+            # Remove boss
+            self.boss_defeated = True
+            if self.boss:
                 self.boss.kill()
-                self.boss_active = False
-                self.boss = None
-                self.ui_manager.update_boss_info(active=False)
+            self.boss_active = False
+            self.boss = None
+            self.ui_manager.update_boss_info(active=False)
+            
+            # Level up the game
+            old_level = self.game_level
+            if self.game_level < MAX_GAME_LEVEL:
+                self.game_level += 1
+                logger.info(f"Boss defeated! Game level up from {old_level} to {self.game_level}")
+            
+            # Clear all enemies on screen
+            enemies_cleared = len(self.enemies)
+            for enemy in self.enemies:
+                enemy.kill()
+            self.enemies.empty()
+            
+            # Clear enemy bullets
+            for bullet in self.enemy_bullets:
+                bullet.kill()
+            self.enemy_bullets.empty()
+            
+            # Clear boss bullets
+            for bullet in self.boss_bullets:
+                bullet.kill()
+            self.boss_bullets.empty()
+            
+            # Add score bonus for boss defeat
+            boss_score_bonus = boss_level * 500
+            self.score.update(boss_score_bonus)
+            
+            # Show victory effects and notifications
+            self.ui_manager.show_level_up_effects(old_level, self.game_level, enemies_cleared, boss_score_bonus)
+            
+            # Play victory sound
+            sound_manager.play_sound('boss_death.wav')
+            
+            # Reset boss spawn timer for next boss
+            self.boss_spawn_timer = time.time()
+            
+            # Reset enemy spawn timer
+            self.enemy_spawn_timer = time.time()
+            
+            # Update item spawn interval for new level
+            self.item_spawn_interval = max(15, 30 - self.game_level)
+            
+            # Reset the defeat processing flag after a delay (handled in main event loop)
+            self._boss_defeat_reset_time = time.time() + 3.0
 
     def level_up(self):
-        """Increase game difficulty level"""
+        """Increase game difficulty level based on score (only for early levels)"""
         if self.game_level < MAX_GAME_LEVEL:
+            old_level = self.game_level
             self.game_level += 1
             self.enemy_spawn_timer = time.time()
             self.item_spawn_interval = max(15, 30 - self.game_level)
-            logger.info(f"Game level up! New level: {self.game_level}")
+            logger.info(f"Score-based level up from {old_level} to {self.game_level}")
             self.ui_manager.add_notification(f"Level Up! Level {self.game_level}", "achievement")
 
     def game_over(self):

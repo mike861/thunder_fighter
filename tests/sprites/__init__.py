@@ -1,1 +1,1 @@
-# 确保tests/sprites是有效Python包 
+# Ensure tests/sprites is a valid Python package 

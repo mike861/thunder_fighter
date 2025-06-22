@@ -9,29 +9,29 @@ from thunder_fighter.graphics.renderers import create_boss_ship
 def mock_pygame():
     with patch('thunder_fighter.sprites.boss.pygame') as mock, \
          patch('thunder_fighter.sprites.boss.ptime') as mock_ptime:
-        # 模拟pygame属性和方法
+        # Mock pygame attributes and methods
         mock.Rect = pygame.Rect
-        # 创建真实的Surface而不是MagicMock
+        # Create real Surface instead of MagicMock
         mock.Surface = pygame.Surface
         mock.SRCALPHA = pygame.SRCALPHA
-        # 确保mask.from_surface返回真实的掩码对象
+        # Ensure mask.from_surface returns real mask objects
         mock.mask.from_surface = pygame.mask.from_surface
-        # 设置pygame.time
+        # Set pygame.time
         mock_ptime.get_ticks.return_value = 0
         mock.math.Vector2.return_value = MagicMock()
-        # 返回两个mock
+        # Return two mocks
         yield mock, mock_ptime
 
 @pytest.fixture
 def mock_random():
     with patch('thunder_fighter.sprites.boss.random') as mock:
-        # 默认返回值，可以在测试中根据需要更改
+        # Default return values, can be changed in tests as needed
         mock.random.return_value = 0.5
         mock.randint.return_value = 50
         mock.choice.return_value = 1
         mock.uniform.return_value = 0.5
-        # 重要：确保choices返回整数而不是MagicMock
-        mock.choices.return_value = [1]  # 确保返回列表中包含整数
+        # Important: ensure choices returns integers, not MagicMock
+        mock.choices.return_value = [1]  # Ensure list contains integers
         yield mock
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def mock_bullets_group():
 @pytest.fixture
 def mock_create_boss_ship():
     with patch('thunder_fighter.sprites.boss.create_boss_ship') as mock:
-        # 返回真实的Surface对象而不是MagicMock
+        # Return real Surface object instead of MagicMock
         mock.return_value = pygame.Surface((100, 100))
         yield mock
 
@@ -69,14 +69,14 @@ class TestBoss:
     """Test suite for the Boss sprite."""
 
     def test_boss_initialization(self, boss):
-        """测试Boss初始化是否正确设置属性"""
+        """Test if Boss initialization correctly sets attributes"""
         assert boss.level == 2
         assert boss.health == boss.max_health
         assert boss.rect.centerx == 240
         assert boss.image is not None
 
     def test_boss_shooting(self, boss, mocker):
-        """测试Boss射击逻辑"""
+        """Test Boss shooting logic"""
         # Patch the rendering function for bullets to avoid graphical operations
         mocker.patch('thunder_fighter.sprites.bullets.create_boss_bullet', return_value=pygame.Surface((5, 10)))
         
@@ -85,7 +85,7 @@ class TestBoss:
         assert len(boss.boss_bullets_group) > initial_bullet_count
 
     def test_boss_damage_and_health(self, boss):
-        """测试Boss伤害和血量逻辑"""
+        """Test Boss damage and health logic"""
         initial_health = boss.health
         boss.damage(20)
         assert boss.health == initial_health - 20
@@ -136,87 +136,87 @@ class TestBoss:
         assert len(seen_images) > 2, "The flash cycle should display multiple different images"
 
     def test_boss_movement_patterns(self, boss):
-        """测试Boss的移动模式"""
-        # 手动设置初始位置和移动参数
-        boss.rect.y = 50  # 确保Boss已入场
+        """Test Boss movement patterns"""
+        # Manually set initial position and movement parameters
+        boss.rect.y = 50  # Ensure Boss has entered
         initial_x = boss.rect.centerx
         initial_y = boss.rect.centery
         
-        # 设置方向和速度
+        # Set direction and speed
         boss.direction = 1
-        boss.base_speedx = 5  # 使用较大的速度值确保移动效果明显
+        boss.base_speedx = 5  # Use larger speed value to ensure obvious movement effect
         
-        # 更新Boss状态
+        # Update Boss state
         boss.update()
         
-        # Y坐标应该保持相对稳定（可能在一定范围内波动）
+        # Y coordinate should remain relatively stable (may fluctuate within range)
         assert abs(boss.rect.centery - initial_y) < 50
         
-        # 检查是否在水平方向上移动
-        # 由于方向为1，speedx为正，所以x坐标应该增加
+        # Check horizontal movement
+        # Since direction is 1, speedx is positive, so x coordinate should increase
         assert boss.rect.centerx > initial_x
         
-        # 重置位置，然后测试方向变化
+        # Reset position, then test direction change
         boss.rect.centerx = initial_x
         boss.direction = -1
         boss.update()
         
-        # 方向为-1，speedx为负，所以x坐标应该减少
+        # Direction is -1, speedx is negative, so x coordinate should decrease
         assert boss.rect.centerx < initial_x
         
-        # 测试边界反弹
-        # 将Boss移动到屏幕左边界附近
+        # Test boundary bounce
+        # Move Boss near left screen boundary
         boss.rect.left = 10
-        boss.direction = -1  # 向左移动
-        boss.speedx = boss.base_speedx * boss.direction  # 确保speedx是负值
+        boss.direction = -1  # Move left
+        boss.speedx = boss.base_speedx * boss.direction  # Ensure speedx is negative
         
         boss.update()
         
-        # 应该反向移动（方向改变为正）
+        # Should reverse movement (direction changes to positive)
         assert boss.direction > 0
         
-        # 将Boss移动到屏幕右边界附近
-        boss.rect.right = 790  # 假设屏幕宽度为800
-        boss.direction = 1  # 向右移动
-        boss.speedx = boss.base_speedx * boss.direction  # 确保speedx是正值
+        # Move Boss near right screen boundary
+        boss.rect.right = 790  # Assume screen width is 800
+        boss.direction = 1  # Move right
+        boss.speedx = boss.base_speedx * boss.direction  # Ensure speedx is positive
         
         boss.update()
         
-        # 应该反向移动（方向改变为负）
+        # Should reverse movement (direction changes to negative)
         assert boss.direction < 0
 
     def test_boss_attack_pattern_changes(self, boss):
-        """测试Boss根据生命值改变攻击模式"""
+        """Test Boss attack pattern changes based on health"""
         initial_health = boss.health
         initial_shoot_pattern = boss.shoot_pattern
         
-        # 造成大量伤害，使生命值降至50%以下
+        # Deal heavy damage to reduce health below 50%
         boss.damage(initial_health // 2 + 1)
         
-        # 更新状态以触发攻击模式变化
+        # Update state to trigger attack pattern change
         boss.update()
         
-        # 验证攻击模式是否改变
-        # 通常，当Boss生命值较低时，攻击会更频繁或更激烈
+        # Verify if attack pattern has changed
+        # Usually when Boss health is low, attacks become more frequent or intense
         current_shoot_delay = boss.shoot_delay
         assert current_shoot_delay <= boss.shoot_delay
         
-        # 验证攻击模式是否改变
+        # Verify if attack pattern has changed
         assert boss.shoot_pattern != initial_shoot_pattern
 
     def test_boss_dynamic_difficulty(self, boss):
-        """测试不同游戏级别下Boss的难度调整"""
-        # 比较不同游戏级别下相同等级Boss的属性
+        """Test Boss difficulty adjustment for different game levels"""
+        # Compare attributes of same level Boss under different game levels
         boss_level = 2
         
         easy_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 1)
         medium_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 5)
         hard_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 10)
         
-        # 验证更高游戏级别的Boss更强
+        # Verify that higher game level Bosses are stronger
         assert medium_game_boss.health >= easy_game_boss.health
         assert hard_game_boss.health >= medium_game_boss.health
         
-        # 验证攻击速度随游戏级别增加
+        # Verify attack speed increases with game level
         assert medium_game_boss.shoot_delay <= easy_game_boss.shoot_delay
         assert hard_game_boss.shoot_delay <= medium_game_boss.shoot_delay

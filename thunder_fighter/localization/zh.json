@@ -45,5 +45,9 @@
     "ADVANCED_TO_LEVEL": "已晋级到第 {} 关！",
     "GAME_PAUSED": "游戏暂停",
     "RESUME_PROMPT": "按 P 键继续",
-    "CONTROLS_INFO": "操作：方向键移动，空格键射击"
+    "CONTROLS_INFO": "操作：方向键移动，空格键射击",
+    "LEVEL_UP": "升级! {} → {}",
+    "ENEMIES_CLEARED": "敌机清空: {}",
+    "BOSS_BONUS": "BOSS奖励: +{}",
+    "STAGE_COMPLETE": "关卡完成!"
 } 

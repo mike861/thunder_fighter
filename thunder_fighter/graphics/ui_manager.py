@@ -32,16 +32,16 @@ class DummyFont:
         return mock_surface
 
 class PlayerUIManager:
-    """管理所有面向玩家的UI界面元素和信息显示"""
+    """Manages all player-facing UI interface elements and information display"""
     
     def __init__(self, screen, player, game):
         """
-        初始化UI管理器
+        Initialize UI manager
         
         Args:
-            screen: pygame.Surface - 游戏屏幕
-            player: Player - 玩家对象
-            game: Game - 游戏主对象
+            screen: pygame.Surface - Game screen
+            player: Player - Player object
+            game: Game - Main game object
         """
         self.screen = screen
         self.player = player
@@ -71,16 +71,16 @@ class PlayerUIManager:
         self.notifications = []
         self.notification_duration = 2000  # 2 seconds in milliseconds
         
-        # 当前语言
+        # Current language
         self.current_language = 'en'
         
-        # 临时通知列表
+        # Temporary notification list
         self.notifications = []
         
-        # 持久显示的游戏状态信息
+        # Persistent game state information display
         self.persistent_info = {}
         
-        # Boss状态信息
+        # Boss status information
         self.boss_info = {
             'active': False,
             'health': 0,
@@ -89,7 +89,7 @@ class PlayerUIManager:
             'mode': 'normal'
         }
         
-        # 游戏状态
+        # Game state
         self.game_state = {
             'level': 1,
             'paused': False,
@@ -98,7 +98,7 @@ class PlayerUIManager:
             'defeat': False
         }
         
-        # 玩家状态
+        # Player state
         self.player_info = {
             'health': 100,
             'max_health': 100,
@@ -108,26 +108,26 @@ class PlayerUIManager:
             'wingmen': 0
         }
         
-        # 最近的伤害/恢复事件
+        # Recent health/recovery events
         self.recent_hp_changes = []
         
-        # 用于高级UI动画的计时器
+        # Timer for advanced UI animations
         self.animation_timer = time.time()
         
-        # 用于关卡变化的动画效果
+        # Timer for level change animation effect
         self.level_change_timer = 0
         self.level_change_active = False
         
-        # 控制文本闪烁效果
+        # Control text blinking effect
         self.blink_timer = 0
         self.show_blink_text = True
 
     def add_notification(self, text, notification_type="normal"):
-        """添加一个临时通知
+        """Add a temporary notification
         
         Args:
-            text: 通知文本
-            notification_type: 通知类型，可以是 "normal", "warning", 或 "achievement"
+            text: Notification text
+            notification_type: Notification type, can be "normal", "warning", or "achievement"
         """
         if notification_type == "warning":
             self.notifications.append(WarningNotification(text))
@@ -137,14 +137,14 @@ class PlayerUIManager:
             self.notifications.append(Notification(text))
     
     def update_boss_info(self, active, health=None, max_health=None, level=None, mode=None):
-        """更新Boss状态信息
+        """Update Boss status information
         
         Args:
-            active: Boss是否存活
-            health: Boss当前生命值
-            max_health: Boss最大生命值
-            level: Boss等级
-            mode: Boss当前攻击模式
+            active: Whether Boss is alive
+            health: Boss current health
+            max_health: Boss maximum health
+            level: Boss level
+            mode: Boss current attack mode
         """
         self.boss_info['active'] = active
         
@@ -158,30 +158,30 @@ class PlayerUIManager:
         if level is not None:
             self.boss_info['level'] = level
         
-        # 检查模式变化并显示相应通知
+        # Check mode changes and display corresponding notifications
         if mode is not None and mode != self.boss_info['mode']:
             old_mode = self.boss_info['mode']
             self.boss_info['mode'] = mode
             
-            # 根据模式变化显示通知
+            # Display notifications based on mode changes
             if mode == "aggressive" and old_mode == "normal":
                 self.add_notification(_("BOSS_ENTERED_AGGRESSIVE"), "warning")
             elif mode == "final":
                 self.add_notification(_("BOSS_ENTERED_FINAL"), "warning")
     
     def update_player_info(self, health=None, max_health=None, bullet_paths=None, bullet_speed=None, speed=None, wingmen=None):
-        """更新玩家状态信息
+        """Update player status information
         
         Args:
-            health: 玩家当前生命值
-            max_health: 玩家最大生命值
-            bullet_paths: 玩家子弹路径数
-            bullet_speed: 玩家子弹速度
-            speed: 玩家移动速度
-            wingmen: 僚机数量
+            health: Player current health
+            max_health: Player maximum health
+            bullet_paths: Player bullet path count
+            bullet_speed: Player bullet speed
+            speed: Player movement speed
+            wingmen: Number of wingmen
         """
         if health is not None:
-            # 计算血量变化
+            # Calculate health change
             try:
                 if health != self.player_info['health']:
                     # Check for mock objects in tests
@@ -191,10 +191,10 @@ class PlayerUIManager:
                     else:
                         change = health - self.player_info['health']
                         if change < 0:
-                            # 受伤
+                            # Injured
                             self.add_notification(_("HEALTH_CHANGE_NEGATIVE", change), "warning")
                         elif change > 0:
-                            # 恢复
+                            # Healed
                             self.add_notification(_("HEALTH_CHANGE_POSITIVE", change), "achievement")
                         self.player_info['health'] = health
             except (TypeError, Exception) as e:
@@ -239,16 +239,16 @@ class PlayerUIManager:
             self.player_info['wingmen'] = wingmen
     
     def update_game_state(self, level=None, paused=None, game_time=None, victory=None, defeat=None):
-        """更新游戏状态
+        """Update game state
         
         Args:
-            level: 游戏当前关卡
-            paused: 游戏是否暂停
-            game_time: 游戏已进行时间
-            victory: 游戏是否胜利
-            defeat: 游戏是否失败
+            level: Current game level
+            paused: Whether game is paused
+            game_time: Game elapsed time
+            victory: Whether game is won
+            defeat: Whether game is lost
         """
-        # 检查关卡变化
+        # Check level changes
         if level is not None and level != self.game_state['level']:
             self.level_change_active = True
             self.level_change_timer = time.time()
@@ -269,10 +269,10 @@ class PlayerUIManager:
             self.game_state['defeat'] = defeat
     
     def show_item_collected(self, item_type):
-        """显示道具收集通知
+        """Display item collection notification
         
         Args:
-            item_type: 道具类型
+            item_type: Type of item collected
         """
         if item_type == 'health':
             self.add_notification(_("HEALTH_RESTORED"), "achievement")
@@ -284,55 +284,81 @@ class PlayerUIManager:
             self.add_notification(_("MOVEMENT_SPEED_INCREASED"), "achievement")
     
     def show_score_milestone(self, score):
-        """显示分数里程碑通知
+        """Display score milestone notification
         
         Args:
-            score: 当前分数
+            score: Current score
         """
         self.add_notification(_("SCORE_MILESTONE", score), "achievement")
     
     def show_boss_defeated(self, boss_level, score_reward):
-        """显示Boss击败通知
+        """Display Boss defeated notification
         
         Args:
-            boss_level: Boss等级
-            score_reward: 获得的分数奖励
+            boss_level: Boss level
+            score_reward: Score reward gained
         """
         self.add_notification(_("BOSS_DEFEATED", boss_level, score_reward), "achievement")
     
     def show_boss_appeared(self, boss_level):
-        """显示Boss出现通知
+        """Display Boss appeared notification
         
         Args:
-            boss_level: Boss等级
+            boss_level: Boss level
         """
         self.add_notification(_("BOSS_APPEARED", boss_level), "warning")
+
+    def show_level_up_effects(self, old_level, new_level, enemies_cleared, score_bonus):
+        """Display level up effects and notifications
+        
+        Args:
+            old_level: Previous game level
+            new_level: New game level
+            enemies_cleared: Number of enemies cleared
+            score_bonus: Score bonus received
+        """
+        # Main level up notification
+        self.add_notification(_("LEVEL_UP", old_level, new_level), "achievement")
+        
+        # Enemies cleared notification
+        if enemies_cleared > 0:
+            self.add_notification(_("ENEMIES_CLEARED", enemies_cleared), "achievement")
+        
+        # Score bonus notification
+        if score_bonus > 0:
+            self.add_notification(_("BOSS_BONUS", score_bonus), "achievement")
+        
+        # Activate level change animation
+        self.level_change_timer = time.time()
+        self.level_change_active = True
+        
+        logger.info(f"Level up effects shown: {old_level} → {new_level}, cleared {enemies_cleared} enemies, bonus {score_bonus}")
     
     def update(self):
-        """更新所有UI元素状态"""
-        # 更新临时通知
+        """Update all UI element states"""
+        # Update temporary notifications
         self.notifications = [n for n in self.notifications if n.update()]
         
-        # 更新闪烁效果计时器
+        # Update blink effect timer
         current_time = time.time()
-        if current_time - self.blink_timer > 0.5:  # 每0.5秒切换一次
+        if current_time - self.blink_timer > 0.5:  # Switch every 0.5 seconds
             self.blink_timer = current_time
             self.show_blink_text = not self.show_blink_text
         
-        # 处理关卡变化动画
+        # Handle level change animation
         if self.level_change_active:
-            if current_time - self.level_change_timer > 3.0:  # 动画持续3秒
+            if current_time - self.level_change_timer > 3.0:  # Animation lasts 3 seconds
                 self.level_change_active = False
                 
-        # 安排通知的垂直位置，避免重叠
+        # Arrange notification vertical positions to avoid overlap
         self.arrange_notifications()
     
     def arrange_notifications(self):
-        """安排通知的垂直位置，使其不会重叠"""
+        """Arrange notifications vertically to avoid overlap"""
         if not self.notifications:
             return
             
-        # 按照位置类型分组
+        # Group by position type
         top_notifications = []
         center_notifications = []
         bottom_notifications = []
@@ -345,85 +371,85 @@ class PlayerUIManager:
             elif notification.position == 'bottom':
                 bottom_notifications.append(notification)
         
-        # 按创建时间排序，让较新的消息显示在前面
+        # Sort by creation time to display newer messages first
         top_notifications.sort(key=lambda n: n.creation_time, reverse=True)
         center_notifications.sort(key=lambda n: n.creation_time, reverse=True)
         bottom_notifications.sort(key=lambda n: n.creation_time, reverse=True)
         
-        # 设置顶部通知的位置
+        # Set top notification positions
         for i, notification in enumerate(top_notifications):
-            # 每个通知之间有垂直间距
-            y_position = 80 + i * 40  # 从顶部开始，每个通知下移40像素
+            # Each notification has vertical spacing
+            y_position = 80 + i * 40  # Start from top, move down 40 pixels each
             notification.set_y_position(y_position)
         
-        # 设置中央通知的位置
+        # Set center notification positions
         center_y_start = HEIGHT // 2 - (len(center_notifications) * 40) // 2
         for i, notification in enumerate(center_notifications):
             y_position = center_y_start + i * 40
             notification.set_y_position(y_position)
         
-        # 设置底部通知的位置
+        # Set bottom notification positions
         for i, notification in enumerate(bottom_notifications):
-            # 从底部往上排列
+            # Arrange from bottom up
             y_position = HEIGHT - 120 - i * 40
             notification.set_y_position(y_position)
     
     def draw_health_bar(self, x, y, width, height, current, maximum, border_color=WHITE, fill_color=GREEN, background_color=(60, 60, 60)):
-        """绘制生命值条
+        """Draw health bar
         
         Args:
-            x, y: 位置坐标
-            width, height: 宽高
-            current: 当前值
-            maximum: 最大值
-            border_color: 边框颜色
-            fill_color: 填充颜色
-            background_color: 背景颜色
+            x, y: Position coordinates
+            width, height: Width and height
+            current: Current value
+            maximum: Maximum value
+            border_color: Border color
+            fill_color: Fill color
+            background_color: Background color
         """
-        # 绘制背景
+        # Draw background
         pygame.draw.rect(self.screen, background_color, (x, y, width, height))
         
-        # 计算填充宽度
+        # Calculate fill width
         fill_width = max(0, int(width * current / maximum))
         
-        # 绘制填充部分
+        # Draw fill part
         if current > 0:
-            # 根据生命值比例改变颜色
+            # Change color based on health percentage
             if current / maximum < 0.3:
-                color = RED  # 生命值低时为红色
+                color = RED  # Red when health is low
             elif current / maximum < 0.6:
-                color = YELLOW  # 生命值中等时为黄色
+                color = YELLOW  # Yellow when health is medium
             else:
-                color = fill_color  # 生命值高时为绿色
+                color = fill_color  # Green when health is high
                 
             pygame.draw.rect(self.screen, color, (x, y, fill_width, height))
         
-        # 绘制边框
+        # Draw border
         pygame.draw.rect(self.screen, border_color, (x, y, width, height), 2)
         
-        # 显示具体数值
+        # Display specific value
         value_text = self.font_small.render(f"{current}/{maximum}", True, WHITE)
         text_rect = value_text.get_rect(center=(x + width//2, y + height//2))
         self.screen.blit(value_text, text_rect)
     
     def draw_player_stats(self):
-        """在屏幕左上角绘制玩家的详细状态"""
+        """Draw detailed player status in top-left corner of screen"""
         x, y = 10, 10
         
-        # 绘制血条
+        # Draw health bar
         self.draw_health_bar(x, y, 150, 20, self.player_info['health'], self.player_info['max_health'])
         
-        # 绘制子弹信息
+        # Draw bullet information
         bullet_text = _("PLAYER_BULLET_INFO", self.player_info['bullet_paths'], self.player_info['bullet_speed'])
         bullet_surf = self.font_small.render(bullet_text, True, WHITE)
         self.screen.blit(bullet_surf, (x, y + 25))
         
-        # 绘制移动速度
+        # Draw movement speed
         speed_text = _("PLAYER_SPEED_INFO", self.player_info['speed'])
         speed_surf = self.font_small.render(speed_text, True, WHITE)
         self.screen.blit(speed_surf, (x, y + 45))
 
-        # 绘制僚机信息
+        # Draw wingmen information
         wingmen_text = _("PLAYER_WINGMEN_INFO", self.player_info['wingmen'])
         wingmen_surf = self.font_small.render(wingmen_text, True, WHITE)
         self.screen.blit(wingmen_surf, (x, y + 65))
@@ -435,7 +461,7 @@ class PlayerUIManager:
         self.draw_player_stats()
     
     def draw_notifications(self):
-        """绘制所有临时通知"""
+        """Draw all temporary notifications"""
         self.arrange_notifications()
         
         for notification in self.notifications:
@@ -464,7 +490,7 @@ class PlayerUIManager:
             self.screen.blit(text_surface, text_rect)
 
     def draw_game_info(self):
-        """在屏幕右上角绘制游戏信息"""
+        """Draw game information in top-right corner of screen"""
         x, y = WIDTH - 200, 10
         score_text = _("SCORE", self.persistent_info.get('score', 0))
         level_text = _("LEVEL", self.game_state.get('level', 1))
@@ -479,22 +505,22 @@ class PlayerUIManager:
         self.screen.blit(time_surf, (x, y + 50))
 
     def draw_pause_screen(self):
-        """绘制暂停画面"""
+        """Draw pause screen"""
         overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         if not self.game_state['paused']:
             return
             
-        # 创建半透明覆盖层
+        # Create semi-transparent overlay
         pause_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        pause_overlay.fill((0, 0, 0, 150))  # 半透明黑色
+        pause_overlay.fill((0, 0, 0, 150))  # Semi-transparent black
         self.screen.blit(pause_overlay, (0, 0))
         
-        # 绘制暂停文本
+        # Draw pause text
         pause_text = self.font_large.render(_("GAME_PAUSED"), True, WHITE)
         text_rect = pause_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40))
         self.screen.blit(pause_text, text_rect)
         
-        # 绘制提示文本
+        # Draw tip text
         tip_text = self.font_medium.render(_("RESUME_PROMPT"), True, WHITE)
         tip_rect = tip_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 10))
         self.screen.blit(tip_text, tip_rect)
@@ -504,59 +530,59 @@ class PlayerUIManager:
         self.screen.blit(controls_text, controls_rect)
     
     def draw_victory_screen(self, final_score, max_level):
-        """绘制游戏胜利界面
+        """Draw game victory screen
         
         Args:
-            final_score: 最终分数
-            max_level: 最大关卡数
+            final_score: Final score
+            max_level: Maximum level number
         """
         if not self.game_state['victory']:
             return
             
-        # 绘制深蓝色背景
+        # Draw dark blue background
         self.screen.fill((20, 20, 40))
         
-        # 绘制胜利文本
+        # Draw victory text
         victory_text = self.font_large.render(_("VICTORY"), True, GREEN)
         text_rect = victory_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
         self.screen.blit(victory_text, text_rect)
         
-        # 绘制关卡完成信息
+        # Draw level cleared information
         level_text = self.font_medium.render(_("LEVEL_CLEARED", max_level), True, WHITE)
         level_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         self.screen.blit(level_text, level_rect)
         
-        # 绘制最终分数
+        # Draw final score
         score_text = self.font_medium.render(_("FINAL_SCORE", final_score), True, WHITE)
         score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
         self.screen.blit(score_text, score_rect)
         
-        # 绘制提示文本
-        if self.show_blink_text:  # 闪烁显示
+        # Draw tip text
+        if self.show_blink_text:  # Blinking display
             exit_text = self.font_small.render(_("EXIT_PROMPT"), True, YELLOW)
             exit_rect = exit_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
             self.screen.blit(exit_text, exit_rect)
     
     def draw_game_over_screen(self, final_score, level_reached, game_time):
-        """绘制游戏结束界面
+        """Draw game over interface
         
         Args:
-            final_score: 最终分数
-            level_reached: 达到的关卡
-            game_time: 游戏时间（分钟）
+            final_score: Final score
+            level_reached: Level reached
+            game_time: Game time (minutes)
         """
         if not self.game_state['defeat']:
             return
             
-        # 绘制深红色背景
+        # Draw dark red background
         self.screen.fill((40, 10, 10))
         
-        # 绘制游戏结束文本
+        # Draw game over text
         gameover_text = self.font_large.render(_("GAME_OVER"), True, RED)
         text_rect = gameover_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
         self.screen.blit(gameover_text, text_rect)
         
-        # 绘制统计信息
+        # Draw statistics
         level_text = self.font_medium.render(_("LEVEL_REACHED", level_reached), True, WHITE)
         level_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10))
         self.screen.blit(level_text, level_rect)
@@ -569,59 +595,59 @@ class PlayerUIManager:
         time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70))
         self.screen.blit(time_text, time_rect)
         
-        # 绘制提示文本
-        if self.show_blink_text:  # 闪烁显示
+        # Draw prompt text
+        if self.show_blink_text:  # Blinking display
             exit_text = self.font_small.render(_("EXIT_PROMPT"), True, YELLOW)
             exit_rect = exit_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 130))
             self.screen.blit(exit_text, exit_rect)
     
     def draw_level_change_animation(self, level):
-        """绘制关卡变化动画
+        """Draw level change animation
         
         Args:
-            level: 新关卡
+            level: New level
         """
         if not self.level_change_active:
             return
             
-        # 计算动画持续时间
+        # Calculate animation duration
         elapsed = time.time() - self.level_change_timer
-        if elapsed > 3.0:  # 动画最长持续3秒
+        if elapsed > 3.0:  # Animation lasts up to 3 seconds
             self.level_change_active = False
             return
             
-        # 创建半透明覆盖层
+        # Create semi-transparent overlay
         overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         
-        # 根据时间调整透明度
-        if elapsed < 0.5:  # 淡入
+        # Adjust transparency based on time
+        if elapsed < 0.5:  # Fade in
             alpha = int(150 * elapsed / 0.5)
-        elif elapsed > 2.5:  # 淡出
+        elif elapsed > 2.5:  # Fade out
             alpha = int(150 * (3.0 - elapsed) / 0.5)
-        else:  # 保持
+        else:  # Maintain
             alpha = 150
             
-        overlay.fill((0, 0, 50, alpha))  # 半透明蓝色
+        overlay.fill((0, 0, 50, alpha))  # Semi-transparent blue
         self.screen.blit(overlay, (0, 0))
         
-        # 绘制关卡变化文本
-        if 0.3 < elapsed < 2.7:  # 显示文本的时间段
+        # Draw level change text
+        if 0.3 < elapsed < 2.7:  # Display text during this time segment
             level_text = self.font_large.render(_("LEVEL_TEXT", level), True, WHITE)
             text_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
             self.screen.blit(level_text, text_rect)
     
     def draw(self, score, level, game_time, enemy_count=None, target_enemy_count=None, max_level=None):
-        """绘制所有UI元素
+        """Draw all UI elements
         
         Args:
-            score: 当前分数
-            level: 游戏关卡
-            game_time: 游戏时间（分钟）
-            enemy_count: 当前敌人数量
-            target_enemy_count: 目标敌人数量
-            max_level: 最大关卡数
+            score: Current score
+            level: Game level
+            game_time: Game time (minutes)
+            enemy_count: Current enemy count
+            target_enemy_count: Target enemy count
+            max_level: Maximum level number
         """
-        # 绘制特殊界面
+        # Draw special screen
         if self.game_state['victory']:
             self.draw_victory_screen(score, max_level or level)
             return
@@ -630,24 +656,24 @@ class PlayerUIManager:
             self.draw_game_over_screen(score, level, game_time)
             return
         
-        # 绘制左上角游戏信息
+        # Draw top left game information
         self.draw_game_info()
         
-        # 绘制右上角玩家状态
+        # Draw top right player status
         self.draw_player_status(WIDTH - 200, 10)
         
-        # 如果Boss激活，绘制Boss状态
+        # If Boss is active, draw Boss status
         if self.boss_info['active']:
             self.draw_boss_status()
         
-        # 先更新通知的排列，确保不会重叠
+        # First update notification arrangement to ensure no overlap
         self.arrange_notifications()
         
-        # 绘制所有通知
+        # Draw all notifications
         self.draw_notifications()
         
-        # 绘制关卡变化动画
+        # Draw level change animation
         self.draw_level_change_animation(level)
         
-        # 绘制暂停界面
+        # Draw pause screen
         self.draw_pause_screen() 
