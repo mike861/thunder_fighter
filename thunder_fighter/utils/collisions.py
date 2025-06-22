@@ -38,17 +38,17 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
                                   last_score_checkpoint, score_threshold, items_group, player):
     """Check collisions between bullets and enemies"""
     try:
-        # 返回详细的结果
+        # Return detailed results
         result = {
-            'enemy_hit': False,  # 是否击中敌人
-            'score_checkpoint': last_score_checkpoint, # 当前得分检查点
-            'enemy_count': 0,  # 击中的敌人数量
-            'generated_item': False  # 是否生成了道具
+            'enemy_hit': False,  # Whether enemy was hit
+            'score_checkpoint': last_score_checkpoint, # Current score checkpoint
+            'enemy_count': 0,  # Number of enemies hit
+            'generated_item': False  # Whether item was generated
         }
         
         hits = pygame.sprite.groupcollide(enemies, bullets, True, True)
         result['enemy_count'] = len(hits)
-        result['enemy_hit'] = bool(hits)  # 如果有击中，设为True
+        result['enemy_hit'] = bool(hits)  # Set to True if there were hits
         
         for hit in hits:
             # Add score based on enemy level
@@ -98,26 +98,26 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
     }
     
     try:
-        # 添加调试日志
+        # Add debug logging
         logger.debug(f"Checking bullet-boss collisions. Boss rect: {boss.rect}, Health: {boss.health}")
         logger.debug(f"Bullets in group: {len(bullets)}")
         
-        # 对于pygame.sprite.spritecollide，第一个参数需要是单个sprite
-        # 确保boss是一个sprite实例而不是group
+        # For pygame.sprite.spritecollide, the first parameter needs to be a single sprite
+        # Ensure boss is a sprite instance rather than a group
         if hasattr(boss, 'rect') and hasattr(boss, 'health'):
-            # 使用碰撞掩码进行更精确的碰撞检测 - 使用遮罩可以提高碰撞检测的准确性
+            # Use collision masks for more precise collision detection - masks improve collision detection accuracy
             boss_hits = pygame.sprite.spritecollide(
                 boss, bullets, True, 
                 pygame.sprite.collide_mask
             )
             
-            # 记录碰撞结果
+            # Record collision results
             hits_count = len(boss_hits)
             if hits_count > 0:
                 logger.debug(f"Boss hit by {hits_count} bullets")
             
             result['boss_hit'] = bool(boss_hits)
-            result['damage'] = len(boss_hits) * 10  # 每颗子弹10点伤害
+            result['damage'] = len(boss_hits) * 10  # 10 damage per bullet
             
             for hit in boss_hits:
                 # Use boss's damage method to handle damage
@@ -158,9 +158,9 @@ def check_enemy_player_collisions(player, enemies, all_sprites):
         result['was_hit'] = bool(hits)
         
         for hit in hits:
-            # 根据敌人等级增加伤害
-            enemy_level = getattr(hit, 'level', 0)  # 获取敌人等级，默认为0
-            damage = 15 + enemy_level * 1  # 基础伤害15，每级额外1点伤害
+            # Increase damage based on enemy level
+            enemy_level = getattr(hit, 'level', 0)  # Get enemy level, default to 0
+            damage = 15 + enemy_level * 1  # Base damage 15, extra 1 per level
             player.health -= damage
             result['damage'] += damage
             
@@ -168,7 +168,7 @@ def check_enemy_player_collisions(player, enemies, all_sprites):
             explosion = Explosion(hit.rect.center)
             all_sprites.add(explosion)
             
-            # 如果玩家生命值为0，游戏结束
+            # If player health is 0, game over
             if player.health <= 0:
                 result['game_over'] = True
         
@@ -188,16 +188,21 @@ def check_boss_bullet_player_collisions(player, boss_bullets, all_sprites):
     try:
         hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         result['was_hit'] = bool(hits)
-        result['damage'] = len(hits) * 15  # Each boss bullet does 15 damage
         
+        total_damage = 0
         for hit in hits:
-            player.health -= 15
+            # Use bullet's dynamic damage value
+            damage = hit.get_damage() if hasattr(hit, 'get_damage') else 15
+            total_damage += damage
+            player.health -= damage
             # Create flash effect for boss bullet hit
             create_flash_effect(player, RED)
             
             # If player health is 0, game over
             if player.health <= 0:
                 result['game_over'] = True
+        
+        result['damage'] = total_damage
         
         return result
     except Exception as e:

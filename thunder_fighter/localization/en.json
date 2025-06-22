@@ -45,5 +45,9 @@
     "ADVANCED_TO_LEVEL": "Advanced to Level {}!",
     "GAME_PAUSED": "GAME PAUSED",
     "RESUME_PROMPT": "Press P to resume",
-    "CONTROLS_INFO": "Controls: Arrow keys to move, Space to shoot"
+    "CONTROLS_INFO": "Controls: Arrow keys to move, Space to shoot",
+    "LEVEL_UP": "LEVEL UP! {} → {}",
+    "ENEMIES_CLEARED": "Enemies Cleared: {}",
+    "BOSS_BONUS": "Boss Bonus: +{}",
+    "STAGE_COMPLETE": "Stage Complete!"
 } 

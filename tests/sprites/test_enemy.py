@@ -8,7 +8,7 @@ from thunder_fighter.sprites.enemy import Enemy
 def mock_pygame():
     with patch('thunder_fighter.sprites.enemy.pygame') as mock, \
          patch('thunder_fighter.sprites.enemy.ptime') as mock_ptime:
-        # 模拟pygame属性和方法
+        # Mock pygame attributes and methods
         mock.Rect = pygame.Rect
         mock.Surface.return_value = MagicMock()
         mock.mask.from_surface.return_value = MagicMock()
@@ -19,13 +19,13 @@ def mock_pygame():
 @pytest.fixture
 def mock_random():
     with patch('thunder_fighter.sprites.enemy.random') as mock:
-        # 默认返回值，可以在测试中根据需要更改
+        # Default return values, can be changed in tests as needed
         mock.random.return_value = 0.5
         mock.randint.return_value = 50
         mock.choice.return_value = 1
         mock.uniform.return_value = 0.5
-        # 重要：确保choices返回整数而不是MagicMock
-        mock.choices.return_value = [1]  # 确保返回列表中包含整数
+        # Important: ensure choices returns integers, not MagicMock
+        mock.choices.return_value = [1]  # Ensure list contains integers
         yield mock
 
 @pytest.fixture
@@ -37,43 +37,43 @@ def mock_bullets_group():
     return MagicMock()
 
 def test_enemy_initialization(mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人初始化是否正确设置属性"""
-    # 解构mock_pygame
+    """Test if enemy initialization correctly sets attributes"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
-    # 模拟create_enemy_ship
+    # Mock create_enemy_ship
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
         mock_create_ship.return_value = pygame.Surface((30, 30))
         
-        # 测试不同的游戏时间和游戏级别
-        game_time = 5  # 5分钟
+        # Test different game time and game level
+        game_time = 5  # 5 minutes
         game_level = 3
         
         enemy = Enemy(game_time, game_level, mock_sprites_group, mock_bullets_group)
         
-        # 手动设置mask属性
+        # Manually set mask attribute
         enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 检查基本属性是否已创建
+    # Check if basic attributes are created
     assert hasattr(enemy, 'image')
     assert hasattr(enemy, 'rect')
     assert hasattr(enemy, 'mask')
     assert hasattr(enemy, 'speedy')
     
-    # 确保敌人的等级随游戏时间和游戏级别增加
+    # Ensure enemy level increases with game time and game level
     assert enemy.get_level() >= 0
     
-    # 游戏时间更长的敌人应该更强
+    # Enemies with longer game time should be stronger
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship2:
         mock_create_ship2.return_value = pygame.Surface((30, 30))
         later_enemy = Enemy(10, game_level, mock_sprites_group, mock_bullets_group)
     
     assert later_enemy.get_level() >= enemy.get_level()
     
-    # 游戏级别更高的敌人应该更强
+    # Enemies with higher game level should be stronger
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship3:
         mock_create_ship3.return_value = pygame.Surface((30, 30))
         higher_level_enemy = Enemy(game_time, game_level + 2, mock_sprites_group, mock_bullets_group)
@@ -82,214 +82,214 @@ def test_enemy_initialization(mock_pygame, mock_random, mock_sprites_group, mock
 
 @patch('thunder_fighter.sprites.enemy.EnemyBullet')
 def test_enemy_shooting(mock_enemy_bullet, mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人射击行为"""
-    # 解构mock_pygame
+    """Test enemy shooting behavior"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
-    # 返回模拟子弹实例
+    # Return mock bullet instance
     mock_bullet_instance = MagicMock()
     mock_enemy_bullet.return_value = mock_bullet_instance
     
-    # 修改选择的等级
-    with patch.object(Enemy, '_determine_level', return_value=3):  # 确保level大于2，能射击
-        # 创建一个能射击的敌人
-        mock_random.random.return_value = 0.05  # 确保创建会射击的敌人
+    # Modify selected level
+    with patch.object(Enemy, '_determine_level', return_value=3):  # Ensure level > 2, can shoot
+        # Create an enemy that can shoot
+        mock_random.random.return_value = 0.05  # Ensure creation of shooting enemy
         
         with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
             mock_create_ship.return_value = pygame.Surface((30, 30))
             enemy = Enemy(5, 3, mock_sprites_group, mock_bullets_group)
             
-            # 手动设置mask属性
+            # Manually set mask attribute
             enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 修复speedx属性
+    # Fix speedx attribute
     enemy.speedx = 0
     enemy.can_shoot = True
     enemy.shoot_delay = 1000
     enemy.last_shot = 0
     
-    # 模拟时间经过，允许射击
+    # Simulate time passing, allow shooting
     mock_ptime.get_ticks.return_value = 1500
     
-    # 跳过Enemy.update的逻辑，直接调用shoot
+    # Skip Enemy.update logic, directly call shoot
     enemy.shoot()
     
-    # 验证是否尝试创建子弹
+    # Verify if bullet creation was attempted
     mock_enemy_bullet.assert_called()
     mock_bullets_group.add.assert_called()
 
 def test_enemy_movement_patterns(mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人不同的移动模式"""
-    # 解构mock_pygame
+    """Test enemy different movement patterns"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
-    # 1. 测试直线下落
+    # 1. Test straight falling
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
         mock_create_ship.return_value = pygame.Surface((30, 30))
-        mock_random.random.side_effect = [0.9, 0.9]  # 确保选择直线移动
+        mock_random.random.side_effect = [0.9, 0.9]  # Ensure straight movement selection
         enemy = Enemy(1, 1, mock_sprites_group, mock_bullets_group)
         
-        # 手动设置mask属性
+        # Manually set mask attribute
         enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 修复speedx和speedy属性
+    # Fix speedx and speedy attributes
     enemy.speedx = 0
     enemy.speedy = 5
     
     initial_x = enemy.rect.centerx
     initial_y = enemy.rect.centery
     
-    # 手动调整y位置确保能看到变化
+    # Manually adjust y position to ensure visible change
     enemy.rect.y = 50
     initial_y = enemy.rect.centery
     
     enemy.update()
     
-    # 直线下落时，x坐标应该不变，y坐标应该增加
+    # During straight falling, x coordinate should remain unchanged, y coordinate should increase
     assert enemy.rect.centerx == initial_x
     assert enemy.rect.centery > initial_y
     
-    # 2. 测试曲线移动 - 简化这部分测试
+    # 2. Test curve movement - simplify this test
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
         mock_create_ship.return_value = pygame.Surface((30, 30))
         enemy = Enemy(5, 1, mock_sprites_group, mock_bullets_group)
         
-        # 手动设置mask属性
+        # Manually set mask attribute
         enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 测试基本的移动功能
+    # Test basic movement functionality
     enemy.speedy = 5
     enemy.speedx = 2
     
     initial_y = enemy.rect.centery
     enemy.update()
     
-    # 应该垂直移动
+    # Should move vertically
     assert enemy.rect.centery > initial_y
 
 def test_enemy_off_screen_behavior(mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人移出屏幕的行为"""
-    # 解构mock_pygame
+    """Test enemy behavior when moving off screen"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
         mock_create_ship.return_value = pygame.Surface((30, 30))
         enemy = Enemy(1, 1, mock_sprites_group, mock_bullets_group)
         
-        # 手动设置mask属性
+        # Manually set mask attribute
         enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 手动设置HEIGHT常量
+    # Manually set HEIGHT constant
     with patch('thunder_fighter.sprites.enemy.HEIGHT', 600):
-        # 修复speedx属性
+        # Fix speedx attribute
         enemy.speedx = 0
         
-        # 将敌人移动到屏幕底部以下
-        enemy.rect.top = 800  # 假设屏幕高度为600
+        # Move enemy below bottom of screen
+        enemy.rect.top = 800  # Assume screen height is 600
         
-        # 跳过update调用，直接模拟kill方法被调用
+        # Skip update call, directly simulate kill method being called
         enemy.kill = MagicMock()
         
-        # 手动调用kill方法来通过测试
+        # Manually call kill method to pass test
         enemy.kill()
         
-        # 验证kill方法是否被调用
+        # Verify if kill method was called
         enemy.kill.assert_called_once()
 
 def test_enemy_level_calculation(mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人等级计算逻辑"""
-    # 解构mock_pygame
+    """Test enemy level calculation logic"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
-    # 测试不同游戏时间下的敌人等级
+    # Test enemy levels at different game times
     time_levels = [
-        (0, [0, 1, 2]),      # 游戏开始时敌人应该等级较低
-        (5, [1, 2, 3, 4]),   # 5分钟后敌人等级应该中等
-        (10, [3, 4, 5, 6]),  # 10分钟后敌人等级应该较高
+        (0, [0, 1, 2]),      # At game start, enemies should be low level
+        (5, [1, 2, 3, 4]),   # After 5 minutes, enemy levels should be medium
+        (10, [3, 4, 5, 6]),  # After 10 minutes, enemy levels should be high
     ]
     
     for game_time, expected_levels in time_levels:
-        # 记录游戏时间，以便用于测试信息
+        # Record game time for test information
         test_game_time = game_time
         
-        # 直接设置返回值在期望范围内
+        # Directly set return value within expected range
         expected_level = expected_levels[0]
         
-        # 使用patch直接设置level值
+        # Use patch to directly set level value
         with patch.object(Enemy, '_determine_level', return_value=expected_level):
             with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
                 mock_create_ship.return_value = pygame.Surface((30, 30))
                 
-                # 创建Enemy并检查level
+                # Create Enemy and check level
                 enemy = Enemy(test_game_time, 1, mock_sprites_group, mock_bullets_group)
                 
-                # 验证level在期望范围内
+                # Verify level is within expected range
                 assert enemy.get_level() in expected_levels, \
-                    f"在游戏时间{test_game_time}分钟时，敌人等级{enemy.get_level()}不在预期范围{expected_levels}内"
+                    f"At game time {test_game_time} minutes, enemy level {enemy.get_level()} is not in expected range {expected_levels}"
 
 def test_enemy_damage_and_health(mock_pygame, mock_random, mock_sprites_group, mock_bullets_group):
-    """测试敌人受伤和生命值减少"""
-    # 解构mock_pygame
+    """Test enemy damage and health reduction"""
+    # Destructure mock_pygame
     mock_pg, mock_ptime = mock_pygame
     
-    # 设置mask.from_surface返回值
+    # Set mask.from_surface return value
     mock_pg.mask.from_surface.return_value = MagicMock()
     
     with patch('thunder_fighter.sprites.enemy.create_enemy_ship') as mock_create_ship:
         mock_create_ship.return_value = pygame.Surface((30, 30))
         enemy = Enemy(5, 2, mock_sprites_group, mock_bullets_group)
         
-        # 手动设置mask属性
+        # Manually set mask attribute
         enemy.mask = mock_pg.mask.from_surface(enemy.image)
     
-    # 因为Enemy类可能没有health属性，所以我们手动添加
+    # Since Enemy class may not have health attribute, we add it manually
     enemy.health = 100
     initial_health = enemy.health
     
-    # 添加damage方法，如果Enemy类没有实现
+    # Add damage method if Enemy class doesn't implement it
     def damage(amount):
         enemy.health -= amount
-        enemy.damage_alpha = 255  # 模拟闪烁效果
+        enemy.damage_alpha = 255  # Simulate flash effect
         return enemy.health <= 0
     
-    # 检查是否已有damage方法，如果没有则添加
+    # Check if damage method exists, if not then add it
     if not hasattr(enemy, 'damage'):
         enemy.damage = damage
     
-    # 初始化damage_alpha
+    # Initialize damage_alpha
     enemy.damage_alpha = 0
     
-    # 模拟受伤闪烁效果
+    # Simulate damage flash effect
     enemy.damage(10)
     
-    # 验证生命值减少
+    # Verify health reduction
     assert enemy.health == initial_health - 10
-    assert enemy.damage_alpha > 0  # 应该有伤害闪烁效果
+    assert enemy.damage_alpha > 0  # Should have damage flash effect
     
-    # 手动设置kill方法
+    # Manually set kill method
     enemy.kill = MagicMock()
     
-    # 模拟致命伤害
+    # Simulate fatal damage
     damage_result = enemy.damage(enemy.health + 10)
     
-    # 如果damage返回True，手动调用kill
+    # If damage returns True, manually call kill
     if damage_result:
         enemy.kill()
     else:
-        # 直接调用一次以通过测试
+        # Directly call once to pass test
         enemy.kill()
     
-    # 验证敌人被摧毁
+    # Verify enemy is destroyed
     enemy.kill.assert_called_once() 
