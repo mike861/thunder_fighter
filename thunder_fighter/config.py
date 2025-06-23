@@ -29,5 +29,5 @@ KEY_MAPPING = {
 }
 
 # Debug settings
-DEBUG_MODE = False
-SHOW_FPS = False 
+# For developer use, to show additional debug info
+DEV_MODE = False

@@ -6,6 +6,7 @@ from thunder_fighter.localization import _  # Import the text localization funct
 import logging
 from thunder_fighter.utils.logger import logger
 from unittest.mock import MagicMock
+from thunder_fighter.config import DEV_MODE
 
 class DummyFont:
     """A dummy font class for use in tests when pygame font isn't available"""
@@ -181,60 +182,15 @@ class PlayerUIManager:
             wingmen: Number of wingmen
         """
         if health is not None:
-            # Calculate health change
-            try:
-                if health != self.player_info['health']:
-                    # Check for mock objects in tests
-                    if hasattr(health, '_extract_mock_name') or hasattr(self.player_info['health'], '_extract_mock_name'):
-                        # In test mode, just update without notifications
-                        self.player_info['health'] = health
-                    else:
-                        change = health - self.player_info['health']
-                        if change < 0:
-                            # Injured
-                            self.add_notification(_("HEALTH_CHANGE_NEGATIVE", change), "warning")
-                        elif change > 0:
-                            # Healed
-                            self.add_notification(_("HEALTH_CHANGE_POSITIVE", change), "achievement")
-                        self.player_info['health'] = health
-            except (TypeError, Exception) as e:
-                # For tests, just update the value without comparison
-                logger.debug(f"Skipping health notification due to: {e}")
-                self.player_info['health'] = health
-                
+            self.player_info['health'] = health
         if max_health is not None:
             self.player_info['max_health'] = max_health
-            
         if bullet_paths is not None:
-            try:
-                if not hasattr(bullet_paths, '_extract_mock_name') and not hasattr(self.player_info['bullet_paths'], '_extract_mock_name'):
-                    if bullet_paths > self.player_info['bullet_paths']:
-                        self.add_notification(_("BULLET_PATHS_INCREASED", bullet_paths), "achievement")
-            except (TypeError, Exception):
-                # Skip notification in tests
-                pass
             self.player_info['bullet_paths'] = bullet_paths
-            
         if bullet_speed is not None:
-            try:
-                if not hasattr(bullet_speed, '_extract_mock_name') and not hasattr(self.player_info['bullet_speed'], '_extract_mock_name'):
-                    if bullet_speed > self.player_info['bullet_speed']:
-                        self.add_notification(_("BULLET_SPEED_INCREASED"), "achievement")
-            except (TypeError, Exception):
-                # Skip notification in tests
-                pass
             self.player_info['bullet_speed'] = bullet_speed
-            
         if speed is not None:
-            try:
-                if not hasattr(speed, '_extract_mock_name') and not hasattr(self.player_info['speed'], '_extract_mock_name'):
-                    if speed > self.player_info['speed']:
-                        self.add_notification(_("MOVEMENT_SPEED_INCREASED"), "achievement")
-            except (TypeError, Exception):
-                # Skip notification in tests
-                pass
             self.player_info['speed'] = speed
-        
         if wingmen is not None:
             self.player_info['wingmen'] = wingmen
     
@@ -252,7 +208,7 @@ class PlayerUIManager:
         if level is not None and level != self.game_state['level']:
             self.level_change_active = True
             self.level_change_timer = time.time()
-            self.add_notification(_("ADVANCED_TO_LEVEL", level), "achievement")
+            # self.add_notification(_("ADVANCED_TO_LEVEL", level), "achievement") # This is now handled by level_up or boss_defeated
             self.game_state['level'] = level
         
         if paused is not None:
@@ -308,32 +264,57 @@ class PlayerUIManager:
         """
         self.add_notification(_("BOSS_APPEARED", boss_level), "warning")
 
+    def show_score_level_up(self, new_level):
+        """Display score-based level up notification."""
+        self.add_notification(_("SCORE_LEVEL_UP", new_level), "achievement")
+
     def show_level_up_effects(self, old_level, new_level, enemies_cleared, score_bonus):
-        """Display level up effects and notifications
+        """Display level up effects and information
         
         Args:
-            old_level: Previous game level
-            new_level: New game level
+            old_level: Previous level
+            new_level: New level
             enemies_cleared: Number of enemies cleared
             score_bonus: Score bonus received
         """
-        # Main level up notification
-        self.add_notification(_("LEVEL_UP", old_level, new_level), "achievement")
+        # Add level up notification
+        level_up_text = _("LEVEL_UP", old_level, new_level)
+        self.add_notification(level_up_text, "achievement")
         
-        # Enemies cleared notification
+        # Add cleared enemies notification
         if enemies_cleared > 0:
-            self.add_notification(_("ENEMIES_CLEARED", enemies_cleared), "achievement")
+            cleared_text = _("ENEMIES_CLEARED", enemies_cleared)
+            self.add_notification(cleared_text, "normal")
         
-        # Score bonus notification
+        # Add score bonus notification
         if score_bonus > 0:
-            self.add_notification(_("BOSS_BONUS", score_bonus), "achievement")
+            bonus_text = _("BOSS_BONUS", score_bonus)
+            self.add_notification(bonus_text, "achievement")
         
-        # Activate level change animation
-        self.level_change_timer = time.time()
-        self.level_change_active = True
+        # Show stage complete notification
+        stage_text = _("STAGE_COMPLETE")
+        self.add_notification(stage_text, "achievement")
         
         logger.info(f"Level up effects shown: {old_level} → {new_level}, cleared {enemies_cleared} enemies, bonus {score_bonus}")
-    
+
+    def show_victory_screen(self, final_score):
+        """Show victory screen when game is won
+        
+        Args:
+            final_score: Final score achieved
+        """
+        # Set victory state
+        self.game_state['victory'] = True
+        
+        # Only add victory notifications once
+        if not hasattr(self, '_victory_notifications_added'):
+            self._victory_notifications_added = True
+            # Add victory notifications
+            self.add_notification(_("FINAL_BOSS_DEFEATED"), "achievement")
+            self.add_notification(_("GAME_COMPLETED"), "achievement")
+            
+            logger.info(f"Victory screen shown with final score: {final_score}")
+
     def update(self):
         """Update all UI element states"""
         # Update temporary notifications
@@ -439,20 +420,27 @@ class PlayerUIManager:
         # Draw health bar
         self.draw_health_bar(x, y, 150, 20, self.player_info['health'], self.player_info['max_health'])
         
-        # Draw bullet information
-        bullet_text = _("PLAYER_BULLET_INFO", self.player_info['bullet_paths'], self.player_info['bullet_speed'])
-        bullet_surf = self.font_small.render(bullet_text, True, WHITE)
-        self.screen.blit(bullet_surf, (x, y + 25))
-        
-        # Draw movement speed
+        # Always display bullet speed
+        bullet_speed_text = _("PLAYER_BULLET_SPEED_INFO", self.player_info['bullet_speed'])
+        bullet_speed_surf = self.font_small.render(bullet_speed_text, True, WHITE)
+        self.screen.blit(bullet_speed_surf, (x, y + 25))
+
+        # Always display movement speed
         speed_text = _("PLAYER_SPEED_INFO", self.player_info['speed'])
         speed_surf = self.font_small.render(speed_text, True, WHITE)
         self.screen.blit(speed_surf, (x, y + 45))
 
-        # Draw wingmen information
-        wingmen_text = _("PLAYER_WINGMEN_INFO", self.player_info['wingmen'])
-        wingmen_surf = self.font_small.render(wingmen_text, True, WHITE)
-        self.screen.blit(wingmen_surf, (x, y + 65))
+        # Display extra info only in dev mode
+        if DEV_MODE:
+            # Draw bullet path info
+            bullet_path_text = _("PLAYER_BULLET_PATHS_INFO", self.player_info['bullet_paths'])
+            bullet_path_surf = self.font_small.render(bullet_path_text, True, WHITE)
+            self.screen.blit(bullet_path_surf, (x, y + 65))
+
+            # Draw wingmen information
+            wingmen_text = _("PLAYER_WINGMEN_INFO", self.player_info['wingmen'])
+            wingmen_surf = self.font_small.render(wingmen_text, True, WHITE)
+            self.screen.blit(wingmen_surf, (x, y + 85))
 
     def draw_player_status(self, x, y):
         # This method seems to be redundant with draw_player_stats, 
@@ -504,6 +492,23 @@ class PlayerUIManager:
         self.screen.blit(level_surf, (x, y + 25))
         self.screen.blit(time_surf, (x, y + 50))
 
+    def draw_dev_info(self, fps, enemy_count, target_enemy_count, player_pos):
+        """Draw developer debug information on the screen."""
+        x, y = 10, HEIGHT - 80
+        dev_color = (200, 200, 200)  # Light gray
+
+        fps_text = f"FPS: {fps:.2f}"
+        enemy_text = f"Enemies: {enemy_count}/{target_enemy_count}"
+        player_pos_text = f"Player: ({int(player_pos[0])}, {int(player_pos[1])})"
+
+        fps_surf = self.font_small.render(fps_text, True, dev_color)
+        enemy_surf = self.font_small.render(enemy_text, True, dev_color)
+        player_pos_surf = self.font_small.render(player_pos_text, True, dev_color)
+
+        self.screen.blit(fps_surf, (x, y))
+        self.screen.blit(enemy_surf, (x, y + 20))
+        self.screen.blit(player_pos_surf, (x, y + 40))
+
     def draw_pause_screen(self):
         """Draw pause screen"""
         overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -539,28 +544,51 @@ class PlayerUIManager:
         if not self.game_state['victory']:
             return
             
-        # Draw dark blue background
-        self.screen.fill((20, 20, 40))
+        # Create semi-transparent overlay instead of filling the entire screen
+        victory_overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        victory_overlay.fill((0, 0, 0, 120))  # Semi-transparent black overlay
+        self.screen.blit(victory_overlay, (0, 0))
+        
+        # Create a victory panel in the center
+        panel_width = 400
+        panel_height = 300
+        panel_x = (WIDTH - panel_width) // 2
+        panel_y = (HEIGHT - panel_height) // 2
+        
+        # Draw victory panel background
+        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        panel_surface.fill((20, 40, 80, 200))  # Semi-transparent blue panel
+        
+        # Draw panel border
+        pygame.draw.rect(panel_surface, GREEN, (0, 0, panel_width, panel_height), 3)
+        
+        self.screen.blit(panel_surface, (panel_x, panel_y))
         
         # Draw victory text
         victory_text = self.font_large.render(_("VICTORY"), True, GREEN)
-        text_rect = victory_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
+        text_rect = victory_text.get_rect(center=(WIDTH // 2, panel_y + 60))
         self.screen.blit(victory_text, text_rect)
         
         # Draw level cleared information
         level_text = self.font_medium.render(_("LEVEL_CLEARED", max_level), True, WHITE)
-        level_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        level_rect = level_text.get_rect(center=(WIDTH // 2, panel_y + 120))
         self.screen.blit(level_text, level_rect)
         
         # Draw final score
         score_text = self.font_medium.render(_("FINAL_SCORE", final_score), True, WHITE)
-        score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
+        score_rect = score_text.get_rect(center=(WIDTH // 2, panel_y + 160))
         self.screen.blit(score_text, score_rect)
+        
+        # Draw survival time
+        game_time = self.game_state.get('game_time', 0)
+        time_text = self.font_medium.render(_("SURVIVAL_TIME", int(game_time)), True, WHITE)
+        time_rect = time_text.get_rect(center=(WIDTH // 2, panel_y + 200))
+        self.screen.blit(time_text, time_rect)
         
         # Draw tip text
         if self.show_blink_text:  # Blinking display
             exit_text = self.font_small.render(_("EXIT_PROMPT"), True, YELLOW)
-            exit_rect = exit_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+            exit_rect = exit_text.get_rect(center=(WIDTH // 2, panel_y + 250))
             self.screen.blit(exit_text, exit_rect)
     
     def draw_game_over_screen(self, final_score, level_reached, game_time):

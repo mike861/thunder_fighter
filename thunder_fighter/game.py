@@ -14,7 +14,7 @@ from thunder_fighter.sprites.player import Player
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.sprites.boss import Boss
 from thunder_fighter.sprites.items import HealthItem, create_random_item
-from thunder_fighter.utils.stars import create_stars, Star
+from thunder_fighter.graphics.background import DynamicBackground
 from thunder_fighter.utils.score import Score
 from thunder_fighter.utils.collisions import (
     check_bullet_enemy_collisions,
@@ -31,6 +31,7 @@ from thunder_fighter.utils.sound_manager import sound_manager
 from thunder_fighter.graphics.ui_manager import PlayerUIManager
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
+from thunder_fighter.config import DEV_MODE
 
 class Game:
     def __init__(self):
@@ -41,6 +42,9 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TEXT_GAME_TITLE)
         self.clock = pygame.time.Clock()
+        
+        # Font for dev mode enemy level display
+        self.dev_font = pygame.font.Font(None, 18) if DEV_MODE else None
         
         # Create sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -66,8 +70,8 @@ class Game:
         for i in range(BASE_ENEMY_COUNT):
             self.spawn_enemy()
         
-        # Create background stars
-        self.stars = create_stars(50)
+        # Create dynamic background
+        self.background = DynamicBackground()
         
         # Create score
         self.score = Score()
@@ -76,6 +80,8 @@ class Game:
         self.last_score_checkpoint = 0
         self.item_spawn_timer = time.time()
         self.item_spawn_interval = 30
+        
+        self.target_enemy_count = BASE_ENEMY_COUNT
         
         # Boss related variables
         self.boss = None
@@ -249,15 +255,19 @@ class Game:
         else:
             self._last_sound_check = time.time()
 
-        if self.paused:
+        # Stop game updates if game is won or paused
+        if self.paused or self.game_won:
             return
+        
+        # Update background
+        self.background.update()
         
         self.all_sprites.update()
         
         # Calculate target enemy count with more gradual increase
-        target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
+        self.target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
         
-        if len(self.enemies) < target_enemy_count:
+        if len(self.enemies) < self.target_enemy_count:
             if time.time() - self.enemy_spawn_timer > 2:  # Increased from 1 to 2 seconds
                 self.spawn_enemy(game_time, self.game_level)
                 self.enemy_spawn_timer = time.time()
@@ -335,7 +345,27 @@ class Game:
             self.boss = None
             self.ui_manager.update_boss_info(active=False)
             
-            # Level up the game
+            # Check if this is the final boss (level 10)
+            if self.game_level >= MAX_GAME_LEVEL:
+                # Game victory!
+                self.game_won = True
+                logger.info(f"Final boss defeated at level {self.game_level}! Game won!")
+                
+                # Add final boss score bonus
+                final_boss_bonus = boss_level * 1000  # Double bonus for final boss
+                self.score.update(final_boss_bonus)
+                
+                # Show victory screen
+                self.ui_manager.show_victory_screen(self.score.value)
+                
+                # Play victory sound and fade out music
+                sound_manager.play_sound('boss_death.wav')
+                sound_manager.fadeout_music(3000)
+                
+                # Stop spawning enemies and items
+                return
+            
+            # Level up the game (only if not at max level)
             old_level = self.game_level
             if self.game_level < MAX_GAME_LEVEL:
                 self.game_level += 1
@@ -387,7 +417,7 @@ class Game:
             self.enemy_spawn_timer = time.time()
             self.item_spawn_interval = max(15, 30 - self.game_level)
             logger.info(f"Score-based level up from {old_level} to {self.game_level}")
-            self.ui_manager.add_notification(f"Level Up! Level {self.game_level}", "achievement")
+            self.ui_manager.show_score_level_up(self.game_level)
 
     def game_over(self):
         logger.info("Game Over")
@@ -395,9 +425,8 @@ class Game:
 
     def render(self):
         """Render game screen"""
-        self.screen.fill(DARK_GRAY)
-        for star in self.stars:
-            star.draw(self.screen)
+        # Draw dynamic background
+        self.background.draw(self.screen)
         
         self.all_sprites.draw(self.screen)
         
@@ -408,9 +437,21 @@ class Game:
         self.ui_manager.draw_player_stats()
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
+
+        if DEV_MODE:
+            fps = self.clock.get_fps()
+            player_pos = self.player.rect.center
+            enemy_count = len(self.enemies)
+            self.ui_manager.draw_dev_info(fps, enemy_count, self.target_enemy_count, player_pos)
+
+            # Draw level text next to each enemy
+            for enemy in self.enemies:
+                level_text = f"L{enemy.get_level()}"
+                text_surf = self.dev_font.render(level_text, True, WHITE)
+                self.screen.blit(text_surf, (enemy.rect.right + 2, enemy.rect.top))
         
         if self.game_won:
-            self.ui_manager.show_victory_screen(self.score.value)
+            self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
         elif self.player.health <= 0:
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, (time.time() - self.game_start_time) / 60.0)
 
@@ -427,11 +468,10 @@ class Game:
             self.update()
             self.render()
             
-            if self.game_level > MAX_GAME_LEVEL and not self.game_won:
-                self.game_won = True
-                sound_manager.fadeout_music(3000)
-                time.sleep(3)
-                self.running = False
+            # Exit game if victory is achieved and player presses ESC
+            if self.game_won:
+                # Victory state - wait for player to exit
+                continue
                 
         pygame.quit()
         sys.exit()
