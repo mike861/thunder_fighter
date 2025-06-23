@@ -27,24 +27,30 @@ from thunder_fighter.utils.collisions import (
 )
 from thunder_fighter.graphics.renderers import draw_health_bar
 from thunder_fighter.utils.logger import logger
-from thunder_fighter.utils.sound_manager import sound_manager
+from thunder_fighter.utils.sound_manager import SoundManager
 from thunder_fighter.graphics.ui_manager import PlayerUIManager
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
-from thunder_fighter.config import DEV_MODE
+from thunder_fighter.utils.config_manager import config_manager
 
 class Game:
     def __init__(self):
         # Initialize pygame
         pygame.init()
         
-        # Create game window
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        # Apply display configuration
+        display_config = config_manager.display
+        if display_config.fullscreen:
+            self.screen = pygame.display.set_mode((display_config.width, display_config.height), pygame.FULLSCREEN)
+        else:
+            # Use constants for now, but could be made configurable
+            self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        
         pygame.display.set_caption(TEXT_GAME_TITLE)
         self.clock = pygame.time.Clock()
         
         # Font for dev mode enemy level display
-        self.dev_font = pygame.font.Font(None, 18) if DEV_MODE else None
+        self.dev_font = pygame.font.Font(None, 18) if config_manager.debug.dev_mode else None
         
         # Create sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -58,8 +64,15 @@ class Game:
         # Enemy level tracking
         self.enemy_levels = {i: 0 for i in range(11)}
         
-        # Create player
-        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies)
+        # Create player with difficulty modifiers
+        difficulty_multipliers = config_manager.get_difficulty_multipliers()
+        
+        # Initialize sound manager first
+        self.sound_manager = SoundManager(config_manager.sound)
+        
+        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies, self.sound_manager)
+        # Apply difficulty-based speed modifier
+        self.player.speed = int(self.player.speed * difficulty_multipliers['player_speed'])
         self.all_sprites.add(self.player)
         
         # Add initial wingmen based on configuration
@@ -73,8 +86,9 @@ class Game:
         # Create dynamic background
         self.background = DynamicBackground()
         
-        # Create score
+        # Create score with difficulty multiplier
         self.score = Score()
+        self.score_multiplier = difficulty_multipliers['score_multiplier']
         
         # Item spawn related variables
         self.last_score_checkpoint = 0
@@ -100,7 +114,7 @@ class Game:
         self.game_won = False
         
         # Play background music
-        sound_manager.play_music('background_music.mp3')
+        self.sound_manager.play_music('background_music.mp3')
         
         # Initialize UI manager
         self.ui_manager = PlayerUIManager(self.screen, self.player, self)
@@ -108,6 +122,8 @@ class Game:
         self.update_ui_state()
         
         logger.info("Game initialization complete.")
+        logger.info(f"Difficulty: {config_manager.gameplay.difficulty}")
+        logger.info(f"Difficulty multipliers: {difficulty_multipliers}")
 
     def update_ui_state(self):
         self.ui_manager.update_game_state(
@@ -140,12 +156,12 @@ class Game:
 
     def _check_sound_system(self):
         """Check and fix sound system if needed"""
-        if not sound_manager.is_healthy():
+        if not self.sound_manager.is_healthy():
             logger.warning("Sound system unhealthy, attempting to fix...")
-            sound_manager.reinitialize()
+            self.sound_manager.reinitialize()
         else:
             # Even if system is healthy, ensure music is playing
-            sound_manager.ensure_music_playing()
+            self.sound_manager.ensure_music_playing()
     
     def spawn_enemy(self, game_time=0, game_level=1):
         """Spawn a new enemy"""
@@ -209,26 +225,26 @@ class Game:
                     
                     if self.paused:
                         logger.debug("Game paused")
-                        sound_manager.set_music_volume(max(0.1, sound_manager.music_volume / 2))
+                        self.sound_manager.set_music_volume(max(0.1, self.sound_manager.music_volume / 2))
                     else:
                         logger.debug("Game resumed")
-                        sound_manager.set_music_volume(min(1.0, sound_manager.music_volume * 2))
+                        self.sound_manager.set_music_volume(min(1.0, self.sound_manager.music_volume * 2))
                 elif event.key == pygame.K_m:
-                    sound_manager.toggle_music()
-                    if sound_manager.music_enabled:
-                        sound_manager.play_music('background_music.mp3')
+                    self.sound_manager.toggle_music()
+                    if self.sound_manager.music_enabled:
+                        self.sound_manager.play_music('background_music.mp3')
                 elif event.key == pygame.K_s:
-                    sound_manager.toggle_sound()
+                    self.sound_manager.toggle_sound()
                 elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
-                    current_volume = sound_manager.sound_volume
-                    sound_manager.set_sound_volume(current_volume + 0.1)
-                    sound_manager.set_music_volume(current_volume + 0.1)
-                    logger.debug(f"Volume increased to {sound_manager.sound_volume:.1f}")
+                    current_volume = self.sound_manager.sound_volume
+                    self.sound_manager.set_sound_volume(current_volume + 0.1)
+                    self.sound_manager.set_music_volume(current_volume + 0.1)
+                    logger.debug(f"Volume increased to {self.sound_manager.sound_volume:.1f}")
                 elif event.key == pygame.K_MINUS:
-                    current_volume = sound_manager.sound_volume
-                    sound_manager.set_sound_volume(current_volume - 0.1)
-                    sound_manager.set_music_volume(current_volume - 0.1)
-                    logger.debug(f"Volume decreased to {sound_manager.sound_volume:.1f}")
+                    current_volume = self.sound_manager.sound_volume
+                    self.sound_manager.set_sound_volume(current_volume - 0.1)
+                    self.sound_manager.set_music_volume(current_volume - 0.1)
+                    logger.debug(f"Volume decreased to {self.sound_manager.sound_volume:.1f}")
                 elif event.key == pygame.K_l:
                     current_lang = 'en' if self.ui_manager.current_language == 'zh' else 'zh'
                     change_language(current_lang)
@@ -308,7 +324,7 @@ class Game:
 
         check_missile_enemy_collisions(self.missiles, self.enemies, self.all_sprites, self.score)
 
-        check_items_player_collisions(self.items, self.player, self.ui_manager)
+        check_items_player_collisions(self.items, self.player, self.ui_manager, self.sound_manager)
         
         if check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)['was_hit']:
             if self.player.health <= 0: self.game_over()
@@ -359,8 +375,8 @@ class Game:
                 self.ui_manager.show_victory_screen(self.score.value)
                 
                 # Play victory sound and fade out music
-                sound_manager.play_sound('boss_death.wav')
-                sound_manager.fadeout_music(3000)
+                self.sound_manager.play_sound('boss_death.wav')
+                self.sound_manager.fadeout_music(3000)
                 
                 # Stop spawning enemies and items
                 return
@@ -395,7 +411,7 @@ class Game:
             self.ui_manager.show_level_up_effects(old_level, self.game_level, enemies_cleared, boss_score_bonus)
             
             # Play victory sound
-            sound_manager.play_sound('boss_death.wav')
+            self.sound_manager.play_sound('boss_death.wav')
             
             # Reset boss spawn timer for next boss
             self.boss_spawn_timer = time.time()
@@ -438,7 +454,7 @@ class Game:
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
 
-        if DEV_MODE:
+        if config_manager.debug.dev_mode:
             fps = self.clock.get_fps()
             player_pos = self.player.rect.center
             enemy_count = len(self.enemies)

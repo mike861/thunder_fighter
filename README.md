@@ -78,6 +78,50 @@ _(Add gameplay screenshots here if available)_
     # THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
     ```
 
+## Configuration Management
+
+Thunder Fighter includes a comprehensive configuration system that allows you to customize various aspects of the game.
+
+### Configuration Tool
+
+Use the built-in configuration tool to manage settings:
+
+```bash
+# Show current configuration
+python -m thunder_fighter.utils.config_tool show
+
+# Set music volume to 80%
+python -m thunder_fighter.utils.config_tool set sound music_volume 0.8
+
+# Enable developer mode
+python -m thunder_fighter.utils.config_tool set debug dev_mode true
+
+# Set difficulty to hard
+python -m thunder_fighter.utils.config_tool set gameplay difficulty hard
+
+# Reset all settings to defaults
+python -m thunder_fighter.utils.config_tool reset
+```
+
+### Available Settings
+
+| Section | Setting | Description | Default |
+|---------|---------|-------------|---------|
+| **Sound** | `music_volume` | Background music volume (0.0-1.0) | 0.5 |
+| | `sound_volume` | Sound effects volume (0.0-1.0) | 0.7 |
+| | `music_enabled` | Enable/disable music | true |
+| | `sound_enabled` | Enable/disable sound effects | true |
+| **Display** | `fullscreen` | Enable fullscreen mode | false |
+| | `screen_scaling` | Screen scaling factor | 1.0 |
+| **Gameplay** | `difficulty` | Game difficulty (easy/normal/hard) | normal |
+| | `initial_lives` | Starting number of lives | 3 |
+| **Debug** | `dev_mode` | Enable developer mode | false |
+| | `log_level` | Logging level | INFO |
+
+### Configuration File
+
+Settings are automatically saved to `~/.thunder_fighter/config.json`. You can also edit this file directly if preferred.
+
 ### Controls
 
 -   **Movement:** Arrow Keys (↑↓←→) or WASD

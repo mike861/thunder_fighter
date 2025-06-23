@@ -6,7 +6,7 @@ from thunder_fighter.localization import _  # Import the text localization funct
 import logging
 from thunder_fighter.utils.logger import logger
 from unittest.mock import MagicMock
-from thunder_fighter.config import DEV_MODE
+from thunder_fighter.utils.config_manager import config_manager
 
 class DummyFont:
     """A dummy font class for use in tests when pygame font isn't available"""
@@ -431,7 +431,12 @@ class PlayerUIManager:
         self.screen.blit(speed_surf, (x, y + 45))
 
         # Display extra info only in dev mode
-        if DEV_MODE:
+        if config_manager.debug.dev_mode:
+            # Draw movement speed
+            speed_text = _("PLAYER_SPEED_INFO", self.player_info['speed'])
+            speed_surf = self.font_small.render(speed_text, True, WHITE)
+            self.screen.blit(speed_surf, (x, y + 45))
+
             # Draw bullet path info
             bullet_path_text = _("PLAYER_BULLET_PATHS_INFO", self.player_info['bullet_paths'])
             bullet_path_surf = self.font_small.render(bullet_path_text, True, WHITE)

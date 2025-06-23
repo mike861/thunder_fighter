@@ -8,26 +8,60 @@ from thunder_fighter.constants import ASSETS_DIR
 class SoundManager:
     """Manage all game sounds and music"""
     
-    def __init__(self):
+    def __init__(self, sound_config=None):
+        """
+        Initialize sound manager with configuration
+        
+        Args:
+            sound_config: SoundConfig object with sound settings
+        """
         self._initialized = False
         self._init_pygame_mixer()
         
-        # Sound effect volume (0.0 to 1.0)
-        self.sound_volume = 0.5
-        # Music volume (0.0 to 1.0)
-        self.music_volume = 0.3
+        # Use configuration if provided, otherwise use defaults
+        if sound_config:
+            self.sound_volume = sound_config.sound_volume
+            self.music_volume = sound_config.music_volume
+            self.sound_enabled = sound_config.sound_enabled
+            self.music_enabled = sound_config.music_enabled
+        else:
+            # Fallback to hardcoded defaults if no config provided
+            self.sound_volume = 0.5
+            self.music_volume = 0.3
+            self.sound_enabled = True
+            self.music_enabled = True
         
         # Sound effects dictionary
         self.sounds = {}
-        self.volume = 0.5  # Default volume at 50%
+        self.volume = self.sound_volume  # Backward compatibility
         self.is_muted = False
-        
-        self.sound_enabled = True
-        self.music_enabled = True
         
         # Load sounds after initialization
         if self._initialized:
             self._load_sounds()
+        
+    def update_config(self, sound_config):
+        """
+        Update sound manager with new configuration
+        
+        Args:
+            sound_config: SoundConfig object with updated settings
+        """
+        self.sound_volume = sound_config.sound_volume
+        self.music_volume = sound_config.music_volume
+        self.sound_enabled = sound_config.sound_enabled
+        self.music_enabled = sound_config.music_enabled
+        self.volume = self.sound_volume  # Backward compatibility
+        
+        # Update volume for all loaded sounds
+        for sound in self.sounds.values():
+            sound.set_volume(self.sound_volume)
+        
+        # Update music volume if music is playing
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.set_volume(self.music_volume)
+        
+        logger.debug(f"Sound manager configuration updated: volume={self.sound_volume}, music_volume={self.music_volume}")
         
     def _init_pygame_mixer(self):
         """Initialize pygame.mixer with proper error handling"""
