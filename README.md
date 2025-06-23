@@ -88,7 +88,6 @@ _(Add gameplay screenshots here if available)_
 -   **Adjust Volume:** +/- (Plus/Minus keys)
 -   **Switch Language:** L (Toggles between English and Chinese)
 -   **Quit Game:** ESC
--   **(Dev Mode) Show Enemy Levels:** F3
 
 ### Game Objective
 

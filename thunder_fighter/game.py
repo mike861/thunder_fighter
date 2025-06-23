@@ -31,6 +31,7 @@ from thunder_fighter.utils.sound_manager import sound_manager
 from thunder_fighter.graphics.ui_manager import PlayerUIManager
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
+from thunder_fighter.config import DEV_MODE
 
 class Game:
     def __init__(self):
@@ -41,6 +42,9 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(TEXT_GAME_TITLE)
         self.clock = pygame.time.Clock()
+        
+        # Font for dev mode enemy level display
+        self.dev_font = pygame.font.Font(None, 18) if DEV_MODE else None
         
         # Create sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -76,6 +80,8 @@ class Game:
         self.last_score_checkpoint = 0
         self.item_spawn_timer = time.time()
         self.item_spawn_interval = 30
+        
+        self.target_enemy_count = BASE_ENEMY_COUNT
         
         # Boss related variables
         self.boss = None
@@ -259,9 +265,9 @@ class Game:
         self.all_sprites.update()
         
         # Calculate target enemy count with more gradual increase
-        target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
+        self.target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
         
-        if len(self.enemies) < target_enemy_count:
+        if len(self.enemies) < self.target_enemy_count:
             if time.time() - self.enemy_spawn_timer > 2:  # Increased from 1 to 2 seconds
                 self.spawn_enemy(game_time, self.game_level)
                 self.enemy_spawn_timer = time.time()
@@ -411,7 +417,7 @@ class Game:
             self.enemy_spawn_timer = time.time()
             self.item_spawn_interval = max(15, 30 - self.game_level)
             logger.info(f"Score-based level up from {old_level} to {self.game_level}")
-            self.ui_manager.add_notification(f"Level Up! Level {self.game_level}", "achievement")
+            self.ui_manager.show_score_level_up(self.game_level)
 
     def game_over(self):
         logger.info("Game Over")
@@ -431,6 +437,18 @@ class Game:
         self.ui_manager.draw_player_stats()
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
+
+        if DEV_MODE:
+            fps = self.clock.get_fps()
+            player_pos = self.player.rect.center
+            enemy_count = len(self.enemies)
+            self.ui_manager.draw_dev_info(fps, enemy_count, self.target_enemy_count, player_pos)
+
+            # Draw level text next to each enemy
+            for enemy in self.enemies:
+                level_text = f"L{enemy.get_level()}"
+                text_surf = self.dev_font.render(level_text, True, WHITE)
+                self.screen.blit(text_surf, (enemy.rect.right + 2, enemy.rect.top))
         
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
