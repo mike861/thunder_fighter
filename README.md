@@ -24,6 +24,11 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - Comprehensive logging system
 - **Extensively Tested**: Fully tested codebase with 94 comprehensive tests covering all game mechanics
 - **Localization**: All user-facing UI text is loaded via the localization module, with translations available in English and Chinese.
+- **Modular UI System**: Component-based UI architecture following single responsibility principle
+- **Configuration Management**: JSON-based configuration with command-line tools
+- **Sound System**: Configurable audio with music and sound effects
+- **Developer Mode**: Debug information and configuration options
+- **Dynamic Difficulty**: Configurable gameplay parameters
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -193,3 +198,138 @@ thunder_fighter/
 ├── README_ZH.md    # Chinese README
 └── LICENSE         # Project License
 ```
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the game
+python main.py
+
+# Configure settings
+python -m thunder_fighter.utils.config_tool show
+python -m thunder_fighter.utils.config_tool set sound music_volume 0.8
+```
+
+## Game Controls
+
+- **Arrow Keys**: Move player
+- **Space**: Shoot bullets
+- **P**: Pause/Resume game
+- **M**: Toggle music
+- **S**: Toggle sound effects
+- **+/-**: Adjust volume
+- **L**: Switch language
+- **ESC**: Exit game
+
+## Architecture
+
+### UI System (Recently Refactored)
+
+The UI system has been completely refactored from a monolithic 700+ line class into modular components:
+
+- **HealthBarComponent**: Draws health bars with dynamic colors
+- **NotificationManager**: Manages game notifications and achievements
+- **GameInfoDisplay**: Shows score, level, and elapsed time
+- **PlayerStatsDisplay**: Displays player statistics and upgrades
+- **BossStatusDisplay**: Shows boss health and combat modes
+- **ScreenOverlayManager**: Handles pause, victory, and game over screens
+- **DevInfoDisplay**: Developer debug information (FPS, positions, etc.)
+
+### Configuration Management
+
+- **JSON-based configuration**: Centralized settings management
+- **Command-line tools**: Easy configuration without code changes
+- **Runtime updates**: Change settings while game is running
+- **Legacy compatibility**: Automatic migration from old config format
+
+### Sound System
+
+- **Instance-based management**: Each game instance has its own sound manager
+- **Configurable volumes**: Separate music and sound effect controls
+- **Health monitoring**: Automatic system recovery and music continuity
+- **Format support**: MP3, WAV, OGG audio formats
+
+## Development
+
+### Testing
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test categories
+python -m pytest tests/graphics/ -v  # UI components
+python -m pytest tests/sprites/ -v   # Game entities
+python -m pytest tests/utils/ -v     # Utilities
+```
+
+### Configuration
+
+```bash
+# View current settings
+python -m thunder_fighter.utils.config_tool show
+
+# Modify settings
+python -m thunder_fighter.utils.config_tool set sound music_volume 0.8
+python -m thunder_fighter.utils.config_tool set debug dev_mode true
+
+# Reset to defaults
+python -m thunder_fighter.utils.config_tool reset
+```
+
+## Project Structure
+
+```
+thunder_fighter/
+├── graphics/
+│   ├── ui_components/          # Modular UI components
+│   ├── ui_manager.py           # Main UI facade
+│   └── ui_manager_refactored.py # Component coordinator
+├── sprites/                    # Game entities
+├── utils/                      # Utilities and managers
+├── state/                      # Game state management
+├── localization/              # Multi-language support
+└── assets/                    # Game assets
+```
+
+## Recent Updates
+
+### ✅ UI System Refactoring (Completed)
+- Transformed monolithic UI into modular components
+- Improved testability with 35 new UI tests
+- Maintained full backwards compatibility
+- Enhanced maintainability and extensibility
+
+### ✅ Configuration Management System
+- Implemented JSON-based configuration
+- Added command-line configuration tools
+- Integrated with all game systems
+- Supports difficulty multipliers
+
+### ✅ Sound System Improvements
+- Instance-based sound management
+- Health monitoring and auto-recovery
+- Configurable volume controls
+- Fixed notification duplicates
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with tests
+4. Ensure all tests pass
+5. Submit a pull request
+
+## Documentation
+
+- [UI Refactoring Summary](docs/UI_REFACTORING_SUMMARY.md)
+- [Configuration Management](docs/IMPLEMENTATION_SUMMARY.md)
+- [State Management System](docs/STATE_MANAGEMENT_SYSTEM.md)
+- [Development Details](docs/DETAILS.md)

@@ -1,10 +1,17 @@
 """
 UI Manager Module
 
-This module provides backwards compatibility by re-exporting the refactored UIManager.
-The original monolithic UIManager has been replaced with a modular component-based approach.
+This module provides the main UI Manager for the Thunder Fighter game.
+The UI system uses a modular component-based architecture following the single responsibility principle.
 
-The original implementation has been preserved in ui_manager_original.py for reference.
+Components include:
+- HealthBarComponent: Draws health bars
+- NotificationManager: Manages game notifications
+- GameInfoDisplay: Shows score, level, and time
+- PlayerStatsDisplay: Displays player statistics
+- BossStatusDisplay: Shows boss health and status
+- ScreenOverlayManager: Manages special screens (pause, victory, game over)
+- DevInfoDisplay: Developer debug information
 """
 
 # Import and re-export the refactored UIManager
