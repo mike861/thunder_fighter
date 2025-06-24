@@ -13,16 +13,24 @@ from thunder_fighter.utils.logger import logger
 class GameInfoDisplay:
     """Component for displaying game information."""
     
-    def __init__(self, screen, font):
+    def __init__(self, screen, font=None):
         """
         Initialize the game info display.
         
         Args:
             screen: pygame.Surface - The game screen to draw on
-            font: pygame.Font - Font for displaying text
+            font: pygame.Font - Font for displaying text (optional, will use resource manager if None)
         """
         self.screen = screen
-        self.font = font
+        
+        # Use resource manager for font if not provided
+        if font is None:
+            from thunder_fighter.utils.resource_manager import get_resource_manager
+            resource_manager = get_resource_manager()
+            self.font = resource_manager.load_font(None, 24, system_font=False)
+        else:
+            self.font = font
+            
         self.text_color = WHITE
         
         # Position settings

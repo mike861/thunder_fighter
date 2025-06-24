@@ -102,13 +102,12 @@ class SoundManager:
             self._initialized = False # Explicitly set to false on error
         
     def _load_sounds(self):
-        """Load all sound effects from the assets/sounds directory."""
-        sounds_dir = os.path.join(ASSETS_DIR, 'sounds')
-        if not os.path.isdir(sounds_dir):
-            logger.warning(f"Sounds directory not found: {sounds_dir}")
-            return
+        """Load all sound effects using the resource manager."""
+        from thunder_fighter.utils.resource_manager import get_resource_manager
         
-        logger.debug(f"Loading sounds from: {sounds_dir}")
+        resource_manager = get_resource_manager()
+        
+        logger.debug("Loading sounds via resource manager")
         
         # Define sound effect files
         sound_files = {
@@ -120,18 +119,17 @@ class SoundManager:
             'player_death': 'player_death.wav'
         }
         
-        # Load sound effects
+        # Load sound effects via resource manager
         for sound_name, file_name in sound_files.items():
-            file_path = os.path.join(sounds_dir, file_name)
-            if os.path.exists(file_path):
-                try:
-                    self.sounds[sound_name] = pygame.mixer.Sound(file_path)
-                    self.sounds[sound_name].set_volume(self.sound_volume)
-                    logger.debug(f"Loaded sound: {sound_name} from {file_path}")
-                except Exception as e:
-                    logger.error(f"Failed to load sound {sound_name}: {e}")
-            else:
-                logger.warning(f"Sound file not found: {file_path}")
+            try:
+                sound = resource_manager.load_sound(file_name, volume=self.sound_volume)
+                if sound:
+                    self.sounds[sound_name] = sound
+                    logger.debug(f"Loaded sound: {sound_name} via resource manager")
+                else:
+                    logger.warning(f"Sound file not found: {file_name}")
+            except Exception as e:
+                logger.error(f"Failed to load sound {sound_name}: {e}")
     
     def play_sound(self, sound_name):
         """Play the specified sound effect"""
@@ -180,9 +178,12 @@ class SoundManager:
         if not self.music_enabled:
             return
             
-        music_path = os.path.join(ASSETS_DIR, 'music', music_file)
-        if not os.path.exists(music_path):
-            logger.warning(f"Music file not found: {music_path}")
+        # Get music path via resource manager
+        from thunder_fighter.utils.resource_manager import get_resource_manager
+        resource_manager = get_resource_manager()
+        music_path = resource_manager.get_music_path(music_file)
+        if not music_path:
+            logger.warning(f"Music file not found: {music_file}")
             return
         
         # Try to play music with retry mechanism

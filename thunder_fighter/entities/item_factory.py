@@ -50,7 +50,14 @@ class ItemFactory(ConfigurableEntityFactory):
         player = config['player']
         
         item_class = self._item_types.get(item_type, HealthItem)
-        return item_class(all_sprites, items, player)
+        # Create item instance without parameters
+        item = item_class()
+        
+        # Add to sprite groups
+        all_sprites.add(item)
+        items.add(item)
+        
+        return item
     
     def create_random_item(self, all_sprites: pygame.sprite.Group,
                           items: pygame.sprite.Group, player):

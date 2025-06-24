@@ -4,11 +4,16 @@ from thunder_fighter.constants import FONT_NAME, FONT_SIZE_MEDIUM, WHITE
 class Score:
     """Game score class"""
     def __init__(self):
-        # Try to load system font, fall back to default if it fails
+        # Use resource manager to load font with caching
+        from thunder_fighter.utils.resource_manager import get_resource_manager
+        
+        resource_manager = get_resource_manager()
+        
         try:
-            self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE_MEDIUM)
-        except:
-            self.font = pygame.font.Font(None, FONT_SIZE_MEDIUM)
+            self.font = resource_manager.load_font(FONT_NAME, FONT_SIZE_MEDIUM, system_font=True)
+        except Exception:
+            self.font = resource_manager.load_font(None, FONT_SIZE_MEDIUM, system_font=False)
+        
         self.value = 0
         self.text = None
         self.rect = None

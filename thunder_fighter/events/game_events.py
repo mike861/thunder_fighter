@@ -31,6 +31,7 @@ class GameEventType(Enum):
     # Boss events
     BOSS_SPAWNED = "boss_spawned"
     BOSS_DIED = "boss_died"
+    BOSS_DEFEATED = "boss_defeated"  # Alias for boss_died, used in game logic
     BOSS_PHASE_CHANGED = "boss_phase_changed"
     
     # Item events
@@ -44,6 +45,10 @@ class GameEventType(Enum):
     GAME_OVER = "game_over"
     GAME_WON = "game_won"
     LEVEL_CHANGED = "level_changed"
+    LEVEL_UP = "level_up"  # Alias for level_changed, used in game logic
+    
+    # Player stat events
+    PLAYER_STATS_CHANGED = "player_stats_changed"
     
     # Score events
     SCORE_CHANGED = "score_changed"

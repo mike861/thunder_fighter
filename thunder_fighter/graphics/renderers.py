@@ -3,24 +3,21 @@ import os
 from thunder_fighter.constants import *
 
 def load_image(name, colorkey=None):
-    """Load an image and return its surface"""
-    fullname = os.path.join('thunder_fighter', 'assets', name)
+    """Load an image and return its surface using resource manager"""
+    from thunder_fighter.utils.resource_manager import get_resource_manager
+    
+    resource_manager = get_resource_manager()
+    
     try:
-        image = pygame.image.load(fullname)
-    except pygame.error as message:
-        print('Cannot load image:', name)
-        raise SystemExit(message)
-    
-    image = image.convert()
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0,0))
-        image.set_colorkey(colorkey, pygame.RLEACCEL)
-    
-    if not image:
-        print(f"Cannot load image: {fullname}")
-    
-    return image
+        # Use resource manager to load image with caching
+        image = resource_manager.load_image(name, colorkey=colorkey, alpha=False)
+        return image
+    except Exception as e:
+        print(f'Cannot load image: {name} - {e}')
+        # Create fallback placeholder
+        placeholder = pygame.Surface((32, 32))
+        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        return placeholder
 
 def create_player_surface():
     """Create player aircraft surface with modern fighter jet design"""
@@ -492,20 +489,29 @@ def draw_health_bar(surface, x, y, width, height, health, max_health, border_col
     pygame.draw.rect(surface, border_color, (x, y, width, height), 1)
 
 def draw_text(surface, text, size, x, y, color=WHITE, font_name='arial'):
-    """Draw text on surface"""
+    """Draw text on surface using resource manager"""
+    from thunder_fighter.utils.resource_manager import get_resource_manager
+    
+    resource_manager = get_resource_manager()
+    
     try:
-        font = pygame.font.Font(pygame.font.match_font(font_name), size)
+        # Use resource manager to load font with caching
+        font = resource_manager.load_font(font_name, size, system_font=True)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x, y)
         surface.blit(text_surface, text_rect)
-    except pygame.error:
-        print(f"Font not found: {font_name}, using default font")
-        font = pygame.font.Font(None, size)
-        text_surface = font.render(text, True, color)
-        text_rect = text_surface.get_rect()
-        text_rect.midtop = (x, y)
-        surface.blit(text_surface, text_rect)
+    except Exception as e:
+        print(f"Error rendering text: {e}")
+        # Fallback to default font
+        try:
+            font = resource_manager.load_font(None, size, system_font=False)
+            text_surface = font.render(text, True, color)
+            text_rect = text_surface.get_rect()
+            text_rect.midtop = (x, y)
+            surface.blit(text_surface, text_rect)
+        except Exception as fallback_error:
+            print(f"Fallback font also failed: {fallback_error}")
 
 # Function aliases for backward compatibility
 create_player_ship = create_player_surface
