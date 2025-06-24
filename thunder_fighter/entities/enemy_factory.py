@@ -137,10 +137,12 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         if hasattr(enemy, 'speed'):
             enemy.speed = int(enemy.speed * speed_multiplier)
         
-        # Apply shooting configuration
+        # Apply shooting configuration - but respect enemy's level-based shooting ability
+        # Only override can_shoot if explicitly set to True in preset, don't force False
         can_shoot = config.get('can_shoot')
-        if can_shoot is not None:
-            enemy.can_shoot = can_shoot
+        if can_shoot is True:
+            enemy.can_shoot = True
+        # If can_shoot is False or None in preset, keep the enemy's level-based decision
         
         shoot_frequency = config.get('shoot_frequency')
         if shoot_frequency and hasattr(enemy, 'shoot_frequency'):
