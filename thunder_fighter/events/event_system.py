@@ -217,17 +217,16 @@ class EventSystem:
         for listener in self._global_listeners:
             try:
                 # Support both function and object listeners
-                if callable(listener):
-                    if hasattr(listener, 'handle_event'):
-                        # Object with handle_event method
-                        if listener.handle_event(event):
-                            event.mark_handled()
-                            return
-                    else:
-                        # Function listener
-                        if listener(event):
-                            event.mark_handled()
-                            return
+                if hasattr(listener, 'handle_event'):
+                    # Object with handle_event method
+                    if listener.handle_event(event):
+                        event.mark_handled()
+                        return
+                elif callable(listener):
+                    # Function listener
+                    if listener(event):
+                        event.mark_handled()
+                        return
             except Exception as e:
                 logger.error(f"Error in global event listener: {e}", exc_info=True)
         
@@ -236,17 +235,16 @@ class EventSystem:
             for listener in self._listeners[event.event_type]:
                 try:
                     # Support both function and object listeners
-                    if callable(listener):
-                        if hasattr(listener, 'handle_event'):
-                            # Object with handle_event method
-                            if listener.handle_event(event):
-                                event.mark_handled()
-                                return
-                        else:
-                            # Function listener
-                            if listener(event):
-                                event.mark_handled()
-                                return
+                    if hasattr(listener, 'handle_event'):
+                        # Object with handle_event method
+                        if listener.handle_event(event):
+                            event.mark_handled()
+                            return
+                    elif callable(listener):
+                        # Function listener
+                        if listener(event):
+                            event.mark_handled()
+                            return
                 except Exception as e:
                     logger.error(f"Error in event listener for {event.event_type.value}: {e}", exc_info=True)
     
