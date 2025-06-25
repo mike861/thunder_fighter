@@ -54,13 +54,15 @@ class Enemy(pygame.sprite.Sprite):
         self.enemy_bullets_group = enemy_bullets_group
         
         # Shooting properties
+        # Initialize shooting properties for all enemies (even non-shooting ones)
+        base_delay = 800
+        level_reduction = self.level * 50
+        self.shoot_delay = max(ENEMY_MIN_SHOOT_DELAY, base_delay - level_reduction)
+        if self.level >= 5:
+            self.shoot_delay = max(300, self.shoot_delay - 100)
+        self.last_shot = pygame.time.get_ticks() - self.shoot_delay + random.randint(0, 1000)
+        
         if self.can_shoot:
-            base_delay = 800
-            level_reduction = self.level * 50
-            self.shoot_delay = max(ENEMY_MIN_SHOOT_DELAY, base_delay - level_reduction)
-            if self.level >= 5:
-                self.shoot_delay = max(300, self.shoot_delay - 100)
-            self.last_shot = pygame.time.get_ticks() - self.shoot_delay + random.randint(0, 1000)
             logger.debug(f"Enemy ID:{id(self)} Level:{self.level} Ready to shoot, Delay:{self.shoot_delay}ms")
     
     def _determine_level(self, game_time, game_level):

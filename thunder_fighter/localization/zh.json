@@ -19,7 +19,7 @@
     "RESTART_PROMPT": "按 R 重新开始",
     "QUIT_PROMPT": "按 Q 退出",
     "EXIT_PROMPT": "按 ESC 键退出",
-    "SURVIVAL_TIME": "生存时间: {}分钟",
+    "SURVIVAL_TIME": "生存时间: {:.1f}分钟",
     "BOSS_APPEARED": "{}级BOSS出现!",
     "BOSS_DEFEATED": "BOSS被击败! +{}分",
     "BOSS_ENTERED_AGGRESSIVE": "BOSS进入攻击模式!",

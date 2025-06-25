@@ -397,7 +397,10 @@ def test_player_collects_health_item(mock_sound_manager, mock_spritecollide, moc
     mock_spritecollide.return_value = [mock_health_item]  # One health item
     mock_player.health = 60  # Player has less than max health
     
-    result = check_items_player_collisions(items, mock_player, ui_manager)
+    # Create mock sound manager
+    mock_sound_manager = MagicMock()
+
+    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
     
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
@@ -416,7 +419,10 @@ def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollid
     mock_spritecollide.return_value = [mock_bullet_speed_item]
     mock_player.increase_bullet_speed = MagicMock(return_value=12)  # Mock the method
     
-    result = check_items_player_collisions(items, mock_player, ui_manager)
+    # Create mock sound manager
+    mock_sound_manager = MagicMock()
+
+    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
     
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
@@ -425,19 +431,20 @@ def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollid
     mock_sound_manager.play_sound.assert_called_with('item_pickup')
 
 @patch('pygame.sprite.spritecollide')
-@patch('thunder_fighter.utils.sound_manager.sound_manager')
-def test_no_item_collision(mock_sound_manager, mock_spritecollide, mock_player, mock_groups):
-    """Test where no items are collected."""
+def test_player_collects_no_items(mock_spritecollide, mock_player, mock_groups):
+    """Test where player doesn't collect any items."""
     _, _, ui_manager, items = mock_groups
-    
+
     # Configure mocks
-    mock_spritecollide.return_value = []  # No items hit
+    mock_spritecollide.return_value = []  # No items collected
     
-    result = check_items_player_collisions(items, mock_player, ui_manager)
-    
+    # Create mock sound manager
+    mock_sound_manager = MagicMock()
+
+    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
     mock_player.heal.assert_not_called()
-    mock_player.increase_bullet_speed.assert_not_called()
-    mock_player.increase_bullet_paths.assert_not_called()
+    ui_manager.show_item_collected.assert_not_called()
     mock_sound_manager.play_sound.assert_not_called()

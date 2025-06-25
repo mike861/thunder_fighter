@@ -1,19 +1,26 @@
+"""
+Refactored Game Class
+
+Enhanced version of the main Game class that integrates all architectural improvements:
+- Input management system
+- Event-driven architecture
+- Factory pattern for entity creation
+- Resource management system
+- UI system decoupling
+"""
+
 import pygame
 import time
 import random
 import sys
+from typing import List, Optional
 from thunder_fighter.constants import (
     WIDTH, HEIGHT, FPS, WHITE, GREEN, DARK_GRAY,
     BASE_ENEMY_COUNT, SCORE_THRESHOLD, BOSS_SPAWN_INTERVAL,
-    FONT_NAME, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_SIZE_SMALL,
-    TEXT_TIME, TEXT_ENEMIES, TEXT_HIGH_LEVEL_ENEMIES, TEXT_BULLET_INFO,
-    TEXT_ENEMY_LEVEL_DETAIL, TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH,
+    TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH,
     PLAYER_INITIAL_WINGMEN, INITIAL_GAME_LEVEL
 )
 from thunder_fighter.sprites.player import Player
-from thunder_fighter.sprites.enemy import Enemy
-from thunder_fighter.sprites.boss import Boss
-from thunder_fighter.sprites.items import HealthItem, create_random_item
 from thunder_fighter.graphics.background import DynamicBackground
 from thunder_fighter.utils.score import Score
 from thunder_fighter.utils.collisions import (
@@ -25,26 +32,70 @@ from thunder_fighter.utils.collisions import (
     check_items_player_collisions,
     check_missile_enemy_collisions
 )
-from thunder_fighter.graphics.renderers import draw_health_bar
 from thunder_fighter.utils.logger import logger
-from thunder_fighter.utils.sound_manager import sound_manager
-from thunder_fighter.graphics.ui_manager import PlayerUIManager
+from thunder_fighter.utils.sound_manager import SoundManager
+from thunder_fighter.utils.resource_manager import get_resource_manager
+from thunder_fighter.graphics.ui_manager import UIManager
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
-from thunder_fighter.config import DEV_MODE
+from thunder_fighter.utils.config_manager import config_manager
 
-class Game:
+# Import input management system
+from thunder_fighter.input import InputManager, InputEvent, InputEventType
+
+# Import event system
+from thunder_fighter.events import EventSystem, GameEventType, GameEvent
+
+# Import factory systems
+from thunder_fighter.entities import (
+    EnemyFactory,
+    BossFactory,
+    ItemFactory,
+    ProjectileFactory
+)
+
+
+class RefactoredGame:
+    """
+    Refactored Game class with full architectural improvements.
+    
+    This version implements:
+    - Event-driven input handling
+    - Centralized resource management
+    - Factory pattern for entity creation
+    - Decoupled UI system
+    - Event-driven game logic
+    """
+    
     def __init__(self):
+        """Initialize the refactored game."""
         # Initialize pygame
         pygame.init()
         
-        # Create game window
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        # Initialize resource manager
+        self.resource_manager = get_resource_manager()
+        self.resource_manager.preload_common_assets()
+        
+        # Apply display configuration
+        display_config = config_manager.display
+        if display_config.fullscreen:
+            self.screen = pygame.display.set_mode(
+                (display_config.width, display_config.height), 
+                pygame.FULLSCREEN
+            )
+        else:
+            self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        
         pygame.display.set_caption(TEXT_GAME_TITLE)
         self.clock = pygame.time.Clock()
         
-        # Font for dev mode enemy level display
-        self.dev_font = pygame.font.Font(None, 18) if DEV_MODE else None
+        # Initialize event system
+        self.event_system = EventSystem()
+        self._setup_event_listeners()
+        
+        # Initialize input management
+        self.input_manager = InputManager()
+        self._setup_input_callbacks()
         
         # Create sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -58,67 +109,562 @@ class Game:
         # Enemy level tracking
         self.enemy_levels = {i: 0 for i in range(11)}
         
+        # Initialize factories
+        self.enemy_factory = EnemyFactory()
+        self.boss_factory = BossFactory()
+        self.item_factory = ItemFactory()
+        self.projectile_factory = ProjectileFactory()
+        
+        # Create player with difficulty modifiers
+        difficulty_multipliers = config_manager.get_difficulty_multipliers()
+        
+        # Initialize sound manager
+        self.sound_manager = SoundManager(config_manager.sound)
+        
         # Create player
-        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies)
+        self.player = Player(
+            self, self.all_sprites, self.bullets, 
+            self.missiles, self.enemies, self.sound_manager
+        )
+        # Apply difficulty-based speed modifier
+        self.player.speed = int(self.player.speed * difficulty_multipliers['player_speed'])
         self.all_sprites.add(self.player)
         
-        # Add initial wingmen based on configuration
+        # Add initial wingmen
         for _ in range(PLAYER_INITIAL_WINGMEN):
             self.player.add_wingman()
-        
-        # Create enemies
-        for i in range(BASE_ENEMY_COUNT):
-            self.spawn_enemy()
         
         # Create dynamic background
         self.background = DynamicBackground()
         
-        # Create score
+        # Create score with difficulty multiplier
         self.score = Score()
+        self.score_multiplier = difficulty_multipliers['score_multiplier']
         
-        # Item spawn related variables
-        self.last_score_checkpoint = 0
-        self.item_spawn_timer = time.time()
-        self.item_spawn_interval = 30
-        
-        self.target_enemy_count = BASE_ENEMY_COUNT
-        
-        # Boss related variables
-        self.boss = None
-        self.boss_spawn_timer = time.time()
-        self.boss_active = False
-        self.boss_defeated = False
-        
-        # Game time and enemy spawn related variables
-        self.game_start_time = time.time()
-        self.enemy_spawn_timer = time.time()
-        
-        # Game state
+        # Game state variables
         self.running = True
         self.paused = False
         self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
         
+        # Timing variables - set these BEFORE creating initial enemies
+        self.game_start_time = time.time()
+        self.enemy_spawn_timer = time.time()
+        self.item_spawn_timer = time.time()
+        self.boss_spawn_timer = time.time()
+        
+        # Create initial enemies using factory (after game_start_time is set)
+        for i in range(BASE_ENEMY_COUNT):
+            self._spawn_enemy_via_factory()
+        
+        # Game configuration
+        self.target_enemy_count = BASE_ENEMY_COUNT
+        self.item_spawn_interval = 30
+        self.last_score_checkpoint = 0
+        
+        # Boss state
+        self.boss = None
+        self.boss_active = False
+        self.boss_defeated = False
+        
+        # Initialize UI manager with event system integration
+        self.ui_manager = UIManager(self.screen, self.player, self)
+        self._setup_ui_event_listeners()
+        
         # Play background music
-        sound_manager.play_music('background_music.mp3')
+        music_path = self.resource_manager.get_music_path('background_music.mp3')
+        if music_path:
+            self.sound_manager.play_music('background_music.mp3')
         
-        # Initialize UI manager
-        self.ui_manager = PlayerUIManager(self.screen, self.player, self)
+        # Initial state update
+        self._update_ui_state()
         
-        self.update_ui_state()
+        logger.info("RefactoredGame initialized with all architectural improvements")
+        logger.info(f"Difficulty: {config_manager.gameplay.difficulty}")
+        logger.info(f"Resource cache stats: {self.resource_manager.get_cache_stats()}")
+    
+    def _setup_event_listeners(self):
+        """Set up event system listeners."""
+        # Game state events
+        self.event_system.register_listener(
+            GameEventType.PLAYER_DIED, 
+            self._handle_player_died
+        )
+        self.event_system.register_listener(
+            GameEventType.BOSS_DEFEATED, 
+            self._handle_boss_defeated_event
+        )
+        self.event_system.register_listener(
+            GameEventType.LEVEL_UP, 
+            self._handle_level_up_event
+        )
+        self.event_system.register_listener(
+            GameEventType.GAME_WON, 
+            self._handle_game_won_event
+        )
         
-        logger.info("Game initialization complete.")
-
-    def update_ui_state(self):
+        # Entity events
+        self.event_system.register_listener(
+            GameEventType.ENEMY_SPAWNED, 
+            self._handle_enemy_spawned
+        )
+        self.event_system.register_listener(
+            GameEventType.ITEM_COLLECTED, 
+            self._handle_item_collected
+        )
+        
+        logger.debug("Event listeners set up")
+    
+    def _setup_input_callbacks(self):
+        """Set up input event callbacks."""
+        # Movement
+        self.input_manager.add_event_callback(
+            InputEventType.MOVE_UP, 
+            self._handle_movement_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.MOVE_DOWN, 
+            self._handle_movement_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.MOVE_LEFT, 
+            self._handle_movement_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.MOVE_RIGHT, 
+            self._handle_movement_input
+        )
+        
+        # Actions
+        self.input_manager.add_event_callback(
+            InputEventType.SHOOT, 
+            self._handle_shoot_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.LAUNCH_MISSILE, 
+            self._handle_missile_input
+        )
+        
+        # Game controls
+        self.input_manager.add_event_callback(
+            InputEventType.PAUSE, 
+            self._handle_pause_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.QUIT, 
+            self._handle_quit_input
+        )
+        
+        # Audio controls
+        self.input_manager.add_event_callback(
+            InputEventType.TOGGLE_MUSIC, 
+            self._handle_audio_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.TOGGLE_SOUND, 
+            self._handle_audio_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.VOLUME_UP, 
+            self._handle_audio_input
+        )
+        self.input_manager.add_event_callback(
+            InputEventType.VOLUME_DOWN, 
+            self._handle_audio_input
+        )
+        
+        # UI controls
+        self.input_manager.add_event_callback(
+            InputEventType.CHANGE_LANGUAGE, 
+            self._handle_ui_input
+        )
+        
+        logger.debug("Input callbacks set up")
+    
+    def _setup_ui_event_listeners(self):
+        """Set up UI event listeners for decoupled UI updates."""
+        # Player state changes
+        self.event_system.register_listener(
+            GameEventType.PLAYER_HEALTH_CHANGED, 
+            self._handle_ui_player_health_changed
+        )
+        self.event_system.register_listener(
+            GameEventType.PLAYER_STATS_CHANGED, 
+            self._handle_ui_player_stats_changed
+        )
+        
+        # Game state changes
+        self.event_system.register_listener(
+            GameEventType.SCORE_CHANGED, 
+            self._handle_ui_score_changed
+        )
+        self.event_system.register_listener(
+            GameEventType.LEVEL_UP, 
+            self._handle_ui_level_changed
+        )
+        
+        # Boss state changes
+        self.event_system.register_listener(
+            GameEventType.BOSS_SPAWNED, 
+            self._handle_ui_boss_spawned
+        )
+        self.event_system.register_listener(
+            GameEventType.BOSS_DEFEATED, 
+            self._handle_ui_boss_defeated
+        )
+        
+        logger.debug("UI event listeners set up")
+    
+    def _spawn_enemy_via_factory(self, game_time: Optional[float] = None, 
+                                game_level: Optional[int] = None) -> bool:
+        """Spawn an enemy using the factory pattern."""
+        if game_time is None:
+            game_time = (time.time() - self.game_start_time) / 60.0
+        if game_level is None:
+            game_level = self.game_level
+        
+        try:
+            enemy = self.enemy_factory.create_for_level(
+                game_level, game_time, self.all_sprites, self.enemy_bullets
+            )
+            
+            if enemy:
+                self.all_sprites.add(enemy)
+                self.enemies.add(enemy)
+                
+                # Track enemy level
+                level = enemy.get_level()
+                self.enemy_levels[level] += 1
+                
+                # Emit event
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.ENEMY_SPAWNED,
+                    {'enemy': enemy, 'level': level, 'game_time': game_time}
+                ))
+                
+                logger.debug(f"Factory spawned enemy level {level}")
+                return True
+        except Exception as e:
+            logger.error(f"Error spawning enemy via factory: {e}", exc_info=True)
+        
+        return False
+    
+    def _spawn_boss_via_factory(self) -> bool:
+        """Spawn a boss using the factory pattern."""
+        if self.boss_active or self.boss:
+            return False
+        
+        try:
+            boss_level = max(1, (self.game_level + 1) // 2)
+            
+            self.boss = self.boss_factory.create_from_preset(
+                "standard",
+                all_sprites=self.all_sprites, 
+                boss_bullets=self.boss_bullets,
+                boss_level=boss_level, 
+                game_level=self.game_level, 
+                player=self.player
+            )
+            
+            if self.boss:
+                self.all_sprites.add(self.boss)
+                self.boss_active = True
+                self.boss_spawn_timer = time.time()
+                
+                # Emit event
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.BOSS_SPAWNED,
+                    {'boss': self.boss, 'level': boss_level}
+                ))
+                
+                logger.debug(f"Factory spawned boss level {boss_level}")
+                return True
+        except Exception as e:
+            logger.error(f"Error spawning boss via factory: {e}", exc_info=True)
+        
+        return False
+    
+    def _spawn_item_via_factory(self, game_time: float) -> bool:
+        """Spawn an item using the factory pattern."""
+        try:
+            item = self.item_factory.create_random_item(
+                self.all_sprites, self.items, self.player
+            )
+            
+            if item:
+                # Emit event
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.ITEM_SPAWNED,
+                    {'item': item, 'game_time': game_time}
+                ))
+                
+                logger.debug(f"Factory spawned item at game time {game_time:.1f}m")
+                return True
+        except Exception as e:
+            logger.error(f"Error spawning item via factory: {e}", exc_info=True)
+        
+        return False
+    
+    # Input event handlers
+    def _handle_movement_input(self, event: InputEvent):
+        """Handle movement input events."""
+        if self.paused or self.game_won:
+            return
+        
+        direction = event.get_data('direction')
+        pressed = event.get_data('pressed', True)
+        
+        # Apply movement to player
+        if direction == 'up':
+            self.player.speedy = -self.player.speed if pressed else 0
+        elif direction == 'down':
+            self.player.speedy = self.player.speed if pressed else 0
+        elif direction == 'left':
+            self.player.speedx = -self.player.speed if pressed else 0
+        elif direction == 'right':
+            self.player.speedx = self.player.speed if pressed else 0
+    
+    def _handle_shoot_input(self, event: InputEvent):
+        """Handle shooting input events."""
+        if self.paused or self.game_won:
+            return
+        
+        pressed = event.get_data('pressed', True)
+        continuous = event.get_data('continuous', False)
+        
+        if pressed:
+            self.player.shoot()
+    
+    def _handle_missile_input(self, event: InputEvent):
+        """Handle missile launch input events."""
+        if self.paused or self.game_won:
+            return
+        
+        self.player.launch_missile()
+    
+    def _handle_pause_input(self, event: InputEvent):
+        """Handle pause input events."""
+        self.paused = not self.paused
+        self._update_ui_state()
+        
+        if self.paused:
+            logger.debug("Game paused via input")
+            self.sound_manager.set_music_volume(
+                max(0.1, self.sound_manager.music_volume / 2)
+            )
+            self.input_manager.pause()
+        else:
+            logger.debug("Game resumed via input")
+            self.sound_manager.set_music_volume(
+                min(1.0, self.sound_manager.music_volume * 2)
+            )
+            self.input_manager.resume()
+    
+    def _handle_quit_input(self, event: InputEvent):
+        """Handle quit input events."""
+        self.running = False
+        logger.debug("Game quit via input")
+    
+    def _handle_audio_input(self, event: InputEvent):
+        """Handle audio control input events."""
+        audio_action = event.get_data('audio_action')
+        
+        if audio_action == 'toggle_music':
+            self.sound_manager.toggle_music()
+            if self.sound_manager.music_enabled:
+                music_path = self.resource_manager.get_music_path('background_music.mp3')
+                if music_path:
+                    self.sound_manager.play_music('background_music.mp3')
+        elif audio_action == 'toggle_sound':
+            self.sound_manager.toggle_sound()
+        elif audio_action == 'volume_up':
+            current_volume = self.sound_manager.sound_volume
+            self.sound_manager.set_sound_volume(current_volume + 0.1)
+            self.sound_manager.set_music_volume(current_volume + 0.1)
+            logger.debug(f"Volume increased to {self.sound_manager.sound_volume:.1f}")
+        elif audio_action == 'volume_down':
+            current_volume = self.sound_manager.sound_volume
+            self.sound_manager.set_sound_volume(current_volume - 0.1)
+            self.sound_manager.set_music_volume(current_volume - 0.1)
+            logger.debug(f"Volume decreased to {self.sound_manager.sound_volume:.1f}")
+    
+    def _handle_ui_input(self, event: InputEvent):
+        """Handle UI control input events."""
+        action = event.get_data('ui_action')
+        
+        if action == 'change_language':
+            current_lang = 'en' if self.ui_manager.current_language == 'zh' else 'zh'
+            change_language(current_lang)
+            self.ui_manager.current_language = current_lang
+            language_name = "English" if current_lang == 'en' else "中文"
+            self.ui_manager.add_notification(f"Language changed to {language_name}", "achievement")
+            logger.debug(f"Language changed to: {language_name}")
+    
+    # Game event handlers
+    def _handle_player_died(self, event: GameEvent):
+        """Handle player death event."""
+        logger.info("Player died - triggering game over")
+        self.running = False
+    
+    def _handle_boss_defeated_event(self, event: GameEvent):
+        """Handle boss defeated event."""
+        boss_data = event.data
+        boss_level = boss_data.get('level', 1)
+        
+        # Check if this is the final boss
+        if self.game_level >= MAX_GAME_LEVEL:
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.GAME_WON,
+                {'final_score': self.score.value, 'level': self.game_level}
+            ))
+        else:
+            # Level up
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.LEVEL_UP,
+                {'old_level': self.game_level, 'new_level': self.game_level + 1}
+            ))
+    
+    def _handle_level_up_event(self, event: GameEvent):
+        """Handle level up event."""
+        level_data = event.data
+        old_level = level_data.get('old_level', self.game_level)
+        new_level = level_data.get('new_level', self.game_level + 1)
+        
+        self.game_level = new_level
+        
+        # Clear enemies and bullets
+        enemies_cleared = len(self.enemies)
+        for enemy in self.enemies:
+            enemy.kill()
+        self.enemies.empty()
+        
+        for bullet in self.enemy_bullets:
+            bullet.kill()
+        self.enemy_bullets.empty()
+        
+        for bullet in self.boss_bullets:
+            bullet.kill()
+        self.boss_bullets.empty()
+        
+        # Update spawn intervals
+        self.item_spawn_interval = max(15, 30 - self.game_level)
+        
+        # Reset timers
+        self.boss_spawn_timer = time.time()
+        self.enemy_spawn_timer = time.time()
+        
+        logger.info(f"Level up: {old_level} -> {new_level}, cleared {enemies_cleared} enemies")
+    
+    def _handle_game_won_event(self, event: GameEvent):
+        """Handle game won event."""
+        game_data = event.data
+        final_score = game_data.get('final_score', self.score.value)
+        
+        self.game_won = True
+        logger.info(f"Game won! Final score: {final_score}")
+        
+        # Show victory screen
+        self.ui_manager.show_victory_screen(final_score)
+        
+        # Play victory sound and fade out music
+        self.sound_manager.play_sound('boss_death.wav')
+        self.sound_manager.fadeout_music(3000)
+    
+    def _handle_enemy_spawned(self, event: GameEvent):
+        """Handle enemy spawned event."""
+        enemy_data = event.data
+        enemy = enemy_data.get('enemy')
+        level = enemy_data.get('level', 1)
+        
+        logger.debug(f"Enemy spawned: level {level}")
+    
+    def _handle_item_collected(self, event: GameEvent):
+        """Handle item collected event."""
+        item_data = event.data
+        item_type = item_data.get('item_type', 'unknown')
+        
+        # Update UI
+        self.ui_manager.show_item_collected(item_type)
+        
+        # Emit player stats changed event
+        self.event_system.dispatch_event(GameEvent(
+            GameEventType.PLAYER_STATS_CHANGED,
+            {
+                'health': self.player.health,
+                'bullet_paths': self.player.bullet_paths,
+                'bullet_speed': self.player.bullet_speed,
+                'speed': self.player.speed,
+                'wingmen': len(self.player.wingmen_list)
+            }
+        ))
+    
+    # UI event handlers
+    def _handle_ui_player_health_changed(self, event: GameEvent):
+        """Handle player health changed event for UI updates."""
+        health_data = event.data
+        self.ui_manager.update_player_info(
+            health=health_data.get('health'),
+            max_health=health_data.get('max_health', PLAYER_HEALTH)
+        )
+    
+    def _handle_ui_player_stats_changed(self, event: GameEvent):
+        """Handle player stats changed event for UI updates."""
+        stats_data = event.data
+        self.ui_manager.update_player_info(
+            health=stats_data.get('health'),
+            bullet_paths=stats_data.get('bullet_paths'),
+            bullet_speed=stats_data.get('bullet_speed'),
+            speed=stats_data.get('speed'),
+            wingmen=stats_data.get('wingmen')
+        )
+    
+    def _handle_ui_score_changed(self, event: GameEvent):
+        """Handle score changed event for UI updates."""
+        score_data = event.data
+        new_score = score_data.get('score', self.score.value)
+        self.ui_manager.persistent_info['score'] = new_score
+    
+    def _handle_ui_level_changed(self, event: GameEvent):
+        """Handle level changed event for UI updates."""
+        level_data = event.data
+        new_level = level_data.get('new_level', self.game_level)
+        self.ui_manager.update_game_state(level=new_level)
+    
+    def _handle_ui_boss_spawned(self, event: GameEvent):
+        """Handle boss spawned event for UI updates."""
+        boss_data = event.data
+        boss = boss_data.get('boss')
+        level = boss_data.get('level', 1)
+        
+        if boss:
+            self.ui_manager.update_boss_info(
+                active=True,
+                health=boss.health,
+                max_health=boss.max_health,
+                level=level,
+                mode=getattr(boss, 'shoot_pattern', 'normal')
+            )
+        
+        self.ui_manager.show_boss_appeared(level)
+    
+    def _handle_ui_boss_defeated(self, event: GameEvent):
+        """Handle boss defeated event for UI updates."""
+        self.ui_manager.update_boss_info(active=False)
+    
+    def _update_ui_state(self):
+        """Update UI state."""
+        game_time = (time.time() - self.game_start_time) / 60.0
+        
         self.ui_manager.update_game_state(
             level=self.game_level,
             paused=self.paused,
-            game_time=(time.time() - self.game_start_time) / 60.0,
+            game_time=game_time,
             victory=self.game_won,
             defeat=self.player.health <= 0
         )
-        # Update persistent info with current score
+        
         self.ui_manager.persistent_info['score'] = self.score.value
+        
         self.ui_manager.update_player_info(
             health=self.player.health,
             max_health=PLAYER_HEALTH,
@@ -127,355 +673,262 @@ class Game:
             speed=self.player.speed,
             wingmen=len(self.player.wingmen_list)
         )
+        
         if self.boss and self.boss.alive():
-             self.ui_manager.update_boss_info(
-                    active=True,
-                    health=self.boss.health,
-                    max_health=self.boss.max_health,
-                    level=self.boss.level,
-                    mode=self.boss.shoot_pattern
-                )
+            self.ui_manager.update_boss_info(
+                active=True,
+                health=self.boss.health,
+                max_health=self.boss.max_health,
+                level=getattr(self.boss, 'level', 1),
+                mode=getattr(self.boss, 'shoot_pattern', 'normal')
+            )
         else:
             self.ui_manager.update_boss_info(active=False)
-
-    def _check_sound_system(self):
-        """Check and fix sound system if needed"""
-        if not sound_manager.is_healthy():
-            logger.warning("Sound system unhealthy, attempting to fix...")
-            sound_manager.reinitialize()
-        else:
-            # Even if system is healthy, ensure music is playing
-            sound_manager.ensure_music_playing()
-    
-    def spawn_enemy(self, game_time=0, game_level=1):
-        """Spawn a new enemy"""
-        try:
-            enemy = Enemy(game_time, game_level, self.all_sprites, self.enemy_bullets)
-            self.all_sprites.add(enemy)
-            self.enemies.add(enemy)
-            
-            level = enemy.get_level()
-            self.enemy_levels[level] += 1
-            logger.debug(f"Spawned enemy level {level} (can_shoot: {enemy.can_shoot})")
-            
-            return enemy
-        except Exception as e:
-            logger.error(f"Error spawning enemy: {e}", exc_info=True)
-            return None
-    
-    def spawn_boss(self):
-        """Spawn a Boss"""
-        if not self.boss_active and self.boss is None:
-            try:
-                # Boss等级是游戏等级的1/2，最小为1级
-                boss_level = max(1, (self.game_level + 1) // 2)
-                    
-                self.boss = Boss(self.all_sprites, self.boss_bullets, boss_level, self.game_level, self.player)
-                self.all_sprites.add(self.boss)
-                self.boss_active = True
-                self.boss_spawn_timer = time.time()
-                
-                logger.debug(f"Boss spawned at: ({self.boss.rect.centerx}, {self.boss.rect.centery})")
-                logger.debug(f"Boss dimensions: {self.boss.rect.width}x{self.boss.rect.height}")
-                
-                self.ui_manager.show_boss_appeared(boss_level)
-                self.update_ui_state()
-                
-                logger.debug(f"Level {boss_level} Boss has appeared! (Game Level: {self.game_level})")
-            except Exception as e:
-                logger.error(f"Error spawning boss: {e}", exc_info=True)
-        else:
-            logger.warning("Attempted to spawn boss while one is already active or present.")
-    
-    def spawn_random_item(self, game_time):
-        """Generate a random item"""
-        try:
-            item = create_random_item(game_time, self.game_level, self.all_sprites, self.items, self.player)
-            logger.debug(f"Random item spawned at game time {game_time:.1f}m")
-        except Exception as e:
-            logger.error(f"Error spawning random item: {e}", exc_info=True)
     
     def handle_events(self):
-        """Handle game events"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.running = False
-                elif event.key == pygame.K_p:
-                    self.paused = not self.paused
-                    self.update_ui_state()
-                    
-                    if self.paused:
-                        logger.debug("Game paused")
-                        sound_manager.set_music_volume(max(0.1, sound_manager.music_volume / 2))
-                    else:
-                        logger.debug("Game resumed")
-                        sound_manager.set_music_volume(min(1.0, sound_manager.music_volume * 2))
-                elif event.key == pygame.K_m:
-                    sound_manager.toggle_music()
-                    if sound_manager.music_enabled:
-                        sound_manager.play_music('background_music.mp3')
-                elif event.key == pygame.K_s:
-                    sound_manager.toggle_sound()
-                elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
-                    current_volume = sound_manager.sound_volume
-                    sound_manager.set_sound_volume(current_volume + 0.1)
-                    sound_manager.set_music_volume(current_volume + 0.1)
-                    logger.debug(f"Volume increased to {sound_manager.sound_volume:.1f}")
-                elif event.key == pygame.K_MINUS:
-                    current_volume = sound_manager.sound_volume
-                    sound_manager.set_sound_volume(current_volume - 0.1)
-                    sound_manager.set_music_volume(current_volume - 0.1)
-                    logger.debug(f"Volume decreased to {sound_manager.sound_volume:.1f}")
-                elif event.key == pygame.K_l:
-                    current_lang = 'en' if self.ui_manager.current_language == 'zh' else 'zh'
-                    change_language(current_lang)
-                    self.ui_manager.current_language = current_lang
-                    language_name = "English" if current_lang == 'en' else "中文"
-                    self.ui_manager.add_notification(f"Language changed to {language_name}", "achievement")
-                    logger.debug(f"Language changed to: {language_name}")
+        """Handle pygame events using the input management system."""
+        pygame_events = pygame.event.get()
+        
+        # Process events through input manager
+        input_events = self.input_manager.update(pygame_events)
+        
+        # Process game events
+        self.event_system.process_events()
     
     def update(self):
-        """Update game state"""
+        """Update game state."""
         game_time = (time.time() - self.game_start_time) / 60.0
         
-        self.update_ui_state()
+        # Update UI
+        self._update_ui_state()
         self.ui_manager.update()
         
         # Update flash effects
         flash_manager.update()
         
-        # Check sound system health periodically (every 2 seconds)
+        # Check sound system health
         if hasattr(self, '_last_sound_check'):
             if time.time() - self._last_sound_check > 2:
                 self._check_sound_system()
                 self._last_sound_check = time.time()
         else:
             self._last_sound_check = time.time()
-
-        # Stop game updates if game is won or paused
+        
+        # Skip updates if paused or game won
         if self.paused or self.game_won:
             return
         
         # Update background
         self.background.update()
         
+        # Update sprites
         self.all_sprites.update()
         
-        # Calculate target enemy count with more gradual increase
+        # Enemy spawning logic
         self.target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
         
         if len(self.enemies) < self.target_enemy_count:
-            if time.time() - self.enemy_spawn_timer > 2:  # Increased from 1 to 2 seconds
-                self.spawn_enemy(game_time, self.game_level)
+            if time.time() - self.enemy_spawn_timer > 2:
+                self._spawn_enemy_via_factory(game_time, self.game_level)
                 self.enemy_spawn_timer = time.time()
         
-        # Only spawn boss after reaching level 2 (after score-based progression)
+        # Boss spawning logic
         if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
             if not self.boss or not self.boss.alive():
-                self.spawn_boss()
+                self._spawn_boss_via_factory()
         
+        # Item spawning logic
         if time.time() - self.item_spawn_timer > self.item_spawn_interval:
-             self.spawn_random_item(game_time)
-             self.item_spawn_timer = time.time()
+            self._spawn_item_via_factory(game_time)
+            self.item_spawn_timer = time.time()
         
-        self.handle_collisions(game_time)
+        # Handle collisions
+        self._handle_collisions(game_time)
         
-        # Only allow score-based level up for levels 0-1 (before boss appears)
+        # Score-based level up (only for early levels)
         if self.game_level <= 1 and self.score.value // SCORE_THRESHOLD >= self.game_level:
-            self.level_up()
-
-        # Reset boss defeat processing flag after delay
-        if hasattr(self, '_boss_defeat_reset_time') and time.time() >= self._boss_defeat_reset_time:
-            if hasattr(self, '_boss_defeat_processed'):
-                delattr(self, '_boss_defeat_processed')
-            delattr(self, '_boss_defeat_reset_time')
-
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.LEVEL_UP,
+                {'old_level': self.game_level, 'new_level': self.game_level + 1}
+            ))
+            # Process events immediately to ensure level up is handled
+            self.event_system.process_events()
+        
+        # Check game over condition
         if self.player.health <= 0 and not self.game_won:
-            self.game_over()
-
-    def handle_collisions(self, game_time):
-        """Handle all collision detection"""
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.PLAYER_DIED,
+                {'final_score': self.score.value, 'level': self.game_level}
+            ))
+    
+    def _handle_collisions(self, game_time: float):
+        """Handle collision detection."""
+        # Bullet-enemy collisions
         hit_result = check_bullet_enemy_collisions(
-            self.enemies, self.bullets, self.all_sprites, self.score, 
+            self.enemies, self.bullets, self.all_sprites, self.score,
             self.last_score_checkpoint, SCORE_THRESHOLD, self.items, self.player
         )
         self.last_score_checkpoint = hit_result['score_checkpoint']
+        
         if hit_result.get('generated_item'):
             self.ui_manager.show_score_milestone(self.score.value)
-
-        check_missile_enemy_collisions(self.missiles, self.enemies, self.all_sprites, self.score)
-
-        check_items_player_collisions(self.items, self.player, self.ui_manager)
         
-        if check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)['was_hit']:
-            if self.player.health <= 0: self.game_over()
-
-        if check_enemy_bullet_player_collisions(self.player, self.enemy_bullets, self.all_sprites)['was_hit']:
-             if self.player.health <= 0: self.game_over()
-
+        # Emit score change event
+        self.event_system.dispatch_event(GameEvent(
+            GameEventType.SCORE_CHANGED,
+            {'score': self.score.value}
+        ))
+        
+        # Missile-enemy collisions
+        check_missile_enemy_collisions(self.missiles, self.enemies, self.all_sprites, self.score)
+        
+        # Item-player collisions
+        check_items_player_collisions(self.items, self.player, self.ui_manager, self.sound_manager)
+        
+        # Enemy-player collisions
+        enemy_hit = check_enemy_player_collisions(self.player, self.enemies, self.all_sprites)
+        if enemy_hit['was_hit']:
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.PLAYER_HEALTH_CHANGED,
+                {'health': self.player.health, 'max_health': PLAYER_HEALTH}
+            ))
+            
+            if self.player.health <= 0:
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.PLAYER_DIED,
+                    {'final_score': self.score.value, 'level': self.game_level}
+                ))
+        
+        # Enemy bullet-player collisions
+        bullet_hit = check_enemy_bullet_player_collisions(self.player, self.enemy_bullets, self.all_sprites)
+        if bullet_hit['was_hit']:
+            self.event_system.dispatch_event(GameEvent(
+                GameEventType.PLAYER_HEALTH_CHANGED,
+                {'health': self.player.health, 'max_health': PLAYER_HEALTH}
+            ))
+            
+            if self.player.health <= 0:
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.PLAYER_DIED,
+                    {'final_score': self.score.value, 'level': self.game_level}
+                ))
+        
+        # Boss collisions
         if self.boss and self.boss.alive():
+            # Bullet-boss collisions
             boss_hit_result = check_bullet_boss_collisions(self.boss, self.bullets, self.all_sprites)
             if boss_hit_result['boss_defeated']:
-                self.handle_boss_defeated()
-
-            if check_boss_bullet_player_collisions(self.player, self.boss_bullets, self.all_sprites)['was_hit']:
-                if self.player.health <= 0: self.game_over()
-            
-            check_missile_enemy_collisions(self.missiles, pygame.sprite.GroupSingle(self.boss), self.all_sprites, self.score)
-
-            if self.boss and self.boss.health <= 0: # Re-check boss after missile collision
-                self.handle_boss_defeated()
-
-    def handle_boss_defeated(self):
-        """Handle boss defeat: level up, clear enemies, and show effects"""
-        if not hasattr(self, '_boss_defeat_processed'):
-            self._boss_defeat_processed = True
-            
-            # Store boss level for scoring before removing boss
-            boss_level = self.boss.level if self.boss else 1
-            
-            # Remove boss
-            self.boss_defeated = True
-            if self.boss:
-                self.boss.kill()
-            self.boss_active = False
-            self.boss = None
-            self.ui_manager.update_boss_info(active=False)
-            
-            # Check if this is the final boss (level 10)
-            if self.game_level >= MAX_GAME_LEVEL:
-                # Game victory!
-                self.game_won = True
-                logger.info(f"Final boss defeated at level {self.game_level}! Game won!")
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.BOSS_DEFEATED,
+                    {'boss': self.boss, 'level': getattr(self.boss, 'level', 1)}
+                ))
                 
-                # Add final boss score bonus
-                final_boss_bonus = boss_level * 1000  # Double bonus for final boss
-                self.score.update(final_boss_bonus)
+                # Clean up boss
+                self.boss_defeated = True
+                if self.boss:
+                    self.boss.kill()
+                self.boss_active = False
+                self.boss = None
+            
+            # Boss bullet-player collisions
+            boss_bullet_hit = check_boss_bullet_player_collisions(self.player, self.boss_bullets, self.all_sprites)
+            if boss_bullet_hit['was_hit']:
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.PLAYER_HEALTH_CHANGED,
+                    {'health': self.player.health, 'max_health': PLAYER_HEALTH}
+                ))
                 
-                # Show victory screen
-                self.ui_manager.show_victory_screen(self.score.value)
+                if self.player.health <= 0:
+                    self.event_system.dispatch_event(GameEvent(
+                        GameEventType.PLAYER_DIED,
+                        {'final_score': self.score.value, 'level': self.game_level}
+                    ))
+            
+            # Missile-boss collisions
+            check_missile_enemy_collisions(
+                self.missiles, pygame.sprite.GroupSingle(self.boss), 
+                self.all_sprites, self.score
+            )
+            
+            # Re-check boss health after missile hits
+            if self.boss and self.boss.health <= 0:
+                self.event_system.dispatch_event(GameEvent(
+                    GameEventType.BOSS_DEFEATED,
+                    {'boss': self.boss, 'level': getattr(self.boss, 'level', 1)}
+                ))
                 
-                # Play victory sound and fade out music
-                sound_manager.play_sound('boss_death.wav')
-                sound_manager.fadeout_music(3000)
-                
-                # Stop spawning enemies and items
-                return
-            
-            # Level up the game (only if not at max level)
-            old_level = self.game_level
-            if self.game_level < MAX_GAME_LEVEL:
-                self.game_level += 1
-                logger.info(f"Boss defeated! Game level up from {old_level} to {self.game_level}")
-            
-            # Clear all enemies on screen
-            enemies_cleared = len(self.enemies)
-            for enemy in self.enemies:
-                enemy.kill()
-            self.enemies.empty()
-            
-            # Clear enemy bullets
-            for bullet in self.enemy_bullets:
-                bullet.kill()
-            self.enemy_bullets.empty()
-            
-            # Clear boss bullets
-            for bullet in self.boss_bullets:
-                bullet.kill()
-            self.boss_bullets.empty()
-            
-            # Add score bonus for boss defeat
-            boss_score_bonus = boss_level * 500
-            self.score.update(boss_score_bonus)
-            
-            # Show victory effects and notifications
-            self.ui_manager.show_level_up_effects(old_level, self.game_level, enemies_cleared, boss_score_bonus)
-            
-            # Play victory sound
-            sound_manager.play_sound('boss_death.wav')
-            
-            # Reset boss spawn timer for next boss
-            self.boss_spawn_timer = time.time()
-            
-            # Reset enemy spawn timer
-            self.enemy_spawn_timer = time.time()
-            
-            # Update item spawn interval for new level
-            self.item_spawn_interval = max(15, 30 - self.game_level)
-            
-            # Reset the defeat processing flag after a delay (handled in main event loop)
-            self._boss_defeat_reset_time = time.time() + 3.0
-
-    def level_up(self):
-        """Increase game difficulty level based on score (only for early levels)"""
-        if self.game_level < MAX_GAME_LEVEL:
-            old_level = self.game_level
-            self.game_level += 1
-            self.enemy_spawn_timer = time.time()
-            self.item_spawn_interval = max(15, 30 - self.game_level)
-            logger.info(f"Score-based level up from {old_level} to {self.game_level}")
-            self.ui_manager.show_score_level_up(self.game_level)
-
-    def game_over(self):
-        logger.info("Game Over")
-        self.running = False
-
+                # Clean up boss
+                self.boss_defeated = True
+                if self.boss:
+                    self.boss.kill()
+                self.boss_active = False
+                self.boss = None
+    
+    def _check_sound_system(self):
+        """Check and fix sound system if needed."""
+        if not self.sound_manager.is_healthy():
+            logger.warning("Sound system unhealthy, attempting to fix...")
+            self.sound_manager.reinitialize()
+        else:
+            self.sound_manager.ensure_music_playing()
+    
     def render(self):
-        """Render game screen"""
-        # Draw dynamic background
+        """Render the game."""
+        # Draw background
         self.background.draw(self.screen)
         
+        # Draw sprites
         self.all_sprites.draw(self.screen)
         
-        # 如果boss存在且存活，绘制跟随boss移动的血条
+        # Draw boss health bar if active
         if self.boss and self.boss.alive():
             self.boss.draw_health_bar(self.screen)
         
+        # Draw UI
         self.ui_manager.draw_player_stats()
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
-
-        if DEV_MODE:
+        
+        # Draw developer info if enabled
+        if config_manager.debug.dev_mode:
             fps = self.clock.get_fps()
             player_pos = self.player.rect.center
             enemy_count = len(self.enemies)
             self.ui_manager.draw_dev_info(fps, enemy_count, self.target_enemy_count, player_pos)
-
-            # Draw level text next to each enemy
+            
+            # Draw level text next to enemies
+            dev_font = self.resource_manager.load_font(None, 18)
             for enemy in self.enemies:
                 level_text = f"L{enemy.get_level()}"
-                text_surf = self.dev_font.render(level_text, True, WHITE)
+                text_surf = dev_font.render(level_text, True, WHITE)
                 self.screen.blit(text_surf, (enemy.rect.right + 2, enemy.rect.top))
         
+        # Draw special screens
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
         elif self.player.health <= 0:
-            self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, (time.time() - self.game_start_time) / 60.0)
-
+            game_time = (time.time() - self.game_start_time) / 60.0
+            self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)
+        
         if self.paused:
             self.ui_manager.draw_pause_screen()
-
+        
         pygame.display.flip()
-
+    
     def run(self):
-        """Main game loop"""
+        """Main game loop."""
+        logger.info("Starting refactored game loop")
+        
         while self.running:
             self.clock.tick(FPS)
             self.handle_events()
             self.update()
             self.render()
             
-            # Exit game if victory is achieved and player presses ESC
+            # Exit if victory achieved and player wants to quit
             if self.game_won:
-                # Victory state - wait for player to exit
                 continue
-                
+        
+        logger.info("Game loop ended")
         pygame.quit()
-        sys.exit()
-
-if __name__ == "__main__":
-    game = Game()
-    game.run() 
+        sys.exit() 

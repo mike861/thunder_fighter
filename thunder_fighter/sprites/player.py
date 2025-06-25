@@ -14,15 +14,15 @@ from thunder_fighter.sprites.bullets import Bullet
 from thunder_fighter.sprites.wingman import Wingman
 from thunder_fighter.sprites.missile import TrackingMissile
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect
-# Import sound manager
-from thunder_fighter.utils.sound_manager import sound_manager
 from thunder_fighter.utils.logger import logger
 
 class Player(pygame.sprite.Sprite):
     """Player class"""
-    def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group):
+    def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group, sound_manager=None):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
+        self.sound_manager = sound_manager  # Store sound manager instance
+        
         # Use custom graphics instead of rectangle
         self.image = create_player_ship()
         self.rect = self.image.get_rect()
@@ -148,7 +148,7 @@ class Player(pygame.sprite.Sprite):
             self.last_shot = now
             
             # Play shooting sound effect
-            # sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
+            # self.sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
             
             # Create different numbers and angles of bullets based on bullet paths
             if self.bullet_paths == 1:
@@ -244,7 +244,8 @@ class Player(pygame.sprite.Sprite):
             self.all_sprites.add(explosion)
             
             # Play sound effect
-            sound_manager.play_sound('enemy_explosion')
+            if self.sound_manager:
+                self.sound_manager.play_sound('enemy_explosion')
             return False # Player not dead
 
         self.health -= damage
@@ -256,7 +257,8 @@ class Player(pygame.sprite.Sprite):
         create_flash_effect(self, WHITE)
         
         # Play hit sound effect
-        sound_manager.play_sound('player_hit')
+        if self.sound_manager:
+            self.sound_manager.play_sound('player_hit')
         
         return self.health <= 0  # Return whether dead
     

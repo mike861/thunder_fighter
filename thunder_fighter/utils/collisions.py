@@ -240,8 +240,15 @@ def check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites):
         logger.error(f"Error in enemy_bullet-player collision check: {e}", exc_info=True)
         return {'was_hit': False, 'game_over': False, 'damage': 0}
     
-def check_items_player_collisions(items, player, ui_manager):
-    """Check collisions between items and player"""
+def check_items_player_collisions(items, player, ui_manager, sound_manager=None):
+    """Check collisions between items and player
+    
+    Args:
+        items: Items sprite group
+        player: Player object
+        ui_manager: UI manager for notifications
+        sound_manager: Sound manager instance for playing sounds
+    """
     
     hits = pygame.sprite.spritecollide(player, items, True)
     for hit in hits:
@@ -264,5 +271,5 @@ def check_items_player_collisions(items, player, ui_manager):
             ui_manager.show_item_collected(item_type)
         
         # 播放音效
-        from thunder_fighter.utils.sound_manager import sound_manager
-        sound_manager.play_sound('item_pickup') 
+        if sound_manager:
+            sound_manager.play_sound('item_pickup') 

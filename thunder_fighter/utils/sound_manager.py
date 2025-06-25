@@ -8,26 +8,60 @@ from thunder_fighter.constants import ASSETS_DIR
 class SoundManager:
     """Manage all game sounds and music"""
     
-    def __init__(self):
+    def __init__(self, sound_config=None):
+        """
+        Initialize sound manager with configuration
+        
+        Args:
+            sound_config: SoundConfig object with sound settings
+        """
         self._initialized = False
         self._init_pygame_mixer()
         
-        # Sound effect volume (0.0 to 1.0)
-        self.sound_volume = 0.5
-        # Music volume (0.0 to 1.0)
-        self.music_volume = 0.3
+        # Use configuration if provided, otherwise use defaults
+        if sound_config:
+            self.sound_volume = sound_config.sound_volume
+            self.music_volume = sound_config.music_volume
+            self.sound_enabled = sound_config.sound_enabled
+            self.music_enabled = sound_config.music_enabled
+        else:
+            # Fallback to hardcoded defaults if no config provided
+            self.sound_volume = 0.5
+            self.music_volume = 0.3
+            self.sound_enabled = True
+            self.music_enabled = True
         
         # Sound effects dictionary
         self.sounds = {}
-        self.volume = 0.5  # Default volume at 50%
+        self.volume = self.sound_volume  # Backward compatibility
         self.is_muted = False
-        
-        self.sound_enabled = True
-        self.music_enabled = True
         
         # Load sounds after initialization
         if self._initialized:
             self._load_sounds()
+        
+    def update_config(self, sound_config):
+        """
+        Update sound manager with new configuration
+        
+        Args:
+            sound_config: SoundConfig object with updated settings
+        """
+        self.sound_volume = sound_config.sound_volume
+        self.music_volume = sound_config.music_volume
+        self.sound_enabled = sound_config.sound_enabled
+        self.music_enabled = sound_config.music_enabled
+        self.volume = self.sound_volume  # Backward compatibility
+        
+        # Update volume for all loaded sounds
+        for sound in self.sounds.values():
+            sound.set_volume(self.sound_volume)
+        
+        # Update music volume if music is playing
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.set_volume(self.music_volume)
+        
+        logger.debug(f"Sound manager configuration updated: volume={self.sound_volume}, music_volume={self.music_volume}")
         
     def _init_pygame_mixer(self):
         """Initialize pygame.mixer with proper error handling"""
@@ -68,13 +102,12 @@ class SoundManager:
             self._initialized = False # Explicitly set to false on error
         
     def _load_sounds(self):
-        """Load all sound effects from the assets/sounds directory."""
-        sounds_dir = os.path.join(ASSETS_DIR, 'sounds')
-        if not os.path.isdir(sounds_dir):
-            logger.warning(f"Sounds directory not found: {sounds_dir}")
-            return
+        """Load all sound effects using the resource manager."""
+        from thunder_fighter.utils.resource_manager import get_resource_manager
         
-        logger.debug(f"Loading sounds from: {sounds_dir}")
+        resource_manager = get_resource_manager()
+        
+        logger.debug("Loading sounds via resource manager")
         
         # Define sound effect files
         sound_files = {
@@ -86,18 +119,17 @@ class SoundManager:
             'player_death': 'player_death.wav'
         }
         
-        # Load sound effects
+        # Load sound effects via resource manager
         for sound_name, file_name in sound_files.items():
-            file_path = os.path.join(sounds_dir, file_name)
-            if os.path.exists(file_path):
-                try:
-                    self.sounds[sound_name] = pygame.mixer.Sound(file_path)
-                    self.sounds[sound_name].set_volume(self.sound_volume)
-                    logger.debug(f"Loaded sound: {sound_name} from {file_path}")
-                except Exception as e:
-                    logger.error(f"Failed to load sound {sound_name}: {e}")
-            else:
-                logger.warning(f"Sound file not found: {file_path}")
+            try:
+                sound = resource_manager.load_sound(file_name, volume=self.sound_volume)
+                if sound:
+                    self.sounds[sound_name] = sound
+                    logger.debug(f"Loaded sound: {sound_name} via resource manager")
+                else:
+                    logger.warning(f"Sound file not found: {file_name}")
+            except Exception as e:
+                logger.error(f"Failed to load sound {sound_name}: {e}")
     
     def play_sound(self, sound_name):
         """Play the specified sound effect"""
@@ -146,9 +178,12 @@ class SoundManager:
         if not self.music_enabled:
             return
             
-        music_path = os.path.join(ASSETS_DIR, 'music', music_file)
-        if not os.path.exists(music_path):
-            logger.warning(f"Music file not found: {music_path}")
+        # Get music path via resource manager
+        from thunder_fighter.utils.resource_manager import get_resource_manager
+        resource_manager = get_resource_manager()
+        music_path = resource_manager.get_music_path(music_file)
+        if not music_path:
+            logger.warning(f"Music file not found: {music_file}")
             return
         
         # Try to play music with retry mechanism
