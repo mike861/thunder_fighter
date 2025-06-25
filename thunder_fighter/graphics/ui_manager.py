@@ -306,8 +306,4 @@ class UIManager:
     @property
     def player_info(self):
         """Get player info (for backwards compatibility)."""
-        return self.player_stats_display.player_info
-
-
-# Backwards compatibility alias
-PlayerUIManager = UIManager 
+        return self.player_stats_display.player_info 
