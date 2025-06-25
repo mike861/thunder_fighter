@@ -2,7 +2,7 @@ import pygame
 import pytest
 from unittest.mock import MagicMock, patch
 
-from thunder_fighter.game import Game
+from thunder_fighter.game import RefactoredGame as Game
 from thunder_fighter.utils.score import Score
 from thunder_fighter.graphics.ui_manager import PlayerUIManager
 
@@ -28,8 +28,8 @@ def mock_game():
         score_mock = MagicMock(spec=Score)
         score_mock.value = 0
 
-        with patch('thunder_fighter.game.PlayerUIManager', return_value=ui_manager_mock), \
-             patch('thunder_fighter.game.Score', return_value=score_mock):
+        with patch('thunder_fighter.graphics.ui_manager.UIManager', return_value=ui_manager_mock), \
+             patch('thunder_fighter.utils.score.Score', return_value=score_mock):
             game = Game()
             game.ui_manager = ui_manager_mock
             game.score = score_mock
@@ -48,7 +48,7 @@ class TestGame:
         mock_game.score.value = test_score
         
         # Act: Call the method that updates the UI state
-        mock_game.update_ui_state()
+        mock_game._update_ui_state()
         
         # Assert: Check if the UI manager's persistent info was updated
         assert 'score' in mock_game.ui_manager.persistent_info, "Score key should be in persistent_info"

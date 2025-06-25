@@ -19,7 +19,7 @@ pygame.mixer = MagicMock()
 pygame.font = MagicMock()
 pygame.display = MagicMock()
 
-from thunder_fighter.game import Game
+from thunder_fighter.game import RefactoredGame as Game
 from thunder_fighter.sprites.boss import Boss
 from thunder_fighter.sprites.enemy import Enemy
 from thunder_fighter.constants import INITIAL_GAME_LEVEL, MAX_GAME_LEVEL
@@ -263,9 +263,9 @@ class TestBossDefeatLevelUp:
         game_instance._boss_defeat_reset_time = time.time() - 1.0
         
         # Call update to trigger flag reset
-        with patch.object(game_instance, 'update_ui_state'), \
+        with patch.object(game_instance, '_update_ui_state'), \
              patch.object(game_instance, '_check_sound_system'), \
-             patch.object(game_instance, 'handle_collisions'):
+             patch.object(game_instance, '_handle_collisions'):
             
             # Mock the time-based reset check
             if hasattr(game_instance, '_boss_defeat_reset_time') and time.time() >= game_instance._boss_defeat_reset_time:

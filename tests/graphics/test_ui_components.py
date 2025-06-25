@@ -7,7 +7,7 @@ Tests for the refactored UI component system.
 import pytest
 import pygame
 from unittest.mock import MagicMock, patch, Mock
-from thunder_fighter.graphics.ui_components import (
+from thunder_fighter.graphics.ui import (
     HealthBarComponent,
     NotificationManager,
     GameInfoDisplay,
@@ -221,14 +221,14 @@ class TestDevInfoDisplay:
         assert dev_info_display.screen is not None
         assert dev_info_display.font is not None
     
-    @patch('thunder_fighter.graphics.ui_components.dev_info_display.config_manager')
+    @patch('thunder_fighter.graphics.ui.dev_info_display.config_manager')
     def test_draw_dev_mode_enabled(self, mock_config, dev_info_display):
         """Test drawing when dev mode is enabled."""
         mock_config.debug.dev_mode = True
         dev_info_display.draw(60.5, 10, 15, (400, 300))
         assert dev_info_display.font.render.call_count == 3
     
-    @patch('thunder_fighter.graphics.ui_components.dev_info_display.config_manager')
+    @patch('thunder_fighter.graphics.ui.dev_info_display.config_manager')
     def test_draw_dev_mode_disabled(self, mock_config, dev_info_display):
         """Test that nothing is drawn when dev mode is disabled."""
         mock_config.debug.dev_mode = False
@@ -296,7 +296,7 @@ class TestUIManagerIntegration:
         game.clock.get_fps.return_value = 60.0
         
         # Create UIManager with mocked fonts that return real surfaces
-        with patch('thunder_fighter.graphics.ui_manager_refactored.pygame.font.Font') as mock_font:
+        with patch('thunder_fighter.graphics.ui_manager.pygame.font.Font') as mock_font:
             mock_font_instance = MagicMock()
             mock_font_instance.render.return_value = pygame.Surface((50, 20))
             mock_font.return_value = mock_font_instance

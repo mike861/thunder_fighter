@@ -13,7 +13,7 @@ This version uses:
 Use arrow keys or WASD to control the aircraft movement, space key to shoot bullets.
 """
 
-from thunder_fighter.game_refactored import RefactoredGame
+from thunder_fighter.game import RefactoredGame
 from thunder_fighter.utils.logger import logger
 
 def main():

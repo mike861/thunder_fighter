@@ -19,7 +19,7 @@ pygame.mixer = MagicMock()
 pygame.font = MagicMock()
 pygame.display = MagicMock()
 
-from thunder_fighter.game import Game
+from thunder_fighter.game import RefactoredGame as Game
 from thunder_fighter.constants import SCORE_THRESHOLD, MAX_GAME_LEVEL
 
 
@@ -150,7 +150,7 @@ class TestLevelProgression:
         with patch.object(game_instance, 'update_ui_state'), \
              patch.object(game_instance, '_check_sound_system'), \
              patch.object(game_instance, 'handle_collisions'), \
-             patch.object(game_instance, 'spawn_boss') as mock_spawn_boss:
+             patch.object(game_instance, '_spawn_boss_via_factory') as mock_spawn_boss:
             
             game_instance.update()
             
@@ -163,7 +163,7 @@ class TestLevelProgression:
         with patch.object(game_instance, 'update_ui_state'), \
              patch.object(game_instance, '_check_sound_system'), \
              patch.object(game_instance, 'handle_collisions'), \
-             patch.object(game_instance, 'spawn_boss') as mock_spawn_boss:
+             patch.object(game_instance, '_spawn_boss_via_factory') as mock_spawn_boss:
             
             game_instance.update()
             

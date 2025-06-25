@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from _pytest.monkeypatch import MonkeyPatch
     from pytest_mock.plugin import MockerFixture
 
-from thunder_fighter.game import Game
+from thunder_fighter.game import RefactoredGame as Game
 from thunder_fighter.constants import MAX_GAME_LEVEL
 
 
