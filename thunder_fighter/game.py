@@ -490,7 +490,7 @@ class RefactoredGame:
     
     def _handle_ui_input(self, event: InputEvent):
         """Handle UI control input events."""
-        action = event.get_data('action')
+        action = event.get_data('ui_action')
         
         if action == 'change_language':
             current_lang = 'en' if self.ui_manager.current_language == 'zh' else 'zh'

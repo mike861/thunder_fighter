@@ -259,16 +259,20 @@ thunder_fighter/
 ├── requirements.txt           # Python 依赖
 ├── pytest.ini                # 测试配置
 ├── README.md                  # 英文 README
-├── README_ZH.md               # 本文档
+├── README_ZH.md               # 中文 README
 └── LICENSE                    # 项目许可证
 ```
+
+## 已知问题
+
+-   **中文显示问题**: 在某些系统（尤其是 macOS）上，切换到中文时可能会出现乱码或"豆腐块"(□□□)，而不是正确的字符。这是一个字体渲染问题，目前正在调查中。
 
 ## 开发
 
 ### 配置
 
 ```bash
-# 查看当前设置
+# 查看当前配置
 python -m thunder_fighter.utils.config_tool show
 
 # 修改设置

@@ -125,7 +125,7 @@ class ScreenOverlayManager:
         self.screen.blit(score_text, score_rect)
         
         # Draw survival time
-        time_text = self.font_medium.render(_("SURVIVAL_TIME", int(game_time)), True, WHITE)
+        time_text = self.font_medium.render(_("SURVIVAL_TIME", round(game_time, 1)), True, WHITE)
         time_rect = time_text.get_rect(center=(WIDTH // 2, panel_y + 200))
         self.screen.blit(time_text, time_rect)
         
@@ -161,7 +161,7 @@ class ScreenOverlayManager:
         score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
         self.screen.blit(score_text, score_rect)
         
-        time_text = self.font_medium.render(_("SURVIVAL_TIME", int(game_time)), True, WHITE)
+        time_text = self.font_medium.render(_("SURVIVAL_TIME", round(game_time, 1)), True, WHITE)
         time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70))
         self.screen.blit(time_text, time_rect)
         

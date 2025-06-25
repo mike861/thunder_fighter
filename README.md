@@ -263,6 +263,10 @@ thunder_fighter/
 └── LICENSE                   # Project License
 ```
 
+## Known Issues
+
+-   **Chinese Language Display**: On some systems (particularly macOS), switching to Chinese may display garbled text or "tofu" blocks (□□□) instead of the correct characters. This is a font rendering issue that is currently under investigation.
+
 ## Development
 
 ### Configuration

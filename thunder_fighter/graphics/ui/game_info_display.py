@@ -50,7 +50,7 @@ class GameInfoDisplay:
         # Format texts
         score_text = _("SCORE", score)
         level_text = _("LEVEL", level)
-        time_text = _("TIME", int(game_time))
+        time_text = _("TIME", game_time)
         
         # Render texts
         score_surf = self.font.render(score_text, True, self.text_color)
