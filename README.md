@@ -10,6 +10,11 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 
 - **Complete Campaign**: Battle through multiple levels culminating in an epic final boss battle
 - **Victory System**: Achieve game completion by defeating the final boss with comprehensive victory statistics
+- **🎨 Dynamic Level Backgrounds**: Each level features unique visual themes with ultra-smooth transitions
+  - **Double Buffering Technology**: Eliminates visual artifacts and flashing during level changes
+  - **Progressive Difficulty Visualization**: Background complexity and atmosphere evolve with game difficulty
+  - **Special Effects**: Level-specific effects including space storms and asteroid fields
+  - **Smooth Alpha Transitions**: Professional-grade 3-second transitions with cubic bezier easing
 - **Wingman System**: Collect power-ups to gain up to two wingmen who provide extra firepower with tracking missiles and act as shields
 - **Enhanced Victory Screen**: Beautiful victory interface that preserves game background with transparent overlay showing completion statistics
 - **Robust Audio System**: Background music and sound effects with volume control, featuring automatic recovery from audio issues
@@ -21,7 +26,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - **Multi-language Support**: Currently English and Chinese with localization system
 - **Developer Mode**: Debug information and configuration options
 - **Dynamic Difficulty**: Configurable gameplay parameters
-- **Extensively Tested**: Fully tested codebase with 249 comprehensive tests covering all game mechanics
+- **Extensively Tested**: Fully tested codebase with 255 comprehensive tests covering all game mechanics
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -82,6 +87,18 @@ For more detailed information on game mechanics, systems, and technical specific
 - **Mid-to-Late Levels (3-10)**: Progress by defeating bosses at the end of each level
 - **Final Victory**: Defeat the boss at Level 10 to complete the game
 - **Victory Rewards**: Receive comprehensive statistics including final score, survival time, and completion achievements upon winning
+
+### Visual Experience
+
+Thunder Fighter features a **dynamic background system** that enhances immersion:
+
+- **Level 1 - Deep Space**: Peaceful blue/black starfield for your journey's beginning
+- **Level 2 - Nebula Field**: Purple/blue nebula clouds as difficulty increases
+- **Level 3 - Asteroid Belt**: Brown/orange asteroid field with animated debris
+- **Level 4 - Red Zone**: Dangerous red space with particle storm effects
+- **Level 5 - Final Battle**: Ominous dark red atmosphere for the ultimate challenge
+
+Each transition between levels features **professional-grade smooth animations** with no visual artifacts or flashing, creating a cinematic experience that reflects the escalating intensity of your mission.
 
 ### Wingman System
 
@@ -182,7 +199,7 @@ The UI system has been completely refactored into modular components:
 
 ## Testing
 
-The project includes a comprehensive test suite with 249 tests covering all aspects of the game:
+The project includes a comprehensive test suite with 255 tests covering all aspects of the game:
 
 ### Test Categories
 
@@ -247,7 +264,7 @@ thunder_fighter/
 │   ├── config.py              # Game configuration
 │   ├── constants.py           # Game constants
 │   └── game.py                # Main game class
-├── tests/                     # Comprehensive test suite (249 tests)
+├── tests/                     # Comprehensive test suite (255 tests)
 │   ├── e2e/                  # End-to-end tests
 │   ├── integration/          # Integration tests
 │   ├── unit/                 # Unit tests

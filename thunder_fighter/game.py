@@ -147,6 +147,9 @@ class RefactoredGame:
         self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
         
+        # Set initial background level
+        self.background.set_level(self.game_level)
+        
         # Timing variables - set these BEFORE creating initial enemies
         self.game_start_time = time.time()
         self.enemy_spawn_timer = time.time()
@@ -531,6 +534,9 @@ class RefactoredGame:
         new_level = level_data.get('new_level', self.game_level + 1)
         
         self.game_level = new_level
+        
+        # Update background for new level
+        self.background.set_level(new_level)
         
         # Clear enemies and bullets
         enemies_cleared = len(self.enemies)

@@ -113,6 +113,130 @@ class Nebula:
         rect = nebula_surface.get_rect(center=(self.x, self.y))
         screen.blit(nebula_surface, rect, special_flags=pygame.BLEND_ADD)
 
+class SpaceStorm:
+    """Space storm effect for higher difficulty levels"""
+    def __init__(self):
+        self.particles = []
+        self.spawn_timer = 0
+        self.intensity = 1.0
+        self.alpha = 255  # Add alpha support for smooth transitions
+        
+        # Create initial particles
+        for _ in range(20):
+            self.particles.append({
+                'x': random.randint(0, WIDTH),
+                'y': random.randint(0, HEIGHT),
+                'speed': random.uniform(3, 6),
+                'size': random.randint(1, 3),
+                'alpha': random.randint(100, 200),
+                'angle': random.uniform(0, math.pi * 2)
+            })
+    
+    def update(self):
+        """Update storm particles"""
+        # Update existing particles
+        for particle in self.particles:
+            particle['y'] += particle['speed'] * self.intensity
+            particle['x'] += math.sin(particle['angle']) * 2
+            particle['angle'] += 0.1
+            
+            # Respawn if off screen
+            if particle['y'] > HEIGHT + 10:
+                particle['y'] = random.randint(-50, -10)
+                particle['x'] = random.randint(0, WIDTH)
+    
+    def draw(self, screen):
+        """Draw storm particles with alpha support"""
+        if self.alpha <= 0:
+            return
+            
+        for particle in self.particles:
+            # Apply global alpha to particle alpha
+            particle_alpha = int((particle['alpha'] / 255.0) * (self.alpha / 255.0) * 255)
+            color = (200, 100, 100, particle_alpha)
+            
+            # Create particle surface
+            particle_surface = pygame.Surface((particle['size'] * 2, particle['size'] * 2), pygame.SRCALPHA)
+            pygame.draw.circle(particle_surface, color, (particle['size'], particle['size']), particle['size'])
+            
+            # Draw with blend mode
+            screen.blit(particle_surface, (int(particle['x']), int(particle['y'])), special_flags=pygame.BLEND_ADD)
+
+class AsteroidField:
+    """Asteroid field effect for asteroid belt level"""
+    def __init__(self):
+        self.asteroids = []
+        self.alpha = 255  # Add alpha support for smooth transitions
+        
+        # Create asteroids
+        for _ in range(8):
+            self.asteroids.append({
+                'x': random.randint(0, WIDTH),
+                'y': random.randint(-HEIGHT, HEIGHT),
+                'speed': random.uniform(0.5, 2),
+                'rotation': 0,
+                'rotation_speed': random.uniform(-0.02, 0.02),
+                'size': random.randint(20, 50),
+                'shape': self._generate_asteroid_shape()
+            })
+    
+    def _generate_asteroid_shape(self):
+        """Generate random asteroid shape"""
+        points = []
+        num_points = random.randint(6, 10)
+        for i in range(num_points):
+            angle = (math.pi * 2 * i) / num_points
+            radius = random.uniform(0.8, 1.2)
+            points.append((math.cos(angle) * radius, math.sin(angle) * radius))
+        return points
+    
+    def update(self):
+        """Update asteroids"""
+        for asteroid in self.asteroids:
+            asteroid['y'] += asteroid['speed']
+            asteroid['rotation'] += asteroid['rotation_speed']
+            
+            if asteroid['y'] > HEIGHT + 100:
+                asteroid['y'] = random.randint(-200, -50)
+                asteroid['x'] = random.randint(0, WIDTH)
+    
+    def draw(self, screen):
+        """Draw asteroids with alpha support"""
+        if self.alpha <= 0:
+            return
+            
+        for asteroid in self.asteroids:
+            # Create asteroid surface
+            size = asteroid['size']
+            asteroid_surface = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+            
+            # Draw asteroid shape
+            points = []
+            for px, py in asteroid['shape']:
+                # Apply rotation
+                cos_r = math.cos(asteroid['rotation'])
+                sin_r = math.sin(asteroid['rotation'])
+                rx = px * cos_r - py * sin_r
+                ry = px * sin_r + py * cos_r
+                
+                # Scale and center
+                points.append((size + rx * size * 0.8, size + ry * size * 0.8))
+            
+            # Apply alpha to colors
+            alpha_factor = self.alpha / 255.0
+            main_color = (int(60 * alpha_factor), int(40 * alpha_factor), int(30 * alpha_factor), self.alpha)
+            border_color = (int(40 * alpha_factor), int(25 * alpha_factor), int(20 * alpha_factor), self.alpha)
+            
+            # Draw with alpha
+            pygame.draw.polygon(asteroid_surface, main_color[:3], points)
+            pygame.draw.polygon(asteroid_surface, border_color[:3], points, 2)
+            
+            # Apply overall alpha to surface
+            asteroid_surface.set_alpha(self.alpha)
+            
+            # Blit to screen
+            screen.blit(asteroid_surface, (int(asteroid['x'] - size), int(asteroid['y'] - size)))
+
 class Planet:
     """Background planet object"""
     def __init__(self):
@@ -163,7 +287,7 @@ class Planet:
             pygame.draw.ellipse(screen, self.ring_color, ring_rect, 2)
 
 class DynamicBackground:
-    """Dynamic scrolling background system"""
+    """Dynamic scrolling background system with level-based themes"""
     def __init__(self):
         # Create multiple star layers for parallax effect
         self.stars_layer1 = [Star(layer=1) for _ in range(30)]  # Far stars
@@ -176,19 +300,205 @@ class DynamicBackground:
         # Create planets
         self.planets = [Planet() for _ in range(2)]
         
-        # Background gradient colors
-        self.bg_colors = [
-            (5, 5, 20),     # Deep space
-            (10, 5, 30),    # Dark blue
-            (5, 10, 25),    # Blue-purple
-        ]
+        # Create special effects (initially inactive)
+        self.space_storm = None
+        self.asteroid_field = None
+        
+        # Current level and transition state
+        self.current_level = 1
+        self.target_level = 1
+        self.transition_progress = 0.0
+        self.transitioning = False
+        
+        # Double buffering for smooth transitions
+        self.current_background_buffer = None
+        self.target_background_buffer = None
+        self.buffer_needs_update = True
+        
+        # Target level effects (for smooth transitions)
+        self.target_nebulae = []
+        self.target_planets = []
+        self.target_space_storm = None
+        self.target_asteroid_field = None
+        
+        # Level themes with progressive difficulty colors
+        self.level_themes = {
+            1: {  # Level 1 - Deep Space (Blue/Black)
+                'primary_colors': [(5, 5, 20), (10, 5, 30), (5, 10, 25)],
+                'nebula_colors': [(20, 50, 80), (50, 20, 80)],
+                'star_brightness': 1.0,
+                'nebula_count': 2,
+                'planet_count': 1,
+                'special_effect': None,
+                'description': 'Deep Space'
+            },
+            2: {  # Level 2 - Nebula Field (Purple/Blue)
+                'primary_colors': [(15, 5, 30), (25, 10, 40), (20, 5, 35)],
+                'nebula_colors': [(80, 20, 100), (60, 40, 120)],
+                'star_brightness': 0.9,
+                'nebula_count': 4,
+                'planet_count': 2,
+                'special_effect': None,
+                'description': 'Nebula Field'
+            },
+            3: {  # Level 3 - Asteroid Belt (Brown/Orange)
+                'primary_colors': [(30, 15, 10), (40, 20, 15), (35, 18, 12)],
+                'nebula_colors': [(120, 60, 30), (100, 50, 20)],
+                'star_brightness': 0.8,
+                'nebula_count': 3,
+                'planet_count': 3,
+                'special_effect': 'asteroid_field',
+                'description': 'Asteroid Belt'
+            },
+            4: {  # Level 4 - Red Zone (Red/Orange)
+                'primary_colors': [(40, 10, 10), (50, 15, 15), (45, 12, 12)],
+                'nebula_colors': [(150, 30, 30), (120, 40, 20)],
+                'star_brightness': 0.7,
+                'nebula_count': 5,
+                'planet_count': 2,
+                'special_effect': 'space_storm',
+                'description': 'Red Zone'
+            },
+            5: {  # Level 5 - Final Battle (Dark Red/Black)
+                'primary_colors': [(30, 5, 5), (40, 10, 10), (35, 8, 8)],
+                'nebula_colors': [(100, 20, 20), (80, 10, 10)],
+                'star_brightness': 0.6,
+                'nebula_count': 6,
+                'planet_count': 1,
+                'special_effect': 'space_storm',
+                'description': 'Final Battle'
+            }
+        }
         
         # Animation variables
         self.color_phase = 0
         self.color_speed = 0.01
+        
+        # Transition effect variables
+        self.transition_duration = 3.0  # Increased duration for smoother transition
+        self.transition_start_time = 0
+        
+        # Initialize buffers (will be created when screen size is known)
+        self._screen_size = None
+        
+        # Initialize with level 1 theme
+        self._apply_level_theme(1)
+    
+    def set_level(self, level: int):
+        """Start transition to a new level theme"""
+        if level != self.current_level and level in self.level_themes:
+            self.target_level = level
+            self.transitioning = True
+            self.transition_start_time = pygame.time.get_ticks() / 1000.0
+            self.transition_progress = 0.0
+            
+            # Prepare target level elements for smooth transition
+            self._prepare_target_level_elements(level)
+            self.buffer_needs_update = True
+    
+    def _initialize_buffers(self, screen_size):
+        """Initialize or recreate background buffers"""
+        if self._screen_size != screen_size:
+            self._screen_size = screen_size
+            self.current_background_buffer = pygame.Surface(screen_size, pygame.SRCALPHA)
+            self.target_background_buffer = pygame.Surface(screen_size, pygame.SRCALPHA)
+            self.buffer_needs_update = True
+    
+    def _prepare_target_level_elements(self, level: int):
+        """Prepare target level elements for smooth transition"""
+        theme = self.level_themes.get(level, self.level_themes[1])
+        
+        # Prepare target nebulae
+        self.target_nebulae = []
+        target_nebula_count = theme['nebula_count']
+        for _ in range(target_nebula_count):
+            nebula = Nebula()
+            nebula.color = random.choice(theme['nebula_colors'])
+            self.target_nebulae.append(nebula)
+        
+        # Prepare target planets
+        self.target_planets = []
+        target_planet_count = theme['planet_count']
+        for _ in range(target_planet_count):
+            self.target_planets.append(Planet())
+        
+        # Prepare target special effects
+        special_effect = theme.get('special_effect')
+        self.target_space_storm = None
+        self.target_asteroid_field = None
+        
+        if special_effect == 'space_storm':
+            self.target_space_storm = SpaceStorm()
+            if level >= 5:
+                self.target_space_storm.intensity = 1.5
+        elif special_effect == 'asteroid_field':
+            self.target_asteroid_field = AsteroidField()
+    
+    def _smooth_ease_in_out(self, t):
+        """Smooth ease-in-out transition curve"""
+        # Uses a cubic bezier-like curve for ultra-smooth transition
+        return t * t * t * (t * (6.0 * t - 15.0) + 10.0)
+    
+    def _apply_level_theme(self, level: int):
+        """Apply theme settings for a specific level"""
+        theme = self.level_themes.get(level, self.level_themes[1])
+        
+        # Adjust nebula count
+        current_nebula_count = len(self.nebulae)
+        target_nebula_count = theme['nebula_count']
+        
+        if current_nebula_count < target_nebula_count:
+            for _ in range(target_nebula_count - current_nebula_count):
+                self.nebulae.append(Nebula())
+        elif current_nebula_count > target_nebula_count:
+            self.nebulae = self.nebulae[:target_nebula_count]
+        
+        # Update nebula colors
+        for nebula in self.nebulae:
+            nebula.color = random.choice(theme['nebula_colors'])
+        
+        # Adjust planet count
+        current_planet_count = len(self.planets)
+        target_planet_count = theme['planet_count']
+        
+        if current_planet_count < target_planet_count:
+            for _ in range(target_planet_count - current_planet_count):
+                self.planets.append(Planet())
+        elif current_planet_count > target_planet_count:
+            self.planets = self.planets[:target_planet_count]
+        
+        # Handle special effects
+        special_effect = theme.get('special_effect')
+        
+        # Clear existing effects
+        self.space_storm = None
+        self.asteroid_field = None
+        
+        # Create new effect if needed
+        if special_effect == 'space_storm':
+            self.space_storm = SpaceStorm()
+            if level >= 5:
+                self.space_storm.intensity = 1.5  # More intense for final level
+        elif special_effect == 'asteroid_field':
+            self.asteroid_field = AsteroidField()
     
     def update(self):
         """Update all background elements"""
+        # Handle level transition
+        if self.transitioning:
+            current_time = pygame.time.get_ticks() / 1000.0
+            elapsed = current_time - self.transition_start_time
+            self.transition_progress = min(1.0, elapsed / self.transition_duration)
+            
+            # Use smooth easing
+            smooth_progress = self._smooth_ease_in_out(self.transition_progress)
+            
+            if self.transition_progress >= 1.0:
+                self.transitioning = False
+                self.current_level = self.target_level
+                self._apply_level_theme(self.current_level)
+                self.buffer_needs_update = True
+        
         # Update all star layers
         for star in self.stars_layer1:
             star.update()
@@ -197,59 +507,263 @@ class DynamicBackground:
         for star in self.stars_layer3:
             star.update()
         
-        # Update nebulae
+        # Update current level elements
         for nebula in self.nebulae:
             nebula.update()
-        
-        # Update planets
         for planet in self.planets:
             planet.update()
+        if self.space_storm:
+            self.space_storm.update()
+        if self.asteroid_field:
+            self.asteroid_field.update()
+        
+        # Update target level elements during transition
+        if self.transitioning:
+            for nebula in self.target_nebulae:
+                nebula.update()
+            for planet in self.target_planets:
+                planet.update()
+            if self.target_space_storm:
+                self.target_space_storm.update()
+            if self.target_asteroid_field:
+                self.target_asteroid_field.update()
         
         # Update background color animation
         self.color_phase += self.color_speed
     
-    def draw_gradient_background(self, screen):
-        """Draw animated gradient background"""
-        # Calculate current background color
+    def _render_level_background(self, surface, level, elements=None, special_effects=None, effect_alpha=255):
+        """Render background for a specific level to a surface"""
+        theme = self.level_themes.get(level, self.level_themes[1])
+        
+        # Clear surface
+        surface.fill((0, 0, 0, 0))
+        
+        # Draw gradient background
+        self._draw_level_gradient(surface, theme)
+        
+        # Use provided elements or current level elements
+        if elements is None:
+            nebulae = self.nebulae
+            planets = self.planets
+            space_storm = self.space_storm
+            asteroid_field = self.asteroid_field
+        else:
+            nebulae = elements.get('nebulae', [])
+            planets = elements.get('planets', [])
+            space_storm = special_effects.get('space_storm') if special_effects else None
+            asteroid_field = special_effects.get('asteroid_field') if special_effects else None
+        
+        # Draw nebulae
+        for nebula in nebulae:
+            nebula.draw(surface)
+        
+        # Draw planets
+        for planet in planets:
+            planet.draw(surface)
+        
+        # Draw special effects (before stars) with alpha support
+        if asteroid_field:
+            # Store original alpha
+            original_alpha = getattr(asteroid_field, 'alpha', 255)
+            asteroid_field.alpha = effect_alpha
+            asteroid_field.draw(surface)
+            # Restore original alpha
+            asteroid_field.alpha = original_alpha
+        
+        # Draw stars with level-appropriate brightness
+        brightness_factor = theme['star_brightness']
+        
+        for star in self.stars_layer1:
+            original_brightness = star.brightness
+            star.brightness = int(star.brightness * brightness_factor)
+            star.draw(surface)
+            star.brightness = original_brightness
+            
+        for star in self.stars_layer2:
+            original_brightness = star.brightness
+            star.brightness = int(star.brightness * brightness_factor)
+            star.draw(surface)
+            star.brightness = original_brightness
+            
+        for star in self.stars_layer3:
+            original_brightness = star.brightness
+            star.brightness = int(star.brightness * brightness_factor)
+            star.draw(surface)
+            star.brightness = original_brightness
+        
+        # Draw space storm on top with alpha support
+        if space_storm:
+            # Store original alpha
+            original_alpha = getattr(space_storm, 'alpha', 255)
+            space_storm.alpha = effect_alpha
+            space_storm.draw(surface)
+            # Restore original alpha
+            space_storm.alpha = original_alpha
+    
+    def _draw_level_gradient(self, surface, theme):
+        """Draw gradient background for a specific theme"""
+        # Calculate current background colors
         phase = (math.sin(self.color_phase) + 1) * 0.5  # Normalize to 0-1
         
-        # Interpolate between colors
-        color1 = self.bg_colors[0]
-        color2 = self.bg_colors[1]
-        current_color = tuple(
-            int(color1[i] + (color2[i] - color1[i]) * phase) 
-            for i in range(3)
-        )
+        # Get base colors
+        colors = theme['primary_colors']
+        color1 = colors[0]
+        color2 = colors[1]
         
-        # Fill background with gradient effect
-        screen.fill(current_color)
+        # Interpolate between the two colors for animation
+        current_color = self._interpolate_color(color1, color2, phase)
         
-        # Add subtle vertical gradient
-        for y in range(0, HEIGHT, 4):
-            gradient_factor = y / HEIGHT
+        # Fill background
+        surface.fill(current_color)
+        
+        # Add vertical gradient effect with level-appropriate intensity
+        level_num = list(self.level_themes.keys())[list(self.level_themes.values()).index(theme)]
+        gradient_intensity = 20 if level_num <= 2 else 30
+        
+        height = surface.get_height()
+        for y in range(0, height, 4):
+            gradient_factor = y / height
+            
+            # Create darker gradient for higher levels
+            if level_num >= 4:
+                gradient_factor = gradient_factor * gradient_factor  # Quadratic darkening
+            
             gradient_color = tuple(
-                min(255, int(current_color[i] + gradient_factor * 10)) 
+                min(255, int(current_color[i] + gradient_factor * gradient_intensity)) 
                 for i in range(3)
             )
-            pygame.draw.line(screen, gradient_color, (0, y), (WIDTH, y), 4)
+            pygame.draw.line(surface, gradient_color, (0, y), (surface.get_width(), y), 4)
+    
+    def _interpolate_color(self, color1, color2, progress):
+        """Interpolate between two colors"""
+        return tuple(
+            int(color1[i] + (color2[i] - color1[i]) * progress)
+            for i in range(3)
+        )
     
     def draw(self, screen):
-        """Draw all background elements in correct order"""
-        # 1. Draw gradient background
-        self.draw_gradient_background(screen)
+        """Draw background using double buffering for smooth transitions"""
+        # Initialize buffers if needed
+        self._initialize_buffers(screen.get_size())
         
-        # 2. Draw nebulae (furthest back)
-        for nebula in self.nebulae:
-            nebula.draw(screen)
+        if self.transitioning:
+            # Double buffered smooth transition
+            self._draw_smooth_transition(screen)
+        else:
+            # Single buffer normal rendering
+            self._render_level_background(
+                screen, 
+                self.current_level,
+                elements={
+                    'nebulae': self.nebulae,
+                    'planets': self.planets
+                },
+                special_effects={
+                    'space_storm': self.space_storm,
+                    'asteroid_field': self.asteroid_field
+                }
+            )
         
-        # 3. Draw planets
-        for planet in self.planets:
-            planet.draw(screen)
+        # Draw level indicator overlay (always on top)
+        self._draw_level_indicator(screen)
+    
+    def _draw_smooth_transition(self, screen):
+        """Draw smooth transition between levels using double buffering"""
+        smooth_progress = self._smooth_ease_in_out(self.transition_progress)
         
-        # 4. Draw stars in layers (parallax effect)
-        for star in self.stars_layer1:  # Furthest stars
-            star.draw(screen)
-        for star in self.stars_layer2:  # Medium stars
-            star.draw(screen)
-        for star in self.stars_layer3:  # Nearest stars
-            star.draw(screen) 
+        # Calculate alpha values for smooth effect transitions
+        current_effect_alpha = int(255 * (1.0 - smooth_progress))
+        target_effect_alpha = int(255 * smooth_progress)
+        
+        # Render current level to buffer
+        self._render_level_background(
+            self.current_background_buffer,
+            self.current_level,
+            elements={
+                'nebulae': self.nebulae,
+                'planets': self.planets
+            },
+            special_effects={
+                'space_storm': self.space_storm,
+                'asteroid_field': self.asteroid_field
+            },
+            effect_alpha=current_effect_alpha
+        )
+        
+        # Render target level to buffer
+        self._render_level_background(
+            self.target_background_buffer,
+            self.target_level,
+            elements={
+                'nebulae': self.target_nebulae,
+                'planets': self.target_planets
+            },
+            special_effects={
+                'space_storm': self.target_space_storm,
+                'asteroid_field': self.target_asteroid_field
+            },
+            effect_alpha=target_effect_alpha
+        )
+        
+        # Draw current level background
+        screen.blit(self.current_background_buffer, (0, 0))
+        
+        # Overlay target level background with alpha blending
+        target_alpha = int(255 * smooth_progress)
+        self.target_background_buffer.set_alpha(target_alpha)
+        screen.blit(self.target_background_buffer, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+        
+        # Restore target buffer alpha
+        self.target_background_buffer.set_alpha(255)
+    
+    def _draw_level_indicator(self, screen):
+        """Draw level transition indicator with improved effects"""
+        if self.transitioning:
+            # Smooth fade in/out calculation
+            fade_factor = 1.0 - abs(self.transition_progress - 0.5) * 2
+            fade_factor = max(0.0, fade_factor)
+            
+            # Subtle overlay instead of harsh black
+            overlay_alpha = int(64 * fade_factor)  # Much more subtle
+            if overlay_alpha > 0:
+                overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+                overlay.fill((0, 0, 20, overlay_alpha))  # Dark blue tint
+                screen.blit(overlay, (0, 0))
+            
+            # Level text with smooth animation
+            target_theme = self.level_themes.get(self.target_level, self.level_themes[1])
+            
+            # Text fade effect
+            text_alpha = int(255 * fade_factor)
+            if text_alpha > 0:
+                # Main level text
+                font = pygame.font.Font(None, 72)
+                text = font.render(f"Level {self.target_level}", True, WHITE)
+                text.set_alpha(text_alpha)
+                
+                # Description text
+                desc_font = pygame.font.Font(None, 48)
+                desc_text = desc_font.render(target_theme['description'], True, WHITE)
+                desc_text.set_alpha(text_alpha)
+                
+                # Center positioning
+                screen_center = (screen.get_width() // 2, screen.get_height() // 2)
+                text_rect = text.get_rect(center=(screen_center[0], screen_center[1] - 50))
+                desc_rect = desc_text.get_rect(center=(screen_center[0], screen_center[1] + 20))
+                
+                # Add subtle glow effect
+                if text_alpha > 128:
+                    glow_alpha = text_alpha // 3
+                    glow_text = font.render(f"Level {self.target_level}", True, (100, 150, 255))
+                    glow_text.set_alpha(glow_alpha)
+                    
+                    # Draw glow slightly offset
+                    for dx, dy in [(-2, -2), (2, -2), (-2, 2), (2, 2)]:
+                        glow_rect = text_rect.copy()
+                        glow_rect.x += dx
+                        glow_rect.y += dy
+                        screen.blit(glow_text, glow_rect)
+                
+                # Draw main text
+                screen.blit(text, text_rect)
+                screen.blit(desc_text, desc_rect) 
