@@ -146,6 +146,7 @@ class RefactoredGame:
         self.paused = False
         self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
+        self.game_over = False  # New: game over state flag
         
         # Set initial background level
         self.background.set_level(self.game_level)
@@ -185,6 +186,70 @@ class RefactoredGame:
         logger.info("RefactoredGame initialized with all architectural improvements")
         logger.info(f"Difficulty: {config_manager.gameplay.difficulty}")
         logger.info(f"Resource cache stats: {self.resource_manager.get_cache_stats()}")
+    
+    def _restart_game(self):
+        """Restart the game to initial state."""
+        logger.info("Restarting game")
+        
+        # Reset game state
+        self.game_over = False
+        self.game_won = False
+        self.paused = False
+        self.game_level = INITIAL_GAME_LEVEL
+        
+        # Reset timing
+        self.game_start_time = time.time()
+        self.enemy_spawn_timer = time.time()
+        self.item_spawn_timer = time.time()
+        self.boss_spawn_timer = time.time()
+        
+        # Reset score
+        self.score.reset()
+        self.last_score_checkpoint = 0
+        
+        # Clear all sprites except player
+        for sprite in self.all_sprites:
+            if sprite != self.player:
+                sprite.kill()
+        
+        # Reset player
+        self.player.health = PLAYER_HEALTH
+        self.player.rect.centerx = WIDTH // 2
+        self.player.rect.bottom = HEIGHT - 50
+        self.player.bullet_paths = 1
+        self.player.bullet_speed = 7
+        self.player.speed = 5
+        self.player.wingmen_list.clear()
+        
+        # Add initial wingmen
+        for _ in range(PLAYER_INITIAL_WINGMEN):
+            self.player.add_wingman()
+        
+        # Reset boss state
+        self.boss = None
+        self.boss_active = False
+        self.boss_defeated = False
+        
+        # Reset background
+        self.background.set_level(self.game_level)
+        
+        # Reset UI state
+        self.ui_manager.reset_game_state()
+        
+        # Create initial enemies
+        for i in range(BASE_ENEMY_COUNT):
+            self._spawn_enemy_via_factory()
+        
+        # Reset configuration
+        self.target_enemy_count = BASE_ENEMY_COUNT
+        self.item_spawn_interval = 30
+        
+        # Play background music
+        music_path = self.resource_manager.get_music_path('background_music.mp3')
+        if music_path:
+            self.sound_manager.play_music('background_music.mp3')
+        
+        logger.info("Game restarted successfully")
     
     def _setup_event_listeners(self):
         """Set up event system listeners."""
@@ -507,7 +572,12 @@ class RefactoredGame:
     def _handle_player_died(self, event: GameEvent):
         """Handle player death event."""
         logger.info("Player died - triggering game over")
-        self.running = False
+        self.game_over = True
+        
+        # Play game over sound and fade out music
+        if hasattr(self, 'sound_manager'):
+            self.sound_manager.play_sound('player_death.wav')
+            self.sound_manager.fadeout_music(2000)
     
     def _handle_boss_defeated_event(self, event: GameEvent):
         """Handle boss defeated event."""
@@ -695,7 +765,21 @@ class RefactoredGame:
         """Handle pygame events using the input management system."""
         pygame_events = pygame.event.get()
         
-        # Process events through input manager
+        # Handle game over state events separately 
+        if self.game_over:
+            for event in pygame_events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        # Exit game
+                        self.running = False
+                    elif event.key == pygame.K_r:
+                        # Restart game
+                        self._restart_game()
+                elif event.type == pygame.QUIT:
+                    self.running = False
+            return
+        
+        # Process events through input manager for normal gameplay
         input_events = self.input_manager.update(pygame_events)
         
         # Process game events
@@ -720,8 +804,8 @@ class RefactoredGame:
         else:
             self._last_sound_check = time.time()
         
-        # Skip updates if paused or game won
-        if self.paused or self.game_won:
+        # Skip updates if paused, game won, or game over
+        if self.paused or self.game_won or self.game_over:
             return
         
         # Update background
@@ -761,7 +845,7 @@ class RefactoredGame:
             self.event_system.process_events()
         
         # Check game over condition
-        if self.player.health <= 0 and not self.game_won:
+        if self.player.health <= 0 and not self.game_won and not self.game_over:
             self.event_system.dispatch_event(GameEvent(
                 GameEventType.PLAYER_DIED,
                 {'final_score': self.score.value, 'level': self.game_level}
@@ -912,7 +996,7 @@ class RefactoredGame:
         # Draw special screens
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
-        elif self.player.health <= 0:
+        elif self.game_over or self.player.health <= 0:
             game_time = (time.time() - self.game_start_time) / 60.0
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)
         

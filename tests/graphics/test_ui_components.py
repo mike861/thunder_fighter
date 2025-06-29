@@ -271,7 +271,7 @@ class TestScreenOverlayManager:
     def test_draw_game_over_screen(self, screen_overlay_manager):
         """Test drawing game over screen."""
         screen_overlay_manager.draw_game_over_screen(5000, 5, 150)
-        screen_overlay_manager.screen.fill.assert_called()
+        # New implementation uses overlay blitting instead of direct screen fill
         screen_overlay_manager.screen.blit.assert_called()
     
     def test_start_level_change_animation(self, screen_overlay_manager):

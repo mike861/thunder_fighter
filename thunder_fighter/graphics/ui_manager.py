@@ -200,6 +200,26 @@ class UIManager:
         self.notification_manager.update()
         self.screen_overlay_manager.update()
         
+    def reset_game_state(self):
+        """Reset game state to initial values."""
+        self.game_state = {
+            'level': 1,
+            'paused': False,
+            'game_time': 0,
+            'victory': False,
+            'defeat': False
+        }
+        self.persistent_info = {}
+        
+        # Reset component states
+        self.notification_manager.clear_all()
+        
+        # Reset player and boss info displays
+        if hasattr(self, 'player_stats_display'):
+            self.player_stats_display.reset()
+        if hasattr(self, 'boss_status_display'):
+            self.boss_status_display.reset()
+        
     def draw(self, score, level, game_time, enemy_count=None, target_enemy_count=None, max_level=None):
         """
         Draw all UI elements.

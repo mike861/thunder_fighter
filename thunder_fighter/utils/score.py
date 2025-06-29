@@ -37,4 +37,9 @@ class Score:
         """Update score display"""
         self.text = self.font.render(f"Score: {self.value}", True, WHITE)
         self.rect = self.text.get_rect()
-        self.rect.topleft = (10, 10) 
+        self.rect.topleft = (10, 10)
+    
+    def reset(self):
+        """Reset score to zero"""
+        self.value = 0
+        self.update_display() 

@@ -55,5 +55,8 @@
     "BOSS_BONUS": "BOSS奖励: +{}",
     "STAGE_COMPLETE": "关卡完成!",
     "FINAL_BOSS_DEFEATED": "最终BOSS被击败!",
-    "GAME_COMPLETED": "恭喜！您已完成雷霆战机全部关卡！"
+    "GAME_COMPLETED": "恭喜！您已完成雷霆战机全部关卡！",
+    "RESTART_GAME": "按 R 重新开始游戏",
+    "GAME_STATISTICS": "游戏统计",
+    "PERFORMANCE_SUMMARY": "战斗总结"
 } 

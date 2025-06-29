@@ -55,5 +55,8 @@
     "BOSS_BONUS": "Boss Bonus: +{}",
     "STAGE_COMPLETE": "Stage Complete!",
     "FINAL_BOSS_DEFEATED": "Final Boss Defeated!",
-    "GAME_COMPLETED": "Congratulations! You have completed Thunder Fighter!"
+    "GAME_COMPLETED": "Congratulations! You have completed Thunder Fighter!",
+    "RESTART_GAME": "Press R to Restart Game",
+    "GAME_STATISTICS": "Game Statistics",
+    "PERFORMANCE_SUMMARY": "Battle Summary"
 } 
