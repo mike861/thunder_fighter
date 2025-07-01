@@ -297,14 +297,20 @@ class Boss(pygame.sprite.Sprite):
             pygame.draw.rect(surface, border_color, (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4), 3)
         
         # Draw boss level indicator and mode
-        mode_indicators = {
-            "normal": "",
-            "aggressive": " [Danger]",
-            "final": " [Extreme]"
-        }
-        level_text = f"BOSS Lv.{self.level}{mode_indicators.get(self.shoot_pattern, '')}"
+        from thunder_fighter.localization import _
         
-        font = pygame.font.Font(None, 20)
+        # Get localized boss level text based on mode
+        if self.shoot_pattern == "aggressive":
+            level_text = _("BOSS_LEVEL_DANGER", self.level)
+        elif self.shoot_pattern == "final":
+            level_text = _("BOSS_LEVEL_EXTREME", self.level)
+        else:
+            level_text = _("BOSS_LEVEL_NORMAL", self.level)
+        
+        # Use resource manager for better Chinese font support
+        from thunder_fighter.utils.resource_manager import get_resource_manager
+        resource_manager = get_resource_manager()
+        font = resource_manager.load_font(None, 20, system_font=True)
         
         # Change text color based on mode
         text_color = WHITE

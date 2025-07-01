@@ -2,6 +2,10 @@
 
 This document contains more detailed information about the Thunder Fighter game mechanics and technical aspects.
 
+## Related Documentation
+
+- [Font System and Localization](FONT_SYSTEM_AND_LOCALIZATION.md) - Comprehensive guide to the multi-language support and Chinese font optimization system
+
 ## Internal Game Mechanics
 
 ### Game Victory System

@@ -50,7 +50,10 @@ class Notification:
     """Class for displaying temporary notification messages"""
     def __init__(self, text, duration=2000, color=WHITE, size=30, position='center'):
         try:
-            self.font = pygame.font.SysFont(None, size)
+            # Use resource manager for better Chinese font support
+            from thunder_fighter.utils.resource_manager import get_resource_manager
+            resource_manager = get_resource_manager()
+            self.font = resource_manager.load_font(None, size, system_font=True)
         except (pygame.error, AttributeError):
             # If pygame font is not initialized or available (test environment)
             # Create a dummy font interface

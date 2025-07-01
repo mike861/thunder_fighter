@@ -330,7 +330,7 @@ class DynamicBackground:
                 'nebula_count': 2,
                 'planet_count': 1,
                 'special_effect': None,
-                'description': 'Deep Space'
+                'description_key': 'LEVEL_THEME_DEEP_SPACE'
             },
             2: {  # Level 2 - Nebula Field (Purple/Blue)
                 'primary_colors': [(15, 5, 30), (25, 10, 40), (20, 5, 35)],
@@ -339,7 +339,7 @@ class DynamicBackground:
                 'nebula_count': 4,
                 'planet_count': 2,
                 'special_effect': None,
-                'description': 'Nebula Field'
+                'description_key': 'LEVEL_THEME_NEBULA_FIELD'
             },
             3: {  # Level 3 - Asteroid Belt (Brown/Orange)
                 'primary_colors': [(30, 15, 10), (40, 20, 15), (35, 18, 12)],
@@ -348,7 +348,7 @@ class DynamicBackground:
                 'nebula_count': 3,
                 'planet_count': 3,
                 'special_effect': 'asteroid_field',
-                'description': 'Asteroid Belt'
+                'description_key': 'LEVEL_THEME_ASTEROID_BELT'
             },
             4: {  # Level 4 - Red Zone (Red/Orange)
                 'primary_colors': [(40, 10, 10), (50, 15, 15), (45, 12, 12)],
@@ -357,7 +357,7 @@ class DynamicBackground:
                 'nebula_count': 5,
                 'planet_count': 2,
                 'special_effect': 'space_storm',
-                'description': 'Red Zone'
+                'description_key': 'LEVEL_THEME_RED_ZONE'
             },
             5: {  # Level 5 - Final Battle (Dark Red/Black)
                 'primary_colors': [(30, 5, 5), (40, 10, 10), (35, 8, 8)],
@@ -366,7 +366,7 @@ class DynamicBackground:
                 'nebula_count': 6,
                 'planet_count': 1,
                 'special_effect': 'space_storm',
-                'description': 'Final Battle'
+                'description_key': 'LEVEL_THEME_FINAL_BATTLE'
             }
         }
         
@@ -736,14 +736,20 @@ class DynamicBackground:
             # Text fade effect
             text_alpha = int(255 * fade_factor)
             if text_alpha > 0:
-                # Main level text
-                font = pygame.font.Font(None, 72)
-                text = font.render(f"Level {self.target_level}", True, WHITE)
+                # Main level text using resource manager for Chinese support
+                from thunder_fighter.utils.resource_manager import get_resource_manager
+                from thunder_fighter.localization import _
+                resource_manager = get_resource_manager()
+                
+                font = resource_manager.load_font(None, 72, system_font=True)
+                level_text_content = _("LEVEL_INDICATOR", self.target_level)
+                text = font.render(level_text_content, True, WHITE)
                 text.set_alpha(text_alpha)
                 
                 # Description text
-                desc_font = pygame.font.Font(None, 48)
-                desc_text = desc_font.render(target_theme['description'], True, WHITE)
+                desc_font = resource_manager.load_font(None, 48, system_font=True)
+                description = _(target_theme['description_key'])
+                desc_text = desc_font.render(description, True, WHITE)
                 desc_text.set_alpha(text_alpha)
                 
                 # Center positioning
@@ -754,7 +760,7 @@ class DynamicBackground:
                 # Add subtle glow effect
                 if text_alpha > 128:
                     glow_alpha = text_alpha // 3
-                    glow_text = font.render(f"Level {self.target_level}", True, (100, 150, 255))
+                    glow_text = font.render(level_text_content, True, (100, 150, 255))
                     glow_text.set_alpha(glow_alpha)
                     
                     # Draw glow slightly offset

@@ -41,12 +41,16 @@ class UIManager:
         self.player = player
         self.game = game
         
-        # Initialize fonts
+        # Initialize fonts using resource manager for Chinese support
         try:
-            self.font_small = pygame.font.Font(None, 24)
-            self.font_medium = pygame.font.Font(None, 36)
-            self.font_large = pygame.font.Font(None, 48)
-        except pygame.error:
+            from thunder_fighter.utils.resource_manager import get_resource_manager
+            resource_manager = get_resource_manager()
+            
+            # Use TTF files for better Chinese character support with original sizes
+            self.font_small = resource_manager.load_font(None, 24, system_font=True)
+            self.font_medium = resource_manager.load_font(None, 36, system_font=True)
+            self.font_large = resource_manager.load_font(None, 48, system_font=True)
+        except (pygame.error, ImportError):
             # Fallback for test environments
             from unittest.mock import MagicMock
             self.font_small = self.font_medium = self.font_large = MagicMock()

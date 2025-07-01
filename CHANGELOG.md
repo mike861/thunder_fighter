@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Special effects including space storms and animated asteroid fields
   - Cubic bezier easing for ultra-smooth 3-second transitions
   - Alpha-based blending technology eliminating flash effects
+- 🌐 **Enhanced Multi-Language Support**: Complete internationalization system
+  - Chinese font optimization for macOS using TTF font files
+  - Localized level indicators and Boss status displays
+  - Multi-language level theme descriptions
+  - Dynamic language switching with L key
+  - Font size optimization for different character sets
 - Comprehensive test suite with 255 tests
 - Modular UI system with component-based architecture
 - Event-driven architecture for decoupled components
@@ -29,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Background System**: Complete rewrite with double buffering technology
 - **Visual Polish**: Enhanced level indicators with glow effects and subtle overlays
 - **Transition Experience**: Eliminated all visual artifacts and improved smoothness
+- **Font System**: Completely redesigned for optimal Chinese character support
+  - All UI components now use ResourceManager for font loading
+  - TTF-only strategy on macOS for reliable Chinese rendering
+  - Unified font management across all game components
+- **UI Components**: Updated all components to support dynamic language switching
 - Refactored UI system into separate components
 - Improved state management system
 - Enhanced sound system with automatic recovery
@@ -36,6 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Background Transitions**: Completely eliminated flashing and visual artifacts during level changes
+- **Chinese Font Display**: Resolved "tofu blocks" (□□□) issue on macOS
+  - Fixed SysFont compatibility issues with Chinese characters
+  - Implemented direct TTF font file loading for reliability
+  - Optimized PingFang SC and STHeiti font usage
+- **Time Display**: Fixed decimal time display for game durations under 1 minute
+- **Language Switching**: Fixed L key functionality for proper language toggling
+- **Localization**: Removed all hardcoded English text from level transitions and Boss displays
 - Audio system stability improvements
 - Memory leak in sprite rendering
 - Collision detection accuracy

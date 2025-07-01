@@ -196,17 +196,17 @@ class ResourceManager:
         
         try:
             if font_name is None:
-                # Default font
-                font = pygame.font.Font(None, size)
+                # Default font - use Chinese-optimized font on macOS
+                font = self._get_optimized_default_font(size)
             elif system_font:
-                # System font
-                font = pygame.font.SysFont(font_name, size)
+                # System font - optimize for Chinese on macOS
+                font = self._get_optimized_system_font(font_name, size)
             else:
                 # Font file
                 font_path = os.path.join(self.fonts_dir, font_name)
                 if not os.path.exists(font_path):
                     logger.warning(f"Font file not found: {font_path}, using default")
-                    font = pygame.font.Font(None, size)
+                    font = self._get_optimized_default_font(size)
                 else:
                     font = pygame.font.Font(font_path, size)
             
@@ -216,9 +216,81 @@ class ResourceManager:
             
         except pygame.error as e:
             logger.error(f"Failed to load font {font_name}: {e}, using default")
-            font = pygame.font.Font(None, size)
+            font = self._get_optimized_default_font(size)
             self._font_cache[cache_key] = font
             return font
+    
+    def _get_optimized_default_font(self, size: int) -> pygame.font.Font:
+        """Get optimized default font for Chinese character support."""
+        import platform
+        import os
+        
+        if platform.system() == "Darwin":  # macOS
+            # ONLY use TTF font files for Chinese support (SysFont doesn't work properly)
+            font_files = [
+                "/System/Library/Fonts/PingFang.ttc",
+                "/System/Library/Fonts/STHeiti Medium.ttc",
+                "/System/Library/Fonts/STHeiti Light.ttc"
+            ]
+            
+            for font_path in font_files:
+                if os.path.exists(font_path):
+                    try:
+                        font = pygame.font.Font(font_path, size)
+                        # Test if font can render Chinese characters
+                        test_surface = font.render("雷", True, (255, 255, 255))
+                        if test_surface.get_width() > 1:  # Successfully rendered
+                            logger.debug(f"Using TTF font file: {font_path}")
+                            return font
+                    except Exception as e:
+                        logger.debug(f"Failed to load font {font_path}: {e}")
+                        continue
+            
+            logger.warning("No TTF Chinese fonts found on macOS, using pygame default")
+        
+        # Fallback to pygame default (will show tofu blocks for Chinese)
+        logger.debug("Using pygame default font - Chinese may not display correctly")
+        return pygame.font.Font(None, size)
+    
+    def _get_optimized_system_font(self, font_name: str, size: int) -> pygame.font.Font:
+        """Get optimized system font for Chinese character support."""
+        import platform
+        import os
+        
+        if platform.system() == "Darwin":  # macOS
+            # ALWAYS use TTF files for Chinese support (SysFont doesn't work)
+            font_file_mapping = {
+                "Arial": "/System/Library/Fonts/PingFang.ttc",
+                "Helvetica": "/System/Library/Fonts/PingFang.ttc", 
+                "Sans": "/System/Library/Fonts/PingFang.ttc",
+                "Default": "/System/Library/Fonts/PingFang.ttc",
+                "PingFang SC": "/System/Library/Fonts/PingFang.ttc",
+                "Heiti SC": "/System/Library/Fonts/STHeiti Medium.ttc",
+                "STHeiti": "/System/Library/Fonts/STHeiti Medium.ttc"
+            }
+            
+            # Try TTF file first
+            ttf_path = font_file_mapping.get(font_name)
+            if ttf_path and os.path.exists(ttf_path):
+                try:
+                    font = pygame.font.Font(ttf_path, size)
+                    # Test if font can render Chinese characters
+                    test_surface = font.render("雷", True, (255, 255, 255))
+                    if test_surface.get_width() > 1:  # Successfully rendered
+                        logger.debug(f"Using TTF file for {font_name}: {ttf_path}")
+                        return font
+                except Exception as e:
+                    logger.debug(f"Failed to load TTF file {ttf_path}: {e}")
+            
+            # If specific font not mapped, try default TTF fonts
+            return self._get_optimized_default_font(size)
+        
+        # For non-macOS systems, use system fonts (may not support Chinese properly)
+        try:
+            return pygame.font.SysFont(font_name, size)
+        except:
+            # Final fallback
+            return self._get_optimized_default_font(size)
     
     def get_music_path(self, filename: str) -> Optional[str]:
         """

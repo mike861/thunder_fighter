@@ -23,7 +23,11 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - **Event-Driven Architecture**: Comprehensive event system for decoupled game components
 - **Factory Pattern**: Entity creation through configurable factories
 - **Input Management System**: Decoupled input handling with customizable key bindings
-- **Multi-language Support**: Currently English and Chinese with localization system
+- **Enhanced Multi-language Support**: Complete internationalization with optimized Chinese font rendering
+  - **Dynamic Language Switching**: Press L to toggle between English and Chinese
+  - **Optimized Chinese Fonts**: TTF-based font system for reliable Chinese character display on macOS
+  - **Localized UI Elements**: All game text including level transitions, Boss status, and notifications
+  - **Font System**: ResourceManager-based font loading with automatic fallbacks
 - **Developer Mode**: Debug information and configuration options
 - **Dynamic Difficulty**: Configurable gameplay parameters
 - **Extensively Tested**: Fully tested codebase with 255 comprehensive tests covering all game mechanics
@@ -241,6 +245,7 @@ thunder_fighter/
 ├── docs/                       # Comprehensive documentation
 │   ├── DETAILS.md             # Detailed game mechanics
 │   ├── DETAILS_ZH.md          # Chinese documentation
+│   ├── FONT_SYSTEM_AND_LOCALIZATION.md # Font system and multi-language support
 │   ├── IMPLEMENTATION_SUMMARY.md
 │   ├── STATE_MANAGEMENT_SYSTEM.md
 │   ├── SEPARATION_OF_CONCERNS_SUMMARY.md
@@ -280,9 +285,11 @@ thunder_fighter/
 └── LICENSE                   # Project License
 ```
 
-## Known Issues
+## Recent Improvements
 
--   **Chinese Language Display**: On some systems (particularly macOS), switching to Chinese may display garbled text or "tofu" blocks (□□□) instead of the correct characters. This is a font rendering issue that is currently under investigation.
+- **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) issue on macOS through TTF-based font loading system
+- **Complete Localization**: All UI elements now support dynamic language switching
+- **Optimized Font System**: ResourceManager-based font loading with platform-specific optimizations
 
 ## Development
 
@@ -311,6 +318,7 @@ python -m thunder_fighter.utils.config_tool reset
 ## Documentation
 
 - [Detailed Game Mechanics](docs/DETAILS.md)
+- [Font System and Localization](docs/FONT_SYSTEM_AND_LOCALIZATION.md)
 - [Configuration Management](docs/IMPLEMENTATION_SUMMARY.md)
 - [State Management System](docs/STATE_MANAGEMENT_SYSTEM.md)
 - [UI Refactoring Summary](docs/UI_REFACTORING_SUMMARY.md)

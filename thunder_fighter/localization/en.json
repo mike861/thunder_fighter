@@ -58,5 +58,16 @@
     "GAME_COMPLETED": "Congratulations! You have completed Thunder Fighter!",
     "RESTART_GAME": "Press R to Restart Game",
     "GAME_STATISTICS": "Game Statistics",
-    "PERFORMANCE_SUMMARY": "Battle Summary"
+    "PERFORMANCE_SUMMARY": "Battle Summary",
+    "LEVEL_INDICATOR": "Level {}",
+    "BOSS_LEVEL_NORMAL": "BOSS Lv.{}",
+    "BOSS_LEVEL_DANGER": "BOSS Lv.{} [Danger]",
+    "BOSS_LEVEL_EXTREME": "BOSS Lv.{} [Extreme]",
+    "SCORE_DISPLAY": "Score: {}",
+    "LEVEL_THEME_DEEP_SPACE": "Deep Space",
+    "LEVEL_THEME_NEBULA_FIELD": "Nebula Field",
+    "LEVEL_THEME_ASTEROID_BELT": "Asteroid Belt",
+    "LEVEL_THEME_RED_ZONE": "Red Zone",
+    "LEVEL_THEME_FINAL_BATTLE": "Final Battle",
+    "SCORE_LEVEL_UP": "Score Level Up to {}!"
 } 

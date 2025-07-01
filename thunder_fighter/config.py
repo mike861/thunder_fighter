@@ -16,7 +16,7 @@ SOUND_ENABLED = True
 DIFFICULTY = "normal"  # "easy", "normal", "hard"
 
 # Language settings
-LANGUAGE = "en"  # Available: "en", "zh"
+LANGUAGE = "zh"  # Available: "en", "zh"
 
 # Controls
 KEY_MAPPING = {
