@@ -33,6 +33,16 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Missiles**: Wingmen fire tracking missiles periodically. These missiles seek out the nearest enemies, prioritizing the Boss if one is active.
 
 ### Enemy System
+- **🛸 Enemy Visual Design**: Complete organic/alien biomechanical appearance system
+  - **Size**: 45×45 pixels (distinct from player's 60×50)
+  - **Shape**: Irregular organic hull with alien appendages instead of geometric wings
+  - **Alien Features**: Bio-sensors ("eyes") replace cockpits, organic exhaust ports replace engines
+  - **Front-Facing Orientation**: All enemies properly oriented with bio-thrusters pointing toward player
+- **Enemy Themes by Level**: Progressive alien evolution across difficulty tiers
+  - **Levels 1-3 (Insectoid)**: Dark crimson/red creatures with aggressive organic appearance
+  - **Levels 4-6 (Toxic Alien)**: Toxic green entities with bio-luminescent glow effects
+  - **Levels 7-9 (Energy Being)**: Purple void creatures with energy manifestations
+  - **Levels 10+ (Nightmare Void)**: Dark energy beings with bright accent colors and maximum bio-luminescence
 - **Enemy Levels**: Enemies range from level 0-10. Higher levels mean more health, speed, and attack power.
 - **Enemy Spawning**: The number and level of enemies increase as the game progresses and the game level increases.
 - **Enemy Shooting**: Enemies level 2 and above can shoot (configurable via the `ENEMY_SHOOT_LEVEL` constant). Firing rate and bullet speed increase with level.
@@ -174,6 +184,11 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - ✅ Dynamic UI with notifications and victory interface
 - ✅ Configurable game parameters (wingmen, enemy counts, etc.)
 - ✅ Victory screen with background preservation and elegant statistics display
+- ✅ **🛸 Distinct ship design system**: Complete visual differentiation between player and enemy forces
+  - ✅ Player ships: Modern blue fighter jets with geometric design
+  - ✅ Enemy ships: Organic alien biomechanical entities with progressive thematic evolution
+  - ✅ Front-facing orientation system for realistic space combat
+  - ✅ Size differentiation for enhanced gameplay clarity
 
 ## Technical Details
 
@@ -183,6 +198,12 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - Centralized `FlashEffectManager` for handling entity damage flashes.
 - Standardized logging system tracks game events.
 - **Enhanced Sound Manager**: Controls game audio playback with robust health-check, auto-recovery system, and independent audio channel management.
+- **🛸 Advanced Ship Rendering System**: 
+  - **Dual Design Architecture**: Separate rendering pipelines for player (geometric/tech) and enemy (organic/alien) ships
+  - **Progressive Alien Themes**: Dynamic color scheme selection based on enemy level progression
+  - **Bio-luminescent Effects**: Organic glow systems for high-level alien entities
+  - **Orientation System**: 180-degree rotation system ensuring front-facing combat positioning
+  - **Size Optimization**: Different sprite dimensions (60×50 vs 45×45) for enhanced visual distinction
 - **Victory System Architecture**:
   - State-based victory detection with final boss recognition
   - Duplicate prevention mechanisms for victory processing

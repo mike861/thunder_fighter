@@ -17,6 +17,11 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
   - **Progressive Difficulty Visualization**: Background complexity and atmosphere evolve with game difficulty
   - **Special Effects**: Level-specific effects including space storms and asteroid fields
   - **Smooth Alpha Transitions**: Professional-grade 3-second transitions with cubic bezier easing
+- **🛸 Distinct Ship Designs**: Clear visual differentiation between player and enemy forces
+  - **Player Ships**: Modern blue fighter jets with geometric design (60×50 pixels)
+  - **Enemy Ships**: Organic alien biomechanical entities with distinct appearance (45×45 pixels)
+  - **Progressive Enemy Evolution**: 4 distinct alien themes across difficulty levels
+  - **Front-Facing Combat**: All ships properly oriented for realistic space combat
 - **Wingman System**: Collect power-ups to gain up to two wingmen who provide extra firepower with tracking missiles and act as shields
 - **Enhanced Victory Screen**: Beautiful victory interface that preserves game background with transparent overlay showing completion statistics
 - **Robust Audio System**: Background music and sound effects with volume control, featuring automatic recovery from audio issues
@@ -289,6 +294,11 @@ thunder_fighter/
 
 ## Recent Improvements
 
+- **🛸 Enemy Ship Redesign**: Complete visual overhaul of enemy ships for enhanced gameplay clarity
+  - **Alien Biomechanical Design**: Replaced fighter jet appearance with organic alien entities
+  - **Size Differentiation**: Enemy ships now 45×45 pixels vs player's 60×50 for clear distinction
+  - **Thematic Evolution**: 4 distinct alien themes (Insectoid → Toxic → Energy → Void) across difficulty levels
+  - **Front-Facing Orientation**: All ships properly oriented with thrusters pointing toward combat direction
 - **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) issue on macOS through TTF-based font loading system
 - **Complete Localization**: All UI elements now support dynamic language switching
 - **Optimized Font System**: ResourceManager-based font loading with platform-specific optimizations
