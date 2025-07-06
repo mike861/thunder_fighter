@@ -5,3 +5,7 @@ venv/
 .cursorindexingignore 
 .pytest_cache/
 .cursorrules
+*.bak
+CLAUDE.md
+.gitignore
+*.png

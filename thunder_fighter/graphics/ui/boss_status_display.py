@@ -104,4 +104,14 @@ class BossStatusDisplay:
             
     def is_active(self):
         """Check if boss is currently active."""
-        return self.boss_info['active'] 
+        return self.boss_info['active']
+        
+    def reset(self):
+        """Reset boss status to initial values."""
+        self.boss_info = {
+            'active': False,
+            'health': 0,
+            'max_health': 0,
+            'level': 0,
+            'mode': 'normal'
+        } 

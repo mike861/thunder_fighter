@@ -129,4 +129,15 @@ class PlayerStatsDisplay:
             y: Y coordinate
         """
         self.x = x
-        self.y = y 
+        self.y = y
+        
+    def reset(self):
+        """Reset player stats to initial values."""
+        self.player_info = {
+            'health': 100,
+            'max_health': 100,
+            'bullet_paths': 1,
+            'bullet_speed': 7,
+            'speed': 5,
+            'wingmen': 0
+        } 
