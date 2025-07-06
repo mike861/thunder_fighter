@@ -47,9 +47,9 @@ class UIManager:
             resource_manager = get_resource_manager()
             
             # Use TTF files for better Chinese character support with original sizes
-            self.font_small = resource_manager.load_font(None, 24, system_font=True)
-            self.font_medium = resource_manager.load_font(None, 36, system_font=True)
-            self.font_large = resource_manager.load_font(None, 48, system_font=True)
+            self.font_small = resource_manager.load_font(None, 16, system_font=True)
+            self.font_medium = resource_manager.load_font(None, 20, system_font=True)
+            self.font_large = resource_manager.load_font(None, 28, system_font=True)
         except (pygame.error, ImportError):
             # Fallback for test environments
             from unittest.mock import MagicMock

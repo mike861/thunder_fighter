@@ -2,6 +2,8 @@
 
 A classic vertical scrolling space shooter game built with Pygame featuring modern architecture and comprehensive testing.
 
+![Thunder Fighter Screenshot](./docs/images/boss.png) 
+
 ## Description
 
 In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. Use the arrow keys or WASD to move and the spacebar to shoot. As the game progresses, enemies become stronger and more numerous, with powerful Bosses appearing periodically. Defeat enemies and Bosses to score points and collect power-ups. **Complete all levels by defeating the final boss to achieve victory!**
@@ -330,6 +332,3 @@ python -m thunder_fighter.utils.config_tool reset
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Screenshots
-
-_(Add gameplay screenshots here if available)_
-<!-- ![Gameplay Screenshot](screenshots/gameplay.png) -->
