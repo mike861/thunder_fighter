@@ -165,6 +165,10 @@ class RefactoredGame:
         self.last_pause_toggle_time = 0.0
         self.pause_toggle_cooldown = 0.2  # 200ms cooldown between pause toggles
         
+        # macOS keyboard focus recovery
+        self.last_input_validation_time = time.time()
+        self.input_validation_interval = 10.0  # Check every 10 seconds (reduced frequency)
+        
         # Create initial enemies using factory (after game_start_time is set)
         for i in range(BASE_ENEMY_COUNT):
             self._spawn_enemy_via_factory()
@@ -600,6 +604,23 @@ class RefactoredGame:
         elapsed_time = current_time - self.game_start_time - total_paused
         return elapsed_time / 60.0  # Convert to minutes
     
+    def _validate_input_state(self):
+        """Validate input state to recover from macOS screenshot interference."""
+        current_time = time.time()
+        
+        # Only check periodically to avoid performance impact
+        if current_time - self.last_input_validation_time < self.input_validation_interval:
+            return
+            
+        self.last_input_validation_time = current_time
+        
+        # Force validation of input handler state
+        try:
+            self.input_manager.input_handler.force_key_state_validation()
+            logger.debug("Periodic input state validation completed")
+        except Exception as e:
+            logger.warning(f"Input state validation failed: {e}")
+    
     def _handle_quit_input(self, event: InputEvent):
         """Handle quit input events."""
         self.running = False
@@ -867,6 +888,10 @@ class RefactoredGame:
         
         # Update flash effects
         flash_manager.update()
+        
+        # Note: Periodic input validation disabled due to performance impact
+        # Use F1 key to manually reset input state if needed after macOS screenshot
+        # self._validate_input_state()
         
         # Check sound system health
         if hasattr(self, '_last_sound_check'):

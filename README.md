@@ -302,6 +302,15 @@ thunder_fighter/
 - **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) issue on macOS through TTF-based font loading system
 - **Complete Localization**: All UI elements now support dynamic language switching
 - **Optimized Font System**: ResourceManager-based font loading with platform-specific optimizations
+- **🍎 macOS Screenshot Interference Fix**: Resolved critical input issue affecting pause and language switching
+  - **Hybrid Input Processing**: Intelligent fallback system ensures P and L keys remain functional
+  - **Automatic Recovery**: Seamless operation even during macOS screenshot interference (`Shift+Cmd+5`)
+  - **Manual Reset Option**: F1 key provides manual input state reset if needed
+  - **Transparent Operation**: Users experience no functional difference during interference scenarios
+- **⏸️ Enhanced Pause System**: Comprehensive improvements to pause/resume functionality
+  - **Pause-Aware Timing**: Game time correctly excludes pause periods for accurate elapsed time calculation
+  - **Robust State Management**: Enhanced pause/resume logic with cooldown and state synchronization
+  - **Reliability Improvements**: Fixed pause failures after repeated pause/resume cycles
 
 ## Development
 

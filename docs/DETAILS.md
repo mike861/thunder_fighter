@@ -236,4 +236,28 @@ If these files are missing, the game will handle the missing sounds gracefully, 
   - Responsive layout management
 - Modular architecture allows for easy extension and maintenance.
 - **Test-Driven Development**: Extensive test suite with 255 tests covering all game mechanics, victory conditions, collision systems, and edge cases.
-- Localization system for multi-language support. 
+- **Localization system** for multi-language support.
+
+## Recent Technical Improvements
+
+### macOS Screenshot Interference Resolution
+- **Problem Identified**: macOS screenshot function (`Shift+Cmd+5` with delayed capture) interfered with Thunder Fighter's multi-layer input processing system, causing P (pause) and L (language) keys to become non-functional while movement and shooting keys remained operational.
+- **Root Cause Analysis**: The complex input chain (pygame → InputHandler → InputManager → Game callbacks) created vulnerability points where macOS system functions could disrupt event processing for specific keys.
+- **Solution Implemented**: Hybrid input processing architecture in `thunder_fighter/input/input_handler.py`:
+  - **Primary Processing**: Standard Thunder Fighter input chain for normal operation
+  - **Intelligent Fallback Detection**: Monitors critical keys (P, L) for processing failures
+  - **Automatic Event Generation**: Creates correct events directly when normal processing fails
+  - **Seamless Recovery**: Users experience no functional difference during interference scenarios
+- **Technical Implementation**: `_process_single_event_with_fallback()` method provides transparent operation with comprehensive logging
+- **Manual Recovery**: F1 key provides manual input state reset for edge cases
+
+### Enhanced Pause System Reliability
+- **Pause-Aware Timing**: Game time calculation now properly excludes pause periods using `get_game_time()` method with accumulated pause duration tracking
+- **Robust State Synchronization**: Enhanced pause/resume logic with cooldown mechanisms and comprehensive state validation
+- **Reliability Improvements**: Fixed intermittent pause failures after repeated pause/resume cycles through improved state management and deduplication systems
+- **Comprehensive Logging**: Added detailed pause/resume logging for debugging and monitoring state transitions
+
+### Font System Optimization
+- **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) display issues on macOS through TTF-based font loading system
+- **Complete Localization Coverage**: All UI elements now support dynamic language switching including level transitions and boss status displays
+- **ResourceManager Integration**: Optimized font loading with platform-specific optimizations and automatic fallback mechanisms 

@@ -88,6 +88,7 @@ class KeyBindings:
             # UI controls
             KeyBinding(pygame.K_l, "change_language", "Change language", "ui"),
             KeyBinding(pygame.K_F3, "toggle_dev_mode", "Toggle developer mode", "ui"),
+            KeyBinding(pygame.K_F1, "reset_input_state", "Reset input state (macOS fix)", "debug"),
             
             # Special
             KeyBinding(pygame.K_RETURN, "skip_animation", "Skip animation", "special"),
@@ -168,6 +169,21 @@ class KeyBindings:
             if binding.action == action:
                 keys.append(binding.key)
         return keys
+    
+    def get_key_for_action(self, action: str) -> Optional[int]:
+        """
+        Get the first key bound to an action.
+        
+        Args:
+            action: The action name
+            
+        Returns:
+            First key code bound to the action, or None if not found
+        """
+        for binding in self._bindings.values():
+            if binding.action == action:
+                return binding.key
+        return None
     
     def get_bindings_by_category(self, category: str) -> List[KeyBinding]:
         """
