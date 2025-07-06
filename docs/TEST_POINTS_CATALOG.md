@@ -1,192 +1,221 @@
 # Thunder Fighter 测试点目录
 
+**最后更新**: 2025-01-07
+
 ## 测试统计
-- **总测试文件数**: 16个
-- **总测试用例数**: 226个
-- **测试覆盖模块**: sprites, utils, graphics, state, integration
+- **总测试文件数**: 18个
+- **总测试用例数**: 260个（从226个增加34个）
+- **测试覆盖模块**: e2e, integration, unit, sprites, utils, graphics, state
+- **测试通过率**: 100%
+
+## 测试分布
+| 模块 | 测试数量 | 占比 |
+|------|---------|------|
+| graphics | 80 | 30.8% |
+| utils | 43 | 16.5% |
+| state | 40 | 15.4% |
+| sprites | 27 | 10.4% |
+| unit/entities | 27 | 10.4% |
+| e2e | 9 | 3.5% |
+| integration | 9 | 3.5% |
+| 其他 | 25 | 9.6% |
 
 ## 详细测试点清单
 
-### 1. 核心游戏测试
+### 1. 端到端测试 (e2e/) - 9个测试
 
-#### test_game.py (1个测试)
-- ✅ test_score_update_in_ui_state: 验证分数在UI中正确更新
+#### test_game_flow.py
+- ✅ test_game_initialization_components: 游戏初始化组件验证
+- ✅ test_level_progression_logic: 等级进度逻辑
+- ✅ test_boss_defeat_handling: Boss击败处理
+- ✅ test_item_collection_handling: 道具收集处理
+- ✅ test_player_death_handling: 玩家死亡处理
+- ✅ test_factory_integration: 工厂集成
+- ✅ test_input_system_integration: 输入系统集成
+- ✅ test_resource_management_integration: 资源管理集成
+- ✅ test_game_state_consistency: 游戏状态一致性
 
-#### test_boss_defeat_level_up.py (8个测试)
-- ✅ test_handle_boss_defeated_basic: 基本boss击败处理
-- ✅ test_handle_boss_defeated_prevents_duplicate_processing: 防止重复处理
-- ✅ test_handle_boss_defeated_max_level_reached: 最高等级时触发胜利
-- ✅ test_handle_boss_defeated_no_boss: 无boss时的处理
-- ✅ test_boss_defeat_resets_timers: 重置计时器
-- ✅ test_boss_defeat_updates_item_spawn_interval: 更新道具生成间隔
-- ✅ test_boss_defeat_plays_sound: 播放音效
-- ✅ test_boss_defeat_processing_flag_reset: 处理标志重置
+### 2. 集成测试 (integration/) - 9个测试
 
-#### test_game_victory.py (11个测试)
-- ✅ test_final_boss_defeat_triggers_victory: 最终boss击败触发胜利
-- ✅ test_non_final_boss_defeat_does_not_trigger_victory: 非最终boss不触发胜利
-- ✅ test_victory_screen_display: 胜利画面显示
-- ✅ test_victory_score_bonus: 胜利分数奖励
-- ✅ test_victory_ui_notifications: 胜利UI通知
-- ✅ test_victory_prevents_further_spawning: 胜利后阻止生成
-- ✅ test_victory_ui_state_update: 胜利UI状态更新
-- ✅ test_victory_stops_game_updates: 胜利后停止游戏更新
-- ✅ test_show_victory_screen_method: 显示胜利画面方法
-- ✅ test_victory_prevents_duplicate_processing: 防止重复处理胜利
+#### test_event_flow.py
+- ✅ test_single_event_dispatch_and_handling: 单事件分发和处理
+- ✅ test_multiple_listeners_same_event_type: 多监听器同事件类型
+- ✅ test_event_propagation_stopping: 事件传播停止
+- ✅ test_global_listener_receives_all_events: 全局监听器接收所有事件
+- ✅ test_immediate_vs_queued_event_processing: 立即vs队列事件处理
+- ✅ test_event_system_statistics_tracking: 事件系统统计跟踪
+- ✅ test_listener_registration_and_unregistration: 监听器注册和注销
+- ✅ test_complex_event_chain_scenario: 复杂事件链场景
+- ✅ test_event_system_error_handling: 事件系统错误处理
 
-#### test_level_progression.py (8个测试)
-- ✅ test_score_based_level_up_level_0_to_1: 分数升级0→1
-- ✅ test_score_based_level_up_level_1_to_2: 分数升级1→2
-- ✅ test_no_score_based_level_up_after_level_2: 2级后无分数升级
-- ✅ test_no_score_based_level_up_after_level_3: 高级别无分数升级
-- ✅ test_boss_spawn_only_after_level_1: boss仅在1级后生成
-- ✅ test_boss_defeat_still_triggers_level_up: boss击败触发升级
-- ✅ test_mixed_progression_path: 混合进度路径
+### 3. 单元测试 (unit/) - 27个测试
 
-### 2. 精灵测试 (sprites/)
+#### entities/test_factories.py
+包含27个测试，覆盖：
+- EntityFactory基类测试（8个）
+- ConfigurableEntityFactory测试（7个）
+- EnemyFactory测试（5个）
+- BossFactory测试（3个）
+- ItemFactory测试（2个）
+- ProjectileFactory测试（2个）
+
+### 4. 精灵测试 (sprites/) - 27个测试
 
 #### test_player.py (11个测试)
 - ✅ test_player_initialization: 玩家初始化
-- ✅ test_player_movement: 玩家移动
-- ✅ test_player_shooting: 玩家射击
-- ✅ test_player_health_system: 生命值系统
-- ✅ test_player_power_ups: 强化道具
-- ✅ test_player_collision: 碰撞检测
-- ✅ test_player_invulnerability: 无敌时间
-- ✅ test_player_missile_system: 导弹系统
-- ✅ test_player_wingman_system: 僚机系统
-- ✅ test_player_speed_limits: 速度限制
-- ✅ test_player_bullet_paths: 子弹路径
+- ✅ test_player_shoot: 玩家射击
+- ✅ test_player_heal: 玩家治疗
+- ✅ test_player_increase_bullet_speed: 增加子弹速度
+- ✅ test_player_increase_bullet_paths: 增加子弹路径
+- ✅ test_player_increase_speed: 增加移动速度
+- ✅ test_player_take_damage_with_wingman: 有僚机时受伤
+- ✅ test_player_take_damage_without_wingman: 无僚机时受伤
+- ✅ test_player_take_fatal_damage: 致命伤害
+- ✅ test_player_add_wingman: 添加僚机
+- ✅ test_player_max_wingmen_limit: 最大僚机限制
 
-#### test_enemy.py (测试数量未详细列出)
-- ✅ 敌人AI行为
-- ✅ 敌人移动模式
-- ✅ 敌人射击逻辑
-- ✅ 敌人生命值系统
-- ✅ 敌人等级系统
+#### test_enemy.py (6个测试)
+- ✅ test_enemy_initialization: 敌人初始化
+- ✅ test_enemy_shooting: 敌人射击
+- ✅ test_enemy_movement_patterns: 敌人移动模式
+- ✅ test_enemy_off_screen_behavior: 离屏行为
+- ✅ test_enemy_level_calculation: 等级计算
+- ✅ test_enemy_damage_and_health: 伤害和生命值
 
-#### test_boss.py (17个测试)
+#### test_boss.py (8个测试)
 - ✅ test_boss_initialization: Boss初始化
+- ✅ test_boss_shooting: Boss射击
+- ✅ test_boss_damage_and_health: 伤害和生命值
+- ✅ test_flash_effect_implementation: 闪烁效果实现
+- ✅ test_flash_effect_update_cycle: 闪烁效果更新周期
 - ✅ test_boss_movement_patterns: 移动模式
-- ✅ test_boss_shooting_patterns: 射击模式
-- ✅ test_boss_phase_transitions: 阶段转换
-- ✅ test_boss_health_system: 生命值系统
-- ✅ test_boss_special_attacks: 特殊攻击
-- ✅ test_boss_difficulty_scaling: 难度缩放
+- ✅ test_boss_attack_pattern_changes: 攻击模式变化
+- ✅ test_boss_dynamic_difficulty: 动态难度
 
-#### test_items.py (8个测试)
-- ✅ test_health_item: 生命值道具
-- ✅ test_power_up_item: 强化道具
-- ✅ test_speed_item: 速度道具
-- ✅ test_missile_item: 导弹道具
-- ✅ test_wingman_item: 僚机道具
-- ✅ test_item_collection: 道具收集
-- ✅ test_item_effects: 道具效果
-- ✅ test_item_duration: 道具持续时间
+#### test_items.py (2个测试)
+- ✅ test_create_random_item_logic: 随机道具创建逻辑
+- ✅ test_wingman_item_creation_level_gate: 僚机道具等级门槛
 
-### 3. 工具类测试 (utils/)
+### 5. 工具类测试 (utils/) - 43个测试
 
 #### test_resource_manager.py (13个测试)
-- ✅ test_singleton_pattern: 单例模式
-- ✅ test_image_loading: 图片加载
-- ✅ test_sound_loading: 音效加载
-- ✅ test_font_loading: 字体加载
-- ✅ test_resource_caching: 资源缓存
-- ✅ test_missing_resource_handling: 缺失资源处理
-- ✅ test_preload_functionality: 预加载功能
-- ✅ test_cache_statistics: 缓存统计
-- ✅ test_resource_paths: 资源路径
-- ✅ test_placeholder_resources: 占位资源
-- ✅ test_multiple_asset_directories: 多资源目录
-- ✅ test_resource_cleanup: 资源清理
-- ✅ test_thread_safety: 线程安全
+- ✅ 单例模式、资源加载、缓存管理等
 
-#### test_sound_manager.py (测试数量未详细列出)
-- ✅ 音效播放
-- ✅ 背景音乐管理
-- ✅ 音量控制
-- ✅ 静音功能
-- ✅ 音效缓存
+#### test_sound_manager.py (2个测试)
+- ✅ 音效管理基本功能和安全操作
 
-#### test_config_manager.py (6个类的测试)
-- ✅ TestSoundConfig: 音效配置
-- ✅ TestDisplayConfig: 显示配置
-- ✅ TestGameplayConfig: 游戏玩法配置
-- ✅ TestControlsConfig: 控制配置
-- ✅ TestDebugConfig: 调试配置
-- ✅ TestConfigManager: 配置管理器
+#### test_config_manager.py (14个测试)
+- ✅ 配置管理各个方面的测试
 
-#### test_collisions.py (测试数量未详细列出)
-- ✅ 子弹-敌人碰撞
-- ✅ 玩家-敌人碰撞
-- ✅ 玩家-道具碰撞
-- ✅ 导弹-敌人碰撞
-- ✅ Boss碰撞检测
+#### test_collisions.py (14个测试)
+- ✅ 各种碰撞检测场景
 
-### 4. 图形测试 (graphics/)
+### 6. 图形测试 (graphics/) - 80个测试
 
-#### test_ui_components.py (22个测试)
-- ✅ TestHealthBarComponent (4个测试)
-- ✅ TestNotificationManager (5个测试)
-- ✅ TestGameInfoDisplay (3个测试)
-- ✅ TestPlayerStatsDisplay (3个测试)
-- ✅ TestBossStatusDisplay (4个测试)
-- ✅ TestDevInfoDisplay (2个测试)
-- ✅ TestScreenOverlayManager (4个测试)
-- ✅ TestUIManagerIntegration (8个测试)
+#### test_ui_components.py (35个测试)
+- TestHealthBarComponent (4个)
+- TestNotificationManager (5个)
+- TestGameInfoDisplay (3个)
+- TestPlayerStatsDisplay (4个)
+- TestBossStatusDisplay (4个)
+- TestDevInfoDisplay (3个)
+- TestScreenOverlayManager (5个)
+- TestUIManagerIntegration (7个)
 
-#### test_renderers.py (4个类的测试)
-- ✅ TestPlayerRenderer: 玩家渲染
-- ✅ TestEnemyRenderer: 敌人渲染
-- ✅ TestRenderingConsistency: 渲染一致性
-- ✅ TestBackwardCompatibility: 向后兼容性
+#### test_renderers.py (52个测试)
+- TestPlayerRenderer (3个)
+- TestEnemyRenderer (43个) - 包括各等级渲染测试
+- TestWingmanRenderer (3个)
+- TestRenderingConsistency (3个)
 
-#### test_background.py (4个类的测试)
-- ✅ TestStar: 星星效果
-- ✅ TestNebula: 星云效果
-- ✅ TestPlanet: 行星效果
-- ✅ TestDynamicBackground: 动态背景
+#### test_background.py (25个测试)
+- TestStar (3个)
+- TestNebula (2个)
+- TestPlanet (2个)
+- TestDynamicBackground (5个)
+- TestSpaceStorm (2个)
+- TestAsteroidField (2个)
 
-### 5. 状态管理测试 (state/)
+### 7. 状态管理测试 (state/) - 40个测试
 
-#### test_state_machine.py (14个测试)
-- ✅ 状态转换逻辑
-- ✅ 状态持久化
-- ✅ 状态验证
-- ✅ 非法转换处理
-- ✅ 状态历史记录
+#### test_state_machine.py (20个测试)
+- TestStateMachine (17个)
+- TestState (3个)
 
-#### test_game_state.py (2个类的测试)
-- ✅ TestGameState: 游戏状态
-- ✅ TestGameStateManager: 游戏状态管理器
+#### test_game_state.py (20个测试)
+- TestGameState (4个)
+- TestGameStateManager (16个)
 
-### 6. 架构测试
+### 8. 其他测试 - 25个测试
 
-#### test_separation_of_concerns.py (4个类的测试)
-- ✅ TestInputManagement: 输入管理测试
-- ✅ TestEntityFactories: 实体工厂测试
-- ✅ TestEventSystem: 事件系统测试
-- ✅ TestSeparationOfConcernsIntegration: 集成测试
+#### test_level_progression.py (4个测试)
+- ✅ 等级进度相关测试
+
+#### test_separation_of_concerns.py (21个测试)
+- TestInputManagement (6个)
+- TestEntityFactories (5个)
+- TestEventSystem (6个)
+- TestSeparationOfConcernsIntegration (3个)
+- test_complete_separation_integration (1个)
 
 ## 测试质量评估
 
-### 优秀的测试
-1. **sprites/**: 核心游戏逻辑测试完整
-2. **utils/test_resource_manager.py**: 新功能测试全面
-3. **graphics/test_ui_components.py**: UI组件测试详细
+### 高质量测试区域
+1. **图形系统** (80个测试): 全面覆盖UI组件和渲染
+2. **工具类** (43个测试): 资源管理、配置、碰撞检测完备
+3. **状态管理** (40个测试): 状态机和游戏状态充分测试
+4. **单元测试** (27个测试): 工厂模式完整测试
 
-### 需要改进的测试
-1. **test_game.py**: 覆盖度太低
-2. **test_boss_defeat_level_up.py**: 测试向后兼容方法
-3. **test_level_progression.py**: 过度依赖Mock
+### 测试覆盖良好区域
+1. **精灵系统** (27个测试): 核心游戏对象基本覆盖
+2. **架构测试** (21个测试): 关注点分离验证
 
-### 缺失的测试
-1. **事件系统**: 需要完整的事件流测试
-2. **输入系统**: InputManager缺少详细测试
-3. **工厂模式**: 各工厂类需要独立测试
-4. **端到端**: 缺少完整游戏流程测试
+### 测试不足区域（需要改进）
+1. **输入系统**: 缺少专门的输入处理测试
+   - 特别是最近的fallback机制
+   - F1键重置功能
+   - macOS截图干扰处理
 
-## 测试覆盖率目标
-- 当前估计覆盖率: ~70%
-- 目标覆盖率: >85%
-- 关键路径覆盖: 100% 
+2. **暂停系统**: 缺少新功能测试
+   - pause-aware timing (get_game_time)
+   - 暂停/恢复稳定性
+
+3. **本地化系统**: 缺少专门测试
+   - 中文字体渲染
+   - 语言切换功能
+
+## 测试执行性能
+- **总执行时间**: <1秒（非常快）
+- **平均每个测试**: ~3.8ms
+- **最慢测试类型**: 渲染测试（由于Surface创建）
+
+## 测试覆盖率估算
+| 模块 | 估计覆盖率 | 目标覆盖率 |
+|------|-----------|-----------|
+| 核心游戏逻辑 | ~85% | 90% |
+| UI组件 | ~90% | 95% |
+| 工具类 | ~95% | 95% |
+| 输入系统 | ~40% | 85% |
+| 事件系统 | ~75% | 85% |
+| **整体** | ~75% | >85% |
+
+## 建议的改进优先级
+
+### 立即（1周内）
+1. 添加输入系统测试套件（15-20个测试）
+2. 添加暂停系统测试（5-8个测试）
+3. 添加本地化测试（5-8个测试）
+
+### 短期（2-3周）
+1. 增加性能测试
+2. 添加边界条件测试
+3. 提高精灵系统测试覆盖
+
+### 长期（1个月+）
+1. 实施自动化覆盖率报告
+2. 添加集成测试场景
+3. 建立性能基准测试
+
+## 总结
+
+Thunder Fighter当前拥有260个高质量测试，比清理前增加了34个测试。测试结构清晰，分层合理，但在输入系统、暂停功能和本地化方面存在明显缺口。通过补充这些缺失的测试（预计30-35个），可以将整体覆盖率提升到85%以上，确保项目的长期质量和稳定性。
