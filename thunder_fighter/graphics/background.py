@@ -741,13 +741,13 @@ class DynamicBackground:
                 from thunder_fighter.localization import _
                 resource_manager = get_resource_manager()
                 
-                font = resource_manager.load_font(None, 72, system_font=True)
+                font = resource_manager.load_font(None, 32, system_font=True)
                 level_text_content = _("LEVEL_INDICATOR", self.target_level)
                 text = font.render(level_text_content, True, WHITE)
                 text.set_alpha(text_alpha)
                 
                 # Description text
-                desc_font = resource_manager.load_font(None, 48, system_font=True)
+                desc_font = resource_manager.load_font(None, 28, system_font=True)
                 description = _(target_theme['description_key'])
                 desc_text = desc_font.render(description, True, WHITE)
                 desc_text.set_alpha(text_alpha)

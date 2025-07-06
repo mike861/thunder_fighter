@@ -334,11 +334,11 @@ class ResourceManager:
         
         # Common fonts
         common_fonts = [
-            (None, 18),  # Default small
-            (None, 24),  # Default medium
-            (None, 36),  # Default large
-            (None, 48),  # Default extra large
-            ('Arial', 24),  # System Arial
+            (None, 16),  # Default small
+            (None, 20),  # Default medium
+            (None, 28),  # Default large
+            (None, 32),  # Default extra large
+            ('Arial', 20),  # System Arial
         ]
         
         for font_name, size in common_fonts:
