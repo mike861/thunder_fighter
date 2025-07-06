@@ -157,6 +157,10 @@ class RefactoredGame:
         self.item_spawn_timer = time.time()
         self.boss_spawn_timer = time.time()
         
+        # Pause-aware timing variables
+        self.total_paused_time = 0.0
+        self.pause_start_time = None
+        
         # Create initial enemies using factory (after game_start_time is set)
         for i in range(BASE_ENEMY_COUNT):
             self._spawn_enemy_via_factory()
@@ -512,21 +516,41 @@ class RefactoredGame:
     
     def _handle_pause_input(self, event: InputEvent):
         """Handle pause input events."""
-        self.paused = not self.paused
-        self._update_ui_state()
-        
         if self.paused:
-            logger.debug("Game paused via input")
-            self.sound_manager.set_music_volume(
-                max(0.1, self.sound_manager.music_volume / 2)
-            )
-            self.input_manager.pause()
-        else:
+            # Resuming game - calculate total paused time
+            if self.pause_start_time is not None:
+                self.total_paused_time += time.time() - self.pause_start_time
+                self.pause_start_time = None
+            self.paused = False
             logger.debug("Game resumed via input")
             self.sound_manager.set_music_volume(
                 min(1.0, self.sound_manager.music_volume * 2)
             )
             self.input_manager.resume()
+        else:
+            # Pausing game - record pause start time
+            self.pause_start_time = time.time()
+            self.paused = True
+            logger.debug("Game paused via input")
+            self.sound_manager.set_music_volume(
+                max(0.1, self.sound_manager.music_volume / 2)
+            )
+            self.input_manager.pause()
+        
+        self._update_ui_state()
+    
+    def get_game_time(self):
+        """Get pause-aware game time in minutes."""
+        current_time = time.time()
+        total_paused = self.total_paused_time
+        
+        # If currently paused, add current pause duration
+        if self.paused and self.pause_start_time is not None:
+            total_paused += current_time - self.pause_start_time
+        
+        # Calculate actual game time excluding pause time
+        elapsed_time = current_time - self.game_start_time - total_paused
+        return elapsed_time / 60.0  # Convert to minutes
     
     def _handle_quit_input(self, event: InputEvent):
         """Handle quit input events."""
@@ -729,7 +753,7 @@ class RefactoredGame:
     
     def _update_ui_state(self):
         """Update UI state."""
-        game_time = (time.time() - self.game_start_time) / 60.0
+        game_time = self.get_game_time()
         
         self.ui_manager.update_game_state(
             level=self.game_level,
@@ -787,7 +811,7 @@ class RefactoredGame:
     
     def update(self):
         """Update game state."""
-        game_time = (time.time() - self.game_start_time) / 60.0
+        game_time = self.get_game_time()
         
         # Update UI
         self._update_ui_state()
@@ -997,7 +1021,7 @@ class RefactoredGame:
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
         elif self.game_over or self.player.health <= 0:
-            game_time = (time.time() - self.game_start_time) / 60.0
+            game_time = self.get_game_time()
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)
         
         if self.paused:
