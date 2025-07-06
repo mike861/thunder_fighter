@@ -470,15 +470,73 @@ def create_player_speed_item():
     return item_surface
 
 def create_wingman():
-    """Create wingman surface"""
-    wingman_surface = pygame.Surface((20, 25), pygame.SRCALPHA)
+    """Create wingman surface - mini version of player fighter"""
+    # Smaller size: 35x30 (scaled down from player's 60x50)
+    surface = pygame.Surface((35, 30))
+    surface.set_colorkey((0, 0, 0))  # Set black as transparent
     
-    # Body
-    pygame.draw.polygon(wingman_surface, (0, 180, 255), [(10, 0), (0, 25), (20, 25)])
-    # Details
-    pygame.draw.polygon(wingman_surface, (200, 200, 200), [(10, 5), (5, 20), (15, 20)])
+    # Slightly different color scheme - lighter blue to distinguish from main player
+    main_color = (140, 190, 255)     # Lighter blue main body
+    secondary_color = (100, 150, 240)  # Lighter darker blue for details
+    accent_color = (220, 235, 255)    # Very light blue accents
+    engine_color = (255, 140, 120)    # Slightly lighter orange-red engines
     
-    return wingman_surface
+    # Draw main fuselage (simplified, scaled down from player design)
+    # Original: [(30, 5), (25, 15), (27, 38), (33, 38), (35, 15)]
+    # Scaled to ~58% size and adjusted for 35x30 surface
+    fuselage_points = [(17, 3), (14, 9), (15, 23), (20, 23), (21, 9)]
+    pygame.draw.polygon(surface, main_color, fuselage_points)
+    
+    # Draw nose cone (simplified)
+    # Original: [(30, 5), (27, 12), (33, 12)]
+    nose_points = [(17, 3), (15, 7), (19, 7)]
+    pygame.draw.polygon(surface, accent_color, nose_points)
+    
+    # Draw simplified swept wings
+    # Original left: [(8, 28), (27, 22), (27, 32), (12, 38)]
+    # Original right: [(52, 28), (33, 22), (33, 32), (48, 38)]
+    left_wing = [(5, 17), (15, 13), (15, 19), (7, 23)]
+    right_wing = [(30, 17), (20, 13), (20, 19), (28, 23)]
+    pygame.draw.polygon(surface, secondary_color, left_wing)
+    pygame.draw.polygon(surface, secondary_color, right_wing)
+    
+    # Draw simplified wing tips
+    pygame.draw.polygon(surface, accent_color, [(5, 17), (7, 18), (8, 21), (7, 23)])
+    pygame.draw.polygon(surface, accent_color, [(30, 17), (28, 18), (27, 21), (28, 23)])
+    
+    # Draw rear stabilizers (simplified)
+    # Original left: [(24, 38), (20, 48), (27, 42)]
+    # Original right: [(36, 38), (40, 48), (33, 42)]
+    left_stabilizer = [(14, 23), (12, 29), (15, 25)]
+    right_stabilizer = [(21, 23), (23, 29), (20, 25)]
+    pygame.draw.polygon(surface, main_color, left_stabilizer)
+    pygame.draw.polygon(surface, main_color, right_stabilizer)
+    
+    # Draw simplified cockpit canopy
+    # Original: (26, 14, 8, 12) with multiple layers
+    # Simplified to single layer for wingman
+    pygame.draw.ellipse(surface, (80, 120, 170), (15, 8, 5, 7))  # Dark canopy
+    pygame.draw.ellipse(surface, (170, 200, 240), (16, 9, 3, 4))   # Reflection
+    
+    # Draw twin engines (simplified)
+    # Original: (24, 42), (36, 42) with multiple glow layers
+    # Simplified for wingman
+    pygame.draw.circle(surface, engine_color, (14, 25), 2)  # Left engine
+    pygame.draw.circle(surface, engine_color, (21, 25), 2)  # Right engine
+    # Engine glow (simplified)
+    pygame.draw.circle(surface, (255, 180, 160), (14, 25), 1)
+    pygame.draw.circle(surface, (255, 180, 160), (21, 25), 1)
+    
+    # Add simple outline for visibility (thinner than main player)
+    # Black shadow outline
+    pygame.draw.lines(surface, (0, 0, 0), True, fuselage_points, 1)
+    pygame.draw.lines(surface, (0, 0, 0), True, left_wing, 1)
+    pygame.draw.lines(surface, (0, 0, 0), True, right_wing, 1)
+    
+    # Light highlight outline
+    pygame.draw.lines(surface, (255, 255, 255), True, fuselage_points, 1)
+    
+    return surface
 
 def create_tracking_missile():
     """Creates the surface for a tracking missile."""

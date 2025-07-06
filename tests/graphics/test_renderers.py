@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING
 from thunder_fighter.graphics.renderers import (
     create_player_surface, 
     create_enemy_surface,
-    create_boss_surface
+    create_boss_surface,
+    create_wingman
 )
 
 if TYPE_CHECKING:
@@ -287,6 +288,86 @@ class TestEnemyRenderer:
         overlap_ratio = color_overlap / total_colors if total_colors > 0 else 0
         
         assert overlap_ratio < 0.3, f"Player and enemy should have distinct color schemes (overlap: {overlap_ratio:.2f})"
+
+
+class TestWingmanRenderer:
+    """Test wingman rendering functionality"""
+    
+    def test_create_wingman_surface_basic(self):
+        """Test basic wingman surface creation"""
+        pygame.init()
+        surface = create_wingman()
+        
+        # Verify surface properties
+        assert surface is not None
+        assert isinstance(surface, pygame.Surface)
+        assert surface.get_size() == (35, 30)  # New mini fighter size
+        colorkey = surface.get_colorkey()
+        assert colorkey is not None
+        assert colorkey[:3] == (0, 0, 0)  # RGB should be black
+    
+    def test_wingman_visual_content(self):
+        """Test that wingman has visual content"""
+        pygame.init()
+        surface = create_wingman()
+        
+        # Verify visual content exists in key areas
+        center_pixel = surface.get_at((17, 15))  # Center of 35x30 surface
+        assert tuple(center_pixel)[:3] != (0, 0, 0)  # Should not be pure black
+        
+        # Check fuselage area
+        fuselage_pixel = surface.get_at((17, 12))
+        assert tuple(fuselage_pixel)[:3] != (0, 0, 0)  # Should have fuselage color
+        
+        # Check wing areas
+        left_wing_pixel = surface.get_at((10, 17))
+        right_wing_pixel = surface.get_at((25, 17))
+        assert tuple(left_wing_pixel)[:3] != (0, 0, 0)  # Should have wing color
+        assert tuple(right_wing_pixel)[:3] != (0, 0, 0)  # Should have wing color
+    
+    def test_wingman_design_based_on_player(self):
+        """Test that wingman design is based on player ship"""
+        pygame.init()
+        
+        player_surface = create_player_surface()
+        wingman_surface = create_wingman()
+        
+        # Verify different sizes (wingman is smaller)
+        assert wingman_surface.get_size() != player_surface.get_size()
+        assert wingman_surface.get_size()[0] < player_surface.get_size()[0]  # Width smaller
+        assert wingman_surface.get_size()[1] < player_surface.get_size()[1]  # Height smaller
+        
+        # Sample colors from both surfaces
+        player_colors = set()
+        wingman_colors = set()
+        
+        # Sample player colors (center area)
+        for x in range(25, 35):
+            for y in range(20, 30):
+                if x < player_surface.get_width() and y < player_surface.get_height():
+                    pixel = player_surface.get_at((x, y))[:3]
+                    if pixel != (0, 0, 0):  # Skip transparent pixels
+                        player_colors.add(pixel)
+        
+        # Sample wingman colors (center area)
+        for x in range(14, 21):
+            for y in range(12, 18):
+                if x < wingman_surface.get_width() and y < wingman_surface.get_height():
+                    pixel = wingman_surface.get_at((x, y))[:3]
+                    if pixel != (0, 0, 0):  # Skip transparent pixels
+                        wingman_colors.add(pixel)
+        
+        # Check for blue color scheme similarity (both should have blues)
+        player_has_blue = any(color[2] > color[0] and color[2] > 100 for color in player_colors)
+        wingman_has_blue = any(color[2] > color[0] and color[2] > 100 for color in wingman_colors)
+        
+        assert player_has_blue, "Player ship should have blue color scheme"
+        assert wingman_has_blue, "Wingman ship should have blue color scheme similar to player"
+        
+        # Verify some color similarity (wingman should be recognizably related to player)
+        color_overlap = len(player_colors & wingman_colors)
+        # Allow for more overlap than enemy vs player, but wingman should have some unique colors too
+        assert color_overlap > 0, "Wingman should share some colors with player ship"
 
 
 class TestRenderingConsistency:
