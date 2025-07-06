@@ -54,6 +54,9 @@ from thunder_fighter.entities import (
     ProjectileFactory
 )
 
+# Import pause manager
+from thunder_fighter.utils.pause_manager import PauseManager
+
 
 class RefactoredGame:
     """
@@ -143,10 +146,13 @@ class RefactoredGame:
         
         # Game state variables
         self.running = True
-        self.paused = False
         self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
         self.game_over = False  # New: game over state flag
+        
+        # Initialize pause manager
+        self.pause_manager = PauseManager(cooldown_ms=200)
+        self.paused = False  # Keep for backward compatibility
         
         # Set initial background level
         self.background.set_level(self.game_level)
@@ -156,14 +162,6 @@ class RefactoredGame:
         self.enemy_spawn_timer = time.time()
         self.item_spawn_timer = time.time()
         self.boss_spawn_timer = time.time()
-        
-        # Pause-aware timing variables
-        self.total_paused_time = 0.0
-        self.pause_start_time = None
-        
-        # Pause event deduplication
-        self.last_pause_toggle_time = 0.0
-        self.pause_toggle_cooldown = 0.2  # 200ms cooldown between pause toggles
         
         # macOS keyboard focus recovery
         self.last_input_validation_time = time.time()
@@ -206,7 +204,8 @@ class RefactoredGame:
         # Reset game state
         self.game_over = False
         self.game_won = False
-        self.paused = False
+        self.pause_manager.reset()  # Reset pause manager
+        self.paused = False  # Keep for backward compatibility
         self.game_level = INITIAL_GAME_LEVEL
         
         # Reset timing
@@ -523,13 +522,14 @@ class RefactoredGame:
         self.player.launch_missile()
     
     def _handle_pause_input(self, event: InputEvent):
-        """Handle pause input events with improved state synchronization and deduplication."""
-        current_time = time.time()
-        
-        # Implement cooldown to prevent rapid toggle issues
-        if current_time - self.last_pause_toggle_time < self.pause_toggle_cooldown:
-            logger.debug(f"Pause toggle ignored - cooldown active ({current_time - self.last_pause_toggle_time:.3f}s < {self.pause_toggle_cooldown}s)")
+        """Handle pause input events using PauseManager."""
+        # Use PauseManager for toggle logic
+        if not self.pause_manager.toggle_pause():
+            # Blocked by cooldown
             return
+        
+        # Update backward compatibility flag
+        self.paused = self.pause_manager.is_paused
         
         # Check for state synchronization issues
         input_manager_paused = self.input_manager.is_paused()
@@ -542,20 +542,17 @@ class RefactoredGame:
                 self.input_manager.resume()
             logger.info(f"Pause state synchronized: both now set to {self.paused}")
         
-        # Record toggle time
-        self.last_pause_toggle_time = current_time
-        
         if self.paused:
-            # Resuming game - calculate total paused time
-            if self.pause_start_time is not None:
-                pause_duration = current_time - self.pause_start_time
-                self.total_paused_time += pause_duration
-                logger.debug(f"Adding pause duration: {pause_duration:.3f}s (total: {self.total_paused_time:.3f}s)")
-                self.pause_start_time = None
-            else:
-                logger.warning("Resume triggered but no pause_start_time recorded")
+            logger.info("Game paused via input")
             
-            self.paused = False
+            # Reduce audio volume
+            self.sound_manager.set_music_volume(
+                max(0.0, self.sound_manager.music_volume / 2)
+            )
+            
+            # Pause input processing (only allow pause/system events)
+            self.input_manager.pause()
+        else:
             logger.info("Game resumed via input")
             
             # Restore audio volume
@@ -565,44 +562,14 @@ class RefactoredGame:
             
             # Resume input processing
             self.input_manager.resume()
-        else:
-            # Pausing game - record pause start time
-            self.pause_start_time = current_time
-            self.paused = True
-            logger.info("Game paused via input")
-            
-            # Lower audio volume
-            self.sound_manager.set_music_volume(
-                max(0.1, self.sound_manager.music_volume / 2)
-            )
-            
-            # Pause input processing
-            self.input_manager.pause()
-        
-        # Verify state synchronization after change
-        final_input_manager_paused = self.input_manager.is_paused()
-        if self.paused != final_input_manager_paused:
-            logger.error(f"Pause state STILL mismatched after toggle: game={self.paused}, input_manager={final_input_manager_paused}")
-            # Emergency synchronization
-            if self.paused:
-                self.input_manager.pause()
-            else:
-                self.input_manager.resume()
         
         self._update_ui_state()
     
     def get_game_time(self):
         """Get pause-aware game time in minutes."""
-        current_time = time.time()
-        total_paused = self.total_paused_time
-        
-        # If currently paused, add current pause duration
-        if self.paused and self.pause_start_time is not None:
-            total_paused += current_time - self.pause_start_time
-        
-        # Calculate actual game time excluding pause time
-        elapsed_time = current_time - self.game_start_time - total_paused
-        return elapsed_time / 60.0  # Convert to minutes
+        # Use PauseManager to calculate game time
+        game_time_seconds = self.pause_manager.calculate_game_time(self.game_start_time)
+        return game_time_seconds / 60.0  # Convert to minutes
     
     def _validate_input_state(self):
         """Validate input state to recover from macOS screenshot interference."""

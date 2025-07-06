@@ -37,7 +37,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
   - **Font System**: ResourceManager-based font loading with automatic fallbacks
 - **Developer Mode**: Debug information and configuration options
 - **Dynamic Difficulty**: Configurable gameplay parameters
-- **Extensively Tested**: Fully tested codebase with 255 comprehensive tests covering all game mechanics
+- **Extensively Tested**: Fully tested codebase with 310+ comprehensive tests covering all game mechanics and architectural improvements
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -188,6 +188,8 @@ Thunder Fighter features a modern, modular architecture designed for maintainabi
 - **Input Management**: Decoupled input handling with customizable key bindings and event callbacks
 - **State Management**: Robust game state handling with transition management
 - **Configuration System**: JSON-based configuration with runtime updates and command-line tools
+- **Pause Management**: Dedicated `PauseManager` component with pause-aware timing calculations and comprehensive statistics
+- **Enhanced Localization**: Dependency injection-based localization system with loader abstraction for improved testability
 
 ### UI System
 
@@ -210,14 +212,19 @@ The UI system has been completely refactored into modular components:
 
 ## Testing
 
-The project includes a comprehensive test suite with 255 tests covering all aspects of the game:
+The project includes a comprehensive test suite with 310+ tests covering all aspects of the game:
 
 ### Test Categories
 
-- **Unit Tests (27 tests)**: Entity factories, individual components
+- **Unit Tests (82+ tests)**: Entity factories, individual components, pause system, localization system
 - **Integration Tests (9 tests)**: Event system flow, component interactions
 - **End-to-End Tests (9 tests)**: Complete game flow scenarios
 - **Component Tests (204 tests)**: Sprites, graphics, utilities, state management
+
+### Recently Added Test Coverage
+
+- **PauseManager Tests (16 tests)**: Comprehensive testing of pause functionality, timing calculations, and edge cases
+- **Localization Tests (39 tests)**: Complete coverage of loader abstraction, dependency injection, and language management
 
 ### Running Tests
 
@@ -269,14 +276,19 @@ thunder_fighter/
 │   │   ├── background.py     # Dynamic background system
 │   │   └── effects.py        # Visual effects
 │   ├── input/                 # Input management and key bindings
-│   ├── localization/          # Language files (en.json, zh.json)
+│   ├── localization/          # Enhanced localization system
+│   │   ├── en.json           # English translations
+│   │   ├── zh.json           # Chinese translations
+│   │   ├── loader.py         # Language loader abstraction
+│   │   └── font_support.py   # Font management system
 │   ├── sprites/               # Game entities (player, enemies, boss, etc.)
 │   ├── state/                 # Game state management
 │   ├── utils/                 # Helper functions and managers
+│   │   └── pause_manager.py  # Dedicated pause management
 │   ├── config.py              # Game configuration
 │   ├── constants.py           # Game constants
 │   └── game.py                # Main game class
-├── tests/                     # Comprehensive test suite (255 tests)
+├── tests/                     # Comprehensive test suite (310+ tests)
 │   ├── e2e/                  # End-to-end tests
 │   ├── integration/          # Integration tests
 │   ├── unit/                 # Unit tests
@@ -311,6 +323,11 @@ thunder_fighter/
   - **Pause-Aware Timing**: Game time correctly excludes pause periods for accurate elapsed time calculation
   - **Robust State Management**: Enhanced pause/resume logic with cooldown and state synchronization
   - **Reliability Improvements**: Fixed pause failures after repeated pause/resume cycles
+- **🔧 Interface Testability Improvements**: Enhanced code architecture for better testing
+  - **PauseManager Component**: Extracted pause logic into dedicated, testable component with dependency injection
+  - **Localization Abstraction**: Implemented loader pattern with `FileLanguageLoader`, `MemoryLanguageLoader`, and `CachedLanguageLoader`
+  - **Enhanced Test Coverage**: Added 55 new comprehensive tests for pause and localization systems
+  - **Dependency Injection**: Improved interfaces enable easier testing and better separation of concerns
 
 ## Development
 
