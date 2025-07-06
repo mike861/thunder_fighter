@@ -199,6 +199,46 @@ class TestEnemyRenderer:
         
         # High level enemies should have more visual details (more colors)
         assert high_colors >= low_colors
+    
+    def test_enemy_orientation_front_facing(self):
+        """Test that enemy ships are oriented front-facing (engines toward player)"""
+        pygame.init()
+        
+        # Create enemy surface
+        surface = create_enemy_surface(level=1)
+        
+        # After 180-degree rotation, engines should be at the top of the sprite
+        # and nose should be at the bottom (engines pointing toward player)
+        
+        # Check that engine area (top after rotation) has engine colors
+        # Engine colors are typically reddish: (200, 100, 100) and (255, 150, 150)
+        engine_area_has_engine_colors = False
+        for x in range(10, 30):  # Check across the width where engines should be
+            for y in range(5, 15):  # Top area where engines should be after rotation
+                pixel = surface.get_at((x, y))[:3]  # Get RGB only
+                # Check for engine-like colors (reddish)
+                if pixel[0] > 150 and pixel[1] < 200 and pixel[2] < 200:
+                    engine_area_has_engine_colors = True
+                    break
+            if engine_area_has_engine_colors:
+                break
+        
+        assert engine_area_has_engine_colors, "Enemy ships should have engines at top (front-facing toward player)"
+        
+        # Check that nose area (bottom after rotation) has nose/cockpit colors
+        # Nose colors are typically accent colors or cockpit colors
+        nose_area_has_nose_colors = False
+        for x in range(15, 25):  # Check center area where nose should be
+            for y in range(35, 45):  # Bottom area where nose should be after rotation
+                pixel = surface.get_at((x, y))[:3]
+                # Check for nose-like colors (bright colors or cockpit blue)
+                if (pixel[0] > 200 and pixel[1] > 80) or (pixel[2] > 100 and pixel[0] < 100):
+                    nose_area_has_nose_colors = True
+                    break
+            if nose_area_has_nose_colors:
+                break
+        
+        assert nose_area_has_nose_colors, "Enemy ships should have nose/cockpit at bottom (proper front-facing orientation)"
 
 
 class TestRenderingConsistency:

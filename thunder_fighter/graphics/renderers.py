@@ -191,22 +191,46 @@ def create_enemy_surface(level=0):
         pygame.draw.circle(surface, (255, 255, 0), (15, 42), 4)
         pygame.draw.circle(surface, (255, 255, 0), (25, 42), 4)
     
+    # Flip enemy ship 180 degrees so engines point toward player (front-facing)
+    surface = pygame.transform.rotate(surface, 180)
+    
+    # After rotation, we need to redraw the outline on the rotated surface
+    # Get the rotated polygon points by calculating their new positions
+    rotated_fuselage_points = []
+    for x, y in fuselage_points:
+        # Rotate point 180 degrees around center (20, 25)
+        new_x = 40 - x
+        new_y = 50 - y
+        rotated_fuselage_points.append((new_x, new_y))
+    
+    rotated_left_wing = []
+    for x, y in left_wing:
+        new_x = 40 - x
+        new_y = 50 - y
+        rotated_left_wing.append((new_x, new_y))
+        
+    rotated_right_wing = []
+    for x, y in right_wing:
+        new_x = 40 - x
+        new_y = 50 - y
+        rotated_right_wing.append((new_x, new_y))
+    
     # Strong outline for visibility against background
     # Black outline first (shadow effect)
-    pygame.draw.lines(surface, (0, 0, 0), True, fuselage_points, 2)
-    pygame.draw.lines(surface, (0, 0, 0), True, left_wing, 2)
-    pygame.draw.lines(surface, (0, 0, 0), True, right_wing, 2)
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_fuselage_points, 2)
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_left_wing, 2)
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_right_wing, 2)
     
     # White highlight outline
-    pygame.draw.lines(surface, (255, 255, 255), True, fuselage_points, 1)
-    pygame.draw.lines(surface, (255, 255, 255), True, left_wing, 1)
-    pygame.draw.lines(surface, (255, 255, 255), True, right_wing, 1)
+    pygame.draw.lines(surface, (255, 255, 255), True, rotated_fuselage_points, 1)
+    pygame.draw.lines(surface, (255, 255, 255), True, rotated_left_wing, 1)
+    pygame.draw.lines(surface, (255, 255, 255), True, rotated_right_wing, 1)
     
-    # Add level indicator (small dots at bottom)
+    # Add level indicator (small dots at bottom - after rotation, now at top)
     for i in range(min(3, (level + 2) // 3)):
         dot_x = 16 + i * 4
-        pygame.draw.circle(surface, (255, 255, 255), (dot_x, 47), 1)
-        pygame.draw.circle(surface, accent_color, (dot_x, 47), 1)
+        pygame.draw.circle(surface, (255, 255, 255), (dot_x, 3), 1)  # Move to top after rotation
+        pygame.draw.circle(surface, accent_color, (dot_x, 3), 1)
     
     return surface
 
