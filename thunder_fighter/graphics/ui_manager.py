@@ -41,12 +41,16 @@ class UIManager:
         self.player = player
         self.game = game
         
-        # Initialize fonts
+        # Initialize fonts using resource manager for Chinese support
         try:
-            self.font_small = pygame.font.Font(None, 24)
-            self.font_medium = pygame.font.Font(None, 36)
-            self.font_large = pygame.font.Font(None, 48)
-        except pygame.error:
+            from thunder_fighter.utils.resource_manager import get_resource_manager
+            resource_manager = get_resource_manager()
+            
+            # Use TTF files for better Chinese character support with original sizes
+            self.font_small = resource_manager.load_font(None, 16, system_font=True)
+            self.font_medium = resource_manager.load_font(None, 20, system_font=True)
+            self.font_large = resource_manager.load_font(None, 28, system_font=True)
+        except (pygame.error, ImportError):
             # Fallback for test environments
             from unittest.mock import MagicMock
             self.font_small = self.font_medium = self.font_large = MagicMock()
@@ -199,6 +203,26 @@ class UIManager:
         """Update all UI components."""
         self.notification_manager.update()
         self.screen_overlay_manager.update()
+        
+    def reset_game_state(self):
+        """Reset game state to initial values."""
+        self.game_state = {
+            'level': 1,
+            'paused': False,
+            'game_time': 0,
+            'victory': False,
+            'defeat': False
+        }
+        self.persistent_info = {}
+        
+        # Reset component states
+        self.notification_manager.clear_all()
+        
+        # Reset player and boss info displays
+        if hasattr(self, 'player_stats_display'):
+            self.player_stats_display.reset()
+        if hasattr(self, 'boss_status_display'):
+            self.boss_status_display.reset()
         
     def draw(self, score, level, game_time, enemy_count=None, target_enemy_count=None, max_level=None):
         """

@@ -505,7 +505,7 @@ def draw_text(surface, text, size, x, y, color=WHITE, font_name='arial'):
         print(f"Error rendering text: {e}")
         # Fallback to default font
         try:
-            font = resource_manager.load_font(None, size, system_font=False)
+            font = resource_manager.load_font(None, size, system_font=True)
             text_surface = font.render(text, True, color)
             text_rect = text_surface.get_rect()
             text_rect.midtop = (x, y)

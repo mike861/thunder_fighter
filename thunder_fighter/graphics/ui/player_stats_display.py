@@ -28,7 +28,8 @@ class PlayerStatsDisplay:
         if font is None:
             from thunder_fighter.utils.resource_manager import get_resource_manager
             resource_manager = get_resource_manager()
-            self.font = resource_manager.load_font(None, 24, system_font=False)
+            # Use original font size with Chinese character support
+            self.font = resource_manager.load_font(None, 24, system_font=True)
         else:
             self.font = font
             
@@ -128,4 +129,15 @@ class PlayerStatsDisplay:
             y: Y coordinate
         """
         self.x = x
-        self.y = y 
+        self.y = y
+        
+    def reset(self):
+        """Reset player stats to initial values."""
+        self.player_info = {
+            'health': 100,
+            'max_health': 100,
+            'bullet_paths': 1,
+            'bullet_speed': 7,
+            'speed': 5,
+            'wingmen': 0
+        } 

@@ -10,9 +10,10 @@ class Score:
         resource_manager = get_resource_manager()
         
         try:
+            # Use original font size with Chinese character support
             self.font = resource_manager.load_font(FONT_NAME, FONT_SIZE_MEDIUM, system_font=True)
         except Exception:
-            self.font = resource_manager.load_font(None, FONT_SIZE_MEDIUM, system_font=False)
+            self.font = resource_manager.load_font(None, FONT_SIZE_MEDIUM, system_font=True)
         
         self.value = 0
         self.text = None
@@ -35,6 +36,13 @@ class Score:
     
     def update_display(self):
         """Update score display"""
-        self.text = self.font.render(f"Score: {self.value}", True, WHITE)
+        from thunder_fighter.localization import _
+        score_text = _("SCORE_DISPLAY", self.value)
+        self.text = self.font.render(score_text, True, WHITE)
         self.rect = self.text.get_rect()
-        self.rect.topleft = (10, 10) 
+        self.rect.topleft = (10, 10)
+    
+    def reset(self):
+        """Reset score to zero"""
+        self.value = 0
+        self.update_display() 

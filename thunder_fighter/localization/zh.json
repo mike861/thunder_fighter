@@ -55,5 +55,19 @@
     "BOSS_BONUS": "BOSS奖励: +{}",
     "STAGE_COMPLETE": "关卡完成!",
     "FINAL_BOSS_DEFEATED": "最终BOSS被击败!",
-    "GAME_COMPLETED": "恭喜！您已完成雷霆战机全部关卡！"
+    "GAME_COMPLETED": "恭喜！您已完成雷霆战机全部关卡！",
+    "RESTART_GAME": "按 R 重新开始游戏",
+    "GAME_STATISTICS": "游戏统计",
+    "PERFORMANCE_SUMMARY": "战斗总结",
+    "LEVEL_INDICATOR": "第{}关",
+    "BOSS_LEVEL_NORMAL": "首领 Lv.{}",
+    "BOSS_LEVEL_DANGER": "首领 Lv.{} [危险]",
+    "BOSS_LEVEL_EXTREME": "首领 Lv.{} [极限]",
+    "SCORE_DISPLAY": "得分: {}",
+    "LEVEL_THEME_DEEP_SPACE": "深空",
+    "LEVEL_THEME_NEBULA_FIELD": "星云地带",
+    "LEVEL_THEME_ASTEROID_BELT": "小行星带",
+    "LEVEL_THEME_RED_ZONE": "红色区域",
+    "LEVEL_THEME_FINAL_BATTLE": "最终之战",
+    "SCORE_LEVEL_UP": "得分等级提升至{}!"
 } 

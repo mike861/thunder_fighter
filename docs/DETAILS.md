@@ -2,6 +2,10 @@
 
 This document contains more detailed information about the Thunder Fighter game mechanics and technical aspects.
 
+## Related Documentation
+
+- [Font System and Localization](FONT_SYSTEM_AND_LOCALIZATION.md) - Comprehensive guide to the multi-language support and Chinese font optimization system
+
 ## Internal Game Mechanics
 
 ### Game Victory System
@@ -96,6 +100,21 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Clear Progression Path**: Players receive clear visual notifications when advancing levels, including enemies cleared count and bonus scores received.
 
 ### Visual Effects System
+- **🎨 Dynamic Level Background System**: Revolutionary double-buffered rendering for seamless level transitions
+  - **Level Themes**: Each level features unique visual identity reflecting difficulty progression:
+    - Level 1 "Deep Space": Peaceful blue/black starfield (2 nebulae, 1 planet)
+    - Level 2 "Nebula Field": Purple/blue clouds (4 nebulae, 2 planets)
+    - Level 3 "Asteroid Belt": Brown/orange asteroid field with animated debris (3 nebulae, 3 planets)
+    - Level 4 "Red Zone": Dangerous red space with particle storm effects (5 nebulae, 2 planets)
+    - Level 5+ "Final Battle": Ominous dark red atmosphere with intense storms (6 nebulae, 1 planet)
+  - **Double Buffering Technology**: Pre-renders level backgrounds into separate buffers for artifact-free transitions
+  - **Smooth Transitions**: 3-second transitions using cubic bezier easing (t³(6t² - 15t + 10)) with alpha blending
+  - **Special Effects**:
+    - SpaceStorm: Animated red particles with sinusoidal movement for dangerous levels
+    - AsteroidField: Procedurally generated rotating asteroids for level 3
+    - Alpha Support: All effects support smooth fade-in/fade-out during transitions
+  - **Hardware Optimization**: Uses pygame.BLEND_ALPHA_SDL2 for maximum performance
+  - **Visual Polish**: Enhanced level indicator with glow effects and subtle overlays
 - **Explosions**: Occur when an entity (enemy, wingman) is destroyed, or when a missile hits a target.
 - **Flash Effects**: Used for non-lethal damage. The entity itself flashes a specific color to indicate it was hit. This provides clearer feedback without cluttering the screen.
     - Player Hit: Flashes white.
@@ -149,7 +168,7 @@ If these files are missing, the game will handle the missing sounds gracefully, 
 - ✅ Boss battles with unique patterns
 - ✅ Item drop and collection system
 - ✅ Enhanced sound system with stability improvements and independent audio controls
-- ✅ Comprehensive test coverage (94 tests passing)
+- ✅ Comprehensive test coverage (255 tests passing)
 - ✅ Refined visual feedback system (explosions vs. damage flashes)
 - ✅ Multi-language support (English, Chinese)
 - ✅ Dynamic UI with notifications and victory interface
@@ -170,6 +189,13 @@ If these files are missing, the game will handle the missing sounds gracefully, 
   - Background preservation rendering system
   - Semi-transparent overlay composition
   - Comprehensive statistics collection and display
+- **🎨 Dynamic Background System Architecture**:
+  - Double buffer rendering pipeline with lazy initialization
+  - Target-based element preparation for smooth transitions
+  - Cubic bezier easing function for professional-grade animations
+  - Hardware-accelerated alpha blending using SDL2 blend modes
+  - Modular special effects system with alpha support
+  - Level-specific theme management with progressive difficulty visualization
 - **Advanced Boss System Architecture**:
   - State-based attack pattern management with health-triggered transitions
   - Dynamic bullet generation with mode-specific properties and targeting
@@ -188,5 +214,5 @@ If these files are missing, the game will handle the missing sounds gracefully, 
   - Multi-layer transparency effects
   - Responsive layout management
 - Modular architecture allows for easy extension and maintenance.
-- **Test-Driven Development**: Extensive test suite with 94 tests covering all game mechanics, victory conditions, collision systems, and edge cases.
+- **Test-Driven Development**: Extensive test suite with 255 tests covering all game mechanics, victory conditions, collision systems, and edge cases.
 - Localization system for multi-language support. 

@@ -86,7 +86,7 @@ ENEMY_SCREEN_BOUNDS = 25  # Distance from screen edge for enemy removal
 # Boss settings
 BOSS_MAX_HEALTH = 300
 BOSS_SHOOT_DELAY = 1000
-BOSS_SPAWN_INTERVAL = 50  # Boss spawn interval (seconds), 120 seconds = 2 minutes
+BOSS_SPAWN_INTERVAL = 30  # Boss spawn interval (seconds), 120 seconds = 2 minutes
 BOSS_HEALTH_MULTIPLIER = 1.5  # Boss health multiplier per level
 BOSS_BULLET_COUNT_BASE = 3  # Base bullet count
 BOSS_BULLET_COUNT_INCREMENT = 1  # Bullet count increment per level
@@ -118,5 +118,5 @@ BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.3  # Size multiplier for final bullets
 SCORE_THRESHOLD = 200  # Generate an item every 200 points
 
 # Game balance
-MAX_GAME_LEVEL = 10 # Maximum game level 
+MAX_GAME_LEVEL = 5 # Maximum game level 
 INITIAL_GAME_LEVEL = 1  # Starting game level 

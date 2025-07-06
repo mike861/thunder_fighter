@@ -1,0 +1,153 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thunder-fighter"
+version = "0.2.0"
+description = "A classic vertical scrolling space shooter game built with Pygame"
+readme = "README.md"
+license = {text = "GPL-2.0"}  # Consider changing to MIT or Apache-2.0
+authors = [
+    {name = "Mike", email = "mike861@example.com"},
+]
+maintainers = [
+    {name = "Mike", email = "mike861@example.com"},
+]
+keywords = ["game", "pygame", "shooter", "arcade", "space"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: Arcade",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "pygame>=2.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-mock>=3.11.1",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    "pre-commit>=3.5.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mike861/thunder_fighter"
+Repository = "https://github.com/mike861/thunder_fighter"
+Issues = "https://github.com/mike861/thunder_fighter/issues"
+Changelog = "https://github.com/mike861/thunder_fighter/blob/main/CHANGELOG.md"
+
+[project.scripts]
+thunder-fighter = "thunder_fighter.__main__:main"
+
+[tool.setuptools]
+packages = ["thunder_fighter"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+thunder_fighter = [
+    "assets/**/*",
+    "localization/*.json",
+]
+
+[tool.ruff]
+target-version = "py37"
+line-length = 120
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults
+]
+exclude = [
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports in __init__.py files
+
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pygame.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=thunder_fighter",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.coverage.run]
+source = ["thunder_fighter"]
+omit = [
+    "*/__init__.py",
+    "*/tests/*",
+    "*/test_*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+] 

@@ -59,6 +59,10 @@ class NotificationManager:
         """Clear all notifications."""
         self.notifications.clear()
         
+    def clear_all(self):
+        """Clear all notifications (alias for clear method)."""
+        self.clear()
+        
     def _arrange_notifications(self):
         """Arrange notifications vertically to avoid overlap."""
         if not self.notifications:

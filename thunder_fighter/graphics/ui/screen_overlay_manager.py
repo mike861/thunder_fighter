@@ -144,31 +144,58 @@ class ScreenOverlayManager:
             level_reached: Level reached before game over
             game_time: Total game time in seconds
         """
-        # Draw dark red background
-        self.screen.fill((40, 10, 10))
+        # Create semi-transparent overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay.fill((40, 10, 10, 200))  # Semi-transparent dark red
+        self.screen.blit(overlay, (0, 0))
+        
+        # Create a game over panel in the center
+        panel_width = 500
+        panel_height = 400
+        panel_x = (WIDTH - panel_width) // 2
+        panel_y = (HEIGHT - panel_height) // 2
+        
+        # Draw game over panel background
+        panel_surface = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
+        panel_surface.fill((60, 20, 20, 220))  # Semi-transparent dark red panel
+        
+        # Draw panel border
+        pygame.draw.rect(panel_surface, RED, (0, 0, panel_width, panel_height), 3)
+        
+        self.screen.blit(panel_surface, (panel_x, panel_y))
         
         # Draw game over text
         gameover_text = self.font_large.render(_("GAME_OVER"), True, RED)
-        text_rect = gameover_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
+        text_rect = gameover_text.get_rect(center=(WIDTH // 2, panel_y + 50))
         self.screen.blit(gameover_text, text_rect)
+        
+        # Draw performance summary title
+        summary_text = self.font_medium.render(_("PERFORMANCE_SUMMARY"), True, WHITE)
+        summary_rect = summary_text.get_rect(center=(WIDTH // 2, panel_y + 100))
+        self.screen.blit(summary_text, summary_rect)
         
         # Draw statistics
         level_text = self.font_medium.render(_("LEVEL_REACHED", level_reached), True, WHITE)
-        level_rect = level_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10))
+        level_rect = level_text.get_rect(center=(WIDTH // 2, panel_y + 140))
         self.screen.blit(level_text, level_rect)
         
         score_text = self.font_medium.render(_("FINAL_SCORE", final_score), True, WHITE)
-        score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 30))
+        score_rect = score_text.get_rect(center=(WIDTH // 2, panel_y + 180))
         self.screen.blit(score_text, score_rect)
         
         time_text = self.font_medium.render(_("SURVIVAL_TIME", round(game_time, 1)), True, WHITE)
-        time_rect = time_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 70))
+        time_rect = time_text.get_rect(center=(WIDTH // 2, panel_y + 220))
         self.screen.blit(time_text, time_rect)
         
-        # Draw prompt text (blinking)
+        # Draw control instructions
+        restart_text = self.font_small.render(_("RESTART_GAME"), True, GREEN)
+        restart_rect = restart_text.get_rect(center=(WIDTH // 2, panel_y + 270))
+        self.screen.blit(restart_text, restart_rect)
+        
+        # Draw exit prompt (blinking)
         if self.show_blink_text:
             exit_text = self.font_small.render(_("EXIT_PROMPT"), True, YELLOW)
-            exit_rect = exit_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 130))
+            exit_rect = exit_text.get_rect(center=(WIDTH // 2, panel_y + 310))
             self.screen.blit(exit_text, exit_rect)
             
     def start_level_change_animation(self, level):

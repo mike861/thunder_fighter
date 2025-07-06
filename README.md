@@ -2,6 +2,8 @@
 
 A classic vertical scrolling space shooter game built with Pygame featuring modern architecture and comprehensive testing.
 
+![Thunder Fighter Screenshot](./docs/images/boss.png) 
+
 ## Description
 
 In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. Use the arrow keys or WASD to move and the spacebar to shoot. As the game progresses, enemies become stronger and more numerous, with powerful Bosses appearing periodically. Defeat enemies and Bosses to score points and collect power-ups. **Complete all levels by defeating the final boss to achieve victory!**
@@ -10,6 +12,11 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 
 - **Complete Campaign**: Battle through multiple levels culminating in an epic final boss battle
 - **Victory System**: Achieve game completion by defeating the final boss with comprehensive victory statistics
+- **🎨 Dynamic Level Backgrounds**: Each level features unique visual themes with ultra-smooth transitions
+  - **Double Buffering Technology**: Eliminates visual artifacts and flashing during level changes
+  - **Progressive Difficulty Visualization**: Background complexity and atmosphere evolve with game difficulty
+  - **Special Effects**: Level-specific effects including space storms and asteroid fields
+  - **Smooth Alpha Transitions**: Professional-grade 3-second transitions with cubic bezier easing
 - **Wingman System**: Collect power-ups to gain up to two wingmen who provide extra firepower with tracking missiles and act as shields
 - **Enhanced Victory Screen**: Beautiful victory interface that preserves game background with transparent overlay showing completion statistics
 - **Robust Audio System**: Background music and sound effects with volume control, featuring automatic recovery from audio issues
@@ -18,10 +25,14 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - **Event-Driven Architecture**: Comprehensive event system for decoupled game components
 - **Factory Pattern**: Entity creation through configurable factories
 - **Input Management System**: Decoupled input handling with customizable key bindings
-- **Multi-language Support**: Currently English and Chinese with localization system
+- **Enhanced Multi-language Support**: Complete internationalization with optimized Chinese font rendering
+  - **Dynamic Language Switching**: Press L to toggle between English and Chinese
+  - **Optimized Chinese Fonts**: TTF-based font system for reliable Chinese character display on macOS
+  - **Localized UI Elements**: All game text including level transitions, Boss status, and notifications
+  - **Font System**: ResourceManager-based font loading with automatic fallbacks
 - **Developer Mode**: Debug information and configuration options
 - **Dynamic Difficulty**: Configurable gameplay parameters
-- **Extensively Tested**: Fully tested codebase with 249 comprehensive tests covering all game mechanics
+- **Extensively Tested**: Fully tested codebase with 255 comprehensive tests covering all game mechanics
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -82,6 +93,18 @@ For more detailed information on game mechanics, systems, and technical specific
 - **Mid-to-Late Levels (3-10)**: Progress by defeating bosses at the end of each level
 - **Final Victory**: Defeat the boss at Level 10 to complete the game
 - **Victory Rewards**: Receive comprehensive statistics including final score, survival time, and completion achievements upon winning
+
+### Visual Experience
+
+Thunder Fighter features a **dynamic background system** that enhances immersion:
+
+- **Level 1 - Deep Space**: Peaceful blue/black starfield for your journey's beginning
+- **Level 2 - Nebula Field**: Purple/blue nebula clouds as difficulty increases
+- **Level 3 - Asteroid Belt**: Brown/orange asteroid field with animated debris
+- **Level 4 - Red Zone**: Dangerous red space with particle storm effects
+- **Level 5 - Final Battle**: Ominous dark red atmosphere for the ultimate challenge
+
+Each transition between levels features **professional-grade smooth animations** with no visual artifacts or flashing, creating a cinematic experience that reflects the escalating intensity of your mission.
 
 ### Wingman System
 
@@ -182,7 +205,7 @@ The UI system has been completely refactored into modular components:
 
 ## Testing
 
-The project includes a comprehensive test suite with 249 tests covering all aspects of the game:
+The project includes a comprehensive test suite with 255 tests covering all aspects of the game:
 
 ### Test Categories
 
@@ -224,6 +247,7 @@ thunder_fighter/
 ├── docs/                       # Comprehensive documentation
 │   ├── DETAILS.md             # Detailed game mechanics
 │   ├── DETAILS_ZH.md          # Chinese documentation
+│   ├── FONT_SYSTEM_AND_LOCALIZATION.md # Font system and multi-language support
 │   ├── IMPLEMENTATION_SUMMARY.md
 │   ├── STATE_MANAGEMENT_SYSTEM.md
 │   ├── SEPARATION_OF_CONCERNS_SUMMARY.md
@@ -247,7 +271,7 @@ thunder_fighter/
 │   ├── config.py              # Game configuration
 │   ├── constants.py           # Game constants
 │   └── game.py                # Main game class
-├── tests/                     # Comprehensive test suite (249 tests)
+├── tests/                     # Comprehensive test suite (255 tests)
 │   ├── e2e/                  # End-to-end tests
 │   ├── integration/          # Integration tests
 │   ├── unit/                 # Unit tests
@@ -263,9 +287,11 @@ thunder_fighter/
 └── LICENSE                   # Project License
 ```
 
-## Known Issues
+## Recent Improvements
 
--   **Chinese Language Display**: On some systems (particularly macOS), switching to Chinese may display garbled text or "tofu" blocks (□□□) instead of the correct characters. This is a font rendering issue that is currently under investigation.
+- **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) issue on macOS through TTF-based font loading system
+- **Complete Localization**: All UI elements now support dynamic language switching
+- **Optimized Font System**: ResourceManager-based font loading with platform-specific optimizations
 
 ## Development
 
@@ -294,6 +320,7 @@ python -m thunder_fighter.utils.config_tool reset
 ## Documentation
 
 - [Detailed Game Mechanics](docs/DETAILS.md)
+- [Font System and Localization](docs/FONT_SYSTEM_AND_LOCALIZATION.md)
 - [Configuration Management](docs/IMPLEMENTATION_SUMMARY.md)
 - [State Management System](docs/STATE_MANAGEMENT_SYSTEM.md)
 - [UI Refactoring Summary](docs/UI_REFACTORING_SUMMARY.md)
@@ -305,6 +332,3 @@ python -m thunder_fighter.utils.config_tool reset
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Screenshots
-
-_(Add gameplay screenshots here if available)_
-<!-- ![Gameplay Screenshot](screenshots/gameplay.png) -->
