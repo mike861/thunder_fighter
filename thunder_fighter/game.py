@@ -887,7 +887,8 @@ class RefactoredGame:
                 self.enemy_spawn_timer = time.time()
         
         # Boss spawning logic
-        if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
+        boss_elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
+        if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
             if not self.boss or not self.boss.alive():
                 self._spawn_boss_via_factory()
         
