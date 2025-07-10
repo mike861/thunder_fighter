@@ -1,5 +1,5 @@
 import pygame
-from thunder_fighter.sprites.missile import TrackingMissile
+from thunder_fighter.entities.projectiles.missile import TrackingMissile
 from thunder_fighter.graphics.renderers import create_wingman
 from thunder_fighter.constants import WINGMAN_FORMATION_SPACING
 

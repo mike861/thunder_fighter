@@ -8,7 +8,7 @@ import pytest
 import pygame
 from unittest.mock import Mock
 
-from thunder_fighter.input import (
+from thunder_fighter.systems.input import (
     InputSystem,
     create_for_testing,
     Command,

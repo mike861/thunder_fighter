@@ -6,9 +6,9 @@ This module provides a factory for creating projectile entities (bullets, missil
 
 from typing import Dict, Any
 import pygame
-from .entity_factory import ConfigurableEntityFactory
-from thunder_fighter.sprites.bullets import Bullet
-from thunder_fighter.sprites.missile import TrackingMissile
+from ..entity_factory import ConfigurableEntityFactory
+from thunder_fighter.entities.projectiles.bullets import Bullet
+from thunder_fighter.entities.projectiles.missile import TrackingMissile
 from thunder_fighter.utils.logger import logger
 
 

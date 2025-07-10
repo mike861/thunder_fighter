@@ -2,7 +2,7 @@ import pytest
 import pygame
 import random
 from unittest.mock import MagicMock, patch, call
-from thunder_fighter.sprites.enemy import Enemy
+from thunder_fighter.entities.enemies.enemy import Enemy
 
 @pytest.fixture
 def mock_pygame():

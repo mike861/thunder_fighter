@@ -7,9 +7,9 @@ input handling, event processing, and input system configuration.
 
 import pygame
 from typing import List, Optional, Callable, Dict, Any
-from .input_handler import InputHandler
-from .input_events import InputEvent, InputEventType
-from .key_bindings import KeyBindings
+from .handler import InputHandler
+from .events import InputEvent, InputEventType
+from .bindings import KeyBindings
 from thunder_fighter.utils.logger import logger
 
 

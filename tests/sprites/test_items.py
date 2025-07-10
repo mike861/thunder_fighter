@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from thunder_fighter.sprites.items import create_random_item, HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem, WingmanItem
+from thunder_fighter.entities.items.items import create_random_item, HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem, WingmanItem
 from thunder_fighter.graphics.renderers import create_wingman_item
 
 # A real pygame surface to be returned by mocks

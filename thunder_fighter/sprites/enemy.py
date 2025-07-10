@@ -9,7 +9,7 @@ from thunder_fighter.constants import (
     ENEMY_ROTATION_UPDATE, ENEMY_SCREEN_BOUNDS
 )
 from thunder_fighter.graphics.renderers import create_enemy_ship
-from thunder_fighter.sprites.bullets import EnemyBullet
+from thunder_fighter.entities.projectiles.bullets import EnemyBullet
 from thunder_fighter.utils.logger import logger
 import traceback
 

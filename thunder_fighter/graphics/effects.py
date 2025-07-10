@@ -1,6 +1,6 @@
 import pygame
 import random
-from thunder_fighter.sprites.explosion import Explosion
+from thunder_fighter.graphics.effects.explosion import Explosion
 import math
 from thunder_fighter.constants import WIDTH, HEIGHT, WHITE, YELLOW, RED, GREEN
 

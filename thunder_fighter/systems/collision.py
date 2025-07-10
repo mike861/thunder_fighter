@@ -114,14 +114,14 @@ class CollisionSystem:
                 score.update(score_value)
                 
                 # Create explosion effect
-                from thunder_fighter.sprites.explosion import Explosion
+                from thunder_fighter.graphics.effects.explosion import Explosion
                 explosion = Explosion(hit.rect.center)
                 all_sprites.add(explosion)
                 
                 # Check if we need to generate item based on score checkpoints
                 current_score_checkpoint = score.value // score_threshold
                 if current_score_checkpoint > last_score_checkpoint:
-                    from thunder_fighter.sprites.items import create_random_item
+                    from thunder_fighter.entities.items.items import create_random_item
                     # Hack: Get game_level from a sprite's group's game reference if available
                     # This is not ideal, but avoids a large refactor to pass 'game' down.
                     game_level = 1
@@ -184,7 +184,7 @@ class CollisionSystem:
                     # Check if Boss is defeated
                     if boss_defeated:
                         # Create big explosion when boss is defeated
-                        from thunder_fighter.sprites.explosion import Explosion
+                        from thunder_fighter.graphics.effects.explosion import Explosion
                         for _ in range(10):
                             pos_x = random.randint(boss.rect.left, boss.rect.right)
                             pos_y = random.randint(boss.rect.top, boss.rect.bottom)
@@ -221,7 +221,7 @@ class CollisionSystem:
                 result['damage'] += damage
                 
                 # Create explosion
-                from thunder_fighter.sprites.explosion import Explosion
+                from thunder_fighter.graphics.effects.explosion import Explosion
                 explosion = Explosion(hit.rect.center)
                 all_sprites.add(explosion)
                 
@@ -332,3 +332,54 @@ class CollisionSystem:
             # 播放音效
             if sound_manager:
                 sound_manager.play_sound('item_pickup')
+
+
+# 全局碰撞系统实例
+_global_collision_system = None
+
+
+def get_collision_system() -> CollisionSystem:
+    """获取全局碰撞系统实例"""
+    global _global_collision_system
+    if _global_collision_system is None:
+        _global_collision_system = CollisionSystem()
+    return _global_collision_system
+
+
+# 兼容性函数 - 保持原有API
+def check_missile_enemy_collisions(missiles, enemies, all_sprites, score):
+    """Checks missile-enemy collisions and creates appropriate effects."""
+    return get_collision_system().check_missile_enemy_collisions(missiles, enemies, all_sprites, score)
+
+
+def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score, 
+                                  last_score_checkpoint, score_threshold, items_group, player):
+    """Check collisions between bullets and enemies"""
+    return get_collision_system().check_bullet_enemy_collisions(
+        enemies, bullets, all_sprites, score, 
+        last_score_checkpoint, score_threshold, items_group, player)
+
+
+def check_bullet_boss_collisions(boss, bullets, all_sprites):
+    """Check collisions between player bullets and boss"""
+    return get_collision_system().check_bullet_boss_collisions(boss, bullets, all_sprites)
+
+
+def check_enemy_player_collisions(player, enemies, all_sprites):
+    """Check collisions between enemies and player"""
+    return get_collision_system().check_enemy_player_collisions(player, enemies, all_sprites)
+
+
+def check_boss_bullet_player_collisions(player, boss_bullets, all_sprites):
+    """Check collisions between boss bullets and player"""
+    return get_collision_system().check_boss_bullet_player_collisions(player, boss_bullets, all_sprites)
+
+
+def check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites):
+    """Check collisions between enemy bullets and player"""
+    return get_collision_system().check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites)
+
+
+def check_items_player_collisions(items, player, ui_manager, sound_manager=None):
+    """Check collisions between items and player"""
+    return get_collision_system().check_items_player_collisions(items, player, ui_manager, sound_manager)

@@ -8,8 +8,8 @@ types and configurations.
 import random
 from typing import Dict, Any
 import pygame
-from .entity_factory import ConfigurableEntityFactory
-from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem, WingmanItem
+from ..entity_factory import ConfigurableEntityFactory
+from thunder_fighter.entities.items.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem, WingmanItem
 from thunder_fighter.utils.logger import logger
 
 

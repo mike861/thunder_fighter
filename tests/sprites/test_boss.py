@@ -2,7 +2,7 @@ import pytest
 import pygame
 import random
 from unittest.mock import MagicMock, patch, call
-from thunder_fighter.sprites.boss import Boss
+from thunder_fighter.entities.enemies.boss import Boss
 from thunder_fighter.graphics.renderers import create_boss_ship
 
 @pytest.fixture

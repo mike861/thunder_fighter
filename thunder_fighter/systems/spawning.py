@@ -46,9 +46,9 @@ class SpawningSystem:
         """初始化工厂类"""
         if not self._factories_initialized:
             try:
-                from thunder_fighter.entities.enemy_factory import EnemyFactory
-                from thunder_fighter.entities.boss_factory import BossFactory
-                from thunder_fighter.entities.item_factory import ItemFactory
+                from thunder_fighter.entities.enemies.enemy_factory import EnemyFactory
+                from thunder_fighter.entities.enemies.boss_factory import BossFactory
+                from thunder_fighter.entities.items.item_factory import ItemFactory
                 
                 self.enemy_factory = EnemyFactory()
                 self.boss_factory = BossFactory()

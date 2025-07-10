@@ -215,7 +215,7 @@ class Boss(pygame.sprite.Sprite):
     def shoot(self):
         """Fire bullets"""
         # Due to circular import, need to import BossBullet externally
-        from thunder_fighter.sprites.bullets import BossBullet
+        from thunder_fighter.entities.projectiles.bullets import BossBullet
         
         # Determine bullet count and pattern based on level and attack mode
         if self.shoot_pattern == "normal":

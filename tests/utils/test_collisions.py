@@ -2,16 +2,16 @@ import pytest
 import pygame
 import random
 from unittest.mock import MagicMock, patch, call
-from thunder_fighter.utils.collisions import (
+from thunder_fighter.systems.collision import (
     check_bullet_enemy_collisions,
     check_bullet_boss_collisions,
     check_enemy_player_collisions,
     check_items_player_collisions
 )
-from thunder_fighter.sprites.enemy import Enemy
-from thunder_fighter.sprites.bullets import Bullet
-from thunder_fighter.sprites.boss import Boss
-from thunder_fighter.utils.score import Score
+from thunder_fighter.entities.enemies.enemy import Enemy
+from thunder_fighter.entities.projectiles.bullets import Bullet
+from thunder_fighter.entities.enemies.boss import Boss
+from thunder_fighter.systems.scoring import Score
 from thunder_fighter.constants import BULLET_DAMAGE_TO_BOSS
 
 # Fixtures to create mock sprites

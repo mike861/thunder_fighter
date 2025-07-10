@@ -1,7 +1,7 @@
 import pytest
 import pygame
 from unittest.mock import MagicMock, patch
-from thunder_fighter.sprites.player import Player
+from thunder_fighter.entities.player.player import Player
 from thunder_fighter.constants import (
     PLAYER_HEALTH, PLAYER_SPEED, BULLET_SPEED_DEFAULT, BULLET_PATHS_DEFAULT,
     PLAYER_MAX_SPEED, BULLET_SPEED_MAX, BULLET_PATHS_MAX

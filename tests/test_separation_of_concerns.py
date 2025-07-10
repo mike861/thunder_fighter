@@ -35,8 +35,8 @@ if TYPE_CHECKING:
     from pytest_mock.plugin import MockerFixture
 
 # Input Management Tests
-from thunder_fighter.input import InputManager, InputHandler, KeyBindings
-from thunder_fighter.input.input_events import InputEvent, InputEventType, InputEventFactory
+from thunder_fighter.systems.input import InputManager, InputHandler, KeyBindings
+from thunder_fighter.systems.input.events import InputEvent, InputEventType, InputEventFactory
 
 # Entity Factory Tests
 from thunder_fighter.entities import EntityFactory, EnemyFactory, BossFactory, ItemFactory, ProjectileFactory

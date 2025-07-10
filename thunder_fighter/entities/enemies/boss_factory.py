@@ -7,8 +7,8 @@ configurations and difficulty levels.
 
 from typing import Dict, Any
 import pygame
-from .entity_factory import ConfigurableEntityFactory
-from thunder_fighter.sprites.boss import Boss
+from ..entity_factory import ConfigurableEntityFactory
+from thunder_fighter.entities.enemies.boss import Boss
 from thunder_fighter.utils.logger import logger
 
 

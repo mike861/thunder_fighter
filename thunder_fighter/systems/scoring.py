@@ -131,3 +131,7 @@ class ScoringSystem:
 def create_legacy_score():
     """创建兼容原有Score类的实例"""
     return ScoringSystem()
+
+
+# 兼容性别名
+Score = ScoringSystem

@@ -10,9 +10,9 @@ from thunder_fighter.constants import (
     BULLET_SPEED_UPGRADE_AMOUNT, PLAYER_MAX_WINGMEN, WINGMAN_FORMATION_SPACING
 )
 from thunder_fighter.graphics.renderers import create_player_ship
-from thunder_fighter.sprites.bullets import Bullet
-from thunder_fighter.sprites.wingman import Wingman
-from thunder_fighter.sprites.missile import TrackingMissile
+from thunder_fighter.entities.projectiles.bullets import Bullet
+from thunder_fighter.entities.player.wingman import Wingman
+from thunder_fighter.entities.projectiles.missile import TrackingMissile
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect
 from thunder_fighter.utils.logger import logger
 

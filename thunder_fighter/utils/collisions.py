@@ -1,8 +1,8 @@
 import pygame
 import random
-from thunder_fighter.sprites.explosion import Explosion
-from thunder_fighter.sprites.enemy import Enemy
-from thunder_fighter.sprites.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
+from thunder_fighter.graphics.effects.explosion import Explosion
+from thunder_fighter.entities.enemies.enemy import Enemy
+from thunder_fighter.entities.items.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem
 from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect, flash_manager
 from thunder_fighter.utils.logger import logger
 from thunder_fighter.constants import WHITE, RED, YELLOW, BULLET_DAMAGE_TO_BOSS
@@ -63,7 +63,7 @@ def check_bullet_enemy_collisions(enemies, bullets, all_sprites, score,
             # Check if we need to generate item based on score checkpoints
             current_score_checkpoint = score.value // score_threshold
             if current_score_checkpoint > last_score_checkpoint:
-                from thunder_fighter.sprites.items import create_random_item
+                from thunder_fighter.entities.items.items import create_random_item
                 # Hack: Get game_level from a sprite's group's game reference if available
                 # This is not ideal, but avoids a large refactor to pass 'game' down.
                 game_level = 1

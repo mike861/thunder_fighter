@@ -9,7 +9,7 @@ import random
 from typing import Dict, Any
 import pygame
 from .entity_factory import ConfigurableEntityFactory
-from thunder_fighter.sprites.enemy import Enemy
+from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.utils.logger import logger
 
 

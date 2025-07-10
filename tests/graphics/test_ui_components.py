@@ -16,7 +16,7 @@ from thunder_fighter.graphics.ui import (
     ScreenOverlayManager,
     DevInfoDisplay
 )
-from thunder_fighter.graphics.ui_manager import UIManager
+from thunder_fighter.graphics.ui.manager import UIManager
 
 
 # Initialize pygame for tests

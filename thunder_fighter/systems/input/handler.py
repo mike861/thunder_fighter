@@ -7,8 +7,8 @@ input events using the key bindings system.
 
 import pygame
 from typing import List, Set, Optional, Callable
-from .input_events import InputEvent, InputEventFactory, InputEventType
-from .key_bindings import KeyBindings
+from .events import InputEvent, InputEventFactory, InputEventType
+from .bindings import KeyBindings
 from thunder_fighter.utils.logger import logger
 
 

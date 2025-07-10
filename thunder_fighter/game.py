@@ -20,10 +20,10 @@ from thunder_fighter.constants import (
     TEXT_GAME_TITLE, MAX_GAME_LEVEL, PLAYER_HEALTH,
     PLAYER_INITIAL_WINGMEN, INITIAL_GAME_LEVEL
 )
-from thunder_fighter.sprites.player import Player
+from thunder_fighter.entities.player.player import Player
 from thunder_fighter.graphics.background import DynamicBackground
-from thunder_fighter.utils.score import Score
-from thunder_fighter.utils.collisions import (
+from thunder_fighter.systems.scoring import Score
+from thunder_fighter.systems.collision import (
     check_bullet_enemy_collisions,
     check_bullet_boss_collisions,
     check_enemy_player_collisions,
@@ -35,13 +35,13 @@ from thunder_fighter.utils.collisions import (
 from thunder_fighter.utils.logger import logger
 from thunder_fighter.utils.sound_manager import SoundManager
 from thunder_fighter.utils.resource_manager import get_resource_manager
-from thunder_fighter.graphics.ui_manager import UIManager
+from thunder_fighter.graphics.ui.manager import UIManager
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.localization import change_language, _
 from thunder_fighter.utils.config_manager import config_manager
 
 # Import input management system
-from thunder_fighter.input import InputManager, InputEvent, InputEventType
+from thunder_fighter.systems.input import InputManager, InputEvent, InputEventType
 
 # Import event system
 from thunder_fighter.events import EventSystem, GameEventType, GameEvent
