@@ -1,7 +1,5 @@
 """
-基础实体类定义
-
-定义所有游戏对象的基类和通用接口。
+Base entity classdefinitions definitions for all Base class for game objects和通用 interface.
 """
 
 import pygame
@@ -10,7 +8,7 @@ from typing import Tuple, Optional, Dict, Any
 
 
 class GameObject(pygame.sprite.Sprite, ABC):
-    """游戏对象基类"""
+    """Base class for game objects"""
     
     def __init__(self, x: float, y: float, width: int, height: int):
         super().__init__()
@@ -24,83 +22,83 @@ class GameObject(pygame.sprite.Sprite, ABC):
         self.max_health = 1
         self.active = True
         
-        # 创建基础rect
+        # Create base rect
         self.rect = pygame.Rect(int(x), int(y), width, height)
         
-        # 基础图像（子类需要设置具体图像）
+        # Base image (subclasses need to set specific image)
         self.image = None
     
     @abstractmethod
     def update(self, dt: float):
-        """更新游戏对象状态"""
+        """updategameobjectsstate"""
         pass
     
     @abstractmethod
     def render(self, screen: pygame.Surface):
-        """渲染游戏对象"""
+        """Take damage, return whether destroyed"""
         pass
     
     def take_damage(self, damage: int) -> bool:
-        """承受伤害，返回是否被摧毁"""
+        """Restore health"""
         self.health -= damage
         return self.health <= 0
     
     def heal(self, amount: int):
-        """恢复生命值"""
+        """Restore health"""
         self.health = min(self.health + amount, self.max_health)
     
     def set_position(self, x: float, y: float):
-        """设置位置"""
+        """settingsposition"""
         self.x = x
         self.y = y
         self.rect.x = int(x)
         self.rect.y = int(y)
     
     def get_position(self) -> Tuple[float, float]:
-        """获取位置"""
+        """getposition"""
         return (self.x, self.y)
     
     def set_velocity(self, velocity_x: float, velocity_y: float):
-        """设置速度"""
+        """settingsvelocity"""
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
     
     def get_velocity(self) -> Tuple[float, float]:
-        """获取速度"""
+        """Concrete entity class providing default implementation"""
         return (self.velocity_x, self.velocity_y)
 
 
 class Entity(GameObject):
-    """具体实体类，提供默认实现"""
+    """Default update implementation"""
     
     def update(self, dt: float):
-        """默认更新实现"""
-        # 更新位置
+        """Default update implementation"""
+        # updateposition
         self.x += self.velocity_x * dt
         self.y += self.velocity_y * dt
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
         
-        # 更新精灵的内置update（如果有动画等）
+        # Update sprite built-in update (if has animation etc)
         if hasattr(super(), 'update') and callable(getattr(super(), 'update')):
             super().update()
     
     def render(self, screen: pygame.Surface):
-        """默认渲染实现"""
+        """Default render implementation"""
         if hasattr(self, 'image') and hasattr(self, 'rect') and self.image:
             screen.blit(self.image, self.rect)
 
 
 class EntityFactory(ABC):
-    """实体工厂基类"""
+    """Base class for entity factories"""
     
     @abstractmethod
     def create(self, *args, **kwargs) -> GameObject:
-        """创建实体实例"""
+        """Create entity instance"""
         pass
     
     def create_batch(self, count: int, *args, **kwargs) -> list:
-        """批量创建实体"""
+        """Create entities in batch"""
         entities = []
         for i in range(count):
             entity = self.create(*args, **kwargs)
@@ -109,7 +107,7 @@ class EntityFactory(ABC):
 
 
 class MovableEntity(Entity):
-    """可移动的实体基类"""
+    """Base class for movable entities"""
     
     def __init__(self, x: float, y: float, width: int, height: int, speed: float = 100.0):
         super().__init__(x, y, width, height)
@@ -118,16 +116,16 @@ class MovableEntity(Entity):
         self.direction_y = 0.0
     
     def set_direction(self, direction_x: float, direction_y: float):
-        """设置移动方向（归一化向量）"""
+        """Set movement direction (normalized vector)"""
         self.direction_x = direction_x
         self.direction_y = direction_y
         
-        # 根据方向和速度计算速度
+        # Calculate velocity according to direction and velocity
         self.velocity_x = self.direction_x * self.speed
         self.velocity_y = self.direction_y * self.speed
     
     def move_towards(self, target_x: float, target_y: float):
-        """朝向目标移动"""
+        """move towards target"""
         dx = target_x - self.x
         dy = target_y - self.y
         distance = (dx * dx + dy * dy) ** 0.5
@@ -137,7 +135,7 @@ class MovableEntity(Entity):
 
 
 class LivingEntity(MovableEntity):
-    """有生命的实体基类"""
+    """Base class for living entities"""
     
     def __init__(self, x: float, y: float, width: int, height: int, 
                  speed: float = 100.0, max_health: int = 100):
@@ -147,7 +145,7 @@ class LivingEntity(MovableEntity):
         self.is_alive = True
     
     def take_damage(self, damage: int) -> bool:
-        """承受伤害，返回是否死亡"""
+        """take damage,returnwhetherdeath"""
         if not self.is_alive:
             return True
         
@@ -162,27 +160,27 @@ class LivingEntity(MovableEntity):
         return False
     
     def heal(self, amount: int):
-        """恢复生命值"""
+        """Restore health"""
         if self.is_alive:
             self.health = min(self.health + amount, self.max_health)
             self.on_heal(amount)
     
     def on_damage_taken(self, damage: int):
-        """受伤时的回调"""
+        """Callback when healed"""
         pass
     
     def on_heal(self, amount: int):
-        """治疗时的回调"""
+        """Callback when dead"""
         pass
     
     def on_death(self):
-        """死亡时的回调"""
+        """Callback when dead"""
         self.active = False
         if hasattr(self, 'kill'):
             self.kill()
     
     def get_health_percentage(self) -> float:
-        """获取生命值百分比"""
+        """gethealthpercentage"""
         if self.max_health <= 0:
             return 0.0
         return self.health / self.max_health

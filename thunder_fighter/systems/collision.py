@@ -1,8 +1,8 @@
 """
-碰撞检测系统
+collisiondetectionsystem
 
-统一管理所有游戏实体间的碰撞检测逻辑。
-从utils/collisions.py重构而来，增加系统化管理。
+统一managementallgameentity间collisiondetection逻辑.
+从utils/collisions.py重构而来,增加system化management.
 """
 
 import pygame
@@ -15,14 +15,14 @@ SCORE_THRESHOLD = 200  # Every 200 points might spawn an item
 
 
 class CollisionSystem:
-    """碰撞检测系统类"""
+    """collisiondetectionsystemclass"""
     
     def __init__(self):
         self.collision_handlers = {}
         self._setup_collision_handlers()
     
     def _setup_collision_handlers(self):
-        """设置碰撞处理器映射"""
+        """settingscollisionprocess器mapping"""
         self.collision_handlers = {
             'missile_enemy': self.check_missile_enemy_collisions,
             'bullet_enemy': self.check_bullet_enemy_collisions,
@@ -34,10 +34,10 @@ class CollisionSystem:
         }
     
     def check_all_collisions(self, game_state: Dict[str, Any]) -> Dict[str, Any]:
-        """检查所有碰撞"""
+        """checkallcollision"""
         results = {}
         
-        # 检查各种碰撞类型
+        # check各种collisiontype
         for collision_type, handler in self.collision_handlers.items():
             try:
                 if collision_type == 'missile_enemy':
@@ -58,7 +58,7 @@ class CollisionSystem:
                         game_state.get('items_group'),
                         game_state.get('player')
                     )
-                # 其他碰撞类型的处理...
+                # 其他collisiontypeprocess...
             except Exception as e:
                 logger.error(f"Error in collision check {collision_type}: {e}")
                 results[collision_type] = None
@@ -313,7 +313,7 @@ class CollisionSystem:
         for hit in hits:
             item_type = getattr(hit, 'type', 'unknown')
             
-            # 根据道具类型执行不同操作
+            # according toitemtypeexecutedifferentoperation
             if item_type == 'health':
                 player.heal()
             elif item_type == 'bullet_speed':
@@ -325,28 +325,28 @@ class CollisionSystem:
             elif item_type == 'wingman':
                 player.add_wingman()
             
-            # 显示通知
+            # displaynotification
             if ui_manager:
                 ui_manager.show_item_collected(item_type)
             
-            # 播放音效
+            # playsound
             if sound_manager:
                 sound_manager.play_sound('item_pickup')
 
 
-# 全局碰撞系统实例
+# globalcollisionsysteminstance
 _global_collision_system = None
 
 
 def get_collision_system() -> CollisionSystem:
-    """获取全局碰撞系统实例"""
+    """getglobalcollisionsysteminstance"""
     global _global_collision_system
     if _global_collision_system is None:
         _global_collision_system = CollisionSystem()
     return _global_collision_system
 
 
-# 兼容性函数 - 保持原有API
+# Compatibilityfunction - maintain原有API
 def check_missile_enemy_collisions(missiles, enemies, all_sprites, score):
     """Checks missile-enemy collisions and creates appropriate effects."""
     return get_collision_system().check_missile_enemy_collisions(missiles, enemies, all_sprites, score)

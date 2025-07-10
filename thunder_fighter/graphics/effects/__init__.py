@@ -1,7 +1,7 @@
 """
-图形效果模块
+Graphics Effects Module
 
-包含所有视觉效果相关的实现。
+Contains all visual effects related implementations.
 """
 
 from .explosion import Explosion
@@ -50,11 +50,37 @@ except ImportError:
     class Notification:
         def __init__(self, *args, **kwargs):
             pass
+        def update(self):
+            return True  # Keep notification alive in fallback mode
+        def draw(self, surface):
+            pass
+        def set_y_position(self, y):
+            pass
     
-    WarningNotification = Notification
-    AchievementNotification = Notification
-    FlashEffect = Notification
-    FlashEffectManager = Notification
+    class WarningNotification(Notification):
+        pass
+    
+    class AchievementNotification(Notification):
+        pass
+    
+    class FlashEffect:
+        def __init__(self, *args, **kwargs):
+            pass
+        def update(self):
+            return False
+        def stop(self):
+            pass
+    
+    class FlashEffectManager:
+        def __init__(self):
+            self.effects = []
+        def add_flash(self, entity, color=(255, 255, 255), duration=200):
+            pass
+        def update(self):
+            pass
+        def clear(self):
+            pass
+    
     flash_manager = FlashEffectManager()
 
 finally:

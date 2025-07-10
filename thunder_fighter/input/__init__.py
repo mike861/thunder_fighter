@@ -1,18 +1,18 @@
 """
-Thunder Fighter 输入系统
+Thunder Fighter inputsystem
 
-这个包提供了完全重构的输入系统，具有以下特性：
-- 完全解耦的架构，核心逻辑不依赖pygame
-- 依赖注入支持，便于测试
-- 命令模式，解耦输入和游戏逻辑
-- 测试友好的设计
+这个包提供了完全重构inputsystem,具有以下特性:
+- 完全解耦架构,核心逻辑不依赖pygame
+- 依赖注入支持,便于测试
+- 命令模式,解耦input和game逻辑
+- 测试友好设计
 
-向后兼容：
-- 保留原有的InputManager, InputHandler等接口
-- 新的InputSystem提供更好的测试支持
+backward compatibility:
+- 保留原有InputManager, InputHandler等接口
+- 新InputSystem提供更好测试支持
 """
 
-# 新的输入系统（推荐使用）
+# 新inputsystem(suggesteduse)
 from .input_system import (
     InputSystem,
     create_for_production,
@@ -20,14 +20,14 @@ from .input_system import (
     InputSystemBuilder
 )
 
-# 核心模型
+# 核心model
 from .core.commands import Command, CommandType
 from .core.events import Event, EventType
 
-# 边界接口（供扩展使用）
+# boundaryinterface(供expanduse)
 from .core.boundaries import EventSource, KeyboardState, Clock, Logger
 
-# 适配器（供高级用户使用）
+# adapter(供advanceduseruse)
 from .adapters.pygame_adapter import (
     PygameEventSource,
     PygameKeyboardState, 
@@ -45,44 +45,44 @@ from .adapters.test_adapter import (
     TestScenario
 )
 
-# 原有的接口（向后兼容）
+# 原有interface(backward compatibility)
 from .input_manager import InputManager
 from .input_handler import InputHandler
 from .key_bindings import KeyBindings
 from .input_events import InputEvent, InputEventType
 
-# 版本信息
+# versioninformation
 __version__ = "2.0.0"
 __author__ = "Thunder Fighter Team"
 
-# 主要导出
+# mainlyexport
 __all__ = [
-    # 新的输入系统
+    # 新inputsystem
     'InputSystem',
     'create_for_production', 
     'create_for_testing',
     'InputSystemBuilder',
     
-    # 核心模型
+    # 核心model
     'Command',
     'CommandType',
     'Event', 
     'EventType',
     
-    # 边界接口
+    # boundaryinterface
     'EventSource',
     'KeyboardState',
     'Clock',
     'Logger',
     
-    # Pygame适配器
+    # Pygameadapter
     'PygameEventSource',
     'PygameKeyboardState',
     'PygameClock', 
     'PygameLogger',
     'create_pygame_adapters',
     
-    # 测试适配器
+    # testingadapter
     'TestEventSource',
     'TestKeyboardState',
     'TestClock',
@@ -90,7 +90,7 @@ __all__ = [
     'create_test_environment',
     'TestScenario',
     
-    # 原有接口（向后兼容）
+    # 原有interface(backward compatibility)
     'InputManager',
     'InputHandler', 
     'KeyBindings',

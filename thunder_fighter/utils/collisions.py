@@ -254,7 +254,7 @@ def check_items_player_collisions(items, player, ui_manager, sound_manager=None)
     for hit in hits:
         item_type = getattr(hit, 'type', 'unknown')
         
-        # 根据道具类型执行不同操作
+        # according toitemtypeexecutedifferentoperation
         if item_type == 'health':
             player.heal()
         elif item_type == 'bullet_speed':
@@ -266,10 +266,10 @@ def check_items_player_collisions(items, player, ui_manager, sound_manager=None)
         elif item_type == 'wingman':
             player.add_wingman()
         
-        # 显示通知
+        # displaynotification
         if ui_manager:
             ui_manager.show_item_collected(item_type)
         
-        # 播放音效
+        # playsound
         if sound_manager:
             sound_manager.play_sound('item_pickup') 

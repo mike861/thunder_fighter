@@ -1,8 +1,8 @@
 """
 Pygame 适配器 - 隔离 pygame 依赖
 
-这个模块实现了 pygame 相关的适配器，将 pygame 的事件和状态
-转换为标准的接口，隔离外部依赖。
+这个moduleimplementations了 pygame related适配器,将 pygame event和state
+转换为标准接口,隔离外部依赖.
 """
 
 import pygame
@@ -13,28 +13,28 @@ from ..core.boundaries import EventSource, KeyboardState, Clock, Logger
 
 
 class PygameEventSource(EventSource):
-    """Pygame 事件源适配器"""
+    """Pygame event源adapter"""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        初始化 Pygame 事件源
+        initialize Pygame event源
         
         Args:
-            logger: 日志接口（可选）
+            logger: 日志接口(可选)
         """
         self.logger = logger
         self._event_queue = []
         
     def poll_events(self) -> List[Event]:
         """
-        获取所有待处理事件
+        getall待processevent
         
         Returns:
-            转换后的 Event 对象列表
+            转换后 Event objects列表
         """
         events = []
         try:
-            # 获取 pygame 事件
+            # get pygame event
             pygame_events = pygame.event.get()
             
             for pg_event in pygame_events:
@@ -51,7 +51,7 @@ class PygameEventSource(EventSource):
         return events
     
     def clear_events(self):
-        """清空事件队列"""
+        """cleareventqueue"""
         try:
             pygame.event.clear()
             if self.logger:
@@ -62,13 +62,13 @@ class PygameEventSource(EventSource):
     
     def _convert_event(self, pg_event) -> Optional[Event]:
         """
-        转换 pygame 事件为标准事件
+        转换 pygame event为标准event
         
         Args:
-            pg_event: pygame 事件对象
+            pg_event: pygame eventobjects
             
         Returns:
-            转换后的 Event 对象，或 None
+            转换后 Event objects,或 None
         """
         try:
             if pg_event.type == pygame.KEYDOWN:
@@ -109,10 +109,10 @@ class PygameEventSource(EventSource):
     
     def _get_modifiers(self) -> Dict[str, bool]:
         """
-        获取修饰键状态
+        get修饰键state
         
         Returns:
-            修饰键状态字典
+            修饰键state字典
         """
         try:
             mods = pygame.key.get_mods()
@@ -126,26 +126,26 @@ class PygameEventSource(EventSource):
 
 
 class PygameKeyboardState(KeyboardState):
-    """Pygame 键盘状态适配器"""
+    """Pygame key盘stateadapter"""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        初始化 Pygame 键盘状态
+        initialize Pygame 键盘state
         
         Args:
-            logger: 日志接口（可选）
+            logger: 日志接口(可选)
         """
         self.logger = logger
     
     def is_pressed(self, key_code: int) -> bool:
         """
-        检查指定键是否按下
+        check指定键whether按下
         
         Args:
             key_code: 键码
             
         Returns:
-            True 如果键被按下，否则 False
+            True if键被按下,else False
         """
         try:
             if not pygame.get_init():
@@ -161,10 +161,10 @@ class PygameKeyboardState(KeyboardState):
     
     def get_pressed_keys(self) -> List[int]:
         """
-        获取所有按下的键
+        getall按下键
         
         Returns:
-            当前按下的所有键码列表
+            当前按下all键码列表
         """
         try:
             if not pygame.get_init():
@@ -180,35 +180,35 @@ class PygameKeyboardState(KeyboardState):
 
 
 class PygameClock(Clock):
-    """Pygame 时钟适配器"""
+    """Pygame 时钟adapter"""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        初始化 Pygame 时钟
+        initialize Pygame 时钟
         
         Args:
-            logger: 日志接口（可选）
+            logger: 日志接口(可选)
         """
         self.logger = logger
         self.clock = pygame.time.Clock() if pygame.get_init() else None
         self._last_time = self._get_pygame_time()
-        self._delta = 0.016  # 默认 60 FPS
+        self._delta = 0.016  # default 60 FPS
         
     def now(self) -> float:
         """
-        获取当前时间
+        get当前time
         
         Returns:
-            当前时间戳（秒）
+            当前time戳(秒)
         """
         return self._get_pygame_time()
     
     def delta_time(self) -> float:
         """
-        获取帧时间间隔
+        get帧time间隔
         
         Returns:
-            上一帧到这一帧的时间间隔（秒）
+            上一帧到这一帧time间隔(秒)
         """
         current = self.now()
         if self._last_time > 0:
@@ -217,7 +217,7 @@ class PygameClock(Clock):
         return self._delta
     
     def _get_pygame_time(self) -> float:
-        """获取 pygame 时间或系统时间作为后备"""
+        """get pygame time或systemtime作为后备"""
         try:
             if pygame.get_init():
                 return pygame.time.get_ticks() / 1000.0
@@ -228,19 +228,19 @@ class PygameClock(Clock):
     
     def tick(self, fps: int = 60) -> int:
         """
-        控制帧率（如果使用 pygame 时钟）
+        控制帧率(if使用 pygame 时钟)
         
         Args:
             fps: 目标帧率
             
         Returns:
-            实际经过的毫秒数
+            实际经过毫秒数
         """
         try:
             if self.clock:
                 return self.clock.tick(fps)
             else:
-                # 简单的时间控制
+                # simpletimecontrol
                 target_delta = 1.0 / fps
                 current_time = time.time()
                 elapsed = current_time - self._last_time
@@ -250,48 +250,48 @@ class PygameClock(Clock):
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error in clock tick: {e}")
-            return 16  # 默认 60 FPS
+            return 16  # default 60 FPS
 
 
 class PygameLogger(Logger):
-    """简单的 Pygame 兼容日志实现"""
+    """simple Pygame compatiblelogimplementations"""
     
     def __init__(self, enable_debug: bool = False):
         """
-        初始化日志器
+        initialize日志器
         
         Args:
-            enable_debug: 是否启用调试输出
+            enable_debug: whether启用调试output
         """
         self.enable_debug = enable_debug
     
     def debug(self, message: str):
-        """记录调试信息"""
+        """recorddebugginginformation"""
         if self.enable_debug:
             print(f"[DEBUG] {message}")
     
     def info(self, message: str):
-        """记录一般信息"""
+        """recordgenerallyinformation"""
         print(f"[INFO] {message}")
     
     def warning(self, message: str):
-        """记录警告信息"""
+        """recordwarninginformation"""
         print(f"[WARNING] {message}")
     
     def error(self, message: str):
-        """记录错误信息"""
+        """recorderrorinformation"""
         print(f"[ERROR] {message}")
 
 
 def create_pygame_adapters(enable_debug: bool = False) -> tuple[PygameEventSource, PygameKeyboardState, PygameClock, PygameLogger]:
     """
-    创建完整的 Pygame 适配器集合
+    create完整 Pygame 适配器集合
     
     Args:
-        enable_debug: 是否启用调试日志
+        enable_debug: whether启用调试日志
         
     Returns:
-        (事件源, 键盘状态, 时钟, 日志器) 的元组
+        (event源, 键盘state, 时钟, 日志器) 元组
     """
     logger = PygameLogger(enable_debug)
     event_source = PygameEventSource(logger)

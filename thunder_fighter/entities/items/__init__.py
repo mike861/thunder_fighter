@@ -1,7 +1,7 @@
 """
-道具实体模块
+itemEntity Module
 
-包含道具相关的所有类和工厂。
+Containsitemrelatedall类和factory.
 """
 
 __all__ = []

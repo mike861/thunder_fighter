@@ -1,8 +1,8 @@
 """
-系统边界接口定义
+system边界接口definitions
 
-这个模块定义了输入系统与外部世界交互的抽象接口，
-实现依赖反转原则，使核心逻辑不依赖具体的实现。
+这个moduledefinitions了inputsystem与外部世界交互抽象接口,
+implementations依赖反转原则,使核心逻辑不依赖具体implementations.
 """
 
 from abc import ABC, abstractmethod
@@ -12,55 +12,55 @@ from .events import Event
 
 class EventSource(ABC):
     """
-    事件源抽象接口
+    event源抽象接口
     
-    定义了获取输入事件的抽象接口，隔离pygame等具体实现。
-    实现类负责将外部输入事件转换为标准的Event对象。
+    definitions了getinputevent抽象接口,隔离pygame等具体implementations.
+    implementations类负责将外部inputevent转换为标准Eventobjects.
     """
     
     @abstractmethod
     def poll_events(self) -> List[Event]:
         """
-        获取所有待处理事件
+        getall待processevent
         
         Returns:
-            Event对象列表，包含所有待处理的输入事件
+            Eventobjects列表,Containsall待processinputevent
         """
         pass
     
     @abstractmethod
     def clear_events(self):
-        """清空事件队列"""
+        """cleareventqueue"""
         pass
 
 
 class KeyboardState(ABC):
     """
-    键盘状态抽象接口
+    键盘state抽象接口
     
-    定义了查询键盘状态的抽象接口，支持实时查询按键状态。
+    definitions了查询键盘state抽象接口,支持实时查询按键state.
     """
     
     @abstractmethod
     def is_pressed(self, key_code: int) -> bool:
         """
-        检查指定键是否按下
+        check指定键whether按下
         
         Args:
             key_code: 键码
             
         Returns:
-            True如果键被按下，否则False
+            Trueif键被按下,elseFalse
         """
         pass
     
     @abstractmethod
     def get_pressed_keys(self) -> List[int]:
         """
-        获取所有按下的键
+        getall按下键
         
         Returns:
-            当前按下的所有键码列表
+            当前按下all键码列表
         """
         pass
 
@@ -69,77 +69,77 @@ class Clock(ABC):
     """
     时钟抽象接口
     
-    定义了时间相关功能的抽象接口，支持可控的时间流逝。
+    definitions了timerelated功能抽象接口,支持可控time流逝.
     """
     
     @abstractmethod
     def now(self) -> float:
         """
-        获取当前时间
+        get当前time
         
         Returns:
-            当前时间戳（秒）
+            当前time戳(秒)
         """
         pass
     
     @abstractmethod
     def delta_time(self) -> float:
         """
-        获取帧时间间隔
+        get帧time间隔
         
         Returns:
-            上一帧到这一帧的时间间隔（秒）
+            上一帧到这一帧time间隔(秒)
         """
         pass
 
 
 class InputConfiguration(ABC):
     """
-    输入配置抽象接口
+    inputconfiguration抽象接口
     
-    定义了输入配置的抽象接口，支持键位映射和输入行为配置。
+    definitions了inputconfiguration抽象接口,支持键位映射和input行为configuration.
     """
     
     @abstractmethod
     def get_key_mapping(self) -> Dict[int, str]:
         """
-        获取键位映射
+        get键位映射
         
         Returns:
-            键码到命令类型的映射字典
+            键码到命令类型映射字典
         """
         pass
     
     @abstractmethod
     def get_repeat_delay(self) -> float:
         """
-        获取按键重复延迟
+        get按键重复delayed
         
         Returns:
-            首次重复前的延迟时间（秒）
+            首次重复前delayedtime(秒)
         """
         pass
     
     @abstractmethod
     def get_repeat_rate(self) -> float:
         """
-        获取按键重复速率
+        get按键重复速率
         
         Returns:
-            重复按键的间隔时间（秒）
+            重复按键间隔time(秒)
         """
         pass
     
     @abstractmethod
     def is_continuous_key(self, key_code: int) -> bool:
         """
-        检查指定键是否支持连续触发
+        check指定键whether支持连续触发
         
         Args:
             key_code: 键码
             
         Returns:
-            True如果键支持连续触发（如移动键），否则False
+            Trueif键支持连续触发(如movement键),elseFalse
         """
         pass
 
@@ -148,25 +148,25 @@ class Logger(ABC):
     """
     日志抽象接口
     
-    定义了日志记录的抽象接口，支持不同级别的日志输出。
+    definitions了日志record抽象接口,支持不同级别日志output.
     """
     
     @abstractmethod
     def debug(self, message: str):
-        """记录调试信息"""
+        """recorddebugginginformation"""
         pass
     
     @abstractmethod
     def info(self, message: str):
-        """记录一般信息"""
+        """recordgenerallyinformation"""
         pass
     
     @abstractmethod
     def warning(self, message: str):
-        """记录警告信息"""
+        """recordwarninginformation"""
         pass
     
     @abstractmethod
     def error(self, message: str):
-        """记录错误信息"""
+        """recorderrorinformation"""
         pass

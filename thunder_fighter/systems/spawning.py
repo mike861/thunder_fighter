@@ -1,8 +1,8 @@
 """
-实体生成系统
+Entity Spawning System
 
-统一管理敌人、道具、Boss等的生成逻辑。
-整合各个工厂类的调用。
+Unified management of enemy, item, Boss spawning logic.
+Integrates all factory class calls.
 """
 
 import random
@@ -11,7 +11,7 @@ from thunder_fighter.utils.logger import logger
 
 
 class SpawningSystem:
-    """实体生成系统类"""
+    """Entity spawning system class"""
     
     def __init__(self):
         self.enemy_factory = None
@@ -21,21 +21,21 @@ class SpawningSystem:
         self.spawn_rates = {}
         self.last_spawn_times = {}
         
-        # 初始化生成参数
+        # Initialize spawn parameters
         self._setup_spawn_parameters()
         
-        # 延迟初始化工厂（避免循环导入）
+        # Delayed factory initialization (avoid circular imports)
         self._factories_initialized = False
     
     def _setup_spawn_parameters(self):
-        """设置生成参数"""
+        """Setup spawn parameters"""
         self.spawn_rates = {
-            'enemy': 2.0,      # 每2秒生成一个敌人
-            'boss': 30.0,      # 每30秒生成一个Boss
-            'item': 10.0,      # 每10秒可能生成一个道具
+            'enemy': 2.0,      # Spawn one enemy every 2 seconds
+            'boss': 30.0,      # Spawn one boss every 30 seconds
+            'item': 10.0,      # Possibly spawn one item every 10 seconds
         }
         
-        # 重置上次生成时间
+        # Reset last spawn times
         self.last_spawn_times = {
             'enemy': 0.0,
             'boss': 0.0,
@@ -43,7 +43,7 @@ class SpawningSystem:
         }
     
     def _init_factories(self):
-        """初始化工厂类"""
+        """Initialize factory classes"""
         if not self._factories_initialized:
             try:
                 from thunder_fighter.entities.enemies.enemy_factory import EnemyFactory
@@ -60,7 +60,7 @@ class SpawningSystem:
                 logger.error(f"Failed to initialize factories: {e}")
     
     def update(self, dt: float, game_state: Dict[str, Any]):
-        """更新生成逻辑"""
+        """Update spawning logic"""
         if not self._factories_initialized:
             self._init_factories()
         
@@ -71,25 +71,25 @@ class SpawningSystem:
         self._update_item_spawning(dt, current_time, game_state)
     
     def _update_enemy_spawning(self, dt: float, current_time: float, game_state: Dict[str, Any]):
-        """更新敌人生成"""
+        """Update enemy spawning"""
         if not self.enemy_factory:
             return
         
-        # 检查是否到了生成时间
+        # Check if it's time to spawn
         if current_time - self.last_spawn_times['enemy'] >= self.spawn_rates['enemy']:
             try:
-                # 根据游戏等级调整敌人难度
+                # according togameleveladjustenemydifficulty
                 game_level = game_state.get('level', 1)
-                enemy_level = min(game_level, 5)  # 最大等级5
+                enemy_level = min(game_level, 5)  # 最大level5
                 
-                # 生成敌人
+                # spawnenemy
                 enemy = self.enemy_factory.create_enemy(
                     level=enemy_level,
                     x=random.randint(50, game_state.get('screen_width', 800) - 50),
                     y=-50
                 )
                 
-                # 添加到sprite组
+                # add到sprite组
                 enemies_group = game_state.get('enemies_group')
                 all_sprites = game_state.get('all_sprites')
                 
@@ -104,27 +104,27 @@ class SpawningSystem:
                 logger.error(f"Error spawning enemy: {e}")
     
     def _update_boss_spawning(self, dt: float, current_time: float, game_state: Dict[str, Any]):
-        """更新Boss生成"""
+        """updateBossspawn"""
         if not self.boss_factory:
             return
         
-        # 检查是否到了生成时间且没有活跃的Boss
+        # checkwhethertime forspawntime且没有activeBoss
         if (current_time - self.last_spawn_times['boss'] >= self.spawn_rates['boss'] and
             not game_state.get('boss_active', False)):
             
             try:
-                # 根据游戏等级调整Boss难度
+                # according togameleveladjustBossdifficulty
                 game_level = game_state.get('level', 1)
-                boss_level = min(game_level // 2 + 1, 3)  # Boss等级稍低但不超过3
+                boss_level = min(game_level // 2 + 1, 3)  # Bosslevel稍低但不超过3
                 
-                # 生成Boss
+                # spawnBoss
                 boss = self.boss_factory.create_boss(
                     level=boss_level,
                     x=game_state.get('screen_width', 800) // 2,
                     y=100
                 )
                 
-                # 添加到sprite组
+                # add到sprite组
                 bosses_group = game_state.get('bosses_group')
                 all_sprites = game_state.get('all_sprites')
                 
@@ -139,27 +139,27 @@ class SpawningSystem:
                 logger.error(f"Error spawning boss: {e}")
     
     def _update_item_spawning(self, dt: float, current_time: float, game_state: Dict[str, Any]):
-        """更新道具生成"""
+        """updateitemspawn"""
         if not self.item_factory:
             return
         
-        # 随机生成道具（概率性）
+        # randomspawnitem(概率性)
         if (current_time - self.last_spawn_times['item'] >= self.spawn_rates['item'] and
-            random.random() < 0.3):  # 30%概率生成道具
+            random.random() < 0.3):  # 30%概率spawnitem
             
             try:
-                # 随机选择道具类型
+                # randomselecteditemtype
                 item_types = ['health', 'bullet_speed', 'bullet_path', 'player_speed']
                 item_type = random.choice(item_types)
                 
-                # 生成道具
+                # spawnitem
                 item = self.item_factory.create_item(
                     item_type=item_type,
                     x=random.randint(50, game_state.get('screen_width', 800) - 50),
                     y=-30
                 )
                 
-                # 添加到sprite组
+                # add到sprite组
                 items_group = game_state.get('items_group')
                 all_sprites = game_state.get('all_sprites')
                 
@@ -174,20 +174,20 @@ class SpawningSystem:
                 logger.error(f"Error spawning item: {e}")
     
     def set_spawn_rate(self, entity_type: str, rate: float):
-        """设置生成速率"""
+        """settingsspawnrate"""
         if entity_type in self.spawn_rates:
             self.spawn_rates[entity_type] = rate
             logger.info(f"Spawn rate for {entity_type} set to {rate}")
     
     def reset_spawn_times(self):
-        """重置生成时间"""
+        """resetspawntime"""
         current_time = 0.0
         for entity_type in self.last_spawn_times:
             self.last_spawn_times[entity_type] = current_time
         logger.info("Spawn times reset")
     
     def get_spawn_statistics(self) -> Dict[str, Any]:
-        """获取生成统计信息"""
+        """getspawnstatisticsinformation"""
         return {
             'spawn_rates': self.spawn_rates.copy(),
             'last_spawn_times': self.last_spawn_times.copy(),

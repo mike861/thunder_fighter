@@ -1,8 +1,8 @@
 """
-命令模式实现 - 解耦输入和游戏逻辑
+命令模式implementations - 解耦input和game逻辑
 
-这个模块定义了游戏命令系统，将输入事件转换为游戏命令，
-实现输入系统和游戏逻辑的完全解耦。
+这个moduledefinitions了game命令system,将inputevent转换为game命令,
+implementationsinputsystem和game逻辑完全解耦.
 """
 
 from dataclasses import dataclass
@@ -11,26 +11,26 @@ from typing import Any, Dict
 
 
 class CommandType(Enum):
-    """游戏命令类型枚举"""
+    """gamecommandtypeenumeration"""
     
-    # 移动命令
+    # movementcommand
     MOVE_UP = "move_up"
     MOVE_DOWN = "move_down"
     MOVE_LEFT = "move_left"
     MOVE_RIGHT = "move_right"
     
-    # 动作命令
+    # actioncommand
     SHOOT = "shoot"
     LAUNCH_MISSILE = "launch_missile"
     
-    # 系统命令
+    # systemcommand
     PAUSE = "pause"
     QUIT = "quit"
     TOGGLE_MUSIC = "toggle_music"
     TOGGLE_SOUND = "toggle_sound"
     CHANGE_LANGUAGE = "change_language"
     
-    # 调试命令
+    # debuggingcommand
     TOGGLE_DEBUG = "toggle_debug"
     RESET_INPUT = "reset_input"
 
@@ -38,30 +38,30 @@ class CommandType(Enum):
 @dataclass
 class Command:
     """
-    游戏命令
+    game命令
     
-    表示一个具体的游戏命令，包含命令类型、时间戳和相关数据。
-    这是输入系统和游戏逻辑之间的接口。
+    表示一个具体game命令,Contains命令类型、time戳和relateddata.
+    这是inputsystem和game逻辑之间接口.
     """
     type: CommandType
     timestamp: float
     data: Dict[str, Any] = None
     
     def __post_init__(self):
-        """初始化后处理，确保数据字典总是存在"""
+        """initialize后process,确保datadictionaryalwaysexists"""
         if self.data is None:
             self.data = {}
     
     def get_data(self, key: str, default=None):
-        """安全获取命令数据"""
+        """securitygetcommanddata"""
         return self.data.get(key, default)
     
     def set_data(self, key: str, value: Any):
-        """设置命令数据"""
+        """settingscommanddata"""
         self.data[key] = value
     
     def is_movement_command(self) -> bool:
-        """检查是否为移动命令"""
+        """checkwhether为movementcommand"""
         return self.type in (
             CommandType.MOVE_UP, 
             CommandType.MOVE_DOWN, 
@@ -70,14 +70,14 @@ class Command:
         )
     
     def is_action_command(self) -> bool:
-        """检查是否为动作命令"""
+        """checkwhether为actioncommand"""
         return self.type in (
             CommandType.SHOOT, 
             CommandType.LAUNCH_MISSILE
         )
     
     def is_system_command(self) -> bool:
-        """检查是否为系统命令"""
+        """checkwhether为systemcommand"""
         return self.type in (
             CommandType.PAUSE,
             CommandType.QUIT,

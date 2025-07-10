@@ -37,7 +37,10 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
   - **Font System**: ResourceManager-based font loading with automatic fallbacks
 - **Developer Mode**: Debug information and configuration options
 - **Dynamic Difficulty**: Configurable gameplay parameters
-- **Extensively Tested**: Fully tested codebase with 310+ comprehensive tests covering all game mechanics and architectural improvements
+- **Extensively Tested**: Fully tested codebase with 354+ comprehensive tests covering all game mechanics and architectural improvements
+- **Systems-Based Architecture**: Modular systems design with collision, scoring, spawning, and physics systems
+- **Factory Pattern Entity Creation**: Type-organized entity factories (enemies/, projectiles/, items/, player/)
+- **Enhanced Input System**: Layered input architecture with handler→manager→facade pattern
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -184,8 +187,20 @@ Thunder Fighter features a modern, modular architecture designed for maintainabi
 ### Core Systems
 
 - **Event-Driven Architecture**: Comprehensive event system enabling decoupled communication between game components
-- **Factory Pattern**: Configurable entity creation system for enemies, bosses, items, and projectiles
-- **Input Management**: Decoupled input handling with customizable key bindings and event callbacks
+- **Systems-Based Design**: Modular architecture with dedicated systems for core game logic:
+  - **CollisionSystem**: Unified collision detection and resolution for all entity interactions
+  - **ScoringSystem**: Centralized score management with level progression and achievement tracking
+  - **SpawningSystem**: Entity spawning coordination integrating all factory classes
+  - **PhysicsSystem**: Movement, boundaries, and collision detection for game physics
+- **Factory Pattern**: Type-organized entity creation with configurable presets:
+  - **EnemyFactory**: Enemy creation with difficulty scaling and behavior patterns
+  - **BossFactory**: Boss generation with level-appropriate challenges
+  - **ItemFactory**: Power-up and collectible creation system
+  - **ProjectileFactory**: Bullet and missile generation for all entities
+- **Enhanced Input System**: Layered input architecture (handler→manager→facade pattern) with:
+  - **InputHandler**: Raw event processing with macOS screenshot interference handling
+  - **InputManager**: Event coordination and state management
+  - **InputFacade**: High-level input interface for game logic
 - **State Management**: Robust game state handling with transition management
 - **Configuration System**: JSON-based configuration with runtime updates and command-line tools
 - **Pause Management**: Dedicated `PauseManager` component with pause-aware timing calculations and comprehensive statistics
@@ -210,16 +225,46 @@ The UI system has been completely refactored into modular components:
 - **Health monitoring**: Automatic system recovery and music continuity
 - **Format support**: MP3, WAV, OGG audio formats
 
+### Project Structure
+
+The codebase follows a modular, systems-based architecture:
+
+```
+thunder_fighter/
+├── systems/              # Core game systems
+│   ├── input/           # Layered input management system
+│   │   ├── handler.py   # Raw event processing
+│   │   ├── manager.py   # Event coordination
+│   │   └── facade.py    # High-level interface
+│   ├── collision.py     # Unified collision detection
+│   ├── scoring.py       # Score and level management
+│   ├── spawning.py      # Entity spawning coordination
+│   └── physics.py       # Movement and physics
+├── entities/            # Type-organized entity system
+│   ├── base.py         # Base entity classes
+│   ├── enemies/        # Enemy entities and factory
+│   ├── projectiles/    # Bullets and missiles
+│   ├── items/          # Power-ups and collectibles
+│   └── player/         # Player and wingman entities
+├── graphics/           # Rendering and visual effects
+│   ├── ui/            # Modular UI components
+│   └── effects/       # Visual effects system
+├── events/            # Event system and definitions
+├── state/             # Game state management
+├── localization/      # Multi-language support
+└── utils/             # Utilities and configuration
+```
+
 ## Testing
 
-The project includes a comprehensive test suite with 350+ tests covering all aspects of the game:
+The project includes a comprehensive test suite with 354+ tests covering all aspects of the game:
 
 ### Test Categories
 
-- **Unit Tests (82+ tests)**: Entity factories, individual components, pause system, localization system
+- **Unit Tests (90+ tests)**: Entity factories, individual components, pause system, localization system, new enemy entity tests
 - **Integration Tests (9 tests)**: Event system flow, component interactions
 - **End-to-End Tests (9 tests)**: Complete game flow scenarios
-- **Component Tests (204 tests)**: Sprites, graphics, utilities, state management
+- **Component Tests (246+ tests)**: Sprites, graphics, utilities, state management, collision systems
 
 ### Recently Added Test Coverage
 

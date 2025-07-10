@@ -222,7 +222,7 @@ class TestEnemyFactory:
         
         self.factory = EnemyFactory()
     
-    @patch('thunder_fighter.entities.enemy_factory.Enemy')
+    @patch('thunder_fighter.entities.enemies.enemy_factory.Enemy')
     def test_create_enemy_basic(self, mock_enemy_class):
         """Test creating basic enemy."""
         mock_enemy_instance = Mock()
@@ -246,7 +246,7 @@ class TestEnemyFactory:
         mock_enemy_class.assert_called_once()
         assert enemy == mock_enemy_instance
     
-    @patch('thunder_fighter.entities.enemy_factory.Enemy')
+    @patch('thunder_fighter.entities.enemies.enemy_factory.Enemy')
     def test_create_from_preset(self, mock_enemy_class):
         """Test creating enemy from preset."""
         mock_enemy_instance = Mock()
@@ -275,7 +275,7 @@ class TestEnemyFactory:
         for preset in expected_presets:
             assert preset in presets
     
-    @patch('thunder_fighter.entities.enemy_factory.Enemy')
+    @patch('thunder_fighter.entities.enemies.enemy_factory.Enemy')
     def test_create_for_level(self, mock_enemy_class):
         """Test creating enemy for specific level."""
         mock_enemy_instance = Mock()
@@ -297,7 +297,7 @@ class TestEnemyFactory:
         mock_enemy_class.assert_called_once()
         assert enemy == mock_enemy_instance
     
-    @patch('thunder_fighter.entities.enemy_factory.Enemy')
+    @patch('thunder_fighter.entities.enemies.enemy_factory.Enemy')
     def test_create_wave(self, mock_enemy_class):
         """Test creating a wave of enemies."""
         def create_mock_enemy(*args, **kwargs):
@@ -334,7 +334,7 @@ class TestBossFactory:
         
         self.factory = BossFactory()
     
-    @patch('thunder_fighter.entities.boss_factory.Boss')
+    @patch('thunder_fighter.entities.enemies.boss_factory.Boss')
     def test_create_boss(self, mock_boss_class):
         """Test creating a boss."""
         mock_boss_instance = Mock()
@@ -364,7 +364,7 @@ class TestBossFactory:
         for preset in expected_presets:
             assert preset in presets
     
-    @patch('thunder_fighter.entities.boss_factory.Boss')
+    @patch('thunder_fighter.entities.enemies.boss_factory.Boss')
     def test_create_from_preset(self, mock_boss_class):
         """Test creating boss from preset."""
         mock_boss_instance = Mock()

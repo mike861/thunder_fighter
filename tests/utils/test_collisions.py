@@ -11,7 +11,7 @@ from thunder_fighter.systems.collision import (
 from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.entities.projectiles.bullets import Bullet
 from thunder_fighter.entities.enemies.boss import Boss
-from thunder_fighter.systems.scoring import Score
+from thunder_fighter.systems.scoring import ScoringSystem as Score
 from thunder_fighter.constants import BULLET_DAMAGE_TO_BOSS
 
 # Fixtures to create mock sprites
@@ -57,8 +57,8 @@ def mock_boss():
 
 # Test cases for check_bullet_enemy_collisions
 @patch('pygame.sprite.groupcollide')
-@patch('thunder_fighter.utils.collisions.Explosion')
-@patch('thunder_fighter.sprites.items.create_random_item')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
+@patch('thunder_fighter.entities.items.items.create_random_item')
 def test_bullet_hits_enemy_no_item(mock_create_item, mock_explosion, mock_groupcollide,
                                     mock_enemy, mock_bullet, mock_groups, mock_score):
     """Test case where a bullet hits an enemy, but score is not enough for an item."""
@@ -89,9 +89,9 @@ def test_bullet_hits_enemy_no_item(mock_create_item, mock_explosion, mock_groupc
     assert result['score_checkpoint'] == last_score_checkpoint # Checkpoint remains the same
 
 @patch('pygame.sprite.groupcollide')
-@patch('thunder_fighter.utils.collisions.Explosion')
-@patch('thunder_fighter.sprites.items.create_random_item')
-@patch('thunder_fighter.utils.collisions.logger') # Patch logger if needed
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
+@patch('thunder_fighter.entities.items.items.create_random_item')
+@patch('thunder_fighter.systems.collision.logger') # Patch logger if needed
 def test_bullet_hits_enemy_triggers_item(mock_logger, mock_create_item, mock_explosion, mock_groupcollide,
                                            mock_enemy, mock_bullet, mock_groups, mock_score):
     """Test case where a bullet hits an enemy, and the score reaches the threshold for an item."""
@@ -139,8 +139,8 @@ def test_bullet_hits_enemy_triggers_item(mock_logger, mock_create_item, mock_exp
     assert result['score_checkpoint'] == 1 # Checkpoint should be updated to 1 (202 // 200)
 
 @patch('pygame.sprite.groupcollide')
-@patch('thunder_fighter.utils.collisions.Explosion')
-@patch('thunder_fighter.sprites.items.create_random_item')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
+@patch('thunder_fighter.entities.items.items.create_random_item')
 def test_no_collision(mock_create_item, mock_explosion, mock_groupcollide,
                       mock_groups, mock_score):
     """Test case where no collision occurs."""
@@ -169,7 +169,7 @@ def test_no_collision(mock_create_item, mock_explosion, mock_groupcollide,
     assert result['score_checkpoint'] == last_score_checkpoint
 
 @patch('pygame.sprite.groupcollide', side_effect=Exception("Test Exception"))
-@patch('thunder_fighter.utils.collisions.logger')
+@patch('thunder_fighter.systems.collision.logger')
 def test_collision_check_exception(mock_logger, mock_groupcollide,
                                    mock_groups, mock_score):
     """Test exception handling in collision check."""
@@ -196,7 +196,7 @@ def test_collision_check_exception(mock_logger, mock_groupcollide,
 # Tests for check_bullet_boss_collisions
 @patch('pygame.sprite.spritecollide')
 @patch('pygame.sprite.collide_mask')
-@patch('thunder_fighter.utils.collisions.Explosion')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
 @patch('random.randint')
 def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collide_mask,
                                        mock_spritecollide, mock_boss, mock_bullet, mock_groups):
@@ -220,7 +220,7 @@ def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collid
 
 @patch('pygame.sprite.spritecollide')
 @patch('pygame.sprite.collide_mask')
-@patch('thunder_fighter.utils.collisions.Explosion')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
 @patch('random.randint')
 def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask, 
                              mock_spritecollide, mock_boss, mock_bullet, mock_groups):
@@ -273,8 +273,8 @@ def test_no_boss_bullet_collision(mock_spritecollide, mock_groups):
     assert result['boss_defeated'] is False
     assert result['damage'] == 0
 
-@patch('thunder_fighter.utils.collisions.Explosion')
-@patch('thunder_fighter.utils.collisions.create_flash_effect')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
+@patch('thunder_fighter.graphics.effects.create_flash_effect')
 def test_bullet_hits_boss_triggers_internal_flash_only(
     mock_create_flash, mock_explosion, mock_groups, mock_boss, mock_bullet
 ):
@@ -306,7 +306,7 @@ def mock_player():
     return player
 
 @patch('pygame.sprite.spritecollide')
-@patch('thunder_fighter.utils.collisions.Explosion')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
 def test_enemy_hits_player(mock_explosion, mock_spritecollide, 
                            mock_player, mock_enemy, mock_groups):
     """Test where an enemy collides with the player."""
@@ -329,7 +329,7 @@ def test_enemy_hits_player(mock_explosion, mock_spritecollide,
     assert result['damage'] == 15 + mock_enemy.level * 1
 
 @patch('pygame.sprite.spritecollide')
-@patch('thunder_fighter.utils.collisions.Explosion')
+@patch('thunder_fighter.graphics.effects.explosion.Explosion')
 def test_enemy_hits_player_game_over(mock_explosion, mock_spritecollide, 
                                      mock_player, mock_enemy, mock_groups):
     """Test where an enemy collision kills the player."""

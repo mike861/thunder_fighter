@@ -1,7 +1,7 @@
 """
-玩家实体模块
+playerEntity Module
 
-包含玩家相关的所有类和工厂。
+Containsplayerrelatedall类和factory.
 """
 
 __all__ = []

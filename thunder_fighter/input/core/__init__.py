@@ -1,7 +1,7 @@
 """
-输入系统核心模块
+inputsystem核心module
 
-这个包包含输入系统的核心逻辑，完全独立于外部依赖。
+这个包Containsinputsystem核心逻辑,完全独立于外部依赖.
 """
 
 from .commands import Command, CommandType

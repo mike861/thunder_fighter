@@ -1,7 +1,7 @@
 """
-敌人实体模块
+enemyEntity Module
 
-包含敌人相关的所有类和工厂。
+Containsenemyrelatedall类和factory.
 """
 
 __all__ = []

@@ -1,7 +1,7 @@
 """
-弹药实体模块
+弹药Entity Module
 
-包含弹药相关的所有类和工厂。
+Contains弹药relatedall类和factory.
 """
 
 __all__ = []

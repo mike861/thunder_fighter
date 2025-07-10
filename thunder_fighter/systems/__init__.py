@@ -1,7 +1,7 @@
 """
-游戏系统模块
+Game Systems Module
 
-包含所有游戏核心系统的实现。
+Contains all core game system implementations.
 """
 
 from .collision import CollisionSystem

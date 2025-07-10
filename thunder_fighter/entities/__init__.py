@@ -1,23 +1,23 @@
 """
-游戏实体模块
+Game Entity Module
 
-包含所有游戏对象的定义和工厂类。
-重构后按类型组织的实体系统。
+Contains all game object definitions and factory classes.
+Refactored entity system organized by type.
 """
 
-# 基础实体类
+# Base entity classes
 from .base import GameObject, Entity, EntityFactory, MovableEntity, LivingEntity
 
-# 兼容性导入（保持向后兼容）
+# Compatibility imports (maintain backward compatibility)
 from .entity_factory import EntityFactory as LegacyEntityFactory
 
-# 导入所有工厂类
+# Import all factory classes
 from .enemies.enemy_factory import EnemyFactory
 from .enemies.boss_factory import BossFactory
 from .items.item_factory import ItemFactory
 from .projectiles.projectile_factory import ProjectileFactory
 
-# 导入实体类
+# Import entity classes
 from .player.player import Player
 from .enemies.enemy import Enemy
 from .enemies.boss import Boss
@@ -27,20 +27,20 @@ from .items.items import HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpee
 from .player.wingman import Wingman
 
 __all__ = [
-    # 新的基础实体类
+    # New base entity classes
     'GameObject', 
     'Entity', 
     'EntityFactory',
     'MovableEntity',
     'LivingEntity',
     
-    # 工厂类
+    # Factory classes
     'EnemyFactory',
     'BossFactory',
     'ItemFactory',
     'ProjectileFactory',
     
-    # 实体类
+    # Entity classes
     'Player',
     'Enemy',
     'Boss',
@@ -55,6 +55,6 @@ __all__ = [
     'WingmanItem',
     'Wingman',
     
-    # 向后兼容
+    # backward compatibility
     'LegacyEntityFactory',
 ] 
