@@ -1,7 +1,7 @@
 """
-UI组件module
+UI Components Module
 
-ContainsallUI组件implementations.
+Contains implementations of all UI components.
 """
 
 from .boss_status_display import BossStatusDisplay

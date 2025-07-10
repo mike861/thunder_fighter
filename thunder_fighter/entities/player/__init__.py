@@ -1,7 +1,7 @@
 """
-playerEntity Module
+Player Entity Module
 
-Containsplayerrelatedall类和factory.
+Contains all classes and factories related to the player.
 """
 
 __all__ = []

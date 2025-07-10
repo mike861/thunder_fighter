@@ -1,7 +1,7 @@
 """
-physicssystem
+Physics System
 
-managementgame中physicsrelated逻辑:movement、边界detection、velocity控制等.
+Manages physics-related logic in the game: movement, boundary detection, velocity control, etc.
 """
 
 import pygame
@@ -10,14 +10,14 @@ from thunder_fighter.utils.logger import logger
 
 
 class PhysicsSystem:
-    """physicssystemclass"""
+    """Physics System Class"""
     
     def __init__(self, screen_width: int, screen_height: int):
         self.screen_width = screen_width
         self.screen_height = screen_height
-        self.gravity = 0  # 太nullgameusuallynonegravity
+        self.gravity = 0  # Space games usually have no gravity
         
-        # boundarysettings
+        # Boundary settings
         self.boundary_margins = {
             'left': -50,
             'right': screen_width + 50,
@@ -28,22 +28,22 @@ class PhysicsSystem:
         logger.info(f"Physics system initialized: {screen_width}x{screen_height}")
     
     def update_movement(self, entities: List, dt: float):
-        """updateallentitymovement"""
+        """Updates the movement of all entities."""
         for entity in entities:
             if hasattr(entity, 'rect') and hasattr(entity, 'velocity_x'):
                 self._update_entity_movement(entity, dt)
                 self._check_boundaries(entity)
     
     def _update_entity_movement(self, entity, dt: float):
-        """update单个entitymovement"""
+        """Updates the movement of a single entity."""
         try:
-            # updateposition
+            # Update position
             if hasattr(entity, 'velocity_x'):
                 entity.rect.x += entity.velocity_x * dt
             if hasattr(entity, 'velocity_y'):
                 entity.rect.y += entity.velocity_y * dt
             
-            # ifentity有自definitionsphysicsupdatemethod,调用它
+            # If the entity has a custom physics update method, call it
             if hasattr(entity, 'update_physics'):
                 entity.update_physics(dt)
                 
@@ -51,12 +51,12 @@ class PhysicsSystem:
             logger.error(f"Error updating entity movement: {e}")
     
     def _check_boundaries(self, entity):
-        """checkboundary"""
+        """Checks boundaries."""
         try:
             if not hasattr(entity, 'rect'):
                 return
             
-            # checkwhether超出boundary
+            # Check if out of bounds
             out_of_bounds = False
             
             if entity.rect.right < self.boundary_margins['left']:
@@ -68,7 +68,7 @@ class PhysicsSystem:
             elif entity.rect.top > self.boundary_margins['bottom']:
                 out_of_bounds = True
             
-            # if超出boundary,marked为delete
+            # If out of bounds, mark for deletion
             if out_of_bounds:
                 if hasattr(entity, 'kill'):
                     entity.kill()
@@ -79,7 +79,7 @@ class PhysicsSystem:
             logger.error(f"Error checking boundaries for entity: {e}")
     
     def apply_force(self, entity, force_x: float, force_y: float):
-        """pairentity施加力"""
+        """Applies a force to an entity."""
         try:
             if hasattr(entity, 'velocity_x'):
                 entity.velocity_x += force_x
@@ -90,7 +90,7 @@ class PhysicsSystem:
             logger.error(f"Error applying force to entity: {e}")
     
     def set_velocity(self, entity, velocity_x: float, velocity_y: float):
-        """settingsentityvelocity"""
+        """Sets the velocity of an entity."""
         try:
             if hasattr(entity, 'velocity_x'):
                 entity.velocity_x = velocity_x
@@ -101,7 +101,7 @@ class PhysicsSystem:
             logger.error(f"Error setting velocity for entity: {e}")
     
     def check_collision_with_boundaries(self, entity) -> Dict[str, bool]:
-        """check与boundarycollision"""
+        """Checks for collisions with boundaries."""
         collisions = {
             'left': False,
             'right': False,
@@ -128,12 +128,12 @@ class PhysicsSystem:
         return collisions
     
     def constrain_to_screen(self, entity):
-        """将entitylimitation在屏幕内"""
+        """Constrains an entity within the screen."""
         try:
             if not hasattr(entity, 'rect'):
                 return
             
-            # limitation在屏幕boundary内
+            # Constrain within screen boundaries
             if entity.rect.left < 0:
                 entity.rect.left = 0
             if entity.rect.right > self.screen_width:
@@ -147,7 +147,7 @@ class PhysicsSystem:
             logger.error(f"Error constraining entity to screen: {e}")
     
     def calculate_distance(self, entity1, entity2) -> float:
-        """calculate两个entity之间distance"""
+        """Calculates the distance between two entities."""
         try:
             if not (hasattr(entity1, 'rect') and hasattr(entity2, 'rect')):
                 return float('inf')
@@ -165,7 +165,7 @@ class PhysicsSystem:
             return float('inf')
     
     def get_direction_vector(self, from_entity, to_entity) -> Tuple[float, float]:
-        """get从一个entity到另一个entitydirection向量"""
+        """Gets the direction vector from one entity to another."""
         try:
             if not (hasattr(from_entity, 'rect') and hasattr(to_entity, 'rect')):
                 return (0.0, 0.0)
@@ -176,7 +176,7 @@ class PhysicsSystem:
             dx = to_center[0] - from_center[0]
             dy = to_center[1] - from_center[1]
             
-            # 归一化
+            # Normalize
             distance = (dx * dx + dy * dy) ** 0.5
             if distance > 0:
                 return (dx / distance, dy / distance)
@@ -188,11 +188,11 @@ class PhysicsSystem:
             return (0.0, 0.0)
     
     def update_screen_size(self, width: int, height: int):
-        """update屏幕dimension"""
+        """Updates the screen size."""
         self.screen_width = width
         self.screen_height = height
         
-        # updateboundary
+        # Update boundaries
         self.boundary_margins.update({
             'right': width + 50,
             'bottom': height + 50
@@ -201,5 +201,5 @@ class PhysicsSystem:
         logger.info(f"Physics system screen size updated: {width}x{height}")
     
     def reset(self):
-        """resetphysicssystem"""
+        """Resets the physics system."""
         logger.info("Physics system reset")

@@ -1,7 +1,7 @@
 """
-itemEntity Module
+Item Entity Module
 
-Containsitemrelatedall类和factory.
+Contains all classes and factories related to items.
 """
 
 __all__ = []

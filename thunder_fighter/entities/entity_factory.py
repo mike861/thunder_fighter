@@ -1,8 +1,8 @@
 """
-Entity Factory Base
+Entity Factory Base Classes
 
-This module provides the base entity factory class and common functionality
-for creating game entities in a centralized and consistent manner.
+This module defines the base classes for entity factories, providing a
+standardized way to create game entities with configuration and tracking.
 """
 
 from abc import ABC, abstractmethod

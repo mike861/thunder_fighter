@@ -1,7 +1,7 @@
 """
-弹药Entity Module
+Projectile Entity Module
 
-Contains弹药relatedall类和factory.
+Contains all classes and factories related to projectiles.
 """
 
 __all__ = []

@@ -1,8 +1,8 @@
 """
-分数managementsystem
+Score Management System
 
-统一managementgame分数、level、成就等related逻辑.
-从utils/score.py重构而来.
+Manages game score, level, achievements, and related logic in a unified way.
+Refactored from utils/score.py.
 """
 
 import pygame
@@ -12,7 +12,7 @@ from thunder_fighter.utils.logger import logger
 
 
 class ScoringSystem:
-    """fractionmanagementsystemclass"""
+    """Score Management System Class"""
     
     def __init__(self):
         self.score = 0
@@ -29,7 +29,7 @@ class ScoringSystem:
         self.update_display()
     
     def _init_display(self):
-        """initializedisplayrelatedcomponent"""
+        """Initializes display-related components."""
         # Use resource manager to load font with caching
         from thunder_fighter.utils.resource_manager import get_resource_manager
         
@@ -42,7 +42,7 @@ class ScoringSystem:
             self.font = resource_manager.load_font(None, FONT_SIZE_MEDIUM, system_font=True)
     
     def add_score(self, points: int, source: str = ""):
-        """addfraction"""
+        """Adds score."""
         actual_points = int(points * self.score_multiplier)
         self.score += actual_points
         logger.info(f"Score added: {actual_points} from {source}")
@@ -51,24 +51,24 @@ class ScoringSystem:
         self._check_achievements()
     
     def update_score(self, points: int):
-        """updatefraction(compatible原有interface)"""
+        """Updates score (for compatibility with the original interface)."""
         self.add_score(points)
     
     def get_score(self) -> int:
-        """getcurrentfraction"""
+        """Gets the current score."""
         return self.score
     
     def get_level(self) -> int:
-        """getcurrentlevel"""
+        """Gets the current level."""
         return self.level
     
     def set_multiplier(self, multiplier: float):
-        """settingsfraction倍数"""
+        """Sets the score multiplier."""
         self.score_multiplier = multiplier
         logger.info(f"Score multiplier set to: {multiplier}")
     
     def reset(self):
-        """resetfraction和level"""
+        """Resets the score and level."""
         self.score = 0
         self.level = 1
         self.score_multiplier = 1.0
@@ -76,8 +76,8 @@ class ScoringSystem:
         logger.info("Scoring system reset")
     
     def _check_level_up(self):
-        """checkwhetherupgrade"""
-        # 每1000分升一级
+        """Checks for level up."""
+        # Level up every 1000 points
         new_level = (self.score // 1000) + 1
         if new_level > self.level:
             old_level = self.level
@@ -86,8 +86,8 @@ class ScoringSystem:
             self._trigger_level_up_callbacks(old_level, new_level)
     
     def _check_achievements(self):
-        """check成就"""
-        # trigger成就回调
+        """Checks for achievements."""
+        # Trigger achievement callbacks
         for callback in self.achievement_callbacks:
             try:
                 callback(self.score, self.level)
@@ -95,17 +95,17 @@ class ScoringSystem:
                 logger.error(f"Error in achievement callback: {e}")
     
     def add_achievement_callback(self, callback: Callable):
-        """add成就回调function"""
+        """Adds an achievement callback function."""
         self.achievement_callbacks.append(callback)
     
     def _trigger_level_up_callbacks(self, old_level: int, new_level: int):
-        """triggerupgrade回调"""
-        # 可以在这里addupgrade时specialeffect
+        """Triggers level up callbacks."""
+        # Special effects for level up can be added here
         pass
     
     # Display methods (compatible with original Score class)
     def update_display(self):
-        """updatefractiondisplay"""
+        """Updates the score display."""
         from thunder_fighter.localization import _
         score_text = _("SCORE_DISPLAY", self.score)
         self.text = self.font.render(score_text, True, WHITE)
@@ -113,25 +113,25 @@ class ScoringSystem:
         self.rect.topleft = (10, 10)
     
     def draw(self, screen: pygame.Surface):
-        """displayfraction"""
+        """Draws the score."""
         if self.text:
             screen.blit(self.text, self.rect)
     
     @property
     def value(self) -> int:
-        """compatible原有Scoreclassvalueattribute"""
+        """Compatibility with the value attribute of the original Score class."""
         return self.score
     
     def update(self, points: int):
-        """compatible原有Scoreclassupdatemethod"""
+        """Compatibility with the update method of the original Score class."""
         self.add_score(points)
 
 
-# Compatibilityfunction:createtraditionScoreclassinstance
+# Compatibility function: create a traditional Score class instance
 def create_legacy_score():
-    """createcompatible原有Scoreclassinstance"""
+    """Creates an instance compatible with the original Score class."""
     return ScoringSystem()
 
 
-# Compatibilityalias
+# Compatibility alias
 Score = ScoringSystem

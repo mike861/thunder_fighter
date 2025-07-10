@@ -1,7 +1,7 @@
 """
-particleeffectsystem
+Particle Effects System
 
-统一management各种particle特效:explosion、尾迹、闪光等.
+Manages various particle effects: explosions, trails, flashes, etc.
 """
 
 import pygame
@@ -12,7 +12,7 @@ from thunder_fighter.utils.logger import logger
 
 
 class Particle:
-    """单个particleclass"""
+    """Single Particle Class"""
     
     def __init__(self, x: float, y: float, velocity: Tuple[float, float], 
                  color: Tuple[int, int, int], lifetime: float, size: int = 2):
@@ -26,7 +26,7 @@ class Particle:
         self.active = True
     
     def update(self, dt: float):
-        """updateparticlestate"""
+        """Updates particle state."""
         if not self.active:
             return
         
@@ -38,15 +38,15 @@ class Particle:
             self.active = False
     
     def render(self, screen: pygame.Surface):
-        """renderparticle"""
+        """Renders the particle."""
         if not self.active:
             return
         
-        # calculatetransparency度(基于剩余lifetime)
+        # Calculate transparency (based on remaining lifetime)
         alpha_ratio = self.lifetime / self.max_lifetime
         alpha = int(255 * alpha_ratio)
         
-        # create带transparency度table面
+        # Create a surface with transparency
         surf = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
         color_with_alpha = (*self.color, alpha)
         pygame.draw.circle(surf, color_with_alpha, (self.size, self.size), self.size)
@@ -55,17 +55,17 @@ class Particle:
 
 
 class ParticleSystem:
-    """particlesystemmanagement器"""
+    """Particle System Manager"""
     
     def __init__(self):
         self.particles: List[Particle] = []
     
     def create_explosion(self, x: float, y: float, particle_count: int = 20):
-        """createexplosioneffect"""
-        colors = [(255, 255, 0), (255, 128, 0), (255, 0, 0)]  # 黄、橙、红
+        """Creates an explosion effect."""
+        colors = [(255, 255, 0), (255, 128, 0), (255, 0, 0)]  # Yellow, Orange, Red
         
         for _ in range(particle_count):
-            # randomdirection和velocity
+            # Random direction and speed
             angle = random.uniform(0, 2 * math.pi)
             speed = random.uniform(50, 150)
             velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
@@ -79,15 +79,15 @@ class ParticleSystem:
     
     def create_trail(self, x: float, y: float, direction: Tuple[float, float], 
                      particle_count: int = 5):
-        """create尾迹effect"""
-        colors = [(255, 255, 255), (200, 200, 255), (150, 150, 255)]  # 白到蓝
+        """Creates a trail effect."""
+        colors = [(255, 255, 255), (200, 200, 255), (150, 150, 255)]  # White to Blue
         
         for i in range(particle_count):
-            # 在direction反directioncreateparticle
+            # Create particles in the opposite direction
             speed = random.uniform(20, 50)
-            spread = 0.3  # 扩散angle
+            spread = 0.3  # Spread angle
             
-            # addrandom扩散
+            # Add random spread
             dir_x = direction[0] + random.uniform(-spread, spread)
             dir_y = direction[1] + random.uniform(-spread, spread)
             
@@ -101,12 +101,12 @@ class ParticleSystem:
             self.particles.append(particle)
     
     def create_sparks(self, x: float, y: float, particle_count: int = 10):
-        """create火花effect"""
-        colors = [(255, 255, 100), (255, 200, 50), (255, 150, 0)]  # 黄到橙
+        """Creates a sparks effect."""
+        colors = [(255, 255, 100), (255, 200, 50), (255, 150, 0)]  # Yellow to Orange
         
         for _ in range(particle_count):
-            # 向上火花
-            angle = random.uniform(-math.pi/3, -2*math.pi/3)  # 向上60度scope
+            # Upward sparks
+            angle = random.uniform(-math.pi/3, -2*math.pi/3)  # 60-degree range upwards
             speed = random.uniform(80, 120)
             velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
             
@@ -118,11 +118,11 @@ class ParticleSystem:
             self.particles.append(particle)
     
     def create_hit_effect(self, x: float, y: float, color: Tuple[int, int, int] = (255, 255, 255)):
-        """create击中effect"""
+        """Creates a hit effect."""
         particle_count = 8
         
         for _ in range(particle_count):
-            # 放射状扩散
+            # Radial spread
             angle = random.uniform(0, 2 * math.pi)
             speed = random.uniform(30, 80)
             velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
@@ -134,32 +134,32 @@ class ParticleSystem:
             self.particles.append(particle)
     
     def update(self, dt: float):
-        """updateallparticle"""
-        for particle in self.particles[:]:  # use切片copy以便securitydelete
+        """Updates all particles."""
+        for particle in self.particles[:]:  # Use slice copy for safe deletion
             particle.update(dt)
             if not particle.active:
                 self.particles.remove(particle)
     
     def render(self, screen: pygame.Surface):
-        """renderallparticle"""
+        """Renders all particles."""
         for particle in self.particles:
             particle.render(screen)
     
     def clear(self):
-        """clearallparticle"""
+        """Clears all particles."""
         self.particles.clear()
     
     def get_particle_count(self) -> int:
-        """getcurrentparticlequantity"""
+        """Gets the current particle count."""
         return len(self.particles)
 
 
-# globalparticlesysteminstance
+# Global particle system instance
 _global_particle_system = None
 
 
 def get_particle_system() -> ParticleSystem:
-    """getglobalparticlesysteminstance"""
+    """Gets the global particle system instance."""
     global _global_particle_system
     if _global_particle_system is None:
         _global_particle_system = ParticleSystem()
@@ -167,36 +167,36 @@ def get_particle_system() -> ParticleSystem:
 
 
 def create_particle_explosion(x: float, y: float, particle_count: int = 20):
-    """便捷function:createexplosionparticleeffect"""
+    """Convenience function: Creates an explosion particle effect."""
     get_particle_system().create_explosion(x, y, particle_count)
 
 
 def create_particle_trail(x: float, y: float, direction: Tuple[float, float], 
                          particle_count: int = 5):
-    """便捷function:create尾迹particleeffect"""
+    """Convenience function: Creates a trail particle effect."""
     get_particle_system().create_trail(x, y, direction, particle_count)
 
 
 def create_particle_sparks(x: float, y: float, particle_count: int = 10):
-    """便捷function:create火花particleeffect"""
+    """Convenience function: Creates a sparks particle effect."""
     get_particle_system().create_sparks(x, y, particle_count)
 
 
 def create_particle_hit_effect(x: float, y: float, color: Tuple[int, int, int] = (255, 255, 255)):
-    """便捷function:create击中particleeffect"""
+    """Convenience function: Creates a hit particle effect."""
     get_particle_system().create_hit_effect(x, y, color)
 
 
 def update_particles(dt: float):
-    """便捷function:updateparticlesystem"""
+    """Convenience function: Updates the particle system."""
     get_particle_system().update(dt)
 
 
 def render_particles(screen: pygame.Surface):
-    """便捷function:renderparticlesystem"""
+    """Convenience function: Renders the particle system."""
     get_particle_system().render(screen)
 
 
 def clear_particles():
-    """便捷function:clearallparticle"""
+    """Convenience function: Clears all particles."""
     get_particle_system().clear()

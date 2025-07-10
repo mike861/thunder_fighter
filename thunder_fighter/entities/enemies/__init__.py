@@ -1,7 +1,7 @@
 """
-enemyEntity Module
+Enemy Entity Module
 
-Containsenemyrelatedall类和factory.
+Contains all classes and factories related to enemies.
 """
 
 __all__ = []

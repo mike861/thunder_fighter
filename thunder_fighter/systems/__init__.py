@@ -1,7 +1,7 @@
 """
 Game Systems Module
 
-Contains all core game system implementations.
+Contains implementations of all core game systems.
 """
 
 from .collision import CollisionSystem

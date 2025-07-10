@@ -1,5 +1,7 @@
 """
-Base entity classdefinitions definitions for all Base class for game objects和通用 interface.
+Base Entity Class Definitions
+
+Defines the base class and common interfaces for all game objects.
 """
 
 import pygame
@@ -8,7 +10,7 @@ from typing import Tuple, Optional, Dict, Any
 
 
 class GameObject(pygame.sprite.Sprite, ABC):
-    """Base class for game objects"""
+    """Base Game Object Class"""
     
     def __init__(self, x: float, y: float, width: int, height: int):
         super().__init__()
@@ -30,75 +32,75 @@ class GameObject(pygame.sprite.Sprite, ABC):
     
     @abstractmethod
     def update(self, dt: float):
-        """updategameobjectsstate"""
+        """Updates the game object's state."""
         pass
     
     @abstractmethod
     def render(self, screen: pygame.Surface):
-        """Take damage, return whether destroyed"""
+        """Renders the game object."""
         pass
     
     def take_damage(self, damage: int) -> bool:
-        """Restore health"""
+        """Takes damage, returns whether destroyed."""
         self.health -= damage
         return self.health <= 0
     
     def heal(self, amount: int):
-        """Restore health"""
+        """Heals health points."""
         self.health = min(self.health + amount, self.max_health)
     
     def set_position(self, x: float, y: float):
-        """settingsposition"""
+        """Sets position."""
         self.x = x
         self.y = y
         self.rect.x = int(x)
         self.rect.y = int(y)
     
     def get_position(self) -> Tuple[float, float]:
-        """getposition"""
+        """Gets position."""
         return (self.x, self.y)
     
     def set_velocity(self, velocity_x: float, velocity_y: float):
-        """settingsvelocity"""
+        """Sets velocity."""
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
     
     def get_velocity(self) -> Tuple[float, float]:
-        """Concrete entity class providing default implementation"""
+        """Gets velocity."""
         return (self.velocity_x, self.velocity_y)
 
 
 class Entity(GameObject):
-    """Default update implementation"""
+    """Concrete Entity Class, provides default implementation"""
     
     def update(self, dt: float):
-        """Default update implementation"""
-        # updateposition
+        """Default update implementation."""
+        # Update position
         self.x += self.velocity_x * dt
         self.y += self.velocity_y * dt
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
         
-        # Update sprite built-in update (if has animation etc)
+        # Update sprite's built-in update (for animation, etc.)
         if hasattr(super(), 'update') and callable(getattr(super(), 'update')):
             super().update()
     
     def render(self, screen: pygame.Surface):
-        """Default render implementation"""
+        """Default render implementation."""
         if hasattr(self, 'image') and hasattr(self, 'rect') and self.image:
             screen.blit(self.image, self.rect)
 
 
 class EntityFactory(ABC):
-    """Base class for entity factories"""
+    """Base Entity Factory Class"""
     
     @abstractmethod
     def create(self, *args, **kwargs) -> GameObject:
-        """Create entity instance"""
+        """Creates an entity instance."""
         pass
     
     def create_batch(self, count: int, *args, **kwargs) -> list:
-        """Create entities in batch"""
+        """Creates entities in batch."""
         entities = []
         for i in range(count):
             entity = self.create(*args, **kwargs)
@@ -116,16 +118,16 @@ class MovableEntity(Entity):
         self.direction_y = 0.0
     
     def set_direction(self, direction_x: float, direction_y: float):
-        """Set movement direction (normalized vector)"""
+        """Sets movement direction (normalized vector)."""
         self.direction_x = direction_x
         self.direction_y = direction_y
         
-        # Calculate velocity according to direction and velocity
+        # Calculate velocity based on direction and speed
         self.velocity_x = self.direction_x * self.speed
         self.velocity_y = self.direction_y * self.speed
     
     def move_towards(self, target_x: float, target_y: float):
-        """move towards target"""
+        """Moves towards a target."""
         dx = target_x - self.x
         dy = target_y - self.y
         distance = (dx * dx + dy * dy) ** 0.5
@@ -145,7 +147,7 @@ class LivingEntity(MovableEntity):
         self.is_alive = True
     
     def take_damage(self, damage: int) -> bool:
-        """take damage,returnwhetherdeath"""
+        """Takes damage, returns whether dead."""
         if not self.is_alive:
             return True
         
@@ -160,27 +162,27 @@ class LivingEntity(MovableEntity):
         return False
     
     def heal(self, amount: int):
-        """Restore health"""
+        """Heals health points."""
         if self.is_alive:
             self.health = min(self.health + amount, self.max_health)
             self.on_heal(amount)
     
     def on_damage_taken(self, damage: int):
-        """Callback when healed"""
+        """Callback when damage is taken."""
         pass
     
     def on_heal(self, amount: int):
-        """Callback when dead"""
+        """Callback when healed."""
         pass
     
     def on_death(self):
-        """Callback when dead"""
+        """Callback when dead."""
         self.active = False
         if hasattr(self, 'kill'):
             self.kill()
     
     def get_health_percentage(self) -> float:
-        """gethealthpercentage"""
+        """Gets health percentage."""
         if self.max_health <= 0:
             return 0.0
         return self.health / self.max_health

@@ -1,8 +1,8 @@
 """
-system边界接口definitions
+System Boundary Interface Definitions
 
-这个moduledefinitions了inputsystem与外部世界交互抽象接口,
-implementations依赖反转原则,使核心逻辑不依赖具体implementations.
+This module defines the abstract interfaces for the input system to interact with the outside world,
+-implementing the dependency inversion principle so that the core logic does not depend on specific implementations.
 """
 
 from abc import ABC, abstractmethod
@@ -12,161 +12,161 @@ from .events import Event
 
 class EventSource(ABC):
     """
-    event源抽象接口
+    Abstract interface for an event source.
     
-    definitions了getinputevent抽象接口,隔离pygame等具体implementations.
-    implementations类负责将外部inputevent转换为标准Eventobjects.
+    Defines the abstract interface for getting input events, isolating specific implementations like pygame.
+    Implementing classes are responsible for converting external input events into standard Event objects.
     """
     
     @abstractmethod
     def poll_events(self) -> List[Event]:
         """
-        getall待processevent
+        Gets all pending events.
         
         Returns:
-            Eventobjects列表,Containsall待processinputevent
+            A list of Event objects, containing all pending input events.
         """
         pass
     
     @abstractmethod
     def clear_events(self):
-        """cleareventqueue"""
+        """Clears the event queue."""
         pass
 
 
 class KeyboardState(ABC):
     """
-    键盘state抽象接口
+    Abstract interface for keyboard state.
     
-    definitions了查询键盘state抽象接口,支持实时查询按键state.
+    Defines the abstract interface for querying keyboard state, supporting real-time querying of key states.
     """
     
     @abstractmethod
     def is_pressed(self, key_code: int) -> bool:
         """
-        check指定键whether按下
+        Checks if a specific key is pressed.
         
         Args:
-            key_code: 键码
+            key_code: The key code.
             
         Returns:
-            Trueif键被按下,elseFalse
+            True if the key is pressed, False otherwise.
         """
         pass
     
     @abstractmethod
     def get_pressed_keys(self) -> List[int]:
         """
-        getall按下键
+        Gets all pressed keys.
         
         Returns:
-            当前按下all键码列表
+            A list of all currently pressed key codes.
         """
         pass
 
 
 class Clock(ABC):
     """
-    时钟抽象接口
+    Abstract interface for a clock.
     
-    definitions了timerelated功能抽象接口,支持可控time流逝.
+    Defines the abstract interface for time-related functions, supporting controllable time flow.
     """
     
     @abstractmethod
     def now(self) -> float:
         """
-        get当前time
+        Gets the current time.
         
         Returns:
-            当前time戳(秒)
+            The current timestamp (in seconds).
         """
         pass
     
     @abstractmethod
     def delta_time(self) -> float:
         """
-        get帧time间隔
+        Gets the frame time interval.
         
         Returns:
-            上一帧到这一帧time间隔(秒)
+            The time interval from the last frame to this one (in seconds).
         """
         pass
 
 
 class InputConfiguration(ABC):
     """
-    inputconfiguration抽象接口
+    Abstract interface for input configuration.
     
-    definitions了inputconfiguration抽象接口,支持键位映射和input行为configuration.
+    Defines the abstract interface for input configuration, supporting key mapping and input behavior configuration.
     """
     
     @abstractmethod
     def get_key_mapping(self) -> Dict[int, str]:
         """
-        get键位映射
+        Gets the key mapping.
         
         Returns:
-            键码到命令类型映射字典
+            A dictionary mapping key codes to command types.
         """
         pass
     
     @abstractmethod
     def get_repeat_delay(self) -> float:
         """
-        get按键重复delayed
+        Gets the key repeat delay.
         
         Returns:
-            首次重复前delayedtime(秒)
+            The delay time before the first repeat (in seconds).
         """
         pass
     
     @abstractmethod
     def get_repeat_rate(self) -> float:
         """
-        get按键重复速率
+        Gets the key repeat rate.
         
         Returns:
-            重复按键间隔time(秒)
+            The interval time for repeated keys (in seconds).
         """
         pass
     
     @abstractmethod
     def is_continuous_key(self, key_code: int) -> bool:
         """
-        check指定键whether支持连续触发
+        Checks if a specific key supports continuous triggering.
         
         Args:
-            key_code: 键码
+            key_code: The key code.
             
         Returns:
-            Trueif键支持连续触发(如movement键),elseFalse
+            True if the key supports continuous triggering (e.g., movement keys), False otherwise.
         """
         pass
 
 
 class Logger(ABC):
     """
-    日志抽象接口
+    Abstract interface for a logger.
     
-    definitions了日志record抽象接口,支持不同级别日志output.
+    Defines the abstract interface for logging, supporting different levels of log output.
     """
     
     @abstractmethod
     def debug(self, message: str):
-        """recorddebugginginformation"""
+        """Logs a debug message."""
         pass
     
     @abstractmethod
     def info(self, message: str):
-        """recordgenerallyinformation"""
+        """Logs a general information message."""
         pass
     
     @abstractmethod
     def warning(self, message: str):
-        """recordwarninginformation"""
+        """Logs a warning message."""
         pass
     
     @abstractmethod
     def error(self, message: str):
-        """recorderrorinformation"""
+        """Logs an error message."""
         pass
