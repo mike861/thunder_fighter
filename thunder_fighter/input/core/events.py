@@ -1,7 +1,8 @@
 """
-纯领域event模型,不依赖任何外部库
+Pure domain event model, independent of any external libraries.
 
-这个moduledefinitions了inputsystem核心event模型,完全独立于pygame等外部依赖.
+This module defines the core event model for the input system, completely
+independent of external dependencies like pygame.
 """
 
 from dataclasses import dataclass
@@ -10,7 +11,7 @@ from typing import Optional, Dict, Any
 
 
 class EventType(Enum):
-    """eventtypeenumeration"""
+    """Event type enumeration."""
     KEY_DOWN = "key_down"
     KEY_UP = "key_up" 
     MOUSE_DOWN = "mouse_down"
@@ -21,10 +22,10 @@ class EventType(Enum):
 @dataclass
 class Event:
     """
-    纯净event模型
+    A pure event model.
     
-    这个类表示system中一个inputevent,不依赖任何外部库.
-    allinputevent都会被转换为这种统一格式.
+    This class represents an input event in the system, independent of any
+    external libraries. All input events are converted into this unified format.
     """
     type: EventType
     key_code: Optional[int] = None
@@ -34,18 +35,18 @@ class Event:
     timestamp: float = 0.0
     
     def __post_init__(self):
-        """initialize后process,确保修饰keydictionaryalwaysexists"""
+        """Post-initialization processing to ensure the modifiers dictionary always exists."""
         if self.modifiers is None:
             self.modifiers = {'ctrl': False, 'shift': False, 'alt': False}
     
     def has_modifier(self, modifier: str) -> bool:
-        """checkwhetherContainsspecific修饰key"""
+        """Checks if a specific modifier key is active."""
         return self.modifiers.get(modifier, False)
     
     def is_key_event(self) -> bool:
-        """checkwhether为key盘event"""
+        """Checks if this is a keyboard event."""
         return self.type in (EventType.KEY_DOWN, EventType.KEY_UP)
     
     def is_mouse_event(self) -> bool:
-        """checkwhether为鼠标event"""
+        """Checks if this is a mouse event."""
         return self.type in (EventType.MOUSE_DOWN, EventType.MOUSE_UP, EventType.MOUSE_MOVE)

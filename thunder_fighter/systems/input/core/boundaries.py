@@ -2,7 +2,7 @@
 System Boundary Interface Definitions
 
 This module defines the abstract interfaces for the input system to interact with the outside world,
--implementing the dependency inversion principle so that the core logic does not depend on specific implementations.
+implementing the dependency inversion principle so that the core logic does not depend on specific implementations.
 """
 
 from abc import ABC, abstractmethod

@@ -1,8 +1,8 @@
 """
-Pygame 适配器 - 隔离 pygame 依赖
+Pygame Adapter - Isolating pygame dependencies
 
-这个moduleimplementations了 pygame related适配器,将 pygame event和state
-转换为标准接口,隔离外部依赖.
+This module implements pygame-related adapters, converting pygame events and state
+into standard interfaces to isolate external dependencies.
 """
 
 import pygame
@@ -13,28 +13,28 @@ from ..core.boundaries import EventSource, KeyboardState, Clock, Logger
 
 
 class PygameEventSource(EventSource):
-    """Pygame event源adapter"""
+    """Pygame event source adapter."""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        initialize Pygame event源
+        Initializes the Pygame event source.
         
         Args:
-            logger: 日志接口(可选)
+            logger: Logger interface (optional).
         """
         self.logger = logger
         self._event_queue = []
         
     def poll_events(self) -> List[Event]:
         """
-        getall待processevent
+        Gets all pending events.
         
         Returns:
-            转换后 Event objects列表
+            A list of converted Event objects.
         """
         events = []
         try:
-            # get pygame event
+            # Get pygame events
             pygame_events = pygame.event.get()
             
             for pg_event in pygame_events:
@@ -51,7 +51,7 @@ class PygameEventSource(EventSource):
         return events
     
     def clear_events(self):
-        """cleareventqueue"""
+        """Clears the event queue."""
         try:
             pygame.event.clear()
             if self.logger:
@@ -62,13 +62,13 @@ class PygameEventSource(EventSource):
     
     def _convert_event(self, pg_event) -> Optional[Event]:
         """
-        转换 pygame event为标准event
+        Converts a pygame event to a standard event.
         
         Args:
-            pg_event: pygame eventobjects
+            pg_event: The pygame event object.
             
         Returns:
-            转换后 Event objects,或 None
+            The converted Event object, or None.
         """
         try:
             if pg_event.type == pygame.KEYDOWN:
@@ -109,10 +109,10 @@ class PygameEventSource(EventSource):
     
     def _get_modifiers(self) -> Dict[str, bool]:
         """
-        get修饰键state
+        Gets the state of modifier keys.
         
         Returns:
-            修饰键state字典
+            A dictionary of modifier key states.
         """
         try:
             mods = pygame.key.get_mods()
@@ -126,26 +126,26 @@ class PygameEventSource(EventSource):
 
 
 class PygameKeyboardState(KeyboardState):
-    """Pygame key盘stateadapter"""
+    """Pygame keyboard state adapter."""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        initialize Pygame 键盘state
+        Initializes the Pygame keyboard state.
         
         Args:
-            logger: 日志接口(可选)
+            logger: Logger interface (optional).
         """
         self.logger = logger
     
     def is_pressed(self, key_code: int) -> bool:
         """
-        check指定键whether按下
+        Checks if a specific key is pressed.
         
         Args:
-            key_code: 键码
+            key_code: The key code.
             
         Returns:
-            True if键被按下,else False
+            True if the key is pressed, otherwise False.
         """
         try:
             if not pygame.get_init():
@@ -161,10 +161,10 @@ class PygameKeyboardState(KeyboardState):
     
     def get_pressed_keys(self) -> List[int]:
         """
-        getall按下键
+        Gets all pressed keys.
         
         Returns:
-            当前按下all键码列表
+            A list of all currently pressed key codes.
         """
         try:
             if not pygame.get_init():
@@ -180,35 +180,35 @@ class PygameKeyboardState(KeyboardState):
 
 
 class PygameClock(Clock):
-    """Pygame 时钟adapter"""
+    """Pygame clock adapter."""
     
     def __init__(self, logger: Optional[Logger] = None):
         """
-        initialize Pygame 时钟
+        Initializes the Pygame clock.
         
         Args:
-            logger: 日志接口(可选)
+            logger: Logger interface (optional).
         """
         self.logger = logger
         self.clock = pygame.time.Clock() if pygame.get_init() else None
         self._last_time = self._get_pygame_time()
-        self._delta = 0.016  # default 60 FPS
+        self._delta = 0.016  # Default to 60 FPS
         
     def now(self) -> float:
         """
-        get当前time
+        Gets the current time.
         
         Returns:
-            当前time戳(秒)
+            Current timestamp in seconds.
         """
         return self._get_pygame_time()
     
     def delta_time(self) -> float:
         """
-        get帧time间隔
+        Gets the frame time interval.
         
         Returns:
-            上一帧到这一帧time间隔(秒)
+            Time interval from the last frame to this one in seconds.
         """
         current = self.now()
         if self._last_time > 0:
@@ -217,7 +217,7 @@ class PygameClock(Clock):
         return self._delta
     
     def _get_pygame_time(self) -> float:
-        """get pygame time或systemtime作为后备"""
+        """Gets pygame time or system time as a fallback."""
         try:
             if pygame.get_init():
                 return pygame.time.get_ticks() / 1000.0
@@ -228,19 +228,19 @@ class PygameClock(Clock):
     
     def tick(self, fps: int = 60) -> int:
         """
-        控制帧率(if使用 pygame 时钟)
+        Controls the frame rate (if using pygame clock).
         
         Args:
-            fps: 目标帧率
+            fps: Target frame rate.
             
         Returns:
-            实际经过毫秒数
+            Actual milliseconds passed.
         """
         try:
             if self.clock:
                 return self.clock.tick(fps)
             else:
-                # simpletimecontrol
+                # Simple time control
                 target_delta = 1.0 / fps
                 current_time = time.time()
                 elapsed = current_time - self._last_time
@@ -250,48 +250,48 @@ class PygameClock(Clock):
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error in clock tick: {e}")
-            return 16  # default 60 FPS
+            return 16  # Default to 60 FPS
 
 
 class PygameLogger(Logger):
-    """simple Pygame compatiblelogimplementations"""
+    """Simple Pygame-compatible logger implementation."""
     
     def __init__(self, enable_debug: bool = False):
         """
-        initialize日志器
+        Initializes the logger.
         
         Args:
-            enable_debug: whether启用调试output
+            enable_debug: Whether to enable debug output.
         """
         self.enable_debug = enable_debug
     
     def debug(self, message: str):
-        """recorddebugginginformation"""
+        """Logs a debug message."""
         if self.enable_debug:
             print(f"[DEBUG] {message}")
     
     def info(self, message: str):
-        """recordgenerallyinformation"""
+        """Logs a general information message."""
         print(f"[INFO] {message}")
     
     def warning(self, message: str):
-        """recordwarninginformation"""
+        """Logs a warning message."""
         print(f"[WARNING] {message}")
     
     def error(self, message: str):
-        """recorderrorinformation"""
+        """Logs an error message."""
         print(f"[ERROR] {message}")
 
 
 def create_pygame_adapters(enable_debug: bool = False) -> tuple[PygameEventSource, PygameKeyboardState, PygameClock, PygameLogger]:
     """
-    create完整 Pygame 适配器集合
+    Creates a complete set of Pygame adapters.
     
     Args:
-        enable_debug: whether启用调试日志
+        enable_debug: Whether to enable debug logging.
         
     Returns:
-        (event源, 键盘state, 时钟, 日志器) 元组
+        A tuple of (EventSource, KeyboardState, Clock, Logger).
     """
     logger = PygameLogger(enable_debug)
     event_source = PygameEventSource(logger)

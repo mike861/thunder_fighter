@@ -1,8 +1,8 @@
 """
-inputsystem门面 - 简化inputsystem接口
+Input System Facade - Simplified interface for the input system
 
-这个module提供了inputsystem主要接口,将复杂内部结构
-隐藏在简单易用API后面.
+This module provides the main interface for the input system, hiding the complex internal structure
+behind a simple and easy-to-use API.
 """
 
 import pygame
@@ -16,10 +16,10 @@ from .adapters.test_adapter import create_test_environment
 
 class InputSystem:
     """
-    inputsystem门面
+    Input System Facade
     
-    提供简化接口来使用inputsystem,自动process适配器create和configuration.
-    支持生产环境(pygame)和测试环境无缝切换.
+    Provides a simplified interface to use the input system, automatically handling adapter creation and configuration.
+    Supports seamless switching between production (pygame) and test environments.
     """
     
     def __init__(self,
@@ -30,17 +30,17 @@ class InputSystem:
                  key_mapping: Optional[Dict[int, CommandType]] = None,
                  enable_debug: bool = False):
         """
-        initializeinputsystem
+        Initializes the input system.
         
         Args:
-            event_source: event源接口(可选,默认使用pygame)
-            keyboard_state: 键盘state接口(可选,默认使用pygame)
-            clock: 时钟接口(可选,默认使用pygame)
-            logger: 日志接口(可选,默认create简单日志器)
-            key_mapping: 键位映射(可选,使用默认映射)
-            enable_debug: whether启用调试日志
+            event_source: Event source interface (optional, defaults to pygame).
+            keyboard_state: Keyboard state interface (optional, defaults to pygame).
+            clock: Clock interface (optional, defaults to pygame).
+            logger: Logger interface (optional, defaults to a simple logger).
+            key_mapping: Key mapping (optional, uses default mapping).
+            enable_debug: Whether to enable debug logging.
         """
-        # if没有providedependency,usedefaultpygameadapter
+        # If dependencies are not provided, use the default pygame adapters
         if not all([event_source, keyboard_state, clock]):
             default_event_source, default_keyboard, default_clock, default_logger = create_pygame_adapters(enable_debug)
             
@@ -54,11 +54,11 @@ class InputSystem:
             self.clock = clock
             self.logger = logger
         
-        # settingsdefaultkey位mapping
+        # Set default key mapping
         if key_mapping is None:
             key_mapping = self._create_default_key_mapping()
         
-        # create核心process器
+        # Create the core processor
         self.processor = InputProcessor(
             event_source=self.event_source,
             keyboard_state=self.keyboard_state,
@@ -67,10 +67,10 @@ class InputSystem:
             logger=self.logger
         )
         
-        # commandprocess器registrationtable
+        # Command handler registry
         self.command_handlers: Dict[CommandType, List[Callable]] = {}
         
-        # systemstate
+        # System state
         self.enabled = True
         self.stats = {
             'total_commands': 0,
@@ -79,23 +79,23 @@ class InputSystem:
     
     def update(self) -> List[Command]:
         """
-        updateinputsystem并return命令
+        Updates the input system and returns commands.
         
         Returns:
-            spawn命令列表
+            A list of generated commands.
         """
         if not self.enabled:
             return []
         
         try:
-            # processinput
+            # Process input
             commands = self.processor.process()
             
-            # executeregistrationprocess器
+            # Execute registered handlers
             for command in commands:
                 self._execute_command_handlers(command)
             
-            # updatestatistics
+            # Update statistics
             self.stats['total_commands'] += len(commands)
             self.stats['last_update_time'] = self.clock.now()
             
@@ -108,11 +108,11 @@ class InputSystem:
     
     def on_command(self, command_type: CommandType, handler: Callable[[Command], None]):
         """
-        注册命令process器
+        Registers a command handler.
         
         Args:
-            command_type: 命令类型
-            handler: process函数,接收Commandobjects作为parameters
+            command_type: The command type.
+            handler: The handler function, which accepts a Command object as an argument.
         """
         if command_type not in self.command_handlers:
             self.command_handlers[command_type] = []
@@ -124,11 +124,11 @@ class InputSystem:
     
     def remove_command_handler(self, command_type: CommandType, handler: Callable[[Command], None]):
         """
-        移除命令process器
+        Removes a command handler.
         
         Args:
-            command_type: 命令类型
-            handler: 要移除process函数
+            command_type: The command type.
+            handler: The handler function to remove.
         """
         if command_type in self.command_handlers:
             try:
@@ -141,10 +141,10 @@ class InputSystem:
     
     def clear_handlers(self, command_type: Optional[CommandType] = None):
         """
-        清除命令process器
+        Clears command handlers.
         
         Args:
-            command_type: 要清除命令类型(可选,None表示清除all)
+            command_type: The command type to clear (optional, None clears all).
         """
         if command_type is None:
             self.command_handlers.clear()
@@ -157,44 +157,44 @@ class InputSystem:
     
     def is_key_pressed(self, key_code: int) -> bool:
         """
-        check键whether按下
+        Checks if a key is pressed.
         
         Args:
-            key_code: 键码
+            key_code: The key code.
             
         Returns:
-            Trueif键被按下,elseFalse
+            True if the key is pressed, otherwise False.
         """
         return self.keyboard_state.is_pressed(key_code)
     
     def is_key_held(self, key_code: int) -> bool:
         """
-        check键whether正在被长按
+        Checks if a key is being held down.
         
         Args:
-            key_code: 键码
+            key_code: The key code.
             
         Returns:
-            Trueif键正在被长按,elseFalse
+            True if the key is being held down, otherwise False.
         """
         return self.processor.is_key_held(key_code)
     
     def get_held_keys(self) -> List[int]:
-        """getall正在被长按key"""
+        """Gets all keys that are being held down."""
         return self.processor.get_held_keys()
     
     def reset_state(self):
-        """resetinputsystemstate"""
+        """Resets the input system state."""
         self.processor.reset_state()
         if self.logger:
             self.logger.info("Input system state reset")
     
     def set_key_mapping(self, key_mapping: Dict[int, CommandType]):
         """
-        update键位映射
+        Updates the key mapping.
         
         Args:
-            key_mapping: 新键位映射
+            key_mapping: The new key mapping.
         """
         self.processor.set_key_mapping(key_mapping)
         if self.logger:
@@ -202,37 +202,37 @@ class InputSystem:
     
     def configure_repeat(self, delay: float, rate: float):
         """
-        configuration按键重复
+        Configures key repeat.
         
         Args:
-            delay: 首次重复delayed(秒)
-            rate: 重复间隔(秒)
+            delay: The initial repeat delay in seconds.
+            rate: The repeat interval in seconds.
         """
         self.processor.set_repeat_config(delay, rate)
     
     def configure_cooldown(self, cooldown: float):
         """
-        configuration命令冷却time
+        Configures command cooldown.
         
         Args:
-            cooldown: 冷却time(秒)
+            cooldown: The cooldown time in seconds.
         """
         self.processor.set_cooldown(cooldown)
     
     def enable(self):
-        """enabledinputsystem"""
+        """Enables the input system."""
         self.enabled = True
         if self.logger:
             self.logger.info("Input system enabled")
     
     def disable(self):
-        """disabledinputsystem"""
+        """Disables the input system."""
         self.enabled = False
         if self.logger:
             self.logger.info("Input system disabled")
     
     def get_stats(self) -> Dict:
-        """getinputsystemstatisticsinformation"""
+        """Gets input system statistics."""
         processor_stats = self.processor.get_stats()
         return {
             **self.stats,
@@ -243,10 +243,10 @@ class InputSystem:
     
     def _execute_command_handlers(self, command: Command):
         """
-        execute命令process器
+        Executes command handlers.
         
         Args:
-            command: 要process命令
+            command: The command to process.
         """
         handlers = self.command_handlers.get(command.type, [])
         for handler in handlers:
@@ -258,13 +258,13 @@ class InputSystem:
     
     def _create_default_key_mapping(self) -> Dict[int, CommandType]:
         """
-        create默认键位映射
+        Creates the default key mapping.
         
         Returns:
-            默认键位映射字典
+            The default key mapping dictionary.
         """
         return {
-            # directionkey
+            # Arrow keys
             pygame.K_UP: CommandType.MOVE_UP,
             pygame.K_DOWN: CommandType.MOVE_DOWN,
             pygame.K_LEFT: CommandType.MOVE_LEFT,
@@ -276,30 +276,30 @@ class InputSystem:
             pygame.K_a: CommandType.MOVE_LEFT,
             pygame.K_d: CommandType.MOVE_RIGHT,
             
-            # actionkey
+            # Action keys
             pygame.K_SPACE: CommandType.SHOOT,
             pygame.K_x: CommandType.LAUNCH_MISSILE,
             
-            # systemkey
+            # System keys
             pygame.K_p: CommandType.PAUSE,
             pygame.K_ESCAPE: CommandType.QUIT,
             pygame.K_m: CommandType.TOGGLE_MUSIC,
             pygame.K_l: CommandType.CHANGE_LANGUAGE,
             
-            # debuggingkey
+            # Debug keys
             pygame.K_F1: CommandType.RESET_INPUT,
         }
 
 
 def create_for_production(enable_debug: bool = False) -> InputSystem:
     """
-    create生产环境inputsystem
+    Creates an input system for the production environment.
     
     Args:
-        enable_debug: whether启用调试日志
+        enable_debug: Whether to enable debug logging.
         
     Returns:
-        configuration好InputSystem实例
+        A configured InputSystem instance.
     """
     return InputSystem(enable_debug=enable_debug)
 
@@ -308,16 +308,16 @@ def create_for_testing(initial_time: float = 0.0,
                       print_logs: bool = False,
                       key_mapping: Optional[Dict[int, CommandType]] = None) -> tuple[InputSystem, dict]:
     """
-    create测试环境inputsystem
+    Creates an input system for the test environment.
     
     Args:
-        initial_time: 初始time
-        print_logs: whether打印日志
-        key_mapping: 键位映射(可选)
+        initial_time: The initial time.
+        print_logs: Whether to print logs.
+        key_mapping: The key mapping (optional).
         
     Returns:
-        (InputSystem实例, 测试控制器字典) 元组
-        测试控制器Contains: event_source, keyboard_state, clock, logger
+        A tuple of (InputSystem instance, test controllers dictionary).
+        The test controllers include: event_source, keyboard_state, clock, logger.
     """
     event_source, keyboard_state, clock, logger = create_test_environment(initial_time, print_logs)
     
@@ -340,10 +340,10 @@ def create_for_testing(initial_time: float = 0.0,
 
 
 class InputSystemBuilder:
-    """inputsystembuild器 - provide流畅configurationAPI"""
+    """Input system builder - provides a fluent configuration API."""
     
     def __init__(self):
-        """initializebuild器"""
+        """Initializes the builder."""
         self._event_source = None
         self._keyboard_state = None
         self._clock = None
@@ -355,33 +355,33 @@ class InputSystemBuilder:
         self._cooldown = 0.2
     
     def with_pygame(self, enable_debug: bool = False):
-        """usepygameadapter"""
+        """Uses pygame adapters."""
         self._enable_debug = enable_debug
         return self
     
     def with_test_environment(self, initial_time: float = 0.0, print_logs: bool = False):
-        """usetestingenvironment"""
+        """Uses the test environment."""
         self._event_source, self._keyboard_state, self._clock, self._logger = create_test_environment(initial_time, print_logs)
         return self
     
     def with_key_mapping(self, key_mapping: Dict[int, CommandType]):
-        """settingskey位mapping"""
+        """Sets the key mapping."""
         self._key_mapping = key_mapping
         return self
     
     def with_repeat_config(self, delay: float, rate: float):
-        """settingsrepetitionconfiguration"""
+        """Sets the repeat configuration."""
         self._repeat_delay = delay
         self._repeat_rate = rate
         return self
     
     def with_cooldown(self, cooldown: float):
-        """settings冷却time"""
+        """Sets the cooldown time."""
         self._cooldown = cooldown
         return self
     
     def build(self) -> InputSystem:
-        """buildinputsystem"""
+        """Builds the input system."""
         system = InputSystem(
             event_source=self._event_source,
             keyboard_state=self._keyboard_state,
@@ -391,7 +391,7 @@ class InputSystemBuilder:
             enable_debug=self._enable_debug
         )
         
-        # applyconfiguration
+        # Apply configurations
         system.configure_repeat(self._repeat_delay, self._repeat_rate)
         system.configure_cooldown(self._cooldown)
         

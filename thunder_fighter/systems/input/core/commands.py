@@ -2,7 +2,7 @@
 Command Pattern Implementation - Decouples input from game logic
 
 This module defines the game command system, converting input events into game commands,
--achieving complete decoupling between the input system and game logic.
+achieving complete decoupling between the input system and game logic.
 """
 
 from dataclasses import dataclass

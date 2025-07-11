@@ -1,8 +1,9 @@
 """
-命令模式implementations - 解耦input和game逻辑
+Command Pattern Implementation - Decoupling input from game logic
 
-这个moduledefinitions了game命令system,将inputevent转换为game命令,
-implementationsinputsystem和game逻辑完全解耦.
+This module defines the game command system, which converts input events
+into game commands, achieving complete decoupling between the input system
+and game logic.
 """
 
 from dataclasses import dataclass
@@ -11,26 +12,26 @@ from typing import Any, Dict
 
 
 class CommandType(Enum):
-    """gamecommandtypeenumeration"""
+    """Game command type enumeration."""
     
-    # movementcommand
+    # Movement commands
     MOVE_UP = "move_up"
     MOVE_DOWN = "move_down"
     MOVE_LEFT = "move_left"
     MOVE_RIGHT = "move_right"
     
-    # actioncommand
+    # Action commands
     SHOOT = "shoot"
     LAUNCH_MISSILE = "launch_missile"
     
-    # systemcommand
+    # System commands
     PAUSE = "pause"
     QUIT = "quit"
     TOGGLE_MUSIC = "toggle_music"
     TOGGLE_SOUND = "toggle_sound"
     CHANGE_LANGUAGE = "change_language"
     
-    # debuggingcommand
+    # Debug commands
     TOGGLE_DEBUG = "toggle_debug"
     RESET_INPUT = "reset_input"
 
@@ -38,30 +39,30 @@ class CommandType(Enum):
 @dataclass
 class Command:
     """
-    game命令
+    Game Command
     
-    表示一个具体game命令,Contains命令类型、time戳和relateddata.
-    这是inputsystem和game逻辑之间接口.
+    Represents a specific game command, including command type, timestamp, and related data.
+    This is the interface between the input system and the game logic.
     """
     type: CommandType
     timestamp: float
     data: Dict[str, Any] = None
     
     def __post_init__(self):
-        """initialize后process,确保datadictionaryalwaysexists"""
+        """Post-initialization processing to ensure the data dictionary always exists."""
         if self.data is None:
             self.data = {}
     
     def get_data(self, key: str, default=None):
-        """securitygetcommanddata"""
+        """Safely gets command data."""
         return self.data.get(key, default)
     
     def set_data(self, key: str, value: Any):
-        """settingscommanddata"""
+        """Sets command data."""
         self.data[key] = value
     
     def is_movement_command(self) -> bool:
-        """checkwhether为movementcommand"""
+        """Checks if this is a movement command."""
         return self.type in (
             CommandType.MOVE_UP, 
             CommandType.MOVE_DOWN, 
@@ -70,14 +71,14 @@ class Command:
         )
     
     def is_action_command(self) -> bool:
-        """checkwhether为actioncommand"""
+        """Checks if this is an action command."""
         return self.type in (
             CommandType.SHOOT, 
             CommandType.LAUNCH_MISSILE
         )
     
     def is_system_command(self) -> bool:
-        """checkwhether为systemcommand"""
+        """Checks if this is a system command."""
         return self.type in (
             CommandType.PAUSE,
             CommandType.QUIT,

@@ -1,7 +1,8 @@
 """
-inputsystem核心module
+Input System Core Module
 
-这个包Containsinputsystem核心逻辑,完全独立于外部依赖.
+This package contains the core logic of the input system,
+completely independent of external dependencies.
 """
 
 from .commands import Command, CommandType

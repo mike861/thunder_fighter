@@ -1,7 +1,7 @@
 """
-inputsystem适配器module
+Input System Adapters Module
 
-这个包Contains各种适配器implementations,用于连接核心逻辑和外部system.
+This package contains various adapter implementations for connecting core logic with external systems.
 """
 
 from .pygame_adapter import (
@@ -22,14 +22,14 @@ from .test_adapter import (
 )
 
 __all__ = [
-    # Pygame adapter
+    # Pygame adapters
     'PygameEventSource',
     'PygameKeyboardState',
     'PygameClock',
     'PygameLogger',
     'create_pygame_adapters',
     
-    # testingadapter
+    # Test adapters
     'TestEventSource',
     'TestKeyboardState',
     'TestClock',

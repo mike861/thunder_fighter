@@ -1,18 +1,18 @@
 """
-Thunder Fighter inputsystem
+Thunder Fighter Input System
 
-这个包提供了完全重构inputsystem,具有以下特性:
-- 完全解耦架构,核心逻辑不依赖pygame
-- 依赖注入支持,便于测试
-- 命令模式,解耦input和game逻辑
-- 测试友好设计
+This package provides a completely refactored input system with the following features:
+- Fully decoupled architecture, core logic does not depend on pygame
+- Dependency injection support for easy testing
+- Command pattern to decouple input from game logic
+- Test-friendly design
 
-backward compatibility:
-- 保留原有InputManager, InputHandler等接口
-- 新InputSystem提供更好测试支持
+Backward Compatibility:
+- Retains original interfaces like InputManager, InputHandler, etc.
+- The new InputSystem provides better testing support
 """
 
-# 新inputsystem(suggesteduse)
+# New input system (recommended)
 from .input_system import (
     InputSystem,
     create_for_production,
@@ -20,14 +20,14 @@ from .input_system import (
     InputSystemBuilder
 )
 
-# 核心model
+# Core models
 from .core.commands import Command, CommandType
 from .core.events import Event, EventType
 
-# boundaryinterface(供expanduse)
+# Boundary interfaces (for extension)
 from .core.boundaries import EventSource, KeyboardState, Clock, Logger
 
-# adapter(供advanceduseruse)
+# Adapters (for advanced users)
 from .adapters.pygame_adapter import (
     PygameEventSource,
     PygameKeyboardState, 
@@ -45,44 +45,44 @@ from .adapters.test_adapter import (
     TestScenario
 )
 
-# 原有interface(backward compatibility)
+# Original interfaces (for backward compatibility)
 from .input_manager import InputManager
 from .input_handler import InputHandler
 from .key_bindings import KeyBindings
 from .input_events import InputEvent, InputEventType
 
-# versioninformation
+# Version information
 __version__ = "2.0.0"
 __author__ = "Thunder Fighter Team"
 
-# mainlyexport
+# Main exports
 __all__ = [
-    # 新inputsystem
+    # New input system
     'InputSystem',
     'create_for_production', 
     'create_for_testing',
     'InputSystemBuilder',
     
-    # 核心model
+    # Core models
     'Command',
     'CommandType',
     'Event', 
     'EventType',
     
-    # boundaryinterface
+    # Boundary interfaces
     'EventSource',
     'KeyboardState',
     'Clock',
     'Logger',
     
-    # Pygameadapter
+    # Pygame adapters
     'PygameEventSource',
     'PygameKeyboardState',
     'PygameClock', 
     'PygameLogger',
     'create_pygame_adapters',
     
-    # testingadapter
+    # Test adapters
     'TestEventSource',
     'TestKeyboardState',
     'TestClock',
@@ -90,10 +90,10 @@ __all__ = [
     'create_test_environment',
     'TestScenario',
     
-    # 原有interface(backward compatibility)
+    # Original interfaces (for backward compatibility)
     'InputManager',
     'InputHandler', 
     'KeyBindings',
     'InputEvent',
     'InputEventType'
-] 
+]
