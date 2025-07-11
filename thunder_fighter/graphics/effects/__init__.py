@@ -18,73 +18,26 @@ from .particles import (
     clear_particles,
 )
 
-# Import from the parent effects.py file for backward compatibility
-import sys
-import os
-parent_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, parent_dir)
+# Import notification classes
+from .notifications import (
+    Notification,
+    WarningNotification,
+    AchievementNotification,
+)
 
-try:
-    from thunder_fighter.graphics.effects import (
-        create_explosion,
-        create_hit_effect,
-        create_flash_effect,
-        Notification,
-        WarningNotification,
-        AchievementNotification,
-        FlashEffect,
-        FlashEffectManager,
-        flash_manager,
-    )
-except ImportError:
-    # If import fails, define dummy functions
-    def create_explosion(center, size_str='md'):
-        return Explosion(center)
-    
-    def create_hit_effect(x, y, size=20):
-        return Explosion((x, y))
-    
-    def create_flash_effect(entity, color=(255, 255, 255), duration=200):
-        pass
-    
-    class Notification:
-        def __init__(self, *args, **kwargs):
-            pass
-        def update(self):
-            return True  # Keep notification alive in fallback mode
-        def draw(self, surface):
-            pass
-        def set_y_position(self, y):
-            pass
-    
-    class WarningNotification(Notification):
-        pass
-    
-    class AchievementNotification(Notification):
-        pass
-    
-    class FlashEffect:
-        def __init__(self, *args, **kwargs):
-            pass
-        def update(self):
-            return False
-        def stop(self):
-            pass
-    
-    class FlashEffectManager:
-        def __init__(self):
-            self.effects = []
-        def add_flash(self, entity, color=(255, 255, 255), duration=200):
-            pass
-        def update(self):
-            pass
-        def clear(self):
-            pass
-    
-    flash_manager = FlashEffectManager()
+# Import explosion effects
+from .explosions import (
+    create_explosion,
+    create_hit_effect,
+)
 
-finally:
-    sys.path.pop(0)
+# Import flash effects
+from .flash_effects import (
+    create_flash_effect,
+    FlashEffect,
+    FlashEffectManager,
+    flash_manager,
+)
 
 __all__ = [
     'Explosion',

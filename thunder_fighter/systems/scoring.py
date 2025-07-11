@@ -45,7 +45,7 @@ class ScoringSystem:
         """Adds score."""
         actual_points = int(points * self.score_multiplier)
         self.score += actual_points
-        logger.info(f"Score added: {actual_points} from {source}")
+        logger.debug(f"Score added: {actual_points} from {source}")
         self.update_display()
         self._check_level_up()
         self._check_achievements()
