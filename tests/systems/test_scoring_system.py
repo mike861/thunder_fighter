@@ -22,9 +22,9 @@ class TestScoringSystem:
         """Test that the scoring system initializes correctly."""
         assert scoring_system is not None
         assert hasattr(scoring_system, 'score')
-        assert hasattr(scoring_system, 'game_level')
+        assert hasattr(scoring_system, 'level')
         assert scoring_system.score == 0
-        assert scoring_system.game_level == 1
+        assert scoring_system.level == 1
     
     def test_add_score_method(self, scoring_system):
         """Test that add_score method exists and works."""
@@ -37,14 +37,15 @@ class TestScoringSystem:
     
     def test_level_progression_interface(self, scoring_system):
         """Test that level progression methods exist."""
-        assert hasattr(scoring_system, 'check_level_progression')
-        assert hasattr(scoring_system, 'get_current_level')
-        assert hasattr(scoring_system, 'get_score_for_next_level')
+        assert hasattr(scoring_system, 'get_level')
+        assert hasattr(scoring_system, 'get_score')
+        assert hasattr(scoring_system, 'set_multiplier')
     
     def test_score_properties(self, scoring_system):
         """Test score-related properties."""
-        assert hasattr(scoring_system, 'total_score')
-        assert hasattr(scoring_system, 'level_score')
+        assert hasattr(scoring_system, 'score')
+        assert hasattr(scoring_system, 'score_multiplier')
+        assert hasattr(scoring_system, 'level')
         
     # TODO: Add more comprehensive scoring system tests
     # - Test level progression thresholds

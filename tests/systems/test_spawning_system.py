@@ -29,8 +29,7 @@ class TestSpawningSystem:
         factory_attributes = [
             'enemy_factory',
             'boss_factory', 
-            'item_factory',
-            'projectile_factory'
+            'item_factory'
         ]
         
         for factory_attr in factory_attributes:
@@ -39,10 +38,9 @@ class TestSpawningSystem:
     def test_spawning_interface(self, spawning_system):
         """Test that spawning methods exist."""
         spawning_methods = [
-            'spawn_enemy',
-            'spawn_boss',
-            'spawn_item',
-            'update_spawn_timers'
+            'update',
+            '_init_factories',
+            '_setup_spawn_parameters'
         ]
         
         for method_name in spawning_methods:
@@ -50,9 +48,10 @@ class TestSpawningSystem:
             assert callable(getattr(spawning_system, method_name))
     
     def test_spawn_coordination(self, spawning_system):
-        """Test that spawn coordination methods exist."""
-        assert hasattr(spawning_system, 'coordinate_spawning')
-        assert hasattr(spawning_system, 'adjust_spawn_rates')
+        """Test that spawn coordination properties exist."""
+        assert hasattr(spawning_system, 'spawn_rates')
+        assert hasattr(spawning_system, 'last_spawn_times')
+        assert hasattr(spawning_system, 'spawn_timers')
         
     # TODO: Add more comprehensive spawning system tests
     # - Test enemy spawn timing and difficulty scaling

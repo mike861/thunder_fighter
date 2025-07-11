@@ -41,25 +41,28 @@ class TestEventSystem:
     def test_event_dispatch(self, event_system):
         """Test event dispatching to registered listeners."""
         mock_listener = Mock()
+        mock_listener.handle_event = Mock(return_value=False)
         test_event = Event(event_type=EventType.UNKNOWN, data={})
         
         event_system.register_listener(EventType.UNKNOWN, mock_listener)
-        event_system.dispatch_event(test_event)
+        event_system.dispatch_event(test_event, immediate=True)
         
-        mock_listener.assert_called_once_with(test_event)
+        mock_listener.handle_event.assert_called_once_with(test_event)
     
     def test_multiple_listeners(self, event_system):
         """Test that multiple listeners receive events."""
         listener1 = Mock()
+        listener1.handle_event = Mock(return_value=False)
         listener2 = Mock()
+        listener2.handle_event = Mock(return_value=False)
         test_event = Event(event_type=EventType.UNKNOWN, data={})
         
         event_system.register_listener(EventType.UNKNOWN, listener1)
         event_system.register_listener(EventType.UNKNOWN, listener2)
-        event_system.dispatch_event(test_event)
+        event_system.dispatch_event(test_event, immediate=True)
         
-        listener1.assert_called_once_with(test_event)
-        listener2.assert_called_once_with(test_event)
+        listener1.handle_event.assert_called_once_with(test_event)
+        listener2.handle_event.assert_called_once_with(test_event)
     
     # TODO: Add more comprehensive event system tests
     # - Test event filtering and priorities

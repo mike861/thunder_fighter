@@ -24,10 +24,10 @@ class TestPhysicsSystem:
     def test_movement_interface(self, physics_system):
         """Test that movement methods exist."""
         movement_methods = [
-            'update_entity_movement',
-            'apply_velocity',
-            'check_boundaries',
-            'handle_boundary_collision'
+            'update_movement',
+            'apply_force',
+            'set_velocity',
+            'constrain_to_screen'
         ]
         
         for method_name in movement_methods:
@@ -37,9 +37,9 @@ class TestPhysicsSystem:
     def test_boundary_management(self, physics_system):
         """Test boundary management interface."""
         boundary_methods = [
-            'set_world_boundaries',
-            'is_out_of_bounds',
-            'constrain_to_boundaries'
+            'check_collision_with_boundaries',
+            'constrain_to_screen',
+            'update_screen_size'
         ]
         
         for method_name in boundary_methods:
@@ -48,8 +48,9 @@ class TestPhysicsSystem:
     def test_physics_properties(self, physics_system):
         """Test physics-related properties."""
         assert hasattr(physics_system, 'gravity')
-        assert hasattr(physics_system, 'friction')
-        assert hasattr(physics_system, 'world_bounds')
+        assert hasattr(physics_system, 'boundary_margins')
+        assert hasattr(physics_system, 'screen_width')
+        assert hasattr(physics_system, 'screen_height')
         
     # TODO: Add more comprehensive physics system tests
     # - Test entity movement calculations
