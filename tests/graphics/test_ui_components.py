@@ -221,14 +221,14 @@ class TestDevInfoDisplay:
         assert dev_info_display.screen is not None
         assert dev_info_display.font is not None
     
-    @patch('thunder_fighter.graphics.ui.dev_info_display.config_manager')
+    @patch('thunder_fighter.graphics.ui.components.dev_info_display.config_manager')
     def test_draw_dev_mode_enabled(self, mock_config, dev_info_display):
         """Test drawing when dev mode is enabled."""
         mock_config.debug.dev_mode = True
         dev_info_display.draw(60.5, 10, 15, (400, 300))
         assert dev_info_display.font.render.call_count == 3
     
-    @patch('thunder_fighter.graphics.ui.dev_info_display.config_manager')
+    @patch('thunder_fighter.graphics.ui.components.dev_info_display.config_manager')
     def test_draw_dev_mode_disabled(self, mock_config, dev_info_display):
         """Test that nothing is drawn when dev mode is disabled."""
         mock_config.debug.dev_mode = False

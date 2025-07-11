@@ -123,12 +123,9 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = [
-    "-v",
+    "-v", 
     "--strict-markers",
     "--tb=short",
-    "--cov=thunder_fighter",
-    "--cov-report=term-missing",
-    "--cov-report=html",
 ]
 
 [tool.coverage.run]

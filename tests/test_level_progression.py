@@ -31,7 +31,7 @@ class TestLevelProgression:
         with patch('pygame.init'), \
              patch('pygame.display.set_mode'), \
              patch('thunder_fighter.sprites.player.Player'), \
-             patch('thunder_fighter.utils.stars.create_stars'):
+             patch('thunder_fighter.graphics.effects.stars.create_stars'):
             game = Game()
             assert game.game_level == 1
     
@@ -50,7 +50,7 @@ class TestLevelProgression:
         with patch('pygame.init'), \
              patch('pygame.display.set_mode'), \
              patch('thunder_fighter.sprites.player.Player'), \
-             patch('thunder_fighter.utils.stars.create_stars'):
+             patch('thunder_fighter.graphics.effects.stars.create_stars'):
             game = Game()
             assert hasattr(game, 'event_system')
             assert hasattr(game.event_system, 'dispatch_event')
