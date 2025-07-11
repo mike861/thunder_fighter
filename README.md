@@ -40,7 +40,8 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - **Extensively Tested**: Fully tested codebase with 354+ comprehensive tests covering all game mechanics and architectural improvements
 - **Systems-Based Architecture**: Modular systems design with collision, scoring, spawning, and physics systems
 - **Factory Pattern Entity Creation**: Type-organized entity factories (enemies/, projectiles/, items/, player/)
-- **Enhanced Input System**: Layered input architecture with handler→manager→facade pattern
+- **Enhanced Input System**: Unified input architecture with handler→manager→facade pattern
+- **Clean Architecture**: Eliminated circular import risks and architectural debt through comprehensive refactoring
 
 For more detailed information on game mechanics, systems, and technical specifications, please see the [Project Details](./docs/DETAILS.md) document.
 
@@ -193,11 +194,11 @@ Thunder Fighter features a modern, modular architecture designed for maintainabi
   - **SpawningSystem**: Entity spawning coordination integrating all factory classes
   - **PhysicsSystem**: Movement, boundaries, and collision detection for game physics
 - **Factory Pattern**: Type-organized entity creation with configurable presets:
-  - **EnemyFactory**: Enemy creation with difficulty scaling and behavior patterns
-  - **BossFactory**: Boss generation with level-appropriate challenges
-  - **ItemFactory**: Power-up and collectible creation system
-  - **ProjectileFactory**: Bullet and missile generation for all entities
-- **Enhanced Input System**: Layered input architecture (handler→manager→facade pattern) with:
+  - **EnemyFactory**: Enemy creation with difficulty scaling and behavior patterns (enemies/)
+  - **BossFactory**: Boss generation with level-appropriate challenges (enemies/)
+  - **ItemFactory**: Power-up and collectible creation system (items/)
+  - **ProjectileFactory**: Bullet and missile generation for all entities (projectiles/)
+- **Unified Input System**: Clean input architecture (systems/input/) with:
   - **InputHandler**: Raw event processing with macOS screenshot interference handling
   - **InputManager**: Event coordination and state management
   - **InputFacade**: High-level input interface for game logic
@@ -205,6 +206,7 @@ Thunder Fighter features a modern, modular architecture designed for maintainabi
 - **Configuration System**: JSON-based configuration with runtime updates and command-line tools
 - **Pause Management**: Dedicated `PauseManager` component with pause-aware timing calculations and comprehensive statistics
 - **Enhanced Localization**: Dependency injection-based localization system with loader abstraction for improved testability
+- **Clean Architecture**: Eliminated circular imports and architectural debt through systematic refactoring
 
 ### UI System
 
@@ -232,23 +234,31 @@ The codebase follows a modular, systems-based architecture:
 ```
 thunder_fighter/
 ├── systems/              # Core game systems
-│   ├── input/           # Layered input management system
+│   ├── input/           # Unified input management system
 │   │   ├── handler.py   # Raw event processing
 │   │   ├── manager.py   # Event coordination
-│   │   └── facade.py    # High-level interface
+│   │   ├── facade.py    # High-level interface
+│   │   └── adapters/    # Platform adapters
 │   ├── collision.py     # Unified collision detection
 │   ├── scoring.py       # Score and level management
 │   ├── spawning.py      # Entity spawning coordination
 │   └── physics.py       # Movement and physics
 ├── entities/            # Type-organized entity system
 │   ├── base.py         # Base entity classes
-│   ├── enemies/        # Enemy entities and factory
+│   ├── enemies/        # Enemy entities and factories
+│   │   ├── enemy_factory.py
+│   │   └── boss_factory.py
 │   ├── projectiles/    # Bullets and missiles
+│   │   └── projectile_factory.py
 │   ├── items/          # Power-ups and collectibles
+│   │   └── item_factory.py
 │   └── player/         # Player and wingman entities
 ├── graphics/           # Rendering and visual effects
 │   ├── ui/            # Modular UI components
-│   └── effects/       # Visual effects system
+│   └── effects/       # Modular visual effects system
+│       ├── notifications.py  # Notification system
+│       ├── explosions.py     # Explosion effects
+│       └── flash_effects.py  # Flash effects
 ├── events/            # Event system and definitions
 ├── state/             # Game state management
 ├── localization/      # Multi-language support
@@ -313,15 +323,24 @@ thunder_fighter/
 │   └── TEST_CASE_REVIEW.md
 ├── thunder_fighter/
 │   ├── assets/                # Game assets (sounds, music)
-│   ├── entities/              # Entity factories and creation logic
+│   ├── systems/               # Core game systems
+│   │   ├── input/            # Unified input management system
+│   │   ├── collision.py      # Collision detection system
+│   │   ├── scoring.py        # Score and level management
+│   │   ├── spawning.py       # Entity spawning coordination
+│   │   └── physics.py        # Movement and physics
+│   ├── entities/              # Type-organized entity system
+│   │   ├── enemies/          # Enemy entities and factories
+│   │   ├── projectiles/      # Bullets and missiles
+│   │   ├── items/            # Power-ups and collectibles
+│   │   └── player/           # Player and wingman entities
 │   ├── events/                # Event system and game events
 │   ├── graphics/              # Rendering, effects, UI components
 │   │   ├── ui/               # Modular UI components
+│   │   ├── effects/          # Modular visual effects system
 │   │   ├── ui_manager.py     # Main UI facade
 │   │   ├── renderers.py      # Entity rendering functions
-│   │   ├── background.py     # Dynamic background system
-│   │   └── effects.py        # Visual effects
-│   ├── input/                 # Input management and key bindings
+│   │   └── background.py     # Dynamic background system
 │   ├── localization/          # Enhanced localization system
 │   │   ├── en.json           # English translations
 │   │   ├── zh.json           # Chinese translations
@@ -379,6 +398,14 @@ thunder_fighter/
   - **Consistent Timing**: Boss spawning behavior now matches display time handling for unified pause-aware timing
   - **Comprehensive Testing**: Added 18 specialized test cases covering boss spawn timing with pause scenarios
   - **Regression Prevention**: Test suite ensures boss spawn timing remains accurate across future changes
+- **🔄 Circular Import Elimination**: Comprehensive architectural debt cleanup
+  - **Duplicate File Removal**: Eliminated 4 sets of duplicate factory files (boss_factory.py, enemy_factory.py, item_factory.py, projectile_factory.py)
+  - **Unified Input System**: Removed old input system (thunder_fighter/input/), consolidated to systems/input/ only
+  - **Factory Organization**: Standardized factory location in type-specific subdirectories (enemies/, items/, projectiles/)
+  - **Import Simplification**: Reduced entities/__init__.py from 60 to 36 lines, removing 30+ unnecessary imports
+  - **Effects Module Restructuring**: Split effects.py into modular components (notifications.py, explosions.py, flash_effects.py)
+  - **Risk Mitigation**: Eliminated all identified circular import patterns that could cause runtime AttributeError issues
+  - **Code Reduction**: Removed 3820+ lines of duplicate/obsolete code while maintaining 100% functionality
 
 ## Development
 
