@@ -1,1 +1,1 @@
-# Integration tests for Thunder Fighter 
+# Integration tests for Thunder Fighter

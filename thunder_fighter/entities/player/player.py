@@ -1,20 +1,35 @@
+import math
+
 import pygame
 import pygame.time as ptime
-import random
-import math
+
 from thunder_fighter.constants import (
-    WIDTH, HEIGHT, PLAYER_HEALTH, PLAYER_SHOOT_DELAY, WHITE, RED,
-    PLAYER_SPEED, PLAYER_MAX_SPEED, PLAYER_SPEED_UPGRADE_AMOUNT, PLAYER_FLASH_FRAMES, PLAYER_HEAL_AMOUNT,
-    BULLET_SPEED_DEFAULT, BULLET_SPEED_MAX, BULLET_PATHS_DEFAULT, BULLET_PATHS_MAX,
-    BULLET_ANGLE_STRAIGHT, BULLET_ANGLE_SPREAD_SMALL, BULLET_ANGLE_SPREAD_LARGE,
-    BULLET_SPEED_UPGRADE_AMOUNT, PLAYER_MAX_WINGMEN, WINGMAN_FORMATION_SPACING
+    BULLET_ANGLE_SPREAD_LARGE,
+    BULLET_ANGLE_SPREAD_SMALL,
+    BULLET_ANGLE_STRAIGHT,
+    BULLET_PATHS_DEFAULT,
+    BULLET_PATHS_MAX,
+    BULLET_SPEED_DEFAULT,
+    BULLET_SPEED_MAX,
+    BULLET_SPEED_UPGRADE_AMOUNT,
+    HEIGHT,
+    PLAYER_FLASH_FRAMES,
+    PLAYER_HEAL_AMOUNT,
+    PLAYER_HEALTH,
+    PLAYER_MAX_SPEED,
+    PLAYER_MAX_WINGMEN,
+    PLAYER_SHOOT_DELAY,
+    PLAYER_SPEED,
+    PLAYER_SPEED_UPGRADE_AMOUNT,
+    WHITE,
+    WIDTH,
 )
-from thunder_fighter.graphics.renderers import create_player_ship
-from thunder_fighter.entities.projectiles.bullets import Bullet
 from thunder_fighter.entities.player.wingman import Wingman
-from thunder_fighter.entities.projectiles.missile import TrackingMissile
-from thunder_fighter.graphics.effects import create_explosion, create_hit_effect, create_flash_effect
+from thunder_fighter.entities.projectiles.bullets import Bullet
+from thunder_fighter.graphics.effects import create_explosion, create_flash_effect
+from thunder_fighter.graphics.renderers import create_player_ship
 from thunder_fighter.utils.logger import logger
+
 
 class Player(pygame.sprite.Sprite):
     """Player class"""
@@ -22,11 +37,11 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
         self.sound_manager = sound_manager  # Store sound manager instance
-        
+
         # Use custom graphics instead of rectangle
         self.image = create_player_ship()
         self.rect = self.image.get_rect()
-        
+
         # Position (float for precision)
         self.x = float(WIDTH // 2)
         self.y = float(HEIGHT - 10)
@@ -41,25 +56,25 @@ class Player(pygame.sprite.Sprite):
         self.last_shot = ptime.get_ticks()
         # Add thruster animation effect
         self.thrust = 0
-        
+
         # Bullet attributes
         self.bullet_speed = BULLET_SPEED_DEFAULT
         self.max_bullet_speed = BULLET_SPEED_MAX
         self.bullet_paths = BULLET_PATHS_DEFAULT
         self.max_bullet_paths = BULLET_PATHS_MAX
-        
+
         # Sprite groups
         self.all_sprites = all_sprites
         self.bullets_group = bullets_group
-        
+
         # Visual effects
         self.flash_timer = 0
         self.flash_duration = 0
         self.original_image = self.image.copy()
-        
+
         # Animation effects
         self.angle = 0  # For rotation animation
-        
+
         # Wingmen
         self.wingmen = pygame.sprite.Group()
         self.wingmen_list = []
@@ -67,13 +82,13 @@ class Player(pygame.sprite.Sprite):
         self.enemies_group = enemies_group
         self.last_missile_shot = ptime.get_ticks()
         self.missile_shoot_delay = 2000 # 2 seconds
-        
+
     def update(self):
         """Update player state"""
         # Reset movement speed
         self.speedx = 0
         self.speedy = 0
-        
+
         # Get key states
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
@@ -84,27 +99,27 @@ class Player(pygame.sprite.Sprite):
             self.speedy = -self.speed # Use current speed
         if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
             self.speedy = self.speed # Use current speed
-        
+
         # Shooting
         if keystate[pygame.K_SPACE]:
             self.shoot()
-        
+
         # Fire missiles
         self.shoot_missiles()
-            
+
         # Move player
         self.x += self.speedx
         self.y += self.speedy
-        
+
         # Slight floating animation for the aircraft
         self.angle = (self.angle + 1) % 360
         dy = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
         self.y += dy
-        
+
         # Update final rect position
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
-        
+
         # Keep player within bounds
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -118,10 +133,10 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom > HEIGHT:
             self.rect.bottom = HEIGHT
             self.y = self.rect.centery
-            
+
         # Update thruster animation
         self.thrust = (self.thrust + 1) % 10
-        
+
         # Flash effect
         current_time = ptime.get_ticks()
         if self.flash_timer > 0:
@@ -130,26 +145,26 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.original_image.copy()
             else:
                 self.image = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
-            
+
             # Decrease timer
             self.flash_timer -= 1
         else:
             # Ensure original image is restored after flashing ends
             if self.image != self.original_image:
                  self.image = self.original_image.copy()
-        
+
         # Update wingmen positions
         self.wingmen.update()
-            
+
     def shoot(self):
         """Fire bullets"""
         now = ptime.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
-            
+
             # Play shooting sound effect
             # self.sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
-            
+
             # Create different numbers and angles of bullets based on bullet paths
             if self.bullet_paths == 1:
                 # Single straight shot
@@ -185,7 +200,7 @@ class Player(pygame.sprite.Sprite):
             return
 
         self.last_missile_shot = now
-        
+
         # Access the game object to check for a boss
         game = self.game
         if not game:
@@ -203,7 +218,7 @@ class Player(pygame.sprite.Sprite):
             # Sort enemies by distance to the player
             sorted_enemies = sorted(self.enemies_group.sprites(),
                                     key=lambda e: pygame.math.Vector2(self.rect.center).distance_to(e.rect.center))
-            
+
             # Assign the closest enemies to the wingmen
             targets = sorted_enemies[:len(self.wingmen_list)]
 
@@ -217,7 +232,7 @@ class Player(pygame.sprite.Sprite):
         """Add a wingman"""
         if len(self.wingmen_list) >= PLAYER_MAX_WINGMEN:
             return False # Maximum number reached
-        
+
         # Determine position for new wingman
         if not self.wingmen_list:
             side = 'left'
@@ -238,39 +253,39 @@ class Player(pygame.sprite.Sprite):
             # Consume one wingman
             wingman_to_remove = self.wingmen_list.pop()
             wingman_to_remove.kill()
-            
+
             # Create explosion effect
             explosion = create_explosion(wingman_to_remove.rect.center, 'sm')
             self.all_sprites.add(explosion)
-            
+
             # Play sound effect
             if self.sound_manager:
                 self.sound_manager.play_sound('enemy_explosion')
             return False # Player not dead
 
         self.health -= damage
-        
+
         # Damage flash effect
         self.flash_timer = PLAYER_FLASH_FRAMES
-        
+
         # Create flash effect instead of hit effect
         create_flash_effect(self, WHITE)
-        
+
         # Play hit sound effect
         if self.sound_manager:
             self.sound_manager.play_sound('player_hit')
-        
+
         return self.health <= 0  # Return whether dead
-    
+
     def heal(self, amount=PLAYER_HEAL_AMOUNT):
         """Player heals"""
         self.health = min(PLAYER_HEALTH, self.health + amount)
-    
+
     def increase_bullet_speed(self, amount=BULLET_SPEED_UPGRADE_AMOUNT):
         """Increase bullet speed"""
         self.bullet_speed = min(self.max_bullet_speed, self.bullet_speed + amount)
         return self.bullet_speed
-        
+
     def increase_bullet_paths(self):
         """Increase bullet paths"""
         if self.bullet_paths < self.max_bullet_paths:
@@ -287,12 +302,12 @@ class Player(pygame.sprite.Sprite):
         # Check if already at max speed
         if self.speed >= PLAYER_MAX_SPEED:
             return False
-        
+
         self.speed += PLAYER_SPEED_UPGRADE_AMOUNT
         # Player speed increase should be shown in game UI, not just logged
         logger.info(f"Player speed increased to: {self.speed}")
         return True
-        
+
     def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
         """
         Increase player movement speed - matches method name called in collisions.py
@@ -306,8 +321,8 @@ class Player(pygame.sprite.Sprite):
         # Check if already at max speed
         if self.speed >= PLAYER_MAX_SPEED:
             return self.speed
-            
+
         # Increase speed but not exceed max
         self.speed = min(self.max_speed, self.speed + amount)
         logger.info(f"Player speed increased to: {self.speed}")
-        return self.speed 
+        return self.speed

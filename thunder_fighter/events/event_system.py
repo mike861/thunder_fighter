@@ -5,11 +5,12 @@ This module provides the core event system for decoupled communication
 between game components.
 """
 
-from abc import ABC, abstractmethod
-from enum import Enum
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Callable, Optional, Set
 import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Set
+
 from thunder_fighter.utils.logger import logger
 
 
@@ -26,13 +27,13 @@ class Event:
     This class represents an event that can be dispatched through
     the event system to decouple component communication.
     """
-    
+
     event_type: EventType
     data: Dict[str, Any] = field(default_factory=dict)
     timestamp: float = field(default_factory=time.time)
     source: str = "unknown"
     handled: bool = False
-    
+
     def get_data(self, key: str, default: Any = None) -> Any:
         """
         Get data from the event.
@@ -45,7 +46,7 @@ class Event:
             The data value or default
         """
         return self.data.get(key, default)
-    
+
     def set_data(self, key: str, value: Any):
         """
         Set data in the event.
@@ -55,15 +56,15 @@ class Event:
             value: Value to set
         """
         self.data[key] = value
-    
+
     def mark_handled(self):
         """Mark this event as handled."""
         self.handled = True
-    
+
     def is_handled(self) -> bool:
         """Check if this event has been handled."""
         return self.handled
-    
+
     def __str__(self):
         return f"Event({self.event_type.value}, source={self.source}, handled={self.handled})"
 
@@ -75,7 +76,7 @@ class EventListener(ABC):
     Components that want to receive events should inherit from this class
     and implement the handle_event method.
     """
-    
+
     @abstractmethod
     def handle_event(self, event: Event) -> bool:
         """
@@ -88,7 +89,7 @@ class EventListener(ABC):
             True if the event was handled and should not be passed to other listeners
         """
         pass
-    
+
     def get_listened_events(self) -> Set[EventType]:
         """
         Get the set of event types this listener is interested in.
@@ -106,7 +107,7 @@ class EventSystem:
     This system provides decoupled communication between game components
     through an event-driven architecture.
     """
-    
+
     def __init__(self):
         """Initialize the event system."""
         self._listeners: Dict[EventType, List[EventListener]] = {}
@@ -114,9 +115,9 @@ class EventSystem:
         self._event_queue: List[Event] = []
         self._processing_events = False
         self._events_processed = 0
-        
+
         logger.info("EventSystem initialized")
-    
+
     def register_listener(self, event_type: EventType, listener: EventListener):
         """
         Register a listener for a specific event type.
@@ -127,11 +128,11 @@ class EventSystem:
         """
         if event_type not in self._listeners:
             self._listeners[event_type] = []
-        
+
         if listener not in self._listeners[event_type]:
             self._listeners[event_type].append(listener)
             logger.debug(f"Registered listener for event type: {event_type.value}")
-    
+
     def unregister_listener(self, event_type: EventType, listener: EventListener):
         """
         Unregister a listener for a specific event type.
@@ -146,7 +147,7 @@ class EventSystem:
                 logger.debug(f"Unregistered listener for event type: {event_type.value}")
             except ValueError:
                 logger.warning(f"Listener not found for event type: {event_type.value}")
-    
+
     def register_global_listener(self, listener: EventListener):
         """
         Register a global listener that receives all events.
@@ -157,7 +158,7 @@ class EventSystem:
         if listener not in self._global_listeners:
             self._global_listeners.append(listener)
             logger.debug("Registered global event listener")
-    
+
     def unregister_global_listener(self, listener: EventListener):
         """
         Unregister a global listener.
@@ -170,7 +171,7 @@ class EventSystem:
             logger.debug("Unregistered global event listener")
         except ValueError:
             logger.warning("Global listener not found")
-    
+
     def dispatch_event(self, event: Event, immediate: bool = False):
         """
         Dispatch an event to registered listeners.
@@ -184,26 +185,26 @@ class EventSystem:
         else:
             self._event_queue.append(event)
             logger.debug(f"Queued event: {event.event_type.value}")
-    
+
     def process_events(self):
         """Process all queued events."""
         if self._processing_events:
             logger.warning("Already processing events, skipping to avoid recursion")
             return
-        
+
         self._processing_events = True
-        
+
         try:
             events_to_process = self._event_queue.copy()
             self._event_queue.clear()
-            
+
             for event in events_to_process:
                 self._process_event(event)
                 self._events_processed += 1
-        
+
         finally:
             self._processing_events = False
-    
+
     def _process_event(self, event: Event):
         """
         Process a single event.
@@ -212,7 +213,7 @@ class EventSystem:
             event: The event to process
         """
         logger.debug(f"Processing event: {event.event_type.value}")
-        
+
         # Send to global listeners first
         for listener in self._global_listeners:
             try:
@@ -229,7 +230,7 @@ class EventSystem:
                         return
             except Exception as e:
                 logger.error(f"Error in global event listener: {e}", exc_info=True)
-        
+
         # Send to specific event type listeners
         if event.event_type in self._listeners:
             for listener in self._listeners[event.event_type]:
@@ -247,7 +248,7 @@ class EventSystem:
                             return
                 except Exception as e:
                     logger.error(f"Error in event listener for {event.event_type.value}: {e}", exc_info=True)
-    
+
     def create_event(self, event_type: EventType, source: str = "unknown", **data) -> Event:
         """
         Create an event with the given type and data.
@@ -265,8 +266,8 @@ class EventSystem:
             data=data,
             source=source
         )
-    
-    def emit_event(self, event_type: EventType, source: str = "unknown", 
+
+    def emit_event(self, event_type: EventType, source: str = "unknown",
                    immediate: bool = False, **data):
         """
         Create and dispatch an event in one call.
@@ -279,13 +280,13 @@ class EventSystem:
         """
         event = self.create_event(event_type, source, **data)
         self.dispatch_event(event, immediate)
-    
+
     def clear_event_queue(self):
         """Clear all queued events."""
         cleared_count = len(self._event_queue)
         self._event_queue.clear()
         logger.debug(f"Cleared {cleared_count} queued events")
-    
+
     def get_queue_size(self) -> int:
         """
         Get the number of queued events.
@@ -294,7 +295,7 @@ class EventSystem:
             Number of events in the queue
         """
         return len(self._event_queue)
-    
+
     def get_listener_count(self, event_type: EventType = None) -> int:
         """
         Get the number of listeners for an event type.
@@ -312,7 +313,7 @@ class EventSystem:
             return total
         else:
             return len(self._listeners.get(event_type, []))
-    
+
     def get_events_processed(self) -> int:
         """
         Get the total number of events processed.
@@ -321,13 +322,13 @@ class EventSystem:
             Number of events processed since initialization
         """
         return self._events_processed
-    
+
     def reset_statistics(self):
         """Reset event processing statistics."""
         self._events_processed = 0
         logger.debug("Event system statistics reset")
-    
+
     def __str__(self):
         return (f"EventSystem(listeners={len(self._listeners)}, "
                 f"queue_size={len(self._event_queue)}, "
-                f"processed={self._events_processed})") 
+                f"processed={self._events_processed})")

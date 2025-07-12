@@ -13,43 +13,36 @@ Backward Compatibility:
 """
 
 # New input system (recommended)
-from .facade import (
-    InputSystem,
-    create_for_production,
-    create_for_testing,
-    InputSystemBuilder
+# Adapters (for advanced users)
+from .adapters.pygame_adapter import (
+    PygameClock,
+    PygameEventSource,
+    PygameKeyboardState,
+    PygameLogger,
+    create_pygame_adapters,
 )
+from .adapters.test_adapter import (
+    TestClock,
+    TestEventSource,
+    TestKeyboardState,
+    TestLogger,
+    TestScenario,
+    create_test_environment,
+)
+from .bindings import KeyBindings
+
+# Boundary interfaces (for extension)
+from .core.boundaries import Clock, EventSource, KeyboardState, Logger
 
 # Core models
 from .core.commands import Command, CommandType
 from .core.events import Event, EventType
-
-# Boundary interfaces (for extension)
-from .core.boundaries import EventSource, KeyboardState, Clock, Logger
-
-# Adapters (for advanced users)
-from .adapters.pygame_adapter import (
-    PygameEventSource,
-    PygameKeyboardState, 
-    PygameClock,
-    PygameLogger,
-    create_pygame_adapters
-)
-
-from .adapters.test_adapter import (
-    TestEventSource,
-    TestKeyboardState,
-    TestClock,
-    TestLogger,
-    create_test_environment,
-    TestScenario
-)
+from .events import InputEvent, InputEventType
+from .facade import InputSystem, InputSystemBuilder, create_for_production, create_for_testing
+from .handler import InputHandler
 
 # Original interfaces (for backward compatibility)
 from .manager import InputManager
-from .handler import InputHandler
-from .bindings import KeyBindings
-from .events import InputEvent, InputEventType
 
 # Version information
 __version__ = "2.0.0"
@@ -59,29 +52,29 @@ __author__ = "Thunder Fighter Team"
 __all__ = [
     # New input system
     'InputSystem',
-    'create_for_production', 
+    'create_for_production',
     'create_for_testing',
     'InputSystemBuilder',
-    
+
     # Core models
     'Command',
     'CommandType',
-    'Event', 
+    'Event',
     'EventType',
-    
+
     # Boundary interfaces
     'EventSource',
     'KeyboardState',
     'Clock',
     'Logger',
-    
+
     # Pygame adapters
     'PygameEventSource',
     'PygameKeyboardState',
-    'PygameClock', 
+    'PygameClock',
     'PygameLogger',
     'create_pygame_adapters',
-    
+
     # Test adapters
     'TestEventSource',
     'TestKeyboardState',
@@ -89,11 +82,11 @@ __all__ = [
     'TestLogger',
     'create_test_environment',
     'TestScenario',
-    
+
     # Original interfaces (for backward compatibility)
     'InputManager',
-    'InputHandler', 
+    'InputHandler',
     'KeyBindings',
     'InputEvent',
     'InputEventType'
-] 
+]

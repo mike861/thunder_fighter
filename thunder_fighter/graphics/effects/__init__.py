@@ -5,25 +5,6 @@ Contains all visual effects related implementations.
 """
 
 from .explosion import Explosion
-from .stars import *
-from .particles import (
-    ParticleSystem,
-    get_particle_system,
-    create_particle_explosion,
-    create_particle_trail,
-    create_particle_sparks,
-    create_particle_hit_effect,
-    update_particles,
-    render_particles,
-    clear_particles,
-)
-
-# Import notification classes
-from .notifications import (
-    Notification,
-    WarningNotification,
-    AchievementNotification,
-)
 
 # Import explosion effects
 from .explosions import (
@@ -33,11 +14,30 @@ from .explosions import (
 
 # Import flash effects
 from .flash_effects import (
-    create_flash_effect,
     FlashEffect,
     FlashEffectManager,
+    create_flash_effect,
     flash_manager,
 )
+
+# Import notification classes
+from .notifications import (
+    AchievementNotification,
+    Notification,
+    WarningNotification,
+)
+from .particles import (
+    ParticleSystem,
+    clear_particles,
+    create_particle_explosion,
+    create_particle_hit_effect,
+    create_particle_sparks,
+    create_particle_trail,
+    get_particle_system,
+    render_particles,
+    update_particles,
+)
+from .stars import *
 
 __all__ = [
     'Explosion',

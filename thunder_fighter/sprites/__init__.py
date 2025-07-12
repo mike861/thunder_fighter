@@ -1,1 +1,1 @@
-# sprites package initialization 
+# sprites package initialization

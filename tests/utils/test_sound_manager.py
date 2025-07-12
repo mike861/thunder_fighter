@@ -1,9 +1,9 @@
+
 import pytest
-from unittest.mock import patch, MagicMock
-import pygame
 
 # Import the global instance, not the class
-from thunder_fighter.utils.sound_manager import sound_manager, SoundManager
+from thunder_fighter.utils.sound_manager import sound_manager
+
 
 @pytest.fixture(autouse=True)
 def clean_sound_manager_state():
@@ -12,14 +12,14 @@ def clean_sound_manager_state():
     original_initialized = sound_manager._initialized
     original_sounds = sound_manager.sounds.copy()
     original_music_enabled = sound_manager.music_enabled
-    
+
     # Reset for test
     sound_manager._initialized = False
     sound_manager.sounds.clear()
     sound_manager.music_enabled = False
-    
+
     yield
-    
+
     # Restore original state
     sound_manager._initialized = original_initialized
     sound_manager.sounds = original_sounds
@@ -48,7 +48,7 @@ class TestSoundManager:
             sound_manager.play_sound('non_existent_sound')
         except Exception as e:
             pytest.fail(f"Playing non-existent sound raised an exception: {e}")
-        
+
         # Test music operations
         try:
             sound_manager.stop_music()
@@ -57,4 +57,4 @@ class TestSoundManager:
             sound_manager.toggle_sound()
             sound_manager.toggle_music()
         except Exception as e:
-            pytest.fail(f"Basic operations raised an exception: {e}") 
+            pytest.fail(f"Basic operations raised an exception: {e}")

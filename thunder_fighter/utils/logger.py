@@ -1,6 +1,6 @@
 import logging
-import sys
 import os
+import sys
 
 # Define log levels
 LOG_LEVELS = {
@@ -76,4 +76,4 @@ if __name__ == '__main__':
 
     # Test default logger
     logger.info("Testing the default logger instance.")
-    print("Logger test complete.") 
+    print("Logger test complete.")

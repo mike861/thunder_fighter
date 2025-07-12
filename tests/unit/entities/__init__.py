@@ -1,1 +1,1 @@
-# Entity factory unit tests for Thunder Fighter 
+# Entity factory unit tests for Thunder Fighter

@@ -1,7 +1,9 @@
 import pygame
+
+from thunder_fighter.constants import WINGMAN_FORMATION_SPACING
 from thunder_fighter.entities.projectiles.missile import TrackingMissile
 from thunder_fighter.graphics.renderers import create_wingman
-from thunder_fighter.constants import WINGMAN_FORMATION_SPACING
+
 
 class Wingman(pygame.sprite.Sprite):
     """
@@ -17,9 +19,9 @@ class Wingman(pygame.sprite.Sprite):
         super().__init__()
         self.player = player
         self.side = side
-        
+
         self.image = create_wingman()
-        
+
         self.rect = self.image.get_rect()
         self.update() # Set initial position
 

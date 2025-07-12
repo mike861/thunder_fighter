@@ -6,8 +6,8 @@ standardized way to create game entities with configuration and tracking.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Type, TypeVar, Generic
-import pygame
+from typing import Any, Dict, Generic, Optional, Type, TypeVar
+
 from thunder_fighter.utils.logger import logger
 
 # Type variable for entity types
@@ -21,7 +21,7 @@ class EntityFactory(ABC, Generic[T]):
     This class provides common functionality for creating game entities
     with consistent configuration and initialization patterns.
     """
-    
+
     def __init__(self, entity_type: Type[T]):
         """
         Initialize the entity factory.
@@ -32,9 +32,9 @@ class EntityFactory(ABC, Generic[T]):
         self.entity_type = entity_type
         self._default_config: Dict[str, Any] = {}
         self._creation_count = 0
-        
+
         logger.debug(f"EntityFactory initialized for {entity_type.__name__}")
-    
+
     def set_default_config(self, config: Dict[str, Any]):
         """
         Set default configuration for entities created by this factory.
@@ -44,7 +44,7 @@ class EntityFactory(ABC, Generic[T]):
         """
         self._default_config = config.copy()
         logger.debug(f"Default config set for {self.entity_type.__name__}")
-    
+
     def get_default_config(self) -> Dict[str, Any]:
         """
         Get the default configuration.
@@ -53,7 +53,7 @@ class EntityFactory(ABC, Generic[T]):
             Copy of the default configuration dictionary
         """
         return self._default_config.copy()
-    
+
     def create(self, **kwargs) -> T:
         """
         Create an entity with the given parameters.
@@ -67,21 +67,21 @@ class EntityFactory(ABC, Generic[T]):
         # Merge default config with provided parameters
         config = self._default_config.copy()
         config.update(kwargs)
-        
+
         # Validate configuration
         self._validate_config(config)
-        
+
         # Create the entity
         entity = self._create_entity(config)
-        
+
         # Post-creation setup
         self._post_creation_setup(entity, config)
-        
+
         self._creation_count += 1
         logger.debug(f"Created {self.entity_type.__name__} #{self._creation_count}")
-        
+
         return entity
-    
+
     @abstractmethod
     def _create_entity(self, config: Dict[str, Any]) -> T:
         """
@@ -94,7 +94,7 @@ class EntityFactory(ABC, Generic[T]):
             Created entity instance
         """
         pass
-    
+
     def _validate_config(self, config: Dict[str, Any]):
         """
         Validate the configuration before entity creation.
@@ -110,7 +110,7 @@ class EntityFactory(ABC, Generic[T]):
         for field in required_fields:
             if field not in config:
                 raise ValueError(f"Required field '{field}' missing for {self.entity_type.__name__}")
-    
+
     def _get_required_fields(self) -> list:
         """
         Get list of required configuration fields.
@@ -119,7 +119,7 @@ class EntityFactory(ABC, Generic[T]):
             List of required field names
         """
         return []  # Override in subclasses
-    
+
     def _post_creation_setup(self, entity: T, config: Dict[str, Any]):
         """
         Perform post-creation setup on the entity.
@@ -130,7 +130,7 @@ class EntityFactory(ABC, Generic[T]):
         """
         # Base implementation does nothing - override in subclasses
         pass
-    
+
     def get_creation_count(self) -> int:
         """
         Get the number of entities created by this factory.
@@ -139,12 +139,12 @@ class EntityFactory(ABC, Generic[T]):
             Number of entities created
         """
         return self._creation_count
-    
+
     def reset_creation_count(self):
         """Reset the creation counter."""
         self._creation_count = 0
         logger.debug(f"Creation count reset for {self.entity_type.__name__}")
-    
+
     def create_batch(self, count: int, **kwargs) -> list:
         """
         Create multiple entities with the same configuration.
@@ -162,10 +162,10 @@ class EntityFactory(ABC, Generic[T]):
             batch_config = kwargs.copy()
             batch_config['batch_index'] = i
             entities.append(self.create(**batch_config))
-        
+
         logger.debug(f"Created batch of {count} {self.entity_type.__name__} entities")
         return entities
-    
+
     def __str__(self):
         return f"{self.__class__.__name__}({self.entity_type.__name__}, created={self._creation_count})"
 
@@ -177,12 +177,12 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     This factory allows defining named configuration presets that can be
     used to create entities with predefined settings.
     """
-    
+
     def __init__(self, entity_type: Type[T]):
         """Initialize the configurable entity factory."""
         super().__init__(entity_type)
         self._presets: Dict[str, Dict[str, Any]] = {}
-    
+
     def add_preset(self, name: str, config: Dict[str, Any]):
         """
         Add a configuration preset.
@@ -193,7 +193,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
         """
         self._presets[name] = config.copy()
         logger.debug(f"Added preset '{name}' for {self.entity_type.__name__}")
-    
+
     def remove_preset(self, name: str):
         """
         Remove a configuration preset.
@@ -204,7 +204,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
         if name in self._presets:
             del self._presets[name]
             logger.debug(f"Removed preset '{name}' for {self.entity_type.__name__}")
-    
+
     def get_preset(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Get a configuration preset.
@@ -216,7 +216,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
             Configuration dictionary or None if not found
         """
         return self._presets.get(name, {}).copy() if name in self._presets else None
-    
+
     def list_presets(self) -> list:
         """
         Get list of available preset names.
@@ -225,7 +225,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
             List of preset names
         """
         return list(self._presets.keys())
-    
+
     def create_from_preset(self, preset_name: str, **overrides) -> T:
         """
         Create an entity using a configuration preset.
@@ -242,14 +242,14 @@ class ConfigurableEntityFactory(EntityFactory[T]):
         """
         if preset_name not in self._presets:
             raise ValueError(f"Preset '{preset_name}' not found for {self.entity_type.__name__}")
-        
+
         # Start with preset configuration
         config = self._presets[preset_name].copy()
         # Apply overrides
         config.update(overrides)
-        
+
         return self.create(**config)
-    
+
     def create_preset_batch(self, preset_name: str, count: int, **overrides) -> list:
         """
         Create multiple entities using a preset.
@@ -267,6 +267,6 @@ class ConfigurableEntityFactory(EntityFactory[T]):
             batch_overrides = overrides.copy()
             batch_overrides['batch_index'] = i
             entities.append(self.create_from_preset(preset_name, **batch_overrides))
-        
+
         logger.debug(f"Created batch of {count} {self.entity_type.__name__} entities from preset '{preset_name}'")
-        return entities 
+        return entities

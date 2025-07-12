@@ -5,8 +5,8 @@ This package provides an event system for decoupled communication between
 game components in the Thunder Fighter game.
 """
 
-from .event_system import EventSystem, Event, EventType
-from .game_events import GameEventType, GameEvent
+from .event_system import Event, EventSystem, EventType
+from .game_events import GameEvent, GameEventType
 
 __all__ = [
     'EventSystem',
@@ -14,4 +14,4 @@ __all__ = [
     'EventType',
     'GameEventType',
     'GameEvent'
-] 
+]

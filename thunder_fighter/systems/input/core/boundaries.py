@@ -6,7 +6,8 @@ implementing the dependency inversion principle so that the core logic does not 
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Tuple
+from typing import Dict, List
+
 from .events import Event
 
 
@@ -17,7 +18,7 @@ class EventSource(ABC):
     Defines the abstract interface for getting input events, isolating specific implementations like pygame.
     Implementing classes are responsible for converting external input events into standard Event objects.
     """
-    
+
     @abstractmethod
     def poll_events(self) -> List[Event]:
         """
@@ -27,7 +28,7 @@ class EventSource(ABC):
             A list of Event objects, containing all pending input events.
         """
         pass
-    
+
     @abstractmethod
     def clear_events(self):
         """Clears the event queue."""
@@ -40,7 +41,7 @@ class KeyboardState(ABC):
     
     Defines the abstract interface for querying keyboard state, supporting real-time querying of key states.
     """
-    
+
     @abstractmethod
     def is_pressed(self, key_code: int) -> bool:
         """
@@ -53,7 +54,7 @@ class KeyboardState(ABC):
             True if the key is pressed, False otherwise.
         """
         pass
-    
+
     @abstractmethod
     def get_pressed_keys(self) -> List[int]:
         """
@@ -71,7 +72,7 @@ class Clock(ABC):
     
     Defines the abstract interface for time-related functions, supporting controllable time flow.
     """
-    
+
     @abstractmethod
     def now(self) -> float:
         """
@@ -81,7 +82,7 @@ class Clock(ABC):
             The current timestamp (in seconds).
         """
         pass
-    
+
     @abstractmethod
     def delta_time(self) -> float:
         """
@@ -99,7 +100,7 @@ class InputConfiguration(ABC):
     
     Defines the abstract interface for input configuration, supporting key mapping and input behavior configuration.
     """
-    
+
     @abstractmethod
     def get_key_mapping(self) -> Dict[int, str]:
         """
@@ -109,7 +110,7 @@ class InputConfiguration(ABC):
             A dictionary mapping key codes to command types.
         """
         pass
-    
+
     @abstractmethod
     def get_repeat_delay(self) -> float:
         """
@@ -119,7 +120,7 @@ class InputConfiguration(ABC):
             The delay time before the first repeat (in seconds).
         """
         pass
-    
+
     @abstractmethod
     def get_repeat_rate(self) -> float:
         """
@@ -129,7 +130,7 @@ class InputConfiguration(ABC):
             The interval time for repeated keys (in seconds).
         """
         pass
-    
+
     @abstractmethod
     def is_continuous_key(self, key_code: int) -> bool:
         """
@@ -150,22 +151,22 @@ class Logger(ABC):
     
     Defines the abstract interface for logging, supporting different levels of log output.
     """
-    
+
     @abstractmethod
     def debug(self, message: str):
         """Logs a debug message."""
         pass
-    
+
     @abstractmethod
     def info(self, message: str):
         """Logs a general information message."""
         pass
-    
+
     @abstractmethod
     def warning(self, message: str):
         """Logs a warning message."""
         pass
-    
+
     @abstractmethod
     def error(self, message: str):
         """Logs an error message."""

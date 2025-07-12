@@ -1,14 +1,22 @@
-import unittest
-from unittest.mock import MagicMock, patch
-import pygame
+import os
 
 # Since the test runner has path issues, we add the root manually.
 import sys
-import os
+import unittest
+from unittest.mock import MagicMock, patch
+
+import pygame
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from thunder_fighter.entities.items.items import create_random_item, HealthItem, BulletSpeedItem, BulletPathItem, PlayerSpeedItem, WingmanItem
-from thunder_fighter.graphics.renderers import create_wingman_item
+from thunder_fighter.entities.items.items import (
+    BulletPathItem,
+    BulletSpeedItem,
+    HealthItem,
+    PlayerSpeedItem,
+    WingmanItem,
+    create_random_item,
+)
 
 # A real pygame surface to be returned by mocks
 MOCK_SURFACE = pygame.Surface((10, 10))
@@ -23,7 +31,7 @@ class TestItems(unittest.TestCase):
         self.mock_player.bullet_speed = 10
         self.mock_player.bullet_paths = 1
         self.mock_player.wingmen_list = []
-        
+
         self.mock_sprites_group = MagicMock()
         self.mock_items_group = MagicMock()
 
@@ -35,11 +43,11 @@ class TestItems(unittest.TestCase):
     @patch('thunder_fighter.sprites.items.create_wingman_item', return_value=MOCK_SURFACE)
     def test_create_random_item_logic(self, mock_create_wingman, mock_create_player_speed, mock_create_bullet_path, mock_create_bullet_speed, mock_create_health, mock_choices):
         """Test that create_random_item correctly creates items based on weighted choices."""
-        
+
         def run_test(item_class, game_time, game_level):
             mock_choices.return_value = [item_class]
             item = create_random_item(game_time, game_level, self.mock_sprites_group, self.mock_items_group, self.mock_player)
-            
+
             self.assertIsInstance(item, item_class)
             self.mock_sprites_group.add.assert_called_with(item)
             self.mock_items_group.add.assert_called_with(item)
@@ -53,8 +61,8 @@ class TestItems(unittest.TestCase):
 
     def test_wingman_item_creation_level_gate(self):
         """Test that WingmanItem is only created at or after game level 3."""
-        
-        # At level 2, it should NOT be created. 
+
+        # At level 2, it should NOT be created.
         # The internal logic should now correctly assign a weight of 0.
         item = create_random_item(5, 2, self.mock_sprites_group, self.mock_items_group, self.mock_player)
         self.assertNotIsInstance(item, WingmanItem, "WingmanItem was created at game level 2")
@@ -68,4 +76,4 @@ class TestItems(unittest.TestCase):
                  self.assertIsInstance(item, WingmanItem, "WingmanItem was not created at game level 3")
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

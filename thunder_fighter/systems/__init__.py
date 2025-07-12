@@ -5,13 +5,13 @@ Contains implementations of all core game systems.
 """
 
 from .collision import CollisionSystem
+from .physics import PhysicsSystem
 from .scoring import ScoringSystem
 from .spawning import SpawningSystem
-from .physics import PhysicsSystem
 
 __all__ = [
     'CollisionSystem',
-    'ScoringSystem', 
+    'ScoringSystem',
     'SpawningSystem',
     'PhysicsSystem',
 ]

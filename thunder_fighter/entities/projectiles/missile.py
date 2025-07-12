@@ -1,7 +1,10 @@
-import pygame
 import math
-from thunder_fighter.constants import WIDTH, HEIGHT
+
+import pygame
+
+from thunder_fighter.constants import HEIGHT, WIDTH
 from thunder_fighter.graphics.renderers import create_tracking_missile
+
 
 class TrackingMissile(pygame.sprite.Sprite):
     """
@@ -9,7 +12,7 @@ class TrackingMissile(pygame.sprite.Sprite):
     """
     def __init__(self, x, y, target):
         super().__init__()
-        
+
         self.image = create_tracking_missile()
         self.original_image = self.image
         self.rect = self.image.get_rect(center=(x, y))
@@ -58,4 +61,4 @@ class TrackingMissile(pygame.sprite.Sprite):
 
         # Kill if it goes off-screen (failsafe)
         if self.rect.bottom < 0 or self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
-            self.kill() 
+            self.kill()

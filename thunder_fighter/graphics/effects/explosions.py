@@ -4,11 +4,13 @@ Explosion Effects
 Handles explosion and hit effect creation and rendering.
 """
 
-import pygame
-import random
 import math
-from thunder_fighter.graphics.effects.explosion import Explosion
+import random
+
+import pygame
+
 from thunder_fighter.constants import WHITE
+from thunder_fighter.graphics.effects.explosion import Explosion
 
 
 def create_explosion(center, size_str='md'):
@@ -31,21 +33,21 @@ def _draw_hit_effect(hit_obj):
     """Custom hit effect drawing function"""
     # Clear surface
     hit_obj.image.fill((0, 0, 0))
-    
+
     # Hit effect uses different colors
     center = (40, 40)  # Fixed center for 80x80 surface
     intensity = max(0, 5 - hit_obj.frame)
-    
+
     # Draw outer circle - white glow
     radius = 20 - hit_obj.frame * 3
     if radius > 0:
         pygame.draw.circle(hit_obj.image, WHITE, center, radius, 2)
-    
+
     # Draw inner circle - blue flash
     inner_radius = max(1, 15 - hit_obj.frame * 3)
     if inner_radius > 0:
         pygame.draw.circle(hit_obj.image, (100, 200, 255), center, inner_radius, 2)
-    
+
     # Draw hit particles - blue
     for _ in range(intensity * 3):
         angle = random.uniform(0, 2 * math.pi)

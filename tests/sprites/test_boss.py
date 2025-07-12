@@ -1,9 +1,9 @@
-import pytest
+from unittest.mock import MagicMock, patch
+
 import pygame
-import random
-from unittest.mock import MagicMock, patch, call
+import pytest
+
 from thunder_fighter.entities.enemies.boss import Boss
-from thunder_fighter.graphics.renderers import create_boss_ship
 
 @pytest.fixture
 def mock_pygame():
@@ -56,10 +56,10 @@ def boss(mocker):
     # Use a real group for bullets to test add() behavior
     mock_boss_bullets = pygame.sprite.Group()
     mocker.patch('thunder_fighter.sprites.boss.create_boss_ship', return_value=pygame.Surface((100, 80)))
-    
+
     # Mock pygame.time.get_ticks
     mocker.patch('pygame.time.get_ticks', return_value=0)
-    
+
     boss_instance = Boss(mock_all_sprites, mock_boss_bullets, level=2, game_level=1)
     # Set a predictable position for tests
     boss_instance.rect.centerx = 240
@@ -79,7 +79,7 @@ class TestBoss:
         """Test Boss shooting logic"""
         # Patch the rendering function for bullets to avoid graphical operations
         mocker.patch('thunder_fighter.sprites.bullets.create_boss_bullet', return_value=pygame.Surface((5, 10)))
-        
+
         initial_bullet_count = len(boss.boss_bullets_group)
         boss.shoot()
         assert len(boss.boss_bullets_group) > initial_bullet_count
@@ -105,7 +105,7 @@ class TestBoss:
         # 2. Test creation of multiple, distinct flash images
         flash_images = boss.flash_images
         assert len(flash_images) > 2, "Should create multiple flash images (e.g., normal, red, white)"
-        
+
         original_image = boss.original_image
         # Check that flash images are different from the original
         # by comparing a sample of their bytes
@@ -123,7 +123,7 @@ class TestBoss:
 
         # Act & Assert: Check that the image changes over the update cycles
         seen_images = {initial_image}
-        
+
         for _ in range(boss.damage_flash):
             boss.update()
             seen_images.add(boss.image)
@@ -131,7 +131,7 @@ class TestBoss:
         # After the cycle, the image should be restored
         boss.update()
         assert pygame.image.tostring(boss.image, 'RGB') == pygame.image.tostring(boss.original_image, 'RGB'), "Image should be restored after flash ends"
-        
+
         # Check that multiple different images were displayed during the cycle
         assert len(seen_images) > 2, "The flash cycle should display multiple different images"
 
@@ -141,47 +141,47 @@ class TestBoss:
         boss.rect.y = 50  # Ensure Boss has entered
         initial_x = boss.rect.centerx
         initial_y = boss.rect.centery
-        
+
         # Set direction and speed
         boss.direction = 1
         boss.base_speedx = 5  # Use larger speed value to ensure obvious movement effect
-        
+
         # Update Boss state
         boss.update()
-        
+
         # Y coordinate should remain relatively stable (may fluctuate within range)
         assert abs(boss.rect.centery - initial_y) < 50
-        
+
         # Check horizontal movement
         # Since direction is 1, speedx is positive, so x coordinate should increase
         assert boss.rect.centerx > initial_x
-        
+
         # Reset position, then test direction change
         boss.rect.centerx = initial_x
         boss.direction = -1
         boss.update()
-        
+
         # Direction is -1, speedx is negative, so x coordinate should decrease
         assert boss.rect.centerx < initial_x
-        
+
         # Test boundary bounce
         # Move Boss near left screen boundary
         boss.rect.left = 10
         boss.direction = -1  # Move left
         boss.speedx = boss.base_speedx * boss.direction  # Ensure speedx is negative
-        
+
         boss.update()
-        
+
         # Should reverse movement (direction changes to positive)
         assert boss.direction > 0
-        
+
         # Move Boss near right screen boundary
         boss.rect.right = 790  # Assume screen width is 800
         boss.direction = 1  # Move right
         boss.speedx = boss.base_speedx * boss.direction  # Ensure speedx is positive
-        
+
         boss.update()
-        
+
         # Should reverse movement (direction changes to negative)
         assert boss.direction < 0
 
@@ -189,18 +189,18 @@ class TestBoss:
         """Test Boss attack pattern changes based on health"""
         initial_health = boss.health
         initial_shoot_pattern = boss.shoot_pattern
-        
+
         # Deal heavy damage to reduce health below 50%
         boss.damage(initial_health // 2 + 1)
-        
+
         # Update state to trigger attack pattern change
         boss.update()
-        
+
         # Verify if attack pattern has changed
         # Usually when Boss health is low, attacks become more frequent or intense
         current_shoot_delay = boss.shoot_delay
         assert current_shoot_delay <= boss.shoot_delay
-        
+
         # Verify if attack pattern has changed
         assert boss.shoot_pattern != initial_shoot_pattern
 
@@ -208,15 +208,15 @@ class TestBoss:
         """Test Boss difficulty adjustment for different game levels"""
         # Compare attributes of same level Boss under different game levels
         boss_level = 2
-        
+
         easy_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 1)
         medium_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 5)
         hard_game_boss = Boss(boss.all_sprites, boss.boss_bullets_group, boss_level, 10)
-        
+
         # Verify that higher game level Bosses are stronger
         assert medium_game_boss.health >= easy_game_boss.health
         assert hard_game_boss.health >= medium_game_boss.health
-        
+
         # Verify attack speed increases with game level
         assert medium_game_boss.shoot_delay <= easy_game_boss.shoot_delay
         assert hard_game_boss.shoot_delay <= medium_game_boss.shoot_delay

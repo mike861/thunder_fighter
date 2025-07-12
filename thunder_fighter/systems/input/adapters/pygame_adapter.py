@@ -5,16 +5,18 @@ This module implements pygame-related adapters, converting pygame events and sta
 into standard interfaces to isolate external dependencies.
 """
 
-import pygame
 import time
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
+
+import pygame
+
+from ..core.boundaries import Clock, EventSource, KeyboardState, Logger
 from ..core.events import Event, EventType
-from ..core.boundaries import EventSource, KeyboardState, Clock, Logger
 
 
 class PygameEventSource(EventSource):
     """Pygame Event Source Adapter"""
-    
+
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame event source.
@@ -24,7 +26,7 @@ class PygameEventSource(EventSource):
         """
         self.logger = logger
         self._event_queue = []
-        
+
     def poll_events(self) -> List[Event]:
         """
         Gets all pending events.
@@ -36,20 +38,20 @@ class PygameEventSource(EventSource):
         try:
             # Get pygame events
             pygame_events = pygame.event.get()
-            
+
             for pg_event in pygame_events:
                 if event := self._convert_event(pg_event):
                     events.append(event)
-                    
+
             if self.logger and events:
                 self.logger.debug(f"Polled {len(events)} events from pygame")
-                
+
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error polling pygame events: {e}")
-            
+
         return events
-    
+
     def clear_events(self):
         """Clears the event queue."""
         try:
@@ -59,7 +61,7 @@ class PygameEventSource(EventSource):
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error clearing pygame events: {e}")
-    
+
     def _convert_event(self, pg_event) -> Optional[Event]:
         """
         Converts a pygame event to a standard event.
@@ -100,13 +102,13 @@ class PygameEventSource(EventSource):
                     type=EventType.MOUSE_MOVE,
                     position=pg_event.pos
                 )
-                
+
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error converting pygame event: {e}")
-                
+
         return None
-    
+
     def _get_modifiers(self) -> Dict[str, bool]:
         """
         Gets the state of modifier keys.
@@ -127,7 +129,7 @@ class PygameEventSource(EventSource):
 
 class PygameKeyboardState(KeyboardState):
     """Pygame Keyboard State Adapter"""
-    
+
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame keyboard state.
@@ -136,7 +138,7 @@ class PygameKeyboardState(KeyboardState):
             logger: Logger interface (optional).
         """
         self.logger = logger
-    
+
     def is_pressed(self, key_code: int) -> bool:
         """
         Checks if a specific key is pressed.
@@ -150,15 +152,15 @@ class PygameKeyboardState(KeyboardState):
         try:
             if not pygame.get_init():
                 return False
-                
+
             keys = pygame.key.get_pressed()
             return bool(keys[key_code]) if 0 <= key_code < len(keys) else False
-            
+
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error checking key state: {e}")
             return False
-    
+
     def get_pressed_keys(self) -> List[int]:
         """
         Gets all pressed keys.
@@ -169,10 +171,10 @@ class PygameKeyboardState(KeyboardState):
         try:
             if not pygame.get_init():
                 return []
-                
+
             keys = pygame.key.get_pressed()
             return [i for i in range(len(keys)) if keys[i]]
-            
+
         except Exception as e:
             if self.logger:
                 self.logger.error(f"Error getting pressed keys: {e}")
@@ -181,7 +183,7 @@ class PygameKeyboardState(KeyboardState):
 
 class PygameClock(Clock):
     """Pygame Clock Adapter"""
-    
+
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame clock.
@@ -193,7 +195,7 @@ class PygameClock(Clock):
         self.clock = pygame.time.Clock() if pygame.get_init() else None
         self._last_time = self._get_pygame_time()
         self._delta = 0.016  # Default 60 FPS
-        
+
     def now(self) -> float:
         """
         Gets the current time.
@@ -202,7 +204,7 @@ class PygameClock(Clock):
             The current timestamp (in seconds).
         """
         return self._get_pygame_time()
-    
+
     def delta_time(self) -> float:
         """
         Gets the frame time interval.
@@ -215,7 +217,7 @@ class PygameClock(Clock):
             self._delta = current - self._last_time
         self._last_time = current
         return self._delta
-    
+
     def _get_pygame_time(self) -> float:
         """Gets the pygame time or system time as a fallback."""
         try:
@@ -225,7 +227,7 @@ class PygameClock(Clock):
                 return time.time()
         except Exception:
             return time.time()
-    
+
     def tick(self, fps: int = 60) -> int:
         """
         Controls the frame rate (if using the pygame clock).
@@ -255,7 +257,7 @@ class PygameClock(Clock):
 
 class PygameLogger(Logger):
     """Simple Pygame-compatible logging implementation."""
-    
+
     def __init__(self, enable_debug: bool = False):
         """
         Initializes the logger.
@@ -264,20 +266,20 @@ class PygameLogger(Logger):
             enable_debug: Whether to enable debug output.
         """
         self.enable_debug = enable_debug
-    
+
     def debug(self, message: str):
         """Logs a debug message."""
         if self.enable_debug:
             print(f"[DEBUG] {message}")
-    
+
     def info(self, message: str):
         """Logs a general information message."""
         print(f"[INFO] {message}")
-    
+
     def warning(self, message: str):
         """Logs a warning message."""
         print(f"[WARNING] {message}")
-    
+
     def error(self, message: str):
         """Logs an error message."""
         print(f"[ERROR] {message}")
@@ -297,5 +299,5 @@ def create_pygame_adapters(enable_debug: bool = False) -> tuple[PygameEventSourc
     event_source = PygameEventSource(logger)
     keyboard_state = PygameKeyboardState(logger)
     clock = PygameClock(logger)
-    
+
     return event_source, keyboard_state, clock, logger

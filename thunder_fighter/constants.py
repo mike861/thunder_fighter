@@ -1,4 +1,3 @@
-import pygame
 import os
 
 # Get the absolute path of the directory where this file is located
@@ -118,5 +117,5 @@ BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.3  # Size multiplier for final bullets
 SCORE_THRESHOLD = 200  # Generate an item every 200 points
 
 # Game balance
-MAX_GAME_LEVEL = 8 # Maximum game level 
-INITIAL_GAME_LEVEL = 1  # Starting game level 
+MAX_GAME_LEVEL = 8 # Maximum game level
+INITIAL_GAME_LEVEL = 1  # Starting game level

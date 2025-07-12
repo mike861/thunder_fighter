@@ -1,9 +1,18 @@
-import pygame
-import random
 import math
-from thunder_fighter.constants import WIDTH, HEIGHT, PLAYER_MAX_SPEED, BULLET_SPEED_MAX, BULLET_PATHS_MAX
-from thunder_fighter.graphics.renderers import create_health_item, create_bullet_speed_item, create_bullet_path_item, create_player_speed_item, create_wingman_item
+import random
+
+import pygame
+
+from thunder_fighter.constants import HEIGHT, WIDTH
+from thunder_fighter.graphics.renderers import (
+    create_bullet_path_item,
+    create_bullet_speed_item,
+    create_health_item,
+    create_player_speed_item,
+    create_wingman_item,
+)
 from thunder_fighter.utils.logger import logger
+
 
 class HealthItem(pygame.sprite.Sprite):
     """Health item class"""
@@ -19,16 +28,16 @@ class HealthItem(pygame.sprite.Sprite):
         self.direction = random.choice([-1, 1])
         self.angle = random.randrange(360)
         self.type = "health"  # Item type identifier
-        
+
     def update(self):
         """Update item position"""
         # Vertical movement
         self.rect.y += self.speedy
-        
+
         # Horizontal swinging
         self.angle = (self.angle + 2) % 360
         self.rect.x += self.direction * math.sin(math.radians(self.angle)) * 0.5
-        
+
         # Ensure item doesn't go off screen edges
         if self.rect.left < 0:
             self.rect.left = 0
@@ -36,7 +45,7 @@ class HealthItem(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.direction = -1
-            
+
         # Remove item if it goes off bottom of screen
         if self.rect.top > HEIGHT:
             self.kill()
@@ -53,18 +62,18 @@ class BulletSpeedItem(pygame.sprite.Sprite):
         self.direction = random.choice([-1, 1])
         self.angle = random.randrange(360)
         self.type = "bullet_speed"  # Item type identifier
-        
+
         # Bullet speed increase amount
         self.speed_increase = random.randint(1, 3)
-        
+
     def update(self):
         """Update item position"""
         self.rect.y += self.speedy
-        
+
         # More pronounced horizontal swinging
         self.angle = (self.angle + 3) % 360
         self.rect.x += self.direction * math.sin(math.radians(self.angle)) * 0.8
-        
+
         # Boundary check
         if self.rect.left < 0:
             self.rect.left = 0
@@ -72,7 +81,7 @@ class BulletSpeedItem(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.direction = -1
-            
+
         # Off-screen check
         if self.rect.top > HEIGHT:
             self.kill()
@@ -89,15 +98,15 @@ class BulletPathItem(pygame.sprite.Sprite):
         self.direction = random.choice([-1, 1])
         self.angle = random.randrange(360)
         self.type = "bullet_path"  # Item type identifier
-        
+
     def update(self):
         """Update item position"""
         self.rect.y += self.speedy
-        
+
         # More complex movement pattern
         self.angle = (self.angle + 2) % 360
         self.rect.x += self.direction * math.sin(math.radians(self.angle * 1.5)) * 1.0
-        
+
         # Boundary check
         if self.rect.left < 0:
             self.rect.left = 0
@@ -105,7 +114,7 @@ class BulletPathItem(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.direction = -1
-            
+
         # Off-screen check
         if self.rect.top > HEIGHT:
             self.kill()
@@ -122,18 +131,18 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         self.direction = random.choice([-1, 1])
         self.angle = random.randrange(360)
         self.type = "player_speed" # Item type identifier
-        
+
         # Player speed increase amount (can be fixed or random)
-        self.speed_increase = 1 
+        self.speed_increase = 1
 
     def update(self):
         """Update item position"""
         self.rect.y += self.speedy
-        
+
         # Slightly different horizontal swinging
         self.angle = (self.angle + 2.5) % 360
         self.rect.x += self.direction * math.sin(math.radians(self.angle)) * 0.6
-        
+
         # Boundary check
         if self.rect.left < 0:
             self.rect.left = 0
@@ -141,7 +150,7 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.direction = -1
-            
+
         # Off-screen check
         if self.rect.top > HEIGHT:
             self.kill()
@@ -162,17 +171,17 @@ class WingmanItem(pygame.sprite.Sprite):
     def update(self):
         """Update item position"""
         self.rect.y += self.speedy
-        
+
         self.angle = (self.angle + 1) % 360
         self.rect.x += self.direction * math.sin(math.radians(self.angle)) * 1.2
-        
+
         if self.rect.left < 0:
             self.rect.left = 0
             self.direction = 1
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
             self.direction = -1
-            
+
         if self.rect.top > HEIGHT:
             self.kill()
 
@@ -202,7 +211,7 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
     # Wingman items only appear after level 3
     if game_level < 3:
         weights[WingmanItem] = 0
-        
+
     # Filter out items with zero weight
     available_items = {item: weight for item, weight in weights.items() if weight > 0}
     if not available_items:
@@ -213,11 +222,11 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
 
     # Randomly select an item type based on weights
     chosen_item_class = random.choices(item_classes, weights=item_weights, k=1)[0]
-    
+
     # Create item instance
     item = chosen_item_class()
     all_sprites.add(item)
     items_group.add(item)
-    
+
     logger.info(f"Created item: {item.type} at level {game_level}")
-    return item 
+    return item

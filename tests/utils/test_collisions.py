@@ -1,18 +1,21 @@
-import pytest
-import pygame
 import random
-from unittest.mock import MagicMock, patch, call
-from thunder_fighter.systems.collision import (
-    check_bullet_enemy_collisions,
-    check_bullet_boss_collisions,
-    check_enemy_player_collisions,
-    check_items_player_collisions
-)
+from unittest.mock import MagicMock, patch
+
+import pygame
+import pytest
+
+from thunder_fighter.constants import BULLET_DAMAGE_TO_BOSS
+from thunder_fighter.entities.enemies.boss import Boss
 from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.entities.projectiles.bullets import Bullet
-from thunder_fighter.entities.enemies.boss import Boss
+from thunder_fighter.systems.collision import (
+    check_bullet_boss_collisions,
+    check_bullet_enemy_collisions,
+    check_enemy_player_collisions,
+    check_items_player_collisions,
+)
 from thunder_fighter.systems.scoring import ScoringSystem as Score
-from thunder_fighter.constants import BULLET_DAMAGE_TO_BOSS
+
 
 # Fixtures to create mock sprites
 @pytest.fixture
@@ -64,7 +67,7 @@ def test_bullet_hits_enemy_no_item(mock_create_item, mock_explosion, mock_groupc
     """Test case where a bullet hits an enemy, but score is not enough for an item."""
     enemies, bullets, all_sprites, items_group = mock_groups
     mock_player = MagicMock()
-    
+
     # Simulate groupcollide finding one hit
     mock_groupcollide.return_value = {mock_enemy: [mock_bullet]}
 
@@ -97,7 +100,7 @@ def test_bullet_hits_enemy_triggers_item(mock_logger, mock_create_item, mock_exp
     """Test case where a bullet hits an enemy, and the score reaches the threshold for an item."""
     enemies, bullets, all_sprites, items_group = mock_groups
     mock_player = MagicMock()
-    
+
     # Simulate groupcollide finding one hit
     mock_groupcollide.return_value = {mock_enemy: [mock_bullet]}
 
@@ -205,13 +208,13 @@ def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collid
     The boss should take damage and flash, but not create an explosion.
     """
     _, bullets, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet]  # One bullet hit
     mock_boss.damage.return_value = False # Simulate that the boss is not defeated
-    
+
     result = check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
     mock_boss.damage.assert_called_once_with(BULLET_DAMAGE_TO_BOSS)
@@ -222,35 +225,35 @@ def test_bullet_hits_boss_not_defeated(mock_randint, mock_explosion, mock_collid
 @patch('pygame.sprite.collide_mask')
 @patch('thunder_fighter.graphics.effects.explosion.Explosion')
 @patch('random.randint')
-def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask, 
+def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask,
                              mock_spritecollide, mock_boss, mock_bullet, mock_groups):
     """Test where bullets defeat the boss."""
     _, bullets, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet]  # One bullet hit
-    
+
     # 模拟damage方法返回True（被击败）
     mock_boss.damage.return_value = True
-    
+
     # Mock random positions for explosions - need 20 values (10 x-positions and 10 y-positions)
     random_positions = []
     for _ in range(10):
         random_positions.append(random.randint(100, 300))  # x position
         random_positions.append(random.randint(50, 200))   # y position
     mock_randint.side_effect = random_positions
-    
+
     result = check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
     mock_boss.damage.assert_called_with(BULLET_DAMAGE_TO_BOSS)  # 应该调用damage(BULLET_DAMAGE_TO_BOSS)
-    
+
     # Check result dict
     assert result['boss_hit'] is True
     assert result['boss_defeated'] is True
     assert result['damage'] == BULLET_DAMAGE_TO_BOSS
-    
+
     # Should create multiple explosions for boss defeat
     assert mock_explosion.call_count >= 2  # At least 2 explosions created (一个子弹击中爆炸，一个Boss被击败爆炸)
     assert all_sprites.add.call_count >= 2  # At least 2 sprites added
@@ -259,15 +262,15 @@ def test_bullet_defeats_boss(mock_randint, mock_explosion, mock_collide_mask,
 def test_no_boss_bullet_collision(mock_spritecollide, mock_groups):
     """Test where no bullets hit the boss."""
     _, bullets, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = []  # No bullets hit
-    
+
     result = check_bullet_boss_collisions(None, bullets, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_not_called()  # Should not call spritecollide if boss is None
-    
+
     # Check result dict - should indicate no hit when boss is None
     assert result['boss_hit'] is False
     assert result['boss_defeated'] is False
@@ -307,22 +310,22 @@ def mock_player():
 
 @patch('pygame.sprite.spritecollide')
 @patch('thunder_fighter.graphics.effects.explosion.Explosion')
-def test_enemy_hits_player(mock_explosion, mock_spritecollide, 
+def test_enemy_hits_player(mock_explosion, mock_spritecollide,
                            mock_player, mock_enemy, mock_groups):
     """Test where an enemy collides with the player."""
     enemies, _, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_enemy]  # One enemy hit
-    
+
     result = check_enemy_player_collisions(mock_player, enemies, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, enemies, True)
     assert mock_player.health == 100 - (15 + mock_enemy.level * 1)  # Base damage 15 + level
     mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
-    
+
     # Check result dict
     assert result['was_hit'] is True
     assert result['game_over'] is False
@@ -330,23 +333,23 @@ def test_enemy_hits_player(mock_explosion, mock_spritecollide,
 
 @patch('pygame.sprite.spritecollide')
 @patch('thunder_fighter.graphics.effects.explosion.Explosion')
-def test_enemy_hits_player_game_over(mock_explosion, mock_spritecollide, 
+def test_enemy_hits_player_game_over(mock_explosion, mock_spritecollide,
                                      mock_player, mock_enemy, mock_groups):
     """Test where an enemy collision kills the player."""
     enemies, _, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_enemy]  # One enemy hit
     mock_player.health = 10  # Player has low health
-    
+
     result = check_enemy_player_collisions(mock_player, enemies, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, enemies, True)
     assert mock_player.health <= 0  # Health should be reduced to 0 or below
     mock_explosion.assert_called_once_with(mock_enemy.rect.center)
     all_sprites.add.assert_called_with(mock_explosion.return_value)
-    
+
     # Check result dict
     assert result['was_hit'] is True
     assert result['game_over'] is True
@@ -356,16 +359,16 @@ def test_enemy_hits_player_game_over(mock_explosion, mock_spritecollide,
 def test_no_enemy_player_collision(mock_spritecollide, mock_player, mock_groups):
     """Test where no enemies hit the player."""
     enemies, _, all_sprites, _ = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = []  # No enemies hit
-    
+
     result = check_enemy_player_collisions(mock_player, enemies, all_sprites)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, enemies, True)
     assert mock_player.health == 100  # Health should remain unchanged
-    
+
     # Check result dict
     assert result['was_hit'] is False
     assert result['game_over'] is False
@@ -392,16 +395,16 @@ def mock_bullet_speed_item():
 def test_player_collects_health_item(mock_sound_manager, mock_spritecollide, mock_player, mock_health_item, mock_groups):
     """Test where player collects a health item."""
     _, _, ui_manager, items = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_health_item]  # One health item
     mock_player.health = 60  # Player has less than max health
-    
+
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 
     result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
     mock_player.heal.assert_called_once()
@@ -410,20 +413,20 @@ def test_player_collects_health_item(mock_sound_manager, mock_spritecollide, moc
 
 @patch('pygame.sprite.spritecollide')
 @patch('thunder_fighter.utils.sound_manager.sound_manager')
-def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollide, mock_player, 
+def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollide, mock_player,
                                           mock_bullet_speed_item, mock_groups):
     """Test where player collects a bullet speed item."""
     _, _, ui_manager, items = mock_groups
-    
+
     # Configure mocks
     mock_spritecollide.return_value = [mock_bullet_speed_item]
     mock_player.increase_bullet_speed = MagicMock(return_value=12)  # Mock the method
-    
+
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 
     result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
-    
+
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
     mock_player.increase_bullet_speed.assert_called_once()
@@ -437,7 +440,7 @@ def test_player_collects_no_items(mock_spritecollide, mock_player, mock_groups):
 
     # Configure mocks
     mock_spritecollide.return_value = []  # No items collected
-    
+
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 

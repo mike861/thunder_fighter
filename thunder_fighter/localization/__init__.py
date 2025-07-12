@@ -4,9 +4,11 @@ Handles loading and managing text in different languages
 """
 import json
 import os
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 from thunder_fighter.utils.logger import logger
-from .loader import LanguageLoader, FileLanguageLoader
+
+from .loader import FileLanguageLoader, LanguageLoader
 
 try:
     # Try to import the config file
@@ -18,8 +20,8 @@ except ImportError:
 
 class LanguageManager:
     """Manages text loading from language files with injectable loader."""
-    
-    def __init__(self, language_code: Optional[str] = None, 
+
+    def __init__(self, language_code: Optional[str] = None,
                  loader: Optional[LanguageLoader] = None):
         """
         Initialize the language manager.
@@ -35,7 +37,7 @@ class LanguageManager:
         # Track already warned missing keys to avoid log spam
         self.missing_keys_warned: set[str] = set()
         self.load_language(self.language_code)
-    
+
     def load_language(self, language_code: str) -> bool:
         """Load a specific language using the configured loader.
         
@@ -47,7 +49,7 @@ class LanguageManager:
         """
         # Use the loader to get language data
         language_data = self.loader.load(language_code)
-        
+
         if language_data is not None:
             self.text = language_data
             self.missing_keys_warned.clear()
@@ -59,12 +61,12 @@ class LanguageManager:
             if language_code != 'en':
                 logger.info("Falling back to English")
                 return self.load_language('en')
-            
+
             # If even English fails, use empty dictionary
             logger.error("Failed to load any language data")
             self.text = {}
             return False
-    
+
     def change_language(self, language_code):
         """Change the active language
         
@@ -75,7 +77,7 @@ class LanguageManager:
             bool: True if language changed successfully
         """
         return self.load_language(language_code)
-    
+
     def get_text(self, key, *args, **kwargs):
         """Get text by key with optional formatting
         
@@ -101,16 +103,16 @@ class LanguageManager:
                 logger.warning(f"Missing text key: {key}")
                 self.missing_keys_warned.add(key)
             return key
-    
+
     def reset_warnings(self):
         """Reset the missing keys warning set. Useful for testing."""
         self.missing_keys_warned.clear()
         logger.debug("Reset missing key warnings")
-    
+
     def get_available_languages(self) -> list[str]:
         """Get list of available languages from the loader."""
         return self.loader.available_languages()
-    
+
     def get_font_for_current_language(self, size: int, style: str = 'normal'):
         """
         Get appropriate font for the current language.
@@ -140,7 +142,7 @@ def get_text(key, *args, **kwargs):
         str: Localized and formatted text
     """
     return language_manager.get_text(key, *args, **kwargs)
-    
+
 # For syntactic sugar, provide a shorter alias
 _ = get_text
 
@@ -157,7 +159,7 @@ def change_language(language_code):
     return language_manager.change_language(language_code)
 
 # Export loader classes for testing
-from .loader import LanguageLoader, FileLanguageLoader, MemoryLanguageLoader, CachedLanguageLoader
+from .loader import CachedLanguageLoader, LanguageLoader, MemoryLanguageLoader
 
 __all__ = [
     'language_manager',
@@ -165,7 +167,7 @@ __all__ = [
     '_',
     'change_language',
     'LanguageLoader',
-    'FileLanguageLoader', 
+    'FileLanguageLoader',
     'MemoryLanguageLoader',
     'CachedLanguageLoader'
-] 
+]

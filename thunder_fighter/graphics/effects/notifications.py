@@ -5,7 +5,8 @@ Handles all types of notifications including regular, warning, and achievement n
 """
 
 import pygame
-from thunder_fighter.constants import WIDTH, HEIGHT, WHITE, YELLOW, RED, GREEN
+
+from thunder_fighter.constants import GREEN, HEIGHT, RED, WHITE, WIDTH, YELLOW
 
 
 class Notification:
@@ -37,14 +38,14 @@ class Notification:
                         })()
                         return mock_surf
             self.font = DummyFont()
-            
+
         self.text = text
         self.color = color
         self.creation_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
         self.duration = duration  # Duration in milliseconds
         self.alpha = 255  # Fully opaque
         self.position = position
-        
+
         # Create the text surface
         try:
             self.surface = self.font.render(text, True, color)
@@ -60,7 +61,7 @@ class Notification:
                 'centerx': WIDTH // 2,
                 'centery': HEIGHT // 2
             })()
-        
+
         # Set position based on position parameter
         if position == 'center':
             self.rect.center = (WIDTH // 2, HEIGHT // 2)
@@ -68,10 +69,10 @@ class Notification:
             self.rect.center = (WIDTH // 2, 100)
         elif position == 'bottom':
             self.rect.center = (WIDTH // 2, HEIGHT - 100)
-            
+
         # Add vertical offset for stacking multiple messages
         self.y_offset = 0
-    
+
     def update(self):
         """Update notification state, check if it should disappear"""
         if hasattr(pygame, 'time'):
@@ -79,26 +80,26 @@ class Notification:
         else:
             # For test environments without pygame.time
             return True  # Just keep notifications alive in tests
-            
+
         time_passed = current_time - self.creation_time
-        
+
         # If duration exceeded, return False to indicate notification should be removed
         if time_passed > self.duration:
             return False
-        
+
         # Fade out in the last 500 milliseconds
         if time_passed > self.duration - 500:
             # Calculate alpha value for fade effect
             self.alpha = max(0, int(255 * (self.duration - time_passed) / 500))
-        
+
         return True
-    
+
     def set_y_position(self, y):
         """Set the Y coordinate of the notification, keeping X coordinate unchanged"""
         old_center_x = self.rect.centerx
         self.rect.centery = y
         self.rect.centerx = old_center_x
-    
+
     def draw(self, surface):
         """Draw notification on screen"""
         try:
@@ -106,10 +107,10 @@ class Notification:
             temp_surface = pygame.Surface(self.surface.get_size(), pygame.SRCALPHA)
             temp_surface.fill((0, 0, 0, 0))  # Completely transparent fill
             temp_surface.blit(self.surface, (0, 0))
-            
+
             # Apply alpha value
             temp_surface.set_alpha(self.alpha)
-            
+
             # Draw to screen
             surface.blit(temp_surface, self.rect)
         except (pygame.error, AttributeError):
@@ -125,17 +126,17 @@ class WarningNotification(Notification):
         self.flash_colors = [YELLOW, RED]  # Flash colors
         self.current_color_index = 0
         self.last_flash = self.creation_time
-    
+
     def update(self):
         """Update warning notification state, add flashing effect"""
         current_time = pygame.time.get_ticks()
-        
+
         # Handle flashing effect
         if current_time - self.last_flash > self.flash_speed:
             self.last_flash = current_time
             self.current_color_index = (self.current_color_index + 1) % len(self.flash_colors)
             self.surface = self.font.render(self.text, True, self.flash_colors[self.current_color_index])
-        
+
         # Call parent update to handle fade and time check
         return super().update()
 
@@ -144,4 +145,4 @@ class AchievementNotification(Notification):
     """Achievement or positive event notification with green color and special effects"""
     def __init__(self, text, duration=2500, color=GREEN, size=24, position='bottom'):
         super().__init__(text, duration, color, size, position)
-        # Add any special effects or custom logic 
+        # Add any special effects or custom logic

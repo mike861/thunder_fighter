@@ -6,11 +6,14 @@ configurations, difficulty levels, and behavior patterns.
 """
 
 import random
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pygame
-from ..entity_factory import ConfigurableEntityFactory
+
 from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.utils.logger import logger
+
+from ..entity_factory import ConfigurableEntityFactory
 
 
 class EnemyFactory(ConfigurableEntityFactory[Enemy]):
@@ -20,14 +23,14 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     This factory provides centralized enemy creation with support for
     different enemy types, difficulty scaling, and configuration presets.
     """
-    
+
     def __init__(self):
         """Initialize the enemy factory."""
         super().__init__(Enemy)
         self._setup_default_presets()
-        
+
         logger.info("EnemyFactory initialized with default presets")
-    
+
     def _setup_default_presets(self):
         """Set up default enemy configuration presets."""
         # Basic enemy preset
@@ -40,7 +43,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'health_multiplier': 1.0,
             'speed_multiplier': 1.0
         })
-        
+
         # Shooter enemy preset
         self.add_preset("shooter", {
             'game_time': 2,
@@ -52,7 +55,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'speed_multiplier': 0.8,
             'shoot_frequency': 2.0
         })
-        
+
         # Fast enemy preset
         self.add_preset("fast", {
             'game_time': 1,
@@ -63,7 +66,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'health_multiplier': 0.8,
             'speed_multiplier': 1.5
         })
-        
+
         # Tank enemy preset
         self.add_preset("tank", {
             'game_time': 3,
@@ -75,7 +78,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'speed_multiplier': 0.5,
             'shoot_frequency': 1.5
         })
-        
+
         # Elite enemy preset
         self.add_preset("elite", {
             'game_time': 5,
@@ -87,11 +90,11 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'speed_multiplier': 1.2,
             'shoot_frequency': 2.5
         })
-    
+
     def _get_required_fields(self) -> list:
         """Get required fields for enemy creation."""
         return ['all_sprites', 'enemy_bullets']
-    
+
     def _create_entity(self, config: Dict[str, Any]) -> Enemy:
         """
         Create an enemy entity.
@@ -107,12 +110,12 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         game_level = config.get('game_level', 1)
         all_sprites = config['all_sprites']
         enemy_bullets = config['enemy_bullets']
-        
+
         # Create the enemy
         enemy = Enemy(game_time, game_level, all_sprites, enemy_bullets)
-        
+
         return enemy
-    
+
     def _post_creation_setup(self, enemy: Enemy, config: Dict[str, Any]):
         """
         Perform post-creation setup on the enemy.
@@ -125,22 +128,22 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         spawn_position = config.get('spawn_position')
         if spawn_position:
             enemy.rect.x, enemy.rect.y = spawn_position
-        
+
         # Apply multipliers
         health_multiplier = config.get('health_multiplier', 1.0)
         speed_multiplier = config.get('speed_multiplier', 1.0)
-        
+
         if hasattr(enemy, 'health'):
             enemy.health = int(enemy.health * health_multiplier)
         if hasattr(enemy, 'max_health'):
             enemy.max_health = int(enemy.max_health * health_multiplier)
         if hasattr(enemy, 'speed'):
             enemy.speed = int(enemy.speed * speed_multiplier)
-        
+
         # Apply shooting configuration - ensure consistency with level requirements
         # The enemy's can_shoot should always respect the level requirement
         preset_can_shoot = config.get('can_shoot')
-        
+
         # Final shooting ability must satisfy both preset intent and level requirement
         if preset_can_shoot is True and enemy.level >= 2:  # ENEMY_SHOOT_LEVEL = 2
             enemy.can_shoot = True
@@ -150,18 +153,18 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         else:
             # Level is too low, cannot shoot regardless of preset
             enemy.can_shoot = False
-        
+
         shoot_frequency = config.get('shoot_frequency')
         if shoot_frequency and hasattr(enemy, 'shoot_frequency'):
             enemy.shoot_frequency = shoot_frequency
-        
+
         # Apply movement pattern
         movement_pattern = config.get('movement_pattern')
         if movement_pattern and hasattr(enemy, 'set_movement_pattern'):
             enemy.set_movement_pattern(movement_pattern)
-    
-    def create_for_level(self, game_level: int, game_time: float, 
-                        all_sprites: pygame.sprite.Group, 
+
+    def create_for_level(self, game_level: int, game_time: float,
+                        all_sprites: pygame.sprite.Group,
                         enemy_bullets: pygame.sprite.Group) -> Enemy:
         """
         Create an enemy appropriate for the given level.
@@ -177,7 +180,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         """
         # Determine enemy type based on level and time
         enemy_type = self._determine_enemy_type(game_level, game_time)
-        
+
         return self.create_from_preset(
             enemy_type,
             game_level=game_level,
@@ -185,7 +188,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             all_sprites=all_sprites,
             enemy_bullets=enemy_bullets
         )
-    
+
     def _determine_enemy_type(self, game_level: int, game_time: float) -> str:
         """
         Determine the appropriate enemy type for the given level and time.
@@ -200,24 +203,24 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         # Early game - mostly basic enemies
         if game_level <= 1:
             return random.choice(["basic", "basic", "fast"])
-        
+
         # Mid game - introduce shooters
         elif game_level <= 3:
             if game_time < 2:
                 return random.choice(["basic", "fast", "shooter"])
             else:
                 return random.choice(["basic", "shooter", "shooter", "fast"])
-        
+
         # Late game - more variety and difficulty
         elif game_level <= 5:
             return random.choice(["shooter", "fast", "tank", "elite"])
-        
+
         # End game - mostly elite enemies
         else:
             return random.choice(["tank", "elite", "elite", "shooter"])
-    
+
     def create_wave(self, wave_size: int, game_level: int, game_time: float,
-                   all_sprites: pygame.sprite.Group, 
+                   all_sprites: pygame.sprite.Group,
                    enemy_bullets: pygame.sprite.Group) -> list:
         """
         Create a wave of enemies.
@@ -233,17 +236,17 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             List of created Enemy instances
         """
         enemies = []
-        
+
         for i in range(wave_size):
             enemy = self.create_for_level(
                 game_level, game_time, all_sprites, enemy_bullets
             )
             enemies.append(enemy)
-        
+
         logger.debug(f"Created enemy wave of {wave_size} enemies for level {game_level}")
         return enemies
-    
-    def create_random_enemy(self, all_sprites: pygame.sprite.Group, 
+
+    def create_random_enemy(self, all_sprites: pygame.sprite.Group,
                            enemy_bullets: pygame.sprite.Group,
                            game_level: int = 1, game_time: float = 0) -> Enemy:
         """
@@ -260,7 +263,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         """
         available_presets = self.list_presets()
         preset_name = random.choice(available_presets)
-        
+
         return self.create_from_preset(
             preset_name,
             game_level=game_level,
@@ -268,7 +271,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             all_sprites=all_sprites,
             enemy_bullets=enemy_bullets
         )
-    
+
     def create_custom_enemy(self, enemy_config: Dict[str, Any],
                            all_sprites: pygame.sprite.Group,
                            enemy_bullets: pygame.sprite.Group) -> Enemy:
@@ -288,9 +291,9 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'all_sprites': all_sprites,
             'enemy_bullets': enemy_bullets
         })
-        
+
         return self.create(**config)
-    
+
     def get_enemy_stats(self, preset_name: str) -> Dict[str, Any]:
         """
         Get statistics for an enemy preset.
@@ -304,7 +307,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         preset = self.get_preset(preset_name)
         if not preset:
             return {}
-        
+
         return {
             'type': preset_name,
             'can_shoot': preset.get('can_shoot', False),
@@ -312,4 +315,4 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
             'speed_multiplier': preset.get('speed_multiplier', 1.0),
             'movement_pattern': preset.get('movement_pattern', 'straight'),
             'difficulty_level': preset.get('game_level', 1)
-        } 
+        }
