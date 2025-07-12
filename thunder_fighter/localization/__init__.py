@@ -25,7 +25,7 @@ class LanguageManager:
                  loader: Optional[LanguageLoader] = None):
         """
         Initialize the language manager.
-        
+
         Args:
             language_code: Initial language code. If None, uses CONFIG_LANGUAGE
             loader: Language loader implementation. If None, uses FileLanguageLoader
@@ -40,10 +40,10 @@ class LanguageManager:
 
     def load_language(self, language_code: str) -> bool:
         """Load a specific language using the configured loader.
-        
+
         Args:
             language_code: Two-letter language code (e.g., 'en', 'zh')
-        
+
         Returns:
             bool: True if language loaded successfully, False otherwise
         """
@@ -69,10 +69,10 @@ class LanguageManager:
 
     def change_language(self, language_code):
         """Change the active language
-        
+
         Args:
             language_code: Two-letter language code
-            
+
         Returns:
             bool: True if language changed successfully
         """
@@ -80,11 +80,11 @@ class LanguageManager:
 
     def get_text(self, key, *args, **kwargs):
         """Get text by key with optional formatting
-        
+
         Args:
             key: Text identifier (must match a constant in the language file)
             *args, **kwargs: Arguments for string formatting
-            
+
         Returns:
             str: Formatted text string or key itself if not found
         """
@@ -116,11 +116,11 @@ class LanguageManager:
     def get_font_for_current_language(self, size: int, style: str = 'normal'):
         """
         Get appropriate font for the current language.
-        
+
         Args:
             size: Font size in points
             style: Font style ('normal' or 'bold')
-            
+
         Returns:
             pygame.font.Font appropriate for current language
         """
@@ -133,11 +133,11 @@ language_manager = LanguageManager()
 # Export a simple function for getting text
 def get_text(key, *args, **kwargs):
     """Get localized text string
-    
+
     Args:
         key: Text key from language file
         *args, **kwargs: Optional formatting arguments
-        
+
     Returns:
         str: Localized and formatted text
     """
@@ -149,10 +149,10 @@ _ = get_text
 # Export a function to change language at runtime
 def change_language(language_code):
     """Change the active language
-    
+
     Args:
         language_code: Two-letter language code (e.g., 'en', 'zh')
-        
+
     Returns:
         bool: True if language changed successfully
     """

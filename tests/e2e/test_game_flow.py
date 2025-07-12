@@ -83,7 +83,7 @@ class TestGameFlow:
 
         # Mock the add method to not fail with Mock objects
         def mock_add(*sprites):
-            for sprite in sprites:
+            for _sprite in sprites:
                 # Just accept the sprite without validation
                 pass
 

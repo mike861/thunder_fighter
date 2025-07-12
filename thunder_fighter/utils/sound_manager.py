@@ -10,7 +10,7 @@ class SoundManager:
     def __init__(self, sound_config=None):
         """
         Initialize sound manager with configuration
-        
+
         Args:
             sound_config: SoundConfig object with sound settings
         """
@@ -42,7 +42,7 @@ class SoundManager:
     def update_config(self, sound_config):
         """
         Update sound manager with new configuration
-        
+
         Args:
             sound_config: SoundConfig object with updated settings
         """

@@ -246,7 +246,7 @@ class TestEntityFactories:
         item_types = set()
         for _ in range(20):  # Create multiple items to test randomness
             try:
-                item = factory.create_random_item(all_sprites, items, player)
+                factory.create_random_item(all_sprites, items, player)
                 # In a real test, we'd check the item type
                 item_types.add("mock_item")  # Placeholder
             except Exception:

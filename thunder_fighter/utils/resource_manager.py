@@ -17,7 +17,7 @@ from thunder_fighter.utils.logger import logger
 class ResourceManager:
     """
     Centralized resource manager for game assets.
-    
+
     This class provides caching and centralized loading of all game resources
     including images, sounds, and fonts to improve performance and maintainability.
     """
@@ -63,16 +63,16 @@ class ResourceManager:
                    alpha: bool = True, scale: Optional[tuple] = None) -> pygame.Surface:
         """
         Load an image with caching.
-        
+
         Args:
             filename: Image filename (relative to images directory)
             colorkey: Color key for transparency (-1 for auto, or specific color)
             alpha: Whether to convert with alpha
             scale: Optional tuple (width, height) to scale the image
-            
+
         Returns:
             pygame.Surface containing the image
-            
+
         Raises:
             pygame.error: If the image cannot be loaded
         """
@@ -136,11 +136,11 @@ class ResourceManager:
     def load_sound(self, filename: str, volume: float = 1.0) -> Optional[pygame.mixer.Sound]:
         """
         Load a sound with caching.
-        
+
         Args:
             filename: Sound filename (relative to sounds directory)
             volume: Initial volume (0.0 to 1.0)
-            
+
         Returns:
             pygame.mixer.Sound or None if loading failed
         """
@@ -181,12 +181,12 @@ class ResourceManager:
                   system_font: bool = True) -> pygame.font.Font:
         """
         Load a font with caching.
-        
+
         Args:
             font_name: Font name or path (None for default)
             size: Font size
             system_font: Whether to use system font (vs. font file)
-            
+
         Returns:
             pygame.font.Font object
         """
@@ -297,10 +297,10 @@ class ResourceManager:
     def get_music_path(self, filename: str) -> Optional[str]:
         """
         Get the full path to a music file.
-        
+
         Args:
             filename: Music filename
-            
+
         Returns:
             Full path to the music file or None if not found
         """
@@ -358,7 +358,7 @@ class ResourceManager:
     def get_cache_stats(self) -> Dict[str, int]:
         """
         Get cache statistics.
-        
+
         Returns:
             Dictionary with cache sizes
         """
@@ -372,12 +372,12 @@ class ResourceManager:
                       fill_color: Optional[tuple] = None) -> pygame.Surface:
         """
         Create a new surface with optional initial fill.
-        
+
         Args:
             size: Surface size (width, height)
             alpha: Whether to use alpha channel
             fill_color: Optional color to fill the surface
-            
+
         Returns:
             New pygame.Surface
         """

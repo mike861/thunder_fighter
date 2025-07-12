@@ -65,7 +65,7 @@ from thunder_fighter.utils.sound_manager import SoundManager
 class RefactoredGame:
     """
     Refactored Game class with full architectural improvements.
-    
+
     This version implements:
     - Event-driven input handling
     - Centralized resource management
@@ -172,7 +172,7 @@ class RefactoredGame:
         self.input_validation_interval = 10.0  # Check every 10 seconds (reduced frequency)
 
         # Create initial enemies using factory (after game_start_time is set)
-        for i in range(BASE_ENEMY_COUNT):
+        for _i in range(BASE_ENEMY_COUNT):
             self._spawn_enemy_via_factory()
 
         # Game configuration
@@ -252,7 +252,7 @@ class RefactoredGame:
         self.ui_manager.reset_game_state()
 
         # Create initial enemies
-        for i in range(BASE_ENEMY_COUNT):
+        for _i in range(BASE_ENEMY_COUNT):
             self._spawn_enemy_via_factory()
 
         # Reset configuration
@@ -646,7 +646,7 @@ class RefactoredGame:
     def _handle_boss_defeated_event(self, event: GameEvent):
         """Handle boss defeated event."""
         boss_data = event.data
-        boss_level = boss_data.get('level', 1)
+        boss_data.get('level', 1)
 
         # Check if this is the final boss
         if self.game_level >= MAX_GAME_LEVEL:
@@ -713,7 +713,7 @@ class RefactoredGame:
     def _handle_enemy_spawned(self, event: GameEvent):
         """Handle enemy spawned event."""
         enemy_data = event.data
-        enemy = enemy_data.get('enemy')
+        enemy_data.get('enemy')
         level = enemy_data.get('level', 1)
 
         logger.debug(f"Enemy spawned: level {level}")
@@ -844,7 +844,7 @@ class RefactoredGame:
             return
 
         # Process events through input manager for normal gameplay
-        input_events = self.input_manager.update(pygame_events)
+        self.input_manager.update(pygame_events)
 
         # Process game events
         self.event_system.process_events()

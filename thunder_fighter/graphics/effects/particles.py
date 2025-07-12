@@ -82,7 +82,7 @@ class ParticleSystem:
         """Creates a trail effect."""
         colors = [(255, 255, 255), (200, 200, 255), (150, 150, 255)]  # White to Blue
 
-        for i in range(particle_count):
+        for _i in range(particle_count):
             # Create particles in the opposite direction
             speed = random.uniform(20, 50)
             spread = 0.3  # Spread angle

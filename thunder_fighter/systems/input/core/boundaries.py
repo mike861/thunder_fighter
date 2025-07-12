@@ -14,7 +14,7 @@ from .events import Event
 class EventSource(ABC):
     """
     Abstract interface for an event source.
-    
+
     Defines the abstract interface for getting input events, isolating specific implementations like pygame.
     Implementing classes are responsible for converting external input events into standard Event objects.
     """
@@ -23,7 +23,7 @@ class EventSource(ABC):
     def poll_events(self) -> List[Event]:
         """
         Gets all pending events.
-        
+
         Returns:
             A list of Event objects, containing all pending input events.
         """
@@ -38,7 +38,7 @@ class EventSource(ABC):
 class KeyboardState(ABC):
     """
     Abstract interface for keyboard state.
-    
+
     Defines the abstract interface for querying keyboard state, supporting real-time querying of key states.
     """
 
@@ -46,10 +46,10 @@ class KeyboardState(ABC):
     def is_pressed(self, key_code: int) -> bool:
         """
         Checks if a specific key is pressed.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key is pressed, False otherwise.
         """
@@ -59,7 +59,7 @@ class KeyboardState(ABC):
     def get_pressed_keys(self) -> List[int]:
         """
         Gets all pressed keys.
-        
+
         Returns:
             A list of all currently pressed key codes.
         """
@@ -69,7 +69,7 @@ class KeyboardState(ABC):
 class Clock(ABC):
     """
     Abstract interface for a clock.
-    
+
     Defines the abstract interface for time-related functions, supporting controllable time flow.
     """
 
@@ -77,7 +77,7 @@ class Clock(ABC):
     def now(self) -> float:
         """
         Gets the current time.
-        
+
         Returns:
             The current timestamp (in seconds).
         """
@@ -87,7 +87,7 @@ class Clock(ABC):
     def delta_time(self) -> float:
         """
         Gets the frame time interval.
-        
+
         Returns:
             The time interval from the last frame to this one (in seconds).
         """
@@ -97,7 +97,7 @@ class Clock(ABC):
 class InputConfiguration(ABC):
     """
     Abstract interface for input configuration.
-    
+
     Defines the abstract interface for input configuration, supporting key mapping and input behavior configuration.
     """
 
@@ -105,7 +105,7 @@ class InputConfiguration(ABC):
     def get_key_mapping(self) -> Dict[int, str]:
         """
         Gets the key mapping.
-        
+
         Returns:
             A dictionary mapping key codes to command types.
         """
@@ -115,7 +115,7 @@ class InputConfiguration(ABC):
     def get_repeat_delay(self) -> float:
         """
         Gets the key repeat delay.
-        
+
         Returns:
             The delay time before the first repeat (in seconds).
         """
@@ -125,7 +125,7 @@ class InputConfiguration(ABC):
     def get_repeat_rate(self) -> float:
         """
         Gets the key repeat rate.
-        
+
         Returns:
             The interval time for repeated keys (in seconds).
         """
@@ -135,10 +135,10 @@ class InputConfiguration(ABC):
     def is_continuous_key(self, key_code: int) -> bool:
         """
         Checks if a specific key supports continuous triggering.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key supports continuous triggering (e.g., movement keys), False otherwise.
         """
@@ -148,7 +148,7 @@ class InputConfiguration(ABC):
 class Logger(ABC):
     """
     Abstract interface for a logger.
-    
+
     Defines the abstract interface for logging, supporting different levels of log output.
     """
 

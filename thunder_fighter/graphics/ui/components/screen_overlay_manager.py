@@ -20,7 +20,7 @@ class ScreenOverlayManager:
     def __init__(self, screen, fonts):
         """
         Initialize the screen overlay manager.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
             fonts: dict - Dictionary of fonts with keys 'small', 'medium', 'large'
@@ -56,7 +56,7 @@ class ScreenOverlayManager:
     def draw_pause_screen(self, is_paused):
         """
         Draw pause screen overlay.
-        
+
         Args:
             is_paused: Whether the game is paused
         """
@@ -85,7 +85,7 @@ class ScreenOverlayManager:
     def draw_victory_screen(self, final_score, max_level, game_time):
         """
         Draw victory screen overlay.
-        
+
         Args:
             final_score: Final score achieved
             max_level: Maximum level reached
@@ -140,7 +140,7 @@ class ScreenOverlayManager:
     def draw_game_over_screen(self, final_score, level_reached, game_time):
         """
         Draw game over screen overlay.
-        
+
         Args:
             final_score: Final score achieved
             level_reached: Level reached before game over
@@ -203,7 +203,7 @@ class ScreenOverlayManager:
     def start_level_change_animation(self, level):
         """
         Start the level change animation.
-        
+
         Args:
             level: The new level number
         """

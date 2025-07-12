@@ -1,7 +1,7 @@
 """
 Unit tests for Enemy entity.
 
-Tests the Enemy class focusing on behavior and interface rather than 
+Tests the Enemy class focusing on behavior and interface rather than
 implementation details, following the new architecture patterns.
 """
 

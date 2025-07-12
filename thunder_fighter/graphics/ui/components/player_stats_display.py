@@ -17,7 +17,7 @@ class PlayerStatsDisplay:
     def __init__(self, screen, font=None):
         """
         Initialize the player stats display.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
             font: pygame.Font - Font for displaying text (optional, will use resource manager if None)
@@ -57,7 +57,7 @@ class PlayerStatsDisplay:
                     bullet_speed=None, speed=None, wingmen=None):
         """
         Update player information.
-        
+
         Args:
             health: Current health
             max_health: Maximum health
@@ -123,7 +123,7 @@ class PlayerStatsDisplay:
     def set_position(self, x, y):
         """
         Set the display position.
-        
+
         Args:
             x: X coordinate
             y: Y coordinate

@@ -14,7 +14,7 @@ from thunder_fighter.utils.logger import logger
 class State(ABC):
     """
     Abstract base class for game states.
-    
+
     Each state represents a distinct mode of the game (playing, paused, etc.)
     and defines the behavior for that mode.
     """
@@ -22,7 +22,7 @@ class State(ABC):
     def __init__(self, name: str):
         """
         Initialize the state.
-        
+
         Args:
             name: The name of this state
         """
@@ -32,7 +32,7 @@ class State(ABC):
     def set_context(self, context):
         """
         Set the state machine context.
-        
+
         Args:
             context: The state machine that owns this state
         """
@@ -42,7 +42,7 @@ class State(ABC):
     def enter(self, previous_state: Optional['State'] = None):
         """
         Called when entering this state.
-        
+
         Args:
             previous_state: The state we're transitioning from
         """
@@ -52,7 +52,7 @@ class State(ABC):
     def exit(self, next_state: Optional['State'] = None):
         """
         Called when exiting this state.
-        
+
         Args:
             next_state: The state we're transitioning to
         """
@@ -62,7 +62,7 @@ class State(ABC):
     def update(self, dt: float):
         """
         Update the state logic.
-        
+
         Args:
             dt: Delta time since last update
         """
@@ -72,7 +72,7 @@ class State(ABC):
     def handle_event(self, event):
         """
         Handle an event in this state.
-        
+
         Args:
             event: The event to handle
         """
@@ -81,10 +81,10 @@ class State(ABC):
     def can_transition_to(self, state_name: str) -> bool:
         """
         Check if this state can transition to another state.
-        
+
         Args:
             state_name: The target state name
-            
+
         Returns:
             True if transition is allowed
         """
@@ -97,7 +97,7 @@ class State(ABC):
 class StateMachine:
     """
     Generic state machine for managing game states.
-    
+
     This class manages state transitions, validates them, and ensures
     proper enter/exit handling for each state.
     """
@@ -105,7 +105,7 @@ class StateMachine:
     def __init__(self, initial_state: Optional[State] = None):
         """
         Initialize the state machine.
-        
+
         Args:
             initial_state: The initial state to start with
         """
@@ -124,7 +124,7 @@ class StateMachine:
     def add_state(self, state: State):
         """
         Add a state to the state machine.
-        
+
         Args:
             state: The state to add
         """
@@ -135,7 +135,7 @@ class StateMachine:
     def remove_state(self, state_name: str):
         """
         Remove a state from the state machine.
-        
+
         Args:
             state_name: The name of the state to remove
         """
@@ -150,10 +150,10 @@ class StateMachine:
     def get_state(self, state_name: str) -> Optional[State]:
         """
         Get a state by name.
-        
+
         Args:
             state_name: The name of the state to get
-            
+
         Returns:
             The state object or None if not found
         """
@@ -170,7 +170,7 @@ class StateMachine:
     def set_current_state(self, state_name: str, force: bool = False):
         """
         Set the current state.
-        
+
         Args:
             state_name: The name of the state to set as current
             force: Whether to force the transition even if not allowed
@@ -211,11 +211,11 @@ class StateMachine:
     def transition_to(self, state_name: str, force: bool = False) -> bool:
         """
         Transition to a new state.
-        
+
         Args:
             state_name: The name of the state to transition to
             force: Whether to force the transition
-            
+
         Returns:
             True if transition was successful
         """
@@ -224,7 +224,7 @@ class StateMachine:
     def update(self, dt: float):
         """
         Update the current state.
-        
+
         Args:
             dt: Delta time since last update
         """
@@ -234,7 +234,7 @@ class StateMachine:
     def handle_event(self, event):
         """
         Handle an event in the current state.
-        
+
         Args:
             event: The event to handle
         """
@@ -244,7 +244,7 @@ class StateMachine:
     def add_transition_callback(self, state_name: str, callback: Callable):
         """
         Add a callback for when transitioning to a specific state.
-        
+
         Args:
             state_name: The state name to listen for
             callback: The callback function
@@ -256,7 +256,7 @@ class StateMachine:
     def add_global_callback(self, callback: Callable):
         """
         Add a global callback for all state transitions.
-        
+
         Args:
             callback: The callback function
         """
@@ -265,7 +265,7 @@ class StateMachine:
     def remove_transition_callback(self, state_name: str, callback: Callable):
         """
         Remove a transition callback.
-        
+
         Args:
             state_name: The state name
             callback: The callback to remove
@@ -279,7 +279,7 @@ class StateMachine:
     def remove_global_callback(self, callback: Callable):
         """
         Remove a global callback.
-        
+
         Args:
             callback: The callback to remove
         """
@@ -291,7 +291,7 @@ class StateMachine:
     def _notify_transition(self, old_state: Optional[State], new_state: State):
         """
         Notify callbacks of state transitions.
-        
+
         Args:
             old_state: The previous state
             new_state: The new state
@@ -318,10 +318,10 @@ class StateMachine:
     def has_state(self, state_name: str) -> bool:
         """
         Check if a state exists.
-        
+
         Args:
             state_name: The state name to check
-            
+
         Returns:
             True if the state exists
         """

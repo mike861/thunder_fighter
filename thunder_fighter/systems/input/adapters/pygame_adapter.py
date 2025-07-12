@@ -20,7 +20,7 @@ class PygameEventSource(EventSource):
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame event source.
-        
+
         Args:
             logger: Logger interface (optional).
         """
@@ -30,7 +30,7 @@ class PygameEventSource(EventSource):
     def poll_events(self) -> List[Event]:
         """
         Gets all pending events.
-        
+
         Returns:
             A list of converted Event objects.
         """
@@ -65,10 +65,10 @@ class PygameEventSource(EventSource):
     def _convert_event(self, pg_event) -> Optional[Event]:
         """
         Converts a pygame event to a standard event.
-        
+
         Args:
             pg_event: The pygame event object.
-            
+
         Returns:
             The converted Event object, or None.
         """
@@ -112,7 +112,7 @@ class PygameEventSource(EventSource):
     def _get_modifiers(self) -> Dict[str, bool]:
         """
         Gets the state of modifier keys.
-        
+
         Returns:
             A dictionary of modifier key states.
         """
@@ -133,7 +133,7 @@ class PygameKeyboardState(KeyboardState):
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame keyboard state.
-        
+
         Args:
             logger: Logger interface (optional).
         """
@@ -142,10 +142,10 @@ class PygameKeyboardState(KeyboardState):
     def is_pressed(self, key_code: int) -> bool:
         """
         Checks if a specific key is pressed.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key is pressed, False otherwise.
         """
@@ -164,7 +164,7 @@ class PygameKeyboardState(KeyboardState):
     def get_pressed_keys(self) -> List[int]:
         """
         Gets all pressed keys.
-        
+
         Returns:
             A list of all currently pressed key codes.
         """
@@ -187,7 +187,7 @@ class PygameClock(Clock):
     def __init__(self, logger: Optional[Logger] = None):
         """
         Initializes the Pygame clock.
-        
+
         Args:
             logger: Logger interface (optional).
         """
@@ -199,7 +199,7 @@ class PygameClock(Clock):
     def now(self) -> float:
         """
         Gets the current time.
-        
+
         Returns:
             The current timestamp (in seconds).
         """
@@ -208,7 +208,7 @@ class PygameClock(Clock):
     def delta_time(self) -> float:
         """
         Gets the frame time interval.
-        
+
         Returns:
             The time interval from the last frame to this one (in seconds).
         """
@@ -231,10 +231,10 @@ class PygameClock(Clock):
     def tick(self, fps: int = 60) -> int:
         """
         Controls the frame rate (if using the pygame clock).
-        
+
         Args:
             fps: The target frame rate.
-            
+
         Returns:
             The actual milliseconds passed.
         """
@@ -261,7 +261,7 @@ class PygameLogger(Logger):
     def __init__(self, enable_debug: bool = False):
         """
         Initializes the logger.
-        
+
         Args:
             enable_debug: Whether to enable debug output.
         """
@@ -288,10 +288,10 @@ class PygameLogger(Logger):
 def create_pygame_adapters(enable_debug: bool = False) -> tuple[PygameEventSource, PygameKeyboardState, PygameClock, PygameLogger]:
     """
     Creates a complete set of Pygame adapters.
-    
+
     Args:
         enable_debug: Whether to enable debug logging.
-        
+
     Returns:
         A tuple of (event source, keyboard state, clock, logger).
     """

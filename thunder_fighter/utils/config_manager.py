@@ -74,14 +74,14 @@ class DebugConfig:
 class ConfigManager:
     """
     Centralized configuration manager for Thunder Fighter
-    
+
     Handles loading, saving, and runtime modification of all game settings.
     """
 
     def __init__(self, config_file: Optional[str] = None):
         """
         Initialize the configuration manager
-        
+
         Args:
             config_file: Path to configuration file. If None, uses default location.
         """

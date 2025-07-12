@@ -19,7 +19,7 @@ from .core.processor import InputProcessor
 class InputSystem:
     """
     Input System Facade
-    
+
     Provides a simplified interface to use the input system, automatically handling adapter creation and configuration.
     Supports seamless switching between production (pygame) and test environments.
     """
@@ -33,7 +33,7 @@ class InputSystem:
                  enable_debug: bool = False):
         """
         Initializes the input system.
-        
+
         Args:
             event_source: Event source interface (optional, defaults to pygame).
             keyboard_state: Keyboard state interface (optional, defaults to pygame).
@@ -82,7 +82,7 @@ class InputSystem:
     def update(self) -> List[Command]:
         """
         Updates the input system and returns commands.
-        
+
         Returns:
             A list of generated commands.
         """
@@ -111,7 +111,7 @@ class InputSystem:
     def on_command(self, command_type: CommandType, handler: Callable[[Command], None]):
         """
         Registers a command handler.
-        
+
         Args:
             command_type: The command type.
             handler: The handler function, which accepts a Command object as an argument.
@@ -127,7 +127,7 @@ class InputSystem:
     def remove_command_handler(self, command_type: CommandType, handler: Callable[[Command], None]):
         """
         Removes a command handler.
-        
+
         Args:
             command_type: The command type.
             handler: The handler function to remove.
@@ -144,7 +144,7 @@ class InputSystem:
     def clear_handlers(self, command_type: Optional[CommandType] = None):
         """
         Clears command handlers.
-        
+
         Args:
             command_type: The command type to clear (optional, None clears all).
         """
@@ -160,10 +160,10 @@ class InputSystem:
     def is_key_pressed(self, key_code: int) -> bool:
         """
         Checks if a key is pressed.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key is pressed, otherwise False.
         """
@@ -172,10 +172,10 @@ class InputSystem:
     def is_key_held(self, key_code: int) -> bool:
         """
         Checks if a key is being held down.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key is being held down, otherwise False.
         """
@@ -194,7 +194,7 @@ class InputSystem:
     def set_key_mapping(self, key_mapping: Dict[int, CommandType]):
         """
         Updates the key mapping.
-        
+
         Args:
             key_mapping: The new key mapping.
         """
@@ -205,7 +205,7 @@ class InputSystem:
     def configure_repeat(self, delay: float, rate: float):
         """
         Configures key repeat.
-        
+
         Args:
             delay: The initial repeat delay in seconds.
             rate: The repeat interval in seconds.
@@ -215,7 +215,7 @@ class InputSystem:
     def configure_cooldown(self, cooldown: float):
         """
         Configures command cooldown.
-        
+
         Args:
             cooldown: The cooldown time in seconds.
         """
@@ -246,7 +246,7 @@ class InputSystem:
     def _execute_command_handlers(self, command: Command):
         """
         Executes command handlers.
-        
+
         Args:
             command: The command to process.
         """
@@ -261,7 +261,7 @@ class InputSystem:
     def _create_default_key_mapping(self) -> Dict[int, CommandType]:
         """
         Creates the default key mapping.
-        
+
         Returns:
             The default key mapping dictionary.
         """
@@ -296,10 +296,10 @@ class InputSystem:
 def create_for_production(enable_debug: bool = False) -> InputSystem:
     """
     Creates an input system for the production environment.
-    
+
     Args:
         enable_debug: Whether to enable debug logging.
-        
+
     Returns:
         A configured InputSystem instance.
     """
@@ -311,12 +311,12 @@ def create_for_testing(initial_time: float = 0.0,
                       key_mapping: Optional[Dict[int, CommandType]] = None) -> tuple[InputSystem, dict]:
     """
     Creates an input system for the test environment.
-    
+
     Args:
         initial_time: The initial time.
         print_logs: Whether to print logs.
         key_mapping: The key mapping (optional).
-        
+
     Returns:
         A tuple of (InputSystem instance, test controllers dictionary).
         The test controllers include: event_source, keyboard_state, clock, logger.

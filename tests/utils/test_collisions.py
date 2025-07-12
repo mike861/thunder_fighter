@@ -287,7 +287,7 @@ def test_bullet_hits_boss_triggers_internal_flash_only(
     """
     # Arrange
     _, bullets, all_sprites, _ = mock_groups
-    mock_spritecollide = patch('pygame.sprite.spritecollide', return_value=[mock_bullet]).start()
+    patch('pygame.sprite.spritecollide', return_value=[mock_bullet]).start()
     mock_boss.damage.return_value = False  # Boss is not defeated
 
     # Act
@@ -403,7 +403,7 @@ def test_player_collects_health_item(mock_sound_manager, mock_spritecollide, moc
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 
-    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
+    check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
 
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
@@ -425,7 +425,7 @@ def test_player_collects_bullet_speed_item(mock_sound_manager, mock_spritecollid
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 
-    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
+    check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
 
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)
@@ -444,7 +444,7 @@ def test_player_collects_no_items(mock_spritecollide, mock_player, mock_groups):
     # Create mock sound manager
     mock_sound_manager = MagicMock()
 
-    result = check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
+    check_items_player_collisions(items, mock_player, ui_manager, mock_sound_manager)
 
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_player, items, True)

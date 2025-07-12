@@ -119,7 +119,7 @@ def check_bullet_boss_collisions(boss, bullets, all_sprites):
             result['boss_hit'] = bool(boss_hits)
             result['damage'] = len(boss_hits) * BULLET_DAMAGE_TO_BOSS  # Damage per bullet from constants
 
-            for hit in boss_hits:
+            for _hit in boss_hits:
                 # Use boss's damage method to handle damage
                 boss_defeated = boss.damage(BULLET_DAMAGE_TO_BOSS)
 
@@ -242,7 +242,7 @@ def check_enemy_bullet_player_collisions(player, enemy_bullets, all_sprites):
 
 def check_items_player_collisions(items, player, ui_manager, sound_manager=None):
     """Check collisions between items and player
-    
+
     Args:
         items: Items sprite group
         player: Player object

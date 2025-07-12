@@ -19,7 +19,7 @@ from ..entity_factory import ConfigurableEntityFactory
 class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     """
     Factory for creating enemy entities.
-    
+
     This factory provides centralized enemy creation with support for
     different enemy types, difficulty scaling, and configuration presets.
     """
@@ -98,10 +98,10 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     def _create_entity(self, config: Dict[str, Any]) -> Enemy:
         """
         Create an enemy entity.
-        
+
         Args:
             config: Configuration dictionary
-            
+
         Returns:
             Created Enemy instance
         """
@@ -119,7 +119,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     def _post_creation_setup(self, enemy: Enemy, config: Dict[str, Any]):
         """
         Perform post-creation setup on the enemy.
-        
+
         Args:
             enemy: The created enemy
             config: Configuration used for creation
@@ -168,13 +168,13 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
                         enemy_bullets: pygame.sprite.Group) -> Enemy:
         """
         Create an enemy appropriate for the given level.
-        
+
         Args:
             game_level: Current game level
             game_time: Current game time
             all_sprites: Sprite group for all sprites
             enemy_bullets: Sprite group for enemy bullets
-            
+
         Returns:
             Created Enemy instance
         """
@@ -192,11 +192,11 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     def _determine_enemy_type(self, game_level: int, game_time: float) -> str:
         """
         Determine the appropriate enemy type for the given level and time.
-        
+
         Args:
             game_level: Current game level
             game_time: Current game time in minutes
-            
+
         Returns:
             Enemy preset name
         """
@@ -224,20 +224,20 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
                    enemy_bullets: pygame.sprite.Group) -> list:
         """
         Create a wave of enemies.
-        
+
         Args:
             wave_size: Number of enemies in the wave
             game_level: Current game level
             game_time: Current game time
             all_sprites: Sprite group for all sprites
             enemy_bullets: Sprite group for enemy bullets
-            
+
         Returns:
             List of created Enemy instances
         """
         enemies = []
 
-        for i in range(wave_size):
+        for _i in range(wave_size):
             enemy = self.create_for_level(
                 game_level, game_time, all_sprites, enemy_bullets
             )
@@ -251,13 +251,13 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
                            game_level: int = 1, game_time: float = 0) -> Enemy:
         """
         Create a random enemy from available presets.
-        
+
         Args:
             all_sprites: Sprite group for all sprites
             enemy_bullets: Sprite group for enemy bullets
             game_level: Current game level
             game_time: Current game time
-            
+
         Returns:
             Created Enemy instance
         """
@@ -277,12 +277,12 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
                            enemy_bullets: pygame.sprite.Group) -> Enemy:
         """
         Create a custom enemy with specific configuration.
-        
+
         Args:
             enemy_config: Custom enemy configuration
             all_sprites: Sprite group for all sprites
             enemy_bullets: Sprite group for enemy bullets
-            
+
         Returns:
             Created Enemy instance
         """
@@ -297,10 +297,10 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
     def get_enemy_stats(self, preset_name: str) -> Dict[str, Any]:
         """
         Get statistics for an enemy preset.
-        
+
         Args:
             preset_name: Name of the preset
-            
+
         Returns:
             Dictionary with enemy statistics
         """

@@ -22,7 +22,7 @@ class EventType(Enum):
 class Event:
     """
     Pure Event Model
-    
+
     This class represents an input event in the system, without relying on any external libraries.
     All input events will be converted to this unified format.
     """

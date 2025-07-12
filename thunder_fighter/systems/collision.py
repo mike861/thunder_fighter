@@ -179,7 +179,7 @@ class CollisionSystem:
                 result['boss_hit'] = bool(boss_hits)
                 result['damage'] = len(boss_hits) * BULLET_DAMAGE_TO_BOSS  # Damage per bullet from constants
 
-                for hit in boss_hits:
+                for _hit in boss_hits:
                     # Use boss's damage method to handle damage
                     boss_defeated = boss.damage(BULLET_DAMAGE_TO_BOSS)
 
@@ -303,7 +303,7 @@ class CollisionSystem:
 
     def check_items_player_collisions(self, items, player, ui_manager, sound_manager=None):
         """Check collisions between items and player
-        
+
         Args:
             items: Items sprite group
             player: Player object

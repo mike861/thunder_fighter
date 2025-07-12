@@ -39,7 +39,7 @@ class CommandType(Enum):
 class Command:
     """
     Game Command
-    
+
     Represents a specific game command, including the command type, timestamp, and related data.
     This is the interface between the input system and the game logic.
     """

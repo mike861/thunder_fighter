@@ -16,7 +16,7 @@ class BossStatusDisplay:
     def __init__(self, screen, font):
         """
         Initialize the boss status display.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
             font: pygame.Font - Font for displaying text
@@ -46,7 +46,7 @@ class BossStatusDisplay:
     def update_info(self, active, health=None, max_health=None, level=None, mode=None):
         """
         Update boss information.
-        
+
         Args:
             active: Whether boss is active
             health: Current health

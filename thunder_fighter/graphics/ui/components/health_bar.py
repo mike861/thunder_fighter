@@ -16,7 +16,7 @@ class HealthBarComponent:
     def __init__(self, screen, font):
         """
         Initialize the health bar component.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
             font: pygame.Font - Font for displaying text
@@ -29,7 +29,7 @@ class HealthBarComponent:
              show_text=True, text_format="{current}/{maximum}"):
         """
         Draw a health bar.
-        
+
         Args:
             x, y: Position coordinates
             width, height: Dimensions of the health bar
@@ -75,7 +75,7 @@ class HealthBarComponent:
     def draw_simple(self, x, y, width, height, percentage, color=GREEN):
         """
         Draw a simple health bar without text.
-        
+
         Args:
             x, y: Position coordinates
             width, height: Dimensions

@@ -26,11 +26,11 @@ class KeyBinding:
     def matches(self, key: int, modifiers: Set[int] = None) -> bool:
         """
         Check if this binding matches the given key and modifiers.
-        
+
         Args:
             key: The key code to check
             modifiers: Set of modifier keys (Ctrl, Shift, Alt)
-            
+
         Returns:
             True if the binding matches
         """
@@ -43,7 +43,7 @@ class KeyBinding:
 class KeyBindings:
     """
     Manages configurable key bindings for the game.
-    
+
     This class provides a centralized way to manage key mappings,
     allowing for easy customization and conflict detection.
     """
@@ -103,7 +103,7 @@ class KeyBindings:
     def add_binding(self, binding: KeyBinding):
         """
         Add a key binding.
-        
+
         Args:
             binding: The KeyBinding to add
         """
@@ -120,7 +120,7 @@ class KeyBindings:
     def remove_binding(self, action: str, key: int):
         """
         Remove a key binding.
-        
+
         Args:
             action: The action name
             key: The key code
@@ -138,11 +138,11 @@ class KeyBindings:
     def get_action(self, key: int, modifiers: Set[int] = None) -> Optional[str]:
         """
         Get the action for a given key and modifiers.
-        
+
         Args:
             key: The key code
             modifiers: Set of modifier keys
-            
+
         Returns:
             The action name or None if no binding found
         """
@@ -159,10 +159,10 @@ class KeyBindings:
     def get_keys_for_action(self, action: str) -> List[int]:
         """
         Get all keys bound to an action.
-        
+
         Args:
             action: The action name
-            
+
         Returns:
             List of key codes bound to the action
         """
@@ -175,10 +175,10 @@ class KeyBindings:
     def get_key_for_action(self, action: str) -> Optional[int]:
         """
         Get the first key bound to an action.
-        
+
         Args:
             action: The action name
-            
+
         Returns:
             First key code bound to the action, or None if not found
         """
@@ -190,10 +190,10 @@ class KeyBindings:
     def get_bindings_by_category(self, category: str) -> List[KeyBinding]:
         """
         Get all bindings in a category.
-        
+
         Args:
             category: The category name
-            
+
         Returns:
             List of KeyBinding objects in the category
         """
@@ -203,7 +203,7 @@ class KeyBindings:
     def get_all_categories(self) -> Set[str]:
         """
         Get all binding categories.
-        
+
         Returns:
             Set of category names
         """
@@ -212,11 +212,11 @@ class KeyBindings:
     def has_conflict(self, key: int, modifiers: Set[int] = None) -> bool:
         """
         Check if a key binding would conflict with existing bindings.
-        
+
         Args:
             key: The key code to check
             modifiers: Set of modifier keys
-            
+
         Returns:
             True if there would be a conflict
         """
@@ -232,11 +232,11 @@ class KeyBindings:
     def get_conflicts(self, key: int, modifiers: Set[int] = None) -> List[KeyBinding]:
         """
         Get all bindings that conflict with the given key.
-        
+
         Args:
             key: The key code to check
             modifiers: Set of modifier keys
-            
+
         Returns:
             List of conflicting KeyBinding objects
         """
@@ -254,13 +254,13 @@ class KeyBindings:
                    modifiers: Set[int] = None) -> bool:
         """
         Rebind an action from one key to another.
-        
+
         Args:
             action: The action to rebind
             old_key: The current key
             new_key: The new key
             modifiers: Set of modifier keys for the new binding
-            
+
         Returns:
             True if rebinding was successful
         """
@@ -306,7 +306,7 @@ class KeyBindings:
     def get_binding_info(self) -> Dict[str, List[Dict[str, str]]]:
         """
         Get formatted binding information for display.
-        
+
         Returns:
             Dictionary with categories as keys and binding info as values
         """

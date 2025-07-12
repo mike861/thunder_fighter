@@ -14,7 +14,7 @@ class GameInfoDisplay:
     def __init__(self, screen, font=None):
         """
         Initialize the game info display.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
             font: pygame.Font - Font for displaying text (optional, will use resource manager if None)
@@ -40,7 +40,7 @@ class GameInfoDisplay:
     def draw(self, score, level, game_time):
         """
         Draw game information.
-        
+
         Args:
             score: Current score
             level: Current game level
@@ -64,7 +64,7 @@ class GameInfoDisplay:
     def set_position(self, x, y):
         """
         Set the display position.
-        
+
         Args:
             x: X coordinate
             y: Y coordinate
@@ -75,7 +75,7 @@ class GameInfoDisplay:
     def set_color(self, color):
         """
         Set the text color.
-        
+
         Args:
             color: RGB color tuple
         """

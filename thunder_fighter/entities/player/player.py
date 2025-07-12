@@ -295,7 +295,7 @@ class Player(pygame.sprite.Sprite):
     def increase_speed(self):
         """
         Increase player movement speed
-        
+
         Returns:
             bool: Whether speed was successfully increased
         """
@@ -311,10 +311,10 @@ class Player(pygame.sprite.Sprite):
     def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
         """
         Increase player movement speed - matches method name called in collisions.py
-        
+
         Args:
             amount: Speed increase amount
-            
+
         Returns:
             float: Current player speed
         """

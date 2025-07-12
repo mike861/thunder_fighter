@@ -24,7 +24,7 @@ from thunder_fighter.utils.logger import logger
 class UIManager:
     """
     Facade class for managing all UI components.
-    
+
     This class delegates responsibilities to specialized components,
     maintaining a clean and modular architecture.
     """
@@ -32,7 +32,7 @@ class UIManager:
     def __init__(self, screen, player, game):
         """
         Initialize the UI manager with all its components.
-        
+
         Args:
             screen: pygame.Surface - Game screen
             player: Player - Player object
@@ -228,7 +228,7 @@ class UIManager:
     def draw(self, score, level, game_time, enemy_count=None, target_enemy_count=None, max_level=None):
         """
         Draw all UI elements.
-        
+
         Args:
             score: Current score
             level: Game level

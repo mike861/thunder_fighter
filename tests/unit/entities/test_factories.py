@@ -120,7 +120,7 @@ class TestEntityFactory:
         self.factory.set_default_config(default_config)
 
         # Create several entities
-        for i in range(5):
+        for _i in range(5):
             self.factory.create()
 
         assert self.factory.get_creation_count() == 5
@@ -408,7 +408,7 @@ class TestItemFactory:
                 'game_time': 60.0
             }
             # This might fail due to missing imports, but tests the structure
-            item = self.factory.create(**config)
+            self.factory.create(**config)
         except (ImportError, AttributeError):
             # Expected if actual item classes aren't available in test environment
             pass

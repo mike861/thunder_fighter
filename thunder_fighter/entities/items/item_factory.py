@@ -56,7 +56,6 @@ class ItemFactory(ConfigurableEntityFactory):
         item_type = config.get('item_type', 'health')
         all_sprites = config['all_sprites']
         items = config['items']
-        player = config['player']
 
         item_class = self._item_types.get(item_type, HealthItem)
         # Create item instance without parameters

@@ -17,7 +17,7 @@ T = TypeVar('T')
 class EntityFactory(ABC, Generic[T]):
     """
     Abstract base class for entity factories.
-    
+
     This class provides common functionality for creating game entities
     with consistent configuration and initialization patterns.
     """
@@ -25,7 +25,7 @@ class EntityFactory(ABC, Generic[T]):
     def __init__(self, entity_type: Type[T]):
         """
         Initialize the entity factory.
-        
+
         Args:
             entity_type: The type of entity this factory creates
         """
@@ -38,7 +38,7 @@ class EntityFactory(ABC, Generic[T]):
     def set_default_config(self, config: Dict[str, Any]):
         """
         Set default configuration for entities created by this factory.
-        
+
         Args:
             config: Default configuration dictionary
         """
@@ -48,7 +48,7 @@ class EntityFactory(ABC, Generic[T]):
     def get_default_config(self) -> Dict[str, Any]:
         """
         Get the default configuration.
-        
+
         Returns:
             Copy of the default configuration dictionary
         """
@@ -57,10 +57,10 @@ class EntityFactory(ABC, Generic[T]):
     def create(self, **kwargs) -> T:
         """
         Create an entity with the given parameters.
-        
+
         Args:
             **kwargs: Entity creation parameters
-            
+
         Returns:
             Created entity instance
         """
@@ -86,10 +86,10 @@ class EntityFactory(ABC, Generic[T]):
     def _create_entity(self, config: Dict[str, Any]) -> T:
         """
         Create the actual entity instance.
-        
+
         Args:
             config: Configuration dictionary
-            
+
         Returns:
             Created entity instance
         """
@@ -98,10 +98,10 @@ class EntityFactory(ABC, Generic[T]):
     def _validate_config(self, config: Dict[str, Any]):
         """
         Validate the configuration before entity creation.
-        
+
         Args:
             config: Configuration to validate
-            
+
         Raises:
             ValueError: If configuration is invalid
         """
@@ -114,7 +114,7 @@ class EntityFactory(ABC, Generic[T]):
     def _get_required_fields(self) -> list:
         """
         Get list of required configuration fields.
-        
+
         Returns:
             List of required field names
         """
@@ -123,7 +123,7 @@ class EntityFactory(ABC, Generic[T]):
     def _post_creation_setup(self, entity: T, config: Dict[str, Any]):
         """
         Perform post-creation setup on the entity.
-        
+
         Args:
             entity: The created entity
             config: Configuration used for creation
@@ -134,7 +134,7 @@ class EntityFactory(ABC, Generic[T]):
     def get_creation_count(self) -> int:
         """
         Get the number of entities created by this factory.
-        
+
         Returns:
             Number of entities created
         """
@@ -148,11 +148,11 @@ class EntityFactory(ABC, Generic[T]):
     def create_batch(self, count: int, **kwargs) -> list:
         """
         Create multiple entities with the same configuration.
-        
+
         Args:
             count: Number of entities to create
             **kwargs: Entity creation parameters
-            
+
         Returns:
             List of created entities
         """
@@ -173,7 +173,7 @@ class EntityFactory(ABC, Generic[T]):
 class ConfigurableEntityFactory(EntityFactory[T]):
     """
     Entity factory that supports configuration templates and presets.
-    
+
     This factory allows defining named configuration presets that can be
     used to create entities with predefined settings.
     """
@@ -186,7 +186,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def add_preset(self, name: str, config: Dict[str, Any]):
         """
         Add a configuration preset.
-        
+
         Args:
             name: Preset name
             config: Configuration dictionary
@@ -197,7 +197,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def remove_preset(self, name: str):
         """
         Remove a configuration preset.
-        
+
         Args:
             name: Preset name to remove
         """
@@ -208,10 +208,10 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def get_preset(self, name: str) -> Optional[Dict[str, Any]]:
         """
         Get a configuration preset.
-        
+
         Args:
             name: Preset name
-            
+
         Returns:
             Configuration dictionary or None if not found
         """
@@ -220,7 +220,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def list_presets(self) -> list:
         """
         Get list of available preset names.
-        
+
         Returns:
             List of preset names
         """
@@ -229,14 +229,14 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def create_from_preset(self, preset_name: str, **overrides) -> T:
         """
         Create an entity using a configuration preset.
-        
+
         Args:
             preset_name: Name of the preset to use
             **overrides: Additional parameters to override preset values
-            
+
         Returns:
             Created entity instance
-            
+
         Raises:
             ValueError: If preset doesn't exist
         """
@@ -253,12 +253,12 @@ class ConfigurableEntityFactory(EntityFactory[T]):
     def create_preset_batch(self, preset_name: str, count: int, **overrides) -> list:
         """
         Create multiple entities using a preset.
-        
+
         Args:
             preset_name: Name of the preset to use
             count: Number of entities to create
             **overrides: Additional parameters to override preset values
-            
+
         Returns:
             List of created entities
         """

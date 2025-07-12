@@ -5,6 +5,7 @@ import pytest
 
 from thunder_fighter.entities.enemies.boss import Boss
 
+
 @pytest.fixture
 def mock_pygame():
     with patch('thunder_fighter.sprites.boss.pygame') as mock, \

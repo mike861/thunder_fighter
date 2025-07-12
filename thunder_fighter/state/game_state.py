@@ -15,7 +15,7 @@ from thunder_fighter.utils.logger import logger
 class GameState:
     """
     Core game state data structure.
-    
+
     This class holds all the essential game state information in a centralized manner.
     """
     # Basic game control
@@ -121,7 +121,7 @@ class GameState:
 class GameStateManager:
     """
     Centralized game state manager.
-    
+
     This class provides a centralized interface for managing game state,
     including state transitions, validation, and event handling.
     """
@@ -141,7 +141,7 @@ class GameStateManager:
     def set_current_state(self, new_state: str):
         """
         Set the current game state.
-        
+
         Args:
             new_state: The new state name
         """
@@ -173,7 +173,7 @@ class GameStateManager:
     def end_game(self, victory: bool = False):
         """
         End the current game.
-        
+
         Args:
             victory: Whether the game ended in victory
         """
@@ -187,7 +187,7 @@ class GameStateManager:
     def level_up(self, new_level: int):
         """
         Level up the game.
-        
+
         Args:
             new_level: The new level number
         """
@@ -202,7 +202,7 @@ class GameStateManager:
     def update_player_stats(self, **kwargs):
         """
         Update player statistics.
-        
+
         Args:
             **kwargs: Player stat updates (health, bullet_paths, etc.)
         """
@@ -213,7 +213,7 @@ class GameStateManager:
     def update_boss_stats(self, **kwargs):
         """
         Update boss statistics.
-        
+
         Args:
             **kwargs: Boss stat updates (active, health, level, mode, etc.)
         """
@@ -224,7 +224,7 @@ class GameStateManager:
     def update_score(self, new_score: int):
         """
         Update the game score.
-        
+
         Args:
             new_score: The new score value
         """
@@ -233,7 +233,7 @@ class GameStateManager:
     def update_enemy_count(self, count: int, target: int = None):
         """
         Update enemy count information.
-        
+
         Args:
             count: Current enemy count
             target: Target enemy count (optional)
@@ -273,7 +273,7 @@ class GameStateManager:
     def add_state_listener(self, state_name: str, callback):
         """
         Add a listener for state changes.
-        
+
         Args:
             state_name: The state to listen for
             callback: Function to call when state changes
@@ -285,7 +285,7 @@ class GameStateManager:
     def remove_state_listener(self, state_name: str, callback):
         """
         Remove a state listener.
-        
+
         Args:
             state_name: The state name
             callback: The callback to remove
@@ -299,7 +299,7 @@ class GameStateManager:
     def _notify_state_change(self, old_state: str, new_state: str):
         """
         Notify listeners of state changes.
-        
+
         Args:
             old_state: The previous state
             new_state: The new state
@@ -326,7 +326,7 @@ class GameStateManager:
     def get_state_info(self) -> Dict[str, Any]:
         """
         Get a dictionary of current state information.
-        
+
         Returns:
             Dictionary containing current state information
         """

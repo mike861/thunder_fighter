@@ -52,7 +52,7 @@ class InputEventType(Enum):
 class InputEvent:
     """
     Represents an input event with associated data.
-    
+
     This class encapsulates input events in a way that decouples
     input handling from game logic processing.
     """
@@ -74,11 +74,11 @@ class InputEvent:
     def get_data(self, key: str, default: Any = None) -> Any:
         """
         Get data from the event.
-        
+
         Args:
             key: The data key to retrieve
             default: Default value if key not found
-            
+
         Returns:
             The data value or default
         """
@@ -87,7 +87,7 @@ class InputEvent:
     def set_data(self, key: str, value: Any):
         """
         Set data in the event.
-        
+
         Args:
             key: The data key to set
             value: The value to set
@@ -105,11 +105,11 @@ class InputEventFactory:
     def create_movement_event(direction: str, pressed: bool = True) -> InputEvent:
         """
         Create a movement event.
-        
+
         Args:
             direction: Direction of movement (up, down, left, right)
             pressed: Whether the key is pressed or released
-            
+
         Returns:
             InputEvent for movement
         """
@@ -138,11 +138,11 @@ class InputEventFactory:
     def create_action_event(action: str, pressed: bool = True) -> InputEvent:
         """
         Create an action event.
-        
+
         Args:
             action: Action type (shoot, missile)
             pressed: Whether the key is pressed or released
-            
+
         Returns:
             InputEvent for action
         """
@@ -163,10 +163,10 @@ class InputEventFactory:
     def create_game_control_event(control: str) -> InputEvent:
         """
         Create a game control event.
-        
+
         Args:
             control: Control type (pause, quit, etc.)
-            
+
         Returns:
             InputEvent for game control
         """
@@ -192,10 +192,10 @@ class InputEventFactory:
     def create_audio_event(audio_action: str) -> InputEvent:
         """
         Create an audio event.
-        
+
         Args:
             audio_action: Audio action (toggle_music, volume_up, etc.)
-            
+
         Returns:
             InputEvent for audio control
         """
@@ -220,10 +220,10 @@ class InputEventFactory:
     def create_ui_event(ui_action: str) -> InputEvent:
         """
         Create a UI event.
-        
+
         Args:
             ui_action: UI action (change_language, toggle_dev_mode)
-            
+
         Returns:
             InputEvent for UI control
         """

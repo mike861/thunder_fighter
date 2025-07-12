@@ -28,7 +28,7 @@ class MockEventSourceAdapter(EventSource):
     def add_event(self, event: Event):
         """
         Adds a test event.
-        
+
         Args:
             event: The event to add.
         """
@@ -39,7 +39,7 @@ class MockEventSourceAdapter(EventSource):
     def add_key_down(self, key_code: int, modifiers: Dict[str, bool] = None):
         """
         Convenience method to add a key down event.
-        
+
         Args:
             key_code: The key code.
             modifiers: The modifier key state.
@@ -53,7 +53,7 @@ class MockEventSourceAdapter(EventSource):
     def add_key_up(self, key_code: int, modifiers: Dict[str, bool] = None):
         """
         Convenience method to add a key up event.
-        
+
         Args:
             key_code: The key code.
             modifiers: The modifier key state.
@@ -67,7 +67,7 @@ class MockEventSourceAdapter(EventSource):
     def add_key_sequence(self, key_code: int, duration: float = 0.1):
         """
         Adds a key sequence (press then release).
-        
+
         Args:
             key_code: The key code.
             duration: The key hold duration.
@@ -79,7 +79,7 @@ class MockEventSourceAdapter(EventSource):
     def poll_events(self) -> List[Event]:
         """
         Gets all pending events.
-        
+
         Returns:
             A list of events (clears the internal queue).
         """
@@ -119,7 +119,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def press_key(self, key_code: int):
         """
         Simulates a key press.
-        
+
         Args:
             key_code: The key code.
         """
@@ -129,7 +129,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def release_key(self, key_code: int):
         """
         Simulates a key release.
-        
+
         Args:
             key_code: The key code.
         """
@@ -139,7 +139,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def press_keys(self, key_codes: List[int]):
         """
         Presses multiple keys simultaneously.
-        
+
         Args:
             key_codes: A list of key codes.
         """
@@ -149,7 +149,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def release_keys(self, key_codes: List[int]):
         """
         Releases multiple keys simultaneously.
-        
+
         Args:
             key_codes: A list of key codes.
         """
@@ -164,10 +164,10 @@ class MockKeyboardStateAdapter(KeyboardState):
     def is_pressed(self, key_code: int) -> bool:
         """
         Checks if a specific key is pressed.
-        
+
         Args:
             key_code: The key code.
-            
+
         Returns:
             True if the key is pressed, False otherwise.
         """
@@ -176,7 +176,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def get_pressed_keys(self) -> List[int]:
         """
         Gets all pressed keys.
-        
+
         Returns:
             A list of all currently pressed key codes.
         """
@@ -185,7 +185,7 @@ class MockKeyboardStateAdapter(KeyboardState):
     def simulate_key_sequence(self, key_codes: List[int], hold_time: float = 0.1):
         """
         Simulates a key sequence.
-        
+
         Args:
             key_codes: The key code sequence.
             hold_time: The hold time for each key.
@@ -206,7 +206,7 @@ class MockClockAdapter(Clock):
     def __init__(self, initial_time: float = 0.0):
         """
         Initializes the test clock.
-        
+
         Args:
             initial_time: The initial time.
         """
@@ -218,7 +218,7 @@ class MockClockAdapter(Clock):
     def advance(self, seconds: float):
         """
         Advances time.
-        
+
         Args:
             seconds: The number of seconds to advance.
         """
@@ -230,7 +230,7 @@ class MockClockAdapter(Clock):
     def advance_frames(self, frames: int, fps: int = 60):
         """
         Advances time by frames.
-        
+
         Args:
             frames: The number of frames to advance.
             fps: The frame rate.
@@ -241,7 +241,7 @@ class MockClockAdapter(Clock):
     def set_time(self, time: float):
         """
         Sets the time directly.
-        
+
         Args:
             time: The new time.
         """
@@ -253,7 +253,7 @@ class MockClockAdapter(Clock):
     def now(self) -> float:
         """
         Gets the current time.
-        
+
         Returns:
             The current timestamp (in seconds).
         """
@@ -262,7 +262,7 @@ class MockClockAdapter(Clock):
     def delta_time(self) -> float:
         """
         Gets the frame time interval.
-        
+
         Returns:
             The time interval from the last frame to this one (in seconds).
         """
@@ -286,7 +286,7 @@ class MockLoggerAdapter(Logger):
     def __init__(self, print_logs: bool = False):
         """
         Initializes the test logger.
-        
+
         Args:
             print_logs: Whether to print logs to the console.
         """
@@ -318,10 +318,10 @@ class MockLoggerAdapter(Logger):
     def get_logs(self, level: Optional[str] = None) -> List[str]:
         """
         Gets log messages.
-        
+
         Args:
             level: The log level to filter by (optional).
-            
+
         Returns:
             A list of log messages.
         """
@@ -346,11 +346,11 @@ def create_test_environment(initial_time: float = 0.0,
                           print_logs: bool = False) -> tuple[MockEventSourceAdapter, MockKeyboardStateAdapter, MockClockAdapter, MockLoggerAdapter]:
     """
     Creates a complete test environment.
-    
+
     Args:
         initial_time: The initial time.
         print_logs: Whether to print logs.
-        
+
     Returns:
         A tuple of (event source, keyboard state, clock, logger).
     """
@@ -371,7 +371,7 @@ class MockScenarioBuilder:
     def __init__(self, event_source: MockEventSourceAdapter, clock: MockClockAdapter, keyboard: MockKeyboardStateAdapter):
         """
         Initializes the test scenario.
-        
+
         Args:
             event_source: The test event source.
             clock: The test clock.

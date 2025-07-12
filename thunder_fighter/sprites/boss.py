@@ -108,10 +108,10 @@ class Boss(pygame.sprite.Sprite):
 
     def damage(self, amount):
         """Handle Boss damage taken
-        
+
         Args:
             amount: Damage value
-        
+
         Returns:
             bool: Returns True if Boss is destroyed, otherwise False
         """
@@ -162,7 +162,7 @@ class Boss(pygame.sprite.Sprite):
 
             # Calculate dynamic movement boundaries based on game_level
             # Higher game_level allows moving closer to the edges
-            max_movement_range = (WIDTH - self.rect.width - 2 * self.move_margin)
+            (WIDTH - self.rect.width - 2 * self.move_margin)
             # Reduce margin based on game level, but keep at least a small margin
             current_margin = max(5, self.move_margin + 50 - self.game_level * 5)
 

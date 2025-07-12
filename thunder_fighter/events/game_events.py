@@ -68,7 +68,7 @@ class GameEventType(Enum):
 class GameEvent(Event):
     """
     Game-specific event class.
-    
+
     This class extends the base Event class with game-specific
     functionality and convenience methods.
     """
@@ -76,7 +76,7 @@ class GameEvent(Event):
     def __init__(self, event_type: GameEventType, source: str = "unknown", **data):
         """
         Initialize a game event.
-        
+
         Args:
             event_type: The game event type
             source: The source component

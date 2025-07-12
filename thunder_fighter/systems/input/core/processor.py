@@ -15,7 +15,7 @@ from .events import Event, EventType
 class InputProcessor:
     """
     Pure Input Processor
-    
+
     Core input processing logic, responsible for converting input events into game commands.
     Uses external interfaces through dependency injection, making it fully testable.
     """
@@ -28,10 +28,10 @@ class InputProcessor:
                  logger: Optional[Logger] = None):
         """
         Initializes the input processor.
-        
+
         Args:
             event_source: Event source interface.
-            keyboard_state: Keyboard state interface.  
+            keyboard_state: Keyboard state interface.
             clock: Clock interface.
             key_mapping: Mapping from key codes to command types.
             logger: Logger interface (optional).
@@ -70,7 +70,7 @@ class InputProcessor:
     def process(self) -> List[Command]:
         """
         Processes input and returns a list of commands.
-        
+
         Returns:
             A list of generated commands.
         """
@@ -109,10 +109,10 @@ class InputProcessor:
     def _process_event(self, event: Event) -> Optional[Command]:
         """
         Processes a single event.
-        
+
         Args:
             event: The input event.
-            
+
         Returns:
             The generated command (if any).
         """
@@ -133,10 +133,10 @@ class InputProcessor:
     def _handle_key_down(self, event: Event) -> Optional[Command]:
         """
         Handles a key down event.
-        
+
         Args:
             event: The key event.
-            
+
         Returns:
             The generated command (if any).
         """
@@ -176,10 +176,10 @@ class InputProcessor:
     def _handle_key_up(self, event: Event) -> Optional[Command]:
         """
         Handles a key up event.
-        
+
         Args:
             event: The key event.
-            
+
         Returns:
             The generated command (if any).
         """
@@ -196,11 +196,11 @@ class InputProcessor:
     def _process_held_key(self, key: int, current_time: float) -> Optional[Command]:
         """
         Processes a held key (for continuous actions like movement).
-        
+
         Args:
             key: The key code.
             current_time: The current time.
-            
+
         Returns:
             The generated command (if any).
         """
@@ -246,7 +246,7 @@ class InputProcessor:
     def set_repeat_config(self, delay: float, rate: float):
         """
         Sets the key repeat configuration.
-        
+
         Args:
             delay: The delay before the first repeat (in seconds).
             rate: The interval between repeats (in seconds).
@@ -260,7 +260,7 @@ class InputProcessor:
     def set_cooldown(self, cooldown: float):
         """
         Sets the command cooldown time.
-        
+
         Args:
             cooldown: The cooldown time (in seconds).
         """

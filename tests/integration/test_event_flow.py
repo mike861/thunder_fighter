@@ -18,7 +18,7 @@ class MockEventListener(EventListener):
     def __init__(self, name: str, listen_events: Set[GameEventType] = None):
         """
         Initialize test listener.
-        
+
         Args:
             name: Listener name for identification
             listen_events: Set of event types to listen for

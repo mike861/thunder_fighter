@@ -15,7 +15,7 @@ class NotificationManager:
     def __init__(self, screen):
         """
         Initialize the notification manager.
-        
+
         Args:
             screen: pygame.Surface - The game screen to draw on
         """
@@ -26,7 +26,7 @@ class NotificationManager:
     def add(self, text, notification_type="normal"):
         """
         Add a new notification.
-        
+
         Args:
             text: Notification text
             notification_type: Type of notification ("normal", "warning", "achievement")

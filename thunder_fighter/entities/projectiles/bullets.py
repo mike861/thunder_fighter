@@ -69,11 +69,11 @@ class Bullet(pygame.sprite.Sprite):
 
 class BossBullet(pygame.sprite.Sprite):
     """Boss bullet class that supports bullet variations for different attack modes.
-    
+
     Creates bullets with different appearance, speed, damage and movement patterns
     based on Boss attack mode (normal/aggressive/final). Final mode bullets support
     initial direction tracking.
-    
+
     Attributes:
         shoot_pattern (str): Attack mode - "normal", "aggressive", or "final"
         damage (int): Bullet damage value
@@ -86,18 +86,18 @@ class BossBullet(pygame.sprite.Sprite):
     def __init__(self, x: int, y: int, shoot_pattern: str = "normal",
                  target_pos: Optional[Tuple[int, int]] = None) -> None:
         """Initialize Boss bullet.
-        
+
         Args:
             x: Initial bullet X coordinate
             y: Initial bullet Y coordinate
             shoot_pattern: Attack mode, valid values: "normal", "aggressive", "final"
             target_pos: Target position (x, y), only used in final mode for tracking direction calculation
-            
+
         Raises:
             ValueError: When attack mode is not within valid range
-            
+
         Note:
-            Final mode tracking only affects direction calculation at firing moment, 
+            Final mode tracking only affects direction calculation at firing moment,
             afterwards bullet flies in straight line
         """
         super().__init__()
@@ -150,7 +150,7 @@ class BossBullet(pygame.sprite.Sprite):
 
     def _setup_tracking_movement(self, x: int, y: int, target_pos: Tuple[int, int]) -> None:
         """Set Final mode tracking movement.
-        
+
         Args:
             x: Bullet start X coordinate
             y: Bullet start Y coordinate
@@ -193,10 +193,10 @@ class BossBullet(pygame.sprite.Sprite):
 
     def _create_boss_bullet(self) -> pygame.Surface:
         """Create bullets with different appearance based on attack mode.
-        
+
         Returns:
             Created bullet surface image
-            
+
         Raises:
             Exception: When image creation fails
         """
@@ -234,16 +234,16 @@ class BossBullet(pygame.sprite.Sprite):
                             size_multiplier: float = 1.0,
                             glow: bool = False) -> pygame.Surface:
         """Create bullet sprite image.
-        
+
         Args:
             primary_color: Primary color RGB tuple
-            secondary_color: Secondary color RGB tuple  
+            secondary_color: Secondary color RGB tuple
             size_multiplier: Size multiplier
             glow: Whether to add glow effect
-            
+
         Returns:
             Created bullet surface image
-            
+
         Raises:
             ValueError: When color values are invalid
             Exception: When image creation fails
@@ -283,13 +283,13 @@ class BossBullet(pygame.sprite.Sprite):
                         primary_color: Tuple[int, int, int],
                         base_width: int, base_height: int) -> pygame.Surface:
         """Add glow effect to bullet.
-        
+
         Args:
             bullet_surface: Original bullet surface
             primary_color: Glow color
             base_width: Bullet width
             base_height: Bullet height
-            
+
         Returns:
             Surface with glow effect
         """
@@ -323,7 +323,7 @@ class BossBullet(pygame.sprite.Sprite):
 
     def update(self) -> None:
         """Update bullet position and check boundaries.
-        
+
         Bullet moves at set speed, automatically destroys if exceeding screen boundaries.
         """
         try:
@@ -343,7 +343,7 @@ class BossBullet(pygame.sprite.Sprite):
 
     def get_damage(self) -> int:
         """Get bullet damage value.
-        
+
         Returns:
             Damage value caused by bullet
         """

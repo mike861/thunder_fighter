@@ -18,7 +18,7 @@ from .events import InputEvent, InputEventFactory
 class InputHandler:
     """
     Handles raw input events and converts them to structured input events.
-    
+
     This class processes pygame events, applies key bindings, and generates
     InputEvent objects that can be consumed by game logic.
     """
@@ -26,7 +26,7 @@ class InputHandler:
     def __init__(self, key_bindings: Optional[KeyBindings] = None):
         """
         Initialize the input handler.
-        
+
         Args:
             key_bindings: Optional KeyBindings instance. If None, creates default.
         """
@@ -51,10 +51,10 @@ class InputHandler:
         """
         Process pygame events and convert them to input events.
         Uses hybrid processing with fallback for macOS screenshot interference.
-        
+
         Args:
             pygame_events: List of pygame events to process
-            
+
         Returns:
             List of InputEvent objects
         """
@@ -76,10 +76,10 @@ class InputHandler:
     def _process_single_event_with_fallback(self, event: pygame.event.Event) -> List[InputEvent]:
         """
         Process a single pygame event with fallback for macOS screenshot interference.
-        
+
         Args:
             event: The pygame event to process
-            
+
         Returns:
             List of InputEvent objects generated from the event
         """
@@ -129,10 +129,10 @@ class InputHandler:
     def _process_single_event(self, event: pygame.event.Event) -> List[InputEvent]:
         """
         Process a single pygame event.
-        
+
         Args:
             event: The pygame event to process
-            
+
         Returns:
             List of InputEvent objects generated from the event
         """
@@ -154,10 +154,10 @@ class InputHandler:
     def _handle_keydown(self, event: pygame.event.Event) -> List[InputEvent]:
         """
         Handle keydown events.
-        
+
         Args:
             event: The pygame keydown event
-            
+
         Returns:
             List of InputEvent objects
         """
@@ -217,10 +217,10 @@ class InputHandler:
     def _handle_keyup(self, event: pygame.event.Event) -> List[InputEvent]:
         """
         Handle keyup events.
-        
+
         Args:
             event: The pygame keyup event
-            
+
         Returns:
             List of InputEvent objects
         """
@@ -252,7 +252,7 @@ class InputHandler:
     def _generate_continuous_events(self) -> List[InputEvent]:
         """
         Generate events for continuous actions (held keys).
-        
+
         Returns:
             List of InputEvent objects for continuous actions
         """
@@ -280,7 +280,7 @@ class InputHandler:
     def _get_modifiers(self) -> Set[int]:
         """
         Get currently pressed modifier keys.
-        
+
         Returns:
             Set of modifier key codes
         """
@@ -305,10 +305,10 @@ class InputHandler:
     def is_key_pressed(self, key: int) -> bool:
         """
         Check if a key is currently pressed.
-        
+
         Args:
             key: The key code to check
-            
+
         Returns:
             True if the key is pressed
         """
@@ -317,10 +317,10 @@ class InputHandler:
     def is_key_held(self, key: int) -> bool:
         """
         Check if a key is currently held down.
-        
+
         Args:
             key: The key code to check
-            
+
         Returns:
             True if the key is held
         """
@@ -329,10 +329,10 @@ class InputHandler:
     def is_action_active(self, action: str) -> bool:
         """
         Check if an action is currently active (for continuous actions).
-        
+
         Args:
             action: The action name to check
-            
+
         Returns:
             True if the action is active
         """
@@ -341,7 +341,7 @@ class InputHandler:
     def get_active_actions(self) -> Set[str]:
         """
         Get all currently active continuous actions.
-        
+
         Returns:
             Set of active action names
         """
@@ -357,7 +357,7 @@ class InputHandler:
     def _detect_focus_issues(self, pygame_events: List[pygame.event.Event]):
         """
         Detect potential focus loss issues that can occur with macOS screenshot function.
-        
+
         Args:
             pygame_events: List of pygame events to analyze
         """
@@ -452,7 +452,7 @@ class InputHandler:
     def get_key_bindings(self) -> KeyBindings:
         """
         Get the key bindings instance.
-        
+
         Returns:
             The KeyBindings instance
         """
@@ -461,7 +461,7 @@ class InputHandler:
     def set_key_bindings(self, key_bindings: KeyBindings):
         """
         Set a new key bindings instance.
-        
+
         Args:
             key_bindings: The new KeyBindings instance
         """

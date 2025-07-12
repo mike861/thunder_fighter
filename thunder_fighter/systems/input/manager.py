@@ -19,7 +19,7 @@ from .handler import InputHandler
 class InputManager:
     """
     Main input manager that coordinates all input handling.
-    
+
     This class provides a high-level interface for input management,
     including event processing, key binding management, and input callbacks.
     """
@@ -27,7 +27,7 @@ class InputManager:
     def __init__(self, key_bindings: Optional[KeyBindings] = None):
         """
         Initialize the input manager.
-        
+
         Args:
             key_bindings: Optional KeyBindings instance
         """
@@ -47,10 +47,10 @@ class InputManager:
     def update(self, pygame_events: List[pygame.event.Event]) -> List[InputEvent]:
         """
         Update the input manager with pygame events.
-        
+
         Args:
             pygame_events: List of pygame events from the current frame
-            
+
         Returns:
             List of processed InputEvent objects
         """
@@ -73,10 +73,10 @@ class InputManager:
     def _filter_paused_events(self, events: List[InputEvent]) -> List[InputEvent]:
         """
         Filter events when the input is paused.
-        
+
         Args:
             events: List of input events to filter
-            
+
         Returns:
             Filtered list of events
         """
@@ -96,7 +96,7 @@ class InputManager:
     def add_event_callback(self, event_type: InputEventType, callback: Callable[[InputEvent], None]):
         """
         Add a callback for a specific event type.
-        
+
         Args:
             event_type: The input event type to listen for
             callback: Function to call when the event occurs
@@ -110,7 +110,7 @@ class InputManager:
     def remove_event_callback(self, event_type: InputEventType, callback: Callable):
         """
         Remove a callback for a specific event type.
-        
+
         Args:
             event_type: The input event type
             callback: The callback function to remove
@@ -125,7 +125,7 @@ class InputManager:
     def add_global_callback(self, callback: Callable[[InputEvent], None]):
         """
         Add a global callback that receives all input events.
-        
+
         Args:
             callback: Function to call for all input events
         """
@@ -135,7 +135,7 @@ class InputManager:
     def remove_global_callback(self, callback: Callable):
         """
         Remove a global callback.
-        
+
         Args:
             callback: The callback function to remove
         """
@@ -148,7 +148,7 @@ class InputManager:
     def _trigger_callbacks(self, event: InputEvent):
         """
         Trigger callbacks for an input event.
-        
+
         Args:
             event: The input event to process
         """
@@ -170,10 +170,10 @@ class InputManager:
     def is_action_active(self, action: str) -> bool:
         """
         Check if an action is currently active.
-        
+
         Args:
             action: The action name to check
-            
+
         Returns:
             True if the action is active
         """
@@ -182,10 +182,10 @@ class InputManager:
     def is_key_pressed(self, key: int) -> bool:
         """
         Check if a key is currently pressed.
-        
+
         Args:
             key: The key code to check
-            
+
         Returns:
             True if the key is pressed
         """
@@ -194,10 +194,10 @@ class InputManager:
     def is_key_held(self, key: int) -> bool:
         """
         Check if a key is currently held down.
-        
+
         Args:
             key: The key code to check
-            
+
         Returns:
             True if the key is held
         """
@@ -206,7 +206,7 @@ class InputManager:
     def get_active_actions(self) -> set:
         """
         Get all currently active actions.
-        
+
         Returns:
             Set of active action names
         """
@@ -248,7 +248,7 @@ class InputManager:
     def get_key_bindings(self) -> KeyBindings:
         """
         Get the key bindings instance.
-        
+
         Returns:
             The KeyBindings instance
         """
@@ -257,7 +257,7 @@ class InputManager:
     def set_key_bindings(self, key_bindings: KeyBindings):
         """
         Set new key bindings.
-        
+
         Args:
             key_bindings: The new KeyBindings instance
         """
@@ -268,12 +268,12 @@ class InputManager:
     def rebind_key(self, action: str, old_key: int, new_key: int) -> bool:
         """
         Rebind a key for an action.
-        
+
         Args:
             action: The action to rebind
             old_key: The current key
             new_key: The new key
-            
+
         Returns:
             True if rebinding was successful
         """
@@ -287,7 +287,7 @@ class InputManager:
     def get_binding_info(self) -> Dict[str, List[Dict[str, str]]]:
         """
         Get formatted key binding information.
-        
+
         Returns:
             Dictionary with binding information organized by category
         """
@@ -296,10 +296,10 @@ class InputManager:
     def create_movement_handler(self, move_callback: Callable[[str, bool], None]) -> Callable:
         """
         Create a movement event handler.
-        
+
         Args:
             move_callback: Function to call for movement events (direction, pressed)
-            
+
         Returns:
             Event handler function
         """
@@ -320,10 +320,10 @@ class InputManager:
     def create_action_handler(self, action_callback: Callable[[str, bool], None]) -> Callable:
         """
         Create an action event handler.
-        
+
         Args:
             action_callback: Function to call for action events (action, pressed)
-            
+
         Returns:
             Event handler function
         """

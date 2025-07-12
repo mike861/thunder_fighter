@@ -494,7 +494,7 @@ class DynamicBackground:
             self.transition_progress = min(1.0, elapsed / self.transition_duration)
 
             # Use smooth easing
-            smooth_progress = self._smooth_ease_in_out(self.transition_progress)
+            self._smooth_ease_in_out(self.transition_progress)
 
             if self.transition_progress >= 1.0:
                 self.transitioning = False

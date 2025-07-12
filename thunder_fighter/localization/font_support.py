@@ -16,7 +16,7 @@ from thunder_fighter.utils.resource_manager import get_resource_manager
 class FontManager:
     """
     Manages fonts for different languages and text styles.
-    
+
     This class ensures that the appropriate font is used for each language,
     particularly important for Chinese characters which require specific fonts.
     """
@@ -45,12 +45,12 @@ class FontManager:
     def get_font(self, language: str, size: int, style: str = 'normal') -> pygame.font.Font:
         """
         Get the appropriate font for a language and style.
-        
+
         Args:
             language: Language code (e.g., 'en', 'zh')
             size: Font size in points
             style: Font style ('normal' or 'bold')
-            
+
         Returns:
             pygame.font.Font object
         """
@@ -99,13 +99,13 @@ class FontManager:
                    antialias: bool = True) -> pygame.Surface:
         """
         Render text with the given font and color.
-        
+
         Args:
             text: Text to render
             font: Font to use
             color: RGB color tuple
             antialias: Whether to use antialiasing
-            
+
         Returns:
             Rendered text surface
         """
@@ -120,17 +120,17 @@ class FontManager:
     def check_rendering_support(self, text: str, font: pygame.font.Font) -> bool:
         """
         Check if the font can render the text without tofu blocks.
-        
+
         Args:
             text: Text to check
             font: Font to test
-            
+
         Returns:
             True if text can be rendered properly, False if tofu blocks detected
         """
         try:
             # Render the text
-            surface = font.render(text, True, (255, 255, 255))
+            font.render(text, True, (255, 255, 255))
 
             # Check for tofu blocks by looking for the replacement character
             # This is a heuristic - a more sophisticated check would analyze pixels
@@ -168,12 +168,12 @@ def get_font_manager() -> FontManager:
 def get_localized_font(language: str, size: int, style: str = 'normal') -> pygame.font.Font:
     """
     Convenience function to get a font for a specific language.
-    
+
     Args:
         language: Language code
         size: Font size
         style: Font style
-        
+
     Returns:
         Appropriate font for the language
     """

@@ -108,10 +108,10 @@ class Boss(pygame.sprite.Sprite):
 
     def damage(self, amount):
         """Handle Boss damage taken
-        
+
         Args:
             amount: Damage value
-        
+
         Returns:
             bool: Returns True if Boss is destroyed, otherwise False
         """

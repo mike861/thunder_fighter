@@ -74,7 +74,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def _determine_level(self, game_time, game_level):
         """Determine enemy level based on game time and level
-        
+
         About level meanings:
         - Enemy levels are integers from 0-10, where 0 is the lowest and 10 is the highest
         - Level 0-1 enemies cannot shoot

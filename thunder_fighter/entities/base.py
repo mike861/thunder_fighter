@@ -103,7 +103,7 @@ class EntityFactory(ABC):
     def create_batch(self, count: int, *args, **kwargs) -> list:
         """Creates entities in batch."""
         entities = []
-        for i in range(count):
+        for _i in range(count):
             entity = self.create(*args, **kwargs)
             entities.append(entity)
         return entities

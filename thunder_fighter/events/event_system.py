@@ -23,7 +23,7 @@ class EventType(Enum):
 class Event:
     """
     Base event class for the event system.
-    
+
     This class represents an event that can be dispatched through
     the event system to decouple component communication.
     """
@@ -37,11 +37,11 @@ class Event:
     def get_data(self, key: str, default: Any = None) -> Any:
         """
         Get data from the event.
-        
+
         Args:
             key: Data key to retrieve
             default: Default value if key not found
-            
+
         Returns:
             The data value or default
         """
@@ -50,7 +50,7 @@ class Event:
     def set_data(self, key: str, value: Any):
         """
         Set data in the event.
-        
+
         Args:
             key: Data key to set
             value: Value to set
@@ -72,7 +72,7 @@ class Event:
 class EventListener(ABC):
     """
     Abstract base class for event listeners.
-    
+
     Components that want to receive events should inherit from this class
     and implement the handle_event method.
     """
@@ -81,10 +81,10 @@ class EventListener(ABC):
     def handle_event(self, event: Event) -> bool:
         """
         Handle an event.
-        
+
         Args:
             event: The event to handle
-            
+
         Returns:
             True if the event was handled and should not be passed to other listeners
         """
@@ -93,7 +93,7 @@ class EventListener(ABC):
     def get_listened_events(self) -> Set[EventType]:
         """
         Get the set of event types this listener is interested in.
-        
+
         Returns:
             Set of EventType values this listener wants to receive
         """
@@ -103,7 +103,7 @@ class EventListener(ABC):
 class EventSystem:
     """
     Central event system for managing event dispatch and handling.
-    
+
     This system provides decoupled communication between game components
     through an event-driven architecture.
     """
@@ -121,7 +121,7 @@ class EventSystem:
     def register_listener(self, event_type: EventType, listener: EventListener):
         """
         Register a listener for a specific event type.
-        
+
         Args:
             event_type: The event type to listen for
             listener: The listener to register
@@ -136,7 +136,7 @@ class EventSystem:
     def unregister_listener(self, event_type: EventType, listener: EventListener):
         """
         Unregister a listener for a specific event type.
-        
+
         Args:
             event_type: The event type
             listener: The listener to unregister
@@ -151,7 +151,7 @@ class EventSystem:
     def register_global_listener(self, listener: EventListener):
         """
         Register a global listener that receives all events.
-        
+
         Args:
             listener: The listener to register
         """
@@ -162,7 +162,7 @@ class EventSystem:
     def unregister_global_listener(self, listener: EventListener):
         """
         Unregister a global listener.
-        
+
         Args:
             listener: The listener to unregister
         """
@@ -175,7 +175,7 @@ class EventSystem:
     def dispatch_event(self, event: Event, immediate: bool = False):
         """
         Dispatch an event to registered listeners.
-        
+
         Args:
             event: The event to dispatch
             immediate: If True, process the event immediately. Otherwise, queue it.
@@ -208,7 +208,7 @@ class EventSystem:
     def _process_event(self, event: Event):
         """
         Process a single event.
-        
+
         Args:
             event: The event to process
         """
@@ -252,12 +252,12 @@ class EventSystem:
     def create_event(self, event_type: EventType, source: str = "unknown", **data) -> Event:
         """
         Create an event with the given type and data.
-        
+
         Args:
             event_type: The type of event to create
             source: The source component creating the event
             **data: Event data as keyword arguments
-            
+
         Returns:
             Created Event instance
         """
@@ -271,7 +271,7 @@ class EventSystem:
                    immediate: bool = False, **data):
         """
         Create and dispatch an event in one call.
-        
+
         Args:
             event_type: The type of event to emit
             source: The source component emitting the event
@@ -290,7 +290,7 @@ class EventSystem:
     def get_queue_size(self) -> int:
         """
         Get the number of queued events.
-        
+
         Returns:
             Number of events in the queue
         """
@@ -299,10 +299,10 @@ class EventSystem:
     def get_listener_count(self, event_type: EventType = None) -> int:
         """
         Get the number of listeners for an event type.
-        
+
         Args:
             event_type: Event type to count listeners for. If None, count all listeners.
-            
+
         Returns:
             Number of listeners
         """
@@ -317,7 +317,7 @@ class EventSystem:
     def get_events_processed(self) -> int:
         """
         Get the total number of events processed.
-        
+
         Returns:
             Number of events processed since initialization
         """

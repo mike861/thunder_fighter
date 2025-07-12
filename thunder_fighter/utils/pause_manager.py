@@ -30,7 +30,7 @@ class PauseStats:
 class PauseManager:
     """
     Manages game pause state and pause-aware timing calculations.
-    
+
     This class provides a clean, testable interface for pause functionality,
     separating it from the main game logic.
     """
@@ -38,7 +38,7 @@ class PauseManager:
     def __init__(self, cooldown_ms: int = 300):
         """
         Initialize the pause manager.
-        
+
         Args:
             cooldown_ms: Minimum milliseconds between pause toggles
         """
@@ -61,10 +61,10 @@ class PauseManager:
     def toggle_pause(self, current_time: Optional[float] = None) -> bool:
         """
         Toggle the pause state.
-        
+
         Args:
             current_time: Current time in seconds. If None, uses time.time()
-            
+
         Returns:
             True if pause state was toggled, False if blocked by cooldown
         """
@@ -104,10 +104,10 @@ class PauseManager:
     def pause(self, current_time: Optional[float] = None) -> bool:
         """
         Pause the game if not already paused.
-        
+
         Args:
             current_time: Current time in seconds
-            
+
         Returns:
             True if successfully paused, False otherwise
         """
@@ -118,10 +118,10 @@ class PauseManager:
     def resume(self, current_time: Optional[float] = None) -> bool:
         """
         Resume the game if paused.
-        
+
         Args:
             current_time: Current time in seconds
-            
+
         Returns:
             True if successfully resumed, False otherwise
         """
@@ -132,7 +132,7 @@ class PauseManager:
     def get_pause_stats(self) -> PauseStats:
         """
         Get current pause statistics.
-        
+
         Returns:
             PauseStats object with current pause information
         """
@@ -152,11 +152,11 @@ class PauseManager:
                           current_time: Optional[float] = None) -> float:
         """
         Calculate pause-aware game time.
-        
+
         Args:
             start_time: Game start time in seconds
             current_time: Current time in seconds. If None, uses time.time()
-            
+
         Returns:
             Game time in seconds, excluding pause duration
         """
@@ -184,7 +184,7 @@ class PauseManager:
     def get_total_pause_duration(self) -> float:
         """
         Get total time spent paused.
-        
+
         Returns:
             Total pause duration in seconds
         """

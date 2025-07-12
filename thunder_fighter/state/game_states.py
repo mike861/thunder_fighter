@@ -316,11 +316,11 @@ class StateFactory:
     def create_state(state_name: str, game_instance=None) -> Optional[State]:
         """
         Create a state by name.
-        
+
         Args:
             state_name: The name of the state to create
             game_instance: The game instance to pass to the state
-            
+
         Returns:
             The created state or None if unknown state name
         """
@@ -347,10 +347,10 @@ class StateFactory:
     def create_all_states(game_instance=None) -> list:
         """
         Create all game states.
-        
+
         Args:
             game_instance: The game instance to pass to states
-            
+
         Returns:
             List of all created states
         """

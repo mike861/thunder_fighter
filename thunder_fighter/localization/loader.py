@@ -20,10 +20,10 @@ class LanguageLoader(ABC):
     def load(self, language_code: str) -> Optional[Dict[str, str]]:
         """
         Load language data for the given code.
-        
+
         Args:
             language_code: Two-letter language code (e.g., 'en', 'zh')
-            
+
         Returns:
             Dictionary of text keys to translations, or None if loading fails
         """
@@ -33,7 +33,7 @@ class LanguageLoader(ABC):
     def available_languages(self) -> list[str]:
         """
         Get list of available language codes.
-        
+
         Returns:
             List of available language codes
         """
@@ -43,14 +43,14 @@ class LanguageLoader(ABC):
 class FileLanguageLoader(LanguageLoader):
     """
     Loads language data from JSON files in the filesystem.
-    
+
     This is the production implementation that reads from actual files.
     """
 
     def __init__(self, base_path: Optional[str] = None):
         """
         Initialize the file loader.
-        
+
         Args:
             base_path: Base directory for language files. If None, uses module directory.
         """
@@ -101,14 +101,14 @@ class FileLanguageLoader(LanguageLoader):
 class MemoryLanguageLoader(LanguageLoader):
     """
     Loads language data from in-memory dictionaries.
-    
+
     This implementation is useful for testing without filesystem dependencies.
     """
 
     def __init__(self, languages: Optional[Dict[str, Dict[str, str]]] = None):
         """
         Initialize the memory loader.
-        
+
         Args:
             languages: Dictionary mapping language codes to translation dictionaries
         """
@@ -126,12 +126,12 @@ class MemoryLanguageLoader(LanguageLoader):
 
     def available_languages(self) -> list[str]:
         """Get available languages from memory."""
-        return sorted(list(self.languages.keys()))
+        return sorted(self.languages.keys())
 
     def add_language(self, language_code: str, translations: Dict[str, str]):
         """
         Add or update a language in memory.
-        
+
         Args:
             language_code: Language code to add/update
             translations: Dictionary of translations
@@ -143,14 +143,14 @@ class MemoryLanguageLoader(LanguageLoader):
 class CachedLanguageLoader(LanguageLoader):
     """
     Wrapper that adds caching to any language loader.
-    
+
     This decorator pattern improves performance by caching loaded languages.
     """
 
     def __init__(self, base_loader: LanguageLoader):
         """
         Initialize the cached loader.
-        
+
         Args:
             base_loader: The underlying loader to cache
         """
