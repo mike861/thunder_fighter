@@ -4,8 +4,10 @@ This document contains more detailed information about the Thunder Fighter game 
 
 ## Related Documentation
 
-- [Font System and Localization](FONT_SYSTEM_AND_LOCALIZATION.md) - Comprehensive guide to the multi-language support and Chinese font optimization system
-- [Interface Testability Evaluation](INTERFACE_TESTABILITY_EVALUATION.md) - Analysis of code interfaces and testability improvements
+- [Localization Guide](LOCALIZATION.md) - Comprehensive guide to the multi-language support and Chinese font optimization system
+- [Architecture Guide](ARCHITECTURE.md) - Complete system architecture and technical design documentation
+- [Development Roadmap](DEVELOPMENT_ROADMAP.md) - Planned improvements and implementation tasks
+- [Development History](DEVELOPMENT_HISTORY.md) - Project evolution and major improvements timeline
 
 ## Internal Game Mechanics
 
@@ -30,7 +32,7 @@ This document contains more detailed information about the Thunder Fighter game 
 - **Duplicate Prevention**: Robust system prevents multiple victory processing and notification spam
 
 ### Player System
-- **Wingmen**: The player can have a configurable number of wingmen (default max is 2), collected via the `WingmanItem`. Wingmen absorb one hit for the player, sacrificing themselves. The initial number, maximum count, and formation spacing are all configurable in `constants.py`.
+- **Wingmen**: The player can have a configurable number of wingmen (default max is 2), collected via the `WingmanItem` starting at game level 3. Wingmen absorb one hit for the player, sacrificing themselves. The initial number, maximum count, and formation spacing are all configurable in `constants.py`.
 - **Missiles**: Wingmen fire tracking missiles periodically. These missiles seek out the nearest enemies, prioritizing the Boss if one is active.
 
 ### Enemy System
@@ -66,7 +68,7 @@ This document contains more detailed information about the Thunder Fighter game 
 
 ### Boss System
 - **Boss Levels**: Bosses are dynamically generated based on game progression. Their level is calculated as `max(1, (game_level + 1) // 2)`. This means boss levels increase as the player advances through the game's 10 levels.
-- **Boss Spawning**: A Boss spawns every 50 seconds starting from game level 2. No bosses appear during early levels (0-1).
+- **Boss Spawning**: A Boss spawns every 30 seconds starting from game level 2. No bosses appear during early levels (0-1).
 - **Boss Health System**: 
   - Base health: `100 + (level-1) * 50` points
   - Health bar displayed above boss with level indicator
