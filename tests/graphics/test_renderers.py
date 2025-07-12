@@ -105,10 +105,10 @@ class TestEnemyRenderer:
         pygame.init()
 
         # Test different level ranges
-        low_level = create_enemy_surface(level=1)   # Red scheme
-        mid_level = create_enemy_surface(level=4)   # Orange scheme
+        low_level = create_enemy_surface(level=1)  # Red scheme
+        mid_level = create_enemy_surface(level=4)  # Orange scheme
         high_level = create_enemy_surface(level=7)  # Blue scheme
-        super_level = create_enemy_surface(level=10) # Purple scheme
+        super_level = create_enemy_surface(level=10)  # Purple scheme
 
         # Sample multiple pixels from main body area
         def get_main_body_colors(surface):
@@ -151,9 +151,9 @@ class TestEnemyRenderer:
             # Check pixels around the aircraft for unwanted black artifacts
             # Sample edge pixels that might show glow/shadow effects (updated for 45x45 surface)
             edge_pixels = [
-                surface.get_at((5, 22)),   # Far left edge
+                surface.get_at((5, 22)),  # Far left edge
                 surface.get_at((40, 22)),  # Far right edge
-                surface.get_at((22, 5)),   # Top edge
+                surface.get_at((22, 5)),  # Top edge
                 surface.get_at((22, 40)),  # Bottom edge
             ]
 
@@ -226,7 +226,9 @@ class TestEnemyRenderer:
             if thruster_area_has_thruster_colors:
                 break
 
-        assert thruster_area_has_thruster_colors, "Enemy ships should have bio-thrusters at top (front-facing toward player)"
+        assert thruster_area_has_thruster_colors, (
+            "Enemy ships should have bio-thrusters at top (front-facing toward player)"
+        )
 
         # Check that eye/sensor area (bottom after rotation) has appropriate colors
         # Eye colors are typically darker with bright accents
@@ -287,7 +289,9 @@ class TestEnemyRenderer:
         total_colors = len(player_colors | enemy_colors)
         overlap_ratio = color_overlap / total_colors if total_colors > 0 else 0
 
-        assert overlap_ratio < 0.3, f"Player and enemy should have distinct color schemes (overlap: {overlap_ratio:.2f})"
+        assert overlap_ratio < 0.3, (
+            f"Player and enemy should have distinct color schemes (overlap: {overlap_ratio:.2f})"
+        )
 
 
 class TestWingmanRenderer:
@@ -383,6 +387,7 @@ class TestRenderingConsistency:
     def test_surface_creation_performance(self):
         """Test that surface creation is reasonably fast"""
         import time
+
         pygame.init()
 
         start_time = time.time()

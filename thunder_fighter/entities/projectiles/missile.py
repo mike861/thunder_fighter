@@ -10,6 +10,7 @@ class TrackingMissile(pygame.sprite.Sprite):
     """
     A missile that tracks a designated enemy.
     """
+
     def __init__(self, x, y, target):
         super().__init__()
 

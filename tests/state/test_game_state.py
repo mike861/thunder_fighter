@@ -34,7 +34,7 @@ class TestGameState:
         state.paused = False
 
         # Mock time to control the test
-        with patch('time.time', return_value=100.0):
+        with patch("time.time", return_value=100.0):
             state.game_start_time = 40.0  # 60 seconds ago
             state.update_game_time()
 
@@ -99,7 +99,7 @@ class TestGameStateManager:
         assert manager.get_state().current_state == "playing"
 
         # Test that the same state doesn't trigger a change
-        with patch.object(manager, '_notify_state_change') as mock_notify:
+        with patch.object(manager, "_notify_state_change") as mock_notify:
             manager.set_current_state("playing")
             mock_notify.assert_not_called()
 
@@ -174,11 +174,7 @@ class TestGameStateManager:
         """Test updating player statistics."""
         manager = GameStateManager()
 
-        manager.update_player_stats(
-            health=80,
-            bullet_paths=3,
-            speed=7
-        )
+        manager.update_player_stats(health=80, bullet_paths=3, speed=7)
 
         state = manager.get_state()
         assert state.player_health == 80
@@ -189,12 +185,7 @@ class TestGameStateManager:
         """Test updating boss statistics."""
         manager = GameStateManager()
 
-        manager.update_boss_stats(
-            active=True,
-            health=500,
-            max_health=1000,
-            level=2
-        )
+        manager.update_boss_stats(active=True, health=500, max_health=1000, level=2)
 
         state = manager.get_state()
         assert state.boss_active is True
@@ -309,7 +300,7 @@ class TestGameStateManager:
         assert manager.get_state().current_state == "level_transition"
 
         # Mock time to simulate timeout
-        with patch('time.time', return_value=manager.get_state().level_change_timer + 4.0):
+        with patch("time.time", return_value=manager.get_state().level_change_timer + 4.0):
             manager.update()
 
             # Should transition back to playing
@@ -328,8 +319,8 @@ class TestGameStateManager:
 
         info = manager.get_state_info()
 
-        assert info['level'] == 3
-        assert info['score'] == 1500
-        assert info['player_health'] == 75
-        assert 'current_state' in info
-        assert 'running' in info
+        assert info["level"] == 3
+        assert info["score"] == 1500
+        assert info["player_health"] == 75
+        assert "current_state" in info
+        assert "running" in info

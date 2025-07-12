@@ -10,6 +10,7 @@ class Wingman(pygame.sprite.Sprite):
     A wingman aircraft that follows the player, fires missiles,
     and acts as a shield.
     """
+
     def __init__(self, player, side):
         """
         Initialize the Wingman.
@@ -23,13 +24,13 @@ class Wingman(pygame.sprite.Sprite):
         self.image = create_wingman()
 
         self.rect = self.image.get_rect()
-        self.update() # Set initial position
+        self.update()  # Set initial position
 
     def update(self):
         """Update the wingman's position to follow the player."""
-        if self.side == 'left':
+        if self.side == "left":
             self.rect.centerx = self.player.rect.centerx - WINGMAN_FORMATION_SPACING
-        else: # 'right'
+        else:  # 'right'
             self.rect.centerx = self.player.rect.centerx + WINGMAN_FORMATION_SPACING
         self.rect.centery = self.player.rect.centery + 10
 

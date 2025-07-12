@@ -26,9 +26,9 @@ class ScreenOverlayManager:
             fonts: dict - Dictionary of fonts with keys 'small', 'medium', 'large'
         """
         self.screen = screen
-        self.font_small = fonts.get('small')
-        self.font_medium = fonts.get('medium')
-        self.font_large = fonts.get('large')
+        self.font_small = fonts.get("small")
+        self.font_medium = fonts.get("medium")
+        self.font_large = fonts.get("large")
 
         # Animation timers
         self.level_change_timer = 0

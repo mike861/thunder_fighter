@@ -22,6 +22,7 @@ from thunder_fighter.utils.logger import logger
 
 class Enemy(pygame.sprite.Sprite):
     """Enemy class"""
+
     def __init__(self, game_time=0, game_level=1, all_sprites=None, enemy_bullets_group=None):
         pygame.sprite.Sprite.__init__(self)
 
@@ -85,47 +86,47 @@ class Enemy(pygame.sprite.Sprite):
         base_probs = [
             max(0, 0.35 - game_time * 0.05),  # Level 0
             max(0, 0.25 - game_time * 0.03),  # Level 1
-            max(0, 0.15),                     # Level 2
+            max(0, 0.15),  # Level 2
             max(0, 0.10 + game_time * 0.01),  # Level 3
-            max(0, 0.05 + game_time * 0.015), # Level 4
-            max(0, 0.05 + game_time * 0.015), # Level 5
+            max(0, 0.05 + game_time * 0.015),  # Level 4
+            max(0, 0.05 + game_time * 0.015),  # Level 5
             max(0, 0.02 + game_time * 0.01),  # Level 6
             max(0, 0.02 + game_time * 0.01),  # Level 7
-            max(0, 0.01 + game_time * 0.005), # Level 8
-            max(0, 0.00 + game_time * 0.003), # Level 9
-            max(0, 0.00 + game_time * 0.002)  # Level 10
+            max(0, 0.01 + game_time * 0.005),  # Level 8
+            max(0, 0.00 + game_time * 0.003),  # Level 9
+            max(0, 0.00 + game_time * 0.002),  # Level 10
         ]
 
         # Game level influence - increase probability of high-level enemies
         # Each game level slightly increases high-level enemy appearance rate
-        level_boost = (game_level - 1) * 0.02 # 2% increase per level
+        level_boost = (game_level - 1) * 0.02  # 2% increase per level
 
         # Transfer probability from low to high levels (simple linear transfer)
         transfer_prob = 0.0
         for i in range(len(base_probs)):
             # Transfer probability from level 0-4 enemies
             if i < 5:
-                reduction = base_probs[i] * level_boost * (5 - i) / 5 # Lower levels lose more
-                reduction = min(base_probs[i], reduction) # Cannot reduce more than current probability
+                reduction = base_probs[i] * level_boost * (5 - i) / 5  # Lower levels lose more
+                reduction = min(base_probs[i], reduction)  # Cannot reduce more than current probability
                 base_probs[i] -= reduction
                 transfer_prob += reduction
             # Add probability to level 5-10 enemies
             elif i >= 5:
                 # Distribute transferred probability proportionally
-                boost_share = transfer_prob / max(1, len(base_probs) - 5) # Equal distribution
+                boost_share = transfer_prob / max(1, len(base_probs) - 5)  # Equal distribution
                 base_probs[i] += boost_share
-                transfer_prob -= boost_share # Update remaining transfer probability
+                transfer_prob -= boost_share  # Update remaining transfer probability
 
         # Ensure probabilities are non-negative and make minor adjustments to prevent all zeros
         for i in range(len(base_probs)):
-            base_probs[i] = max(0.001, base_probs[i]) # Ensure each level has minimal probability
+            base_probs[i] = max(0.001, base_probs[i])  # Ensure each level has minimal probability
 
         # Normalize probabilities to sum to 1
         total = sum(base_probs)
         if total > 0:
             probs = [p / total for p in base_probs]
         else:
-            probs = [1/len(base_probs)] * len(base_probs)
+            probs = [1 / len(base_probs)] * len(base_probs)
 
         # Choose level based on final probabilities
         chosen_level = random.choices(range(11), weights=probs, k=1)[0]
@@ -134,7 +135,9 @@ class Enemy(pygame.sprite.Sprite):
         max_allowed_level = min(10, game_level + 2)
         chosen_level = min(chosen_level, max_allowed_level)
 
-        logger.debug(f"Determined enemy level {chosen_level} (game_time: {game_time:.1f}, game_level: {game_level}, max_allowed: {max_allowed_level})")
+        logger.debug(
+            f"Determined enemy level {chosen_level} (game_time: {game_time:.1f}, game_level: {game_level}, max_allowed: {max_allowed_level})"
+        )
         return chosen_level
 
     def update(self):
@@ -158,9 +161,11 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.center = old_center
 
         # If enemy goes off-screen, remove it
-        if (self.rect.top > HEIGHT + ENEMY_SCREEN_BOUNDS or
-            self.rect.left < -ENEMY_SCREEN_BOUNDS or
-            self.rect.right > WIDTH + ENEMY_SCREEN_BOUNDS):
+        if (
+            self.rect.top > HEIGHT + ENEMY_SCREEN_BOUNDS
+            or self.rect.left < -ENEMY_SCREEN_BOUNDS
+            or self.rect.right > WIDTH + ENEMY_SCREEN_BOUNDS
+        ):
             logger.debug(f"Enemy ID:{id(self)} killed (off-screen).")
             self.kill()
 
@@ -178,13 +183,15 @@ class Enemy(pygame.sprite.Sprite):
         """Fires a bullet"""
         try:
             # Ensure sprite groups exist
-            if not hasattr(self, 'all_sprites') or not hasattr(self, 'enemy_bullets_group'):
+            if not hasattr(self, "all_sprites") or not hasattr(self, "enemy_bullets_group"):
                 logger.error(f"Error: Enemy {id(self)} missing required sprite groups for shooting.")
                 return False
 
             # Double-check shooting capability and level requirement
             if not self.can_shoot or self.level < ENEMY_SHOOT_LEVEL:
-                logger.warning(f"Enemy ID:{id(self)} attempted to shoot but can_shoot={self.can_shoot}, level={self.level}, required level={ENEMY_SHOOT_LEVEL}")
+                logger.warning(
+                    f"Enemy ID:{id(self)} attempted to shoot but can_shoot={self.can_shoot}, level={self.level}, required level={ENEMY_SHOOT_LEVEL}"
+                )
                 return False
 
             # Create bullet

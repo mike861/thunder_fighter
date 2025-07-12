@@ -4,7 +4,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Define the path to the assets directory
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
 # Game window size
 WIDTH = 480
@@ -48,9 +48,9 @@ TEXT_GAME_TITLE = "Thunder Fighter"
 # Player settings
 PLAYER_HEALTH = 100
 PLAYER_SHOOT_DELAY = 250
-PLAYER_SPEED = 6 # Player movement speed
-PLAYER_MAX_SPEED = 15 # Player max movement speed
-PLAYER_SPEED_UPGRADE_AMOUNT = 1 # Player speed upgrade increment
+PLAYER_SPEED = 6  # Player movement speed
+PLAYER_MAX_SPEED = 15  # Player max movement speed
+PLAYER_SPEED_UPGRADE_AMOUNT = 1  # Player speed upgrade increment
 PLAYER_FLASH_FRAMES = 20  # Player damage flash frames
 PLAYER_HEAL_AMOUNT = 10  # Player heal amount
 
@@ -78,7 +78,7 @@ ENEMY_SHOOT_LEVEL = 2  # Lower shooting level requirement, can shoot from level 
 ENEMY_SPAWN_Y_MIN = -80  # Reduce enemy spawn min Y coordinate for faster screen entry
 ENEMY_SPAWN_Y_MAX = -20  # Reduce enemy spawn max Y coordinate for faster screen entry
 ENEMY_HORIZONTAL_MOVE_MIN = -3  # Enemy horizontal movement min speed
-ENEMY_HORIZONTAL_MOVE_MAX = 4   # Enemy horizontal movement max speed
+ENEMY_HORIZONTAL_MOVE_MAX = 4  # Enemy horizontal movement max speed
 ENEMY_ROTATION_UPDATE = 50  # Enemy rotation animation update interval (ms)
 ENEMY_SCREEN_BOUNDS = 25  # Distance from screen edge for enemy removal
 
@@ -117,5 +117,5 @@ BOSS_BULLET_FINAL_SIZE_MULTIPLIER = 1.3  # Size multiplier for final bullets
 SCORE_THRESHOLD = 200  # Generate an item every 200 points
 
 # Game balance
-MAX_GAME_LEVEL = 8 # Maximum game level
+MAX_GAME_LEVEL = 8  # Maximum game level
 INITIAL_GAME_LEVEL = 1  # Starting game level

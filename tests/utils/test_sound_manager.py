@@ -1,4 +1,3 @@
-
 import pytest
 
 # Import the global instance, not the class
@@ -25,6 +24,7 @@ def clean_sound_manager_state():
     sound_manager.sounds = original_sounds
     sound_manager.music_enabled = original_music_enabled
 
+
 class TestSoundManager:
     """Test suite for the SoundManager."""
 
@@ -34,10 +34,10 @@ class TestSoundManager:
         """
         # Test that the global sound manager exists and can be imported
         assert sound_manager is not None
-        assert hasattr(sound_manager, 'play_sound')
-        assert hasattr(sound_manager, 'play_music')
-        assert hasattr(sound_manager, 'is_healthy')
-        assert hasattr(sound_manager, 'ensure_music_playing')
+        assert hasattr(sound_manager, "play_sound")
+        assert hasattr(sound_manager, "play_music")
+        assert hasattr(sound_manager, "is_healthy")
+        assert hasattr(sound_manager, "ensure_music_playing")
 
     def test_sound_manager_safe_operations(self):
         """
@@ -45,7 +45,7 @@ class TestSoundManager:
         """
         # Test playing non-existent sound
         try:
-            sound_manager.play_sound('non_existent_sound')
+            sound_manager.play_sound("non_existent_sound")
         except Exception as e:
             pytest.fail(f"Playing non-existent sound raised an exception: {e}")
 

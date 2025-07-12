@@ -51,42 +51,37 @@ __author__ = "Thunder Fighter Team"
 # Main exports
 __all__ = [
     # New input system
-    'InputSystem',
-    'create_for_production',
-    'create_for_testing',
-    'InputSystemBuilder',
-
+    "InputSystem",
+    "create_for_production",
+    "create_for_testing",
+    "InputSystemBuilder",
     # Core models
-    'Command',
-    'CommandType',
-    'Event',
-    'EventType',
-
+    "Command",
+    "CommandType",
+    "Event",
+    "EventType",
     # Boundary interfaces
-    'EventSource',
-    'KeyboardState',
-    'Clock',
-    'Logger',
-
+    "EventSource",
+    "KeyboardState",
+    "Clock",
+    "Logger",
     # Pygame adapters
-    'PygameEventSource',
-    'PygameKeyboardState',
-    'PygameClock',
-    'PygameLogger',
-    'create_pygame_adapters',
-
+    "PygameEventSource",
+    "PygameKeyboardState",
+    "PygameClock",
+    "PygameLogger",
+    "create_pygame_adapters",
     # Test adapters
-    'TestEventSource',
-    'TestKeyboardState',
-    'TestClock',
-    'TestLogger',
-    'create_test_environment',
-    'TestScenario',
-
+    "TestEventSource",
+    "TestKeyboardState",
+    "TestClock",
+    "TestLogger",
+    "create_test_environment",
+    "TestScenario",
     # Original interfaces (for backward compatibility)
-    'InputManager',
-    'InputHandler',
-    'KeyBindings',
-    'InputEvent',
-    'InputEventType'
+    "InputManager",
+    "InputHandler",
+    "KeyBindings",
+    "InputEvent",
+    "InputEventType",
 ]

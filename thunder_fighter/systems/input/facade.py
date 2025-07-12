@@ -24,13 +24,15 @@ class InputSystem:
     Supports seamless switching between production (pygame) and test environments.
     """
 
-    def __init__(self,
-                 event_source: Optional[EventSource] = None,
-                 keyboard_state: Optional[KeyboardState] = None,
-                 clock: Optional[Clock] = None,
-                 logger: Optional[Logger] = None,
-                 key_mapping: Optional[Dict[int, CommandType]] = None,
-                 enable_debug: bool = False):
+    def __init__(
+        self,
+        event_source: Optional[EventSource] = None,
+        keyboard_state: Optional[KeyboardState] = None,
+        clock: Optional[Clock] = None,
+        logger: Optional[Logger] = None,
+        key_mapping: Optional[Dict[int, CommandType]] = None,
+        enable_debug: bool = False,
+    ):
         """
         Initializes the input system.
 
@@ -66,7 +68,7 @@ class InputSystem:
             keyboard_state=self.keyboard_state,
             clock=self.clock,
             key_mapping=key_mapping,
-            logger=self.logger
+            logger=self.logger,
         )
 
         # Command handler registry
@@ -74,10 +76,7 @@ class InputSystem:
 
         # System state
         self.enabled = True
-        self.stats = {
-            'total_commands': 0,
-            'last_update_time': 0.0
-        }
+        self.stats = {"total_commands": 0, "last_update_time": 0.0}
 
     def update(self) -> List[Command]:
         """
@@ -98,8 +97,8 @@ class InputSystem:
                 self._execute_command_handlers(command)
 
             # Update statistics
-            self.stats['total_commands'] += len(commands)
-            self.stats['last_update_time'] = self.clock.now()
+            self.stats["total_commands"] += len(commands)
+            self.stats["last_update_time"] = self.clock.now()
 
             return commands
 
@@ -239,8 +238,8 @@ class InputSystem:
         return {
             **self.stats,
             **processor_stats,
-            'enabled': self.enabled,
-            'handler_count': sum(len(handlers) for handlers in self.command_handlers.values())
+            "enabled": self.enabled,
+            "handler_count": sum(len(handlers) for handlers in self.command_handlers.values()),
         }
 
     def _execute_command_handlers(self, command: Command):
@@ -271,23 +270,19 @@ class InputSystem:
             pygame.K_DOWN: CommandType.MOVE_DOWN,
             pygame.K_LEFT: CommandType.MOVE_LEFT,
             pygame.K_RIGHT: CommandType.MOVE_RIGHT,
-
             # WASD
             pygame.K_w: CommandType.MOVE_UP,
             pygame.K_s: CommandType.MOVE_DOWN,
             pygame.K_a: CommandType.MOVE_LEFT,
             pygame.K_d: CommandType.MOVE_RIGHT,
-
             # Action keys
             pygame.K_SPACE: CommandType.SHOOT,
             pygame.K_x: CommandType.LAUNCH_MISSILE,
-
             # System keys
             pygame.K_p: CommandType.PAUSE,
             pygame.K_ESCAPE: CommandType.QUIT,
             pygame.K_m: CommandType.TOGGLE_MUSIC,
             pygame.K_l: CommandType.CHANGE_LANGUAGE,
-
             # Debug keys
             pygame.K_F1: CommandType.RESET_INPUT,
         }
@@ -306,9 +301,9 @@ def create_for_production(enable_debug: bool = False) -> InputSystem:
     return InputSystem(enable_debug=enable_debug)
 
 
-def create_for_testing(initial_time: float = 0.0,
-                      print_logs: bool = False,
-                      key_mapping: Optional[Dict[int, CommandType]] = None) -> tuple[InputSystem, dict]:
+def create_for_testing(
+    initial_time: float = 0.0, print_logs: bool = False, key_mapping: Optional[Dict[int, CommandType]] = None
+) -> tuple[InputSystem, dict]:
     """
     Creates an input system for the test environment.
 
@@ -324,19 +319,10 @@ def create_for_testing(initial_time: float = 0.0,
     event_source, keyboard_state, clock, logger = create_test_environment(initial_time, print_logs)
 
     input_system = InputSystem(
-        event_source=event_source,
-        keyboard_state=keyboard_state,
-        clock=clock,
-        logger=logger,
-        key_mapping=key_mapping
+        event_source=event_source, keyboard_state=keyboard_state, clock=clock, logger=logger, key_mapping=key_mapping
     )
 
-    controllers = {
-        'event_source': event_source,
-        'keyboard_state': keyboard_state,
-        'clock': clock,
-        'logger': logger
-    }
+    controllers = {"event_source": event_source, "keyboard_state": keyboard_state, "clock": clock, "logger": logger}
 
     return input_system, controllers
 
@@ -363,7 +349,9 @@ class InputSystemBuilder:
 
     def with_test_environment(self, initial_time: float = 0.0, print_logs: bool = False):
         """Uses the test environment."""
-        self._event_source, self._keyboard_state, self._clock, self._logger = create_test_environment(initial_time, print_logs)
+        self._event_source, self._keyboard_state, self._clock, self._logger = create_test_environment(
+            initial_time, print_logs
+        )
         return self
 
     def with_key_mapping(self, key_mapping: Dict[int, CommandType]):
@@ -390,7 +378,7 @@ class InputSystemBuilder:
             clock=self._clock,
             logger=self._logger,
             key_mapping=self._key_mapping,
-            enable_debug=self._enable_debug
+            enable_debug=self._enable_debug,
         )
 
         # Apply configurations

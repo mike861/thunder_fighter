@@ -1,4 +1,3 @@
-
 import pygame
 
 from thunder_fighter.constants import ORANGE, RED, YELLOW
@@ -6,6 +5,7 @@ from thunder_fighter.constants import ORANGE, RED, YELLOW
 
 class Explosion(pygame.sprite.Sprite):
     """Explosion effect class"""
+
     def __init__(self, center):
         super().__init__()
         self.image = pygame.Surface((80, 80))

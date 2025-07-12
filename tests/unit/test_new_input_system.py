@@ -28,15 +28,15 @@ class TestInputSystemCore:
         system, controllers = create_for_testing()
 
         assert system is not None
-        assert 'event_source' in controllers
-        assert 'keyboard_state' in controllers
-        assert 'clock' in controllers
-        assert 'logger' in controllers
+        assert "event_source" in controllers
+        assert "keyboard_state" in controllers
+        assert "clock" in controllers
+        assert "logger" in controllers
 
     def test_simple_key_press_to_command(self):
         """Test simple key press to command conversion."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Simulate spacebar press
         event_source.add_key_down(pygame.K_SPACE)
@@ -47,12 +47,12 @@ class TestInputSystemCore:
         # Verify shoot command is generated
         assert len(commands) == 1
         assert commands[0].type == CommandType.SHOOT
-        assert commands[0].get_data('key') == pygame.K_SPACE
+        assert commands[0].get_data("key") == pygame.K_SPACE
 
     def test_movement_commands(self):
         """Test movement commands."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Test all movement keys
         movement_keys = [
@@ -84,13 +84,11 @@ class TestInputSystemCore:
     def test_modifier_keys(self):
         """Test modifier keys."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Add event with modifier keys
         event = Event(
-            type=EventType.KEY_DOWN,
-            key_code=pygame.K_SPACE,
-            modifiers={'ctrl': True, 'shift': False, 'alt': False}
+            type=EventType.KEY_DOWN, key_code=pygame.K_SPACE, modifiers={"ctrl": True, "shift": False, "alt": False}
         )
         event_source.add_event(event)
 
@@ -99,14 +97,14 @@ class TestInputSystemCore:
 
         # Verify modifier keys are passed correctly
         assert len(commands) == 1
-        assert commands[0].get_data('modifiers')['ctrl'] is True
-        assert commands[0].get_data('modifiers')['shift'] is False
+        assert commands[0].get_data("modifiers")["ctrl"] is True
+        assert commands[0].get_data("modifiers")["shift"] is False
 
     def test_continuous_movement(self):
         """Test continuous movement."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
-        clock = controllers['clock']
+        event_source = controllers["event_source"]
+        clock = controllers["clock"]
 
         # Press W key
         event_source.add_key_down(pygame.K_w)
@@ -115,7 +113,7 @@ class TestInputSystemCore:
         commands = system.update()
         assert len(commands) == 1
         assert commands[0].type == CommandType.MOVE_UP
-        assert commands[0].get_data('continuous') is False
+        assert commands[0].get_data("continuous") is False
 
         # Advance time
         clock.advance(0.1)
@@ -124,13 +122,13 @@ class TestInputSystemCore:
         commands = system.update()
         assert len(commands) == 1
         assert commands[0].type == CommandType.MOVE_UP
-        assert commands[0].get_data('continuous') is True
+        assert commands[0].get_data("continuous") is True
 
     def test_command_cooldown(self):
         """Test command cooldown."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
-        clock = controllers['clock']
+        event_source = controllers["event_source"]
+        clock = controllers["clock"]
 
         # Set a longer cooldown time
         system.configure_cooldown(0.5)
@@ -166,6 +164,7 @@ class TestCommandHandlers:
 
         # Register handler
         shoot_called = False
+
         def on_shoot(cmd):
             nonlocal shoot_called
             shoot_called = True
@@ -173,7 +172,7 @@ class TestCommandHandlers:
         system.on_command(CommandType.SHOOT, on_shoot)
 
         # Trigger command
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
         event_source.add_key_down(pygame.K_SPACE)
         system.update()
 
@@ -200,7 +199,7 @@ class TestCommandHandlers:
         system.on_command(CommandType.SHOOT, handler2)
 
         # Trigger command
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
         event_source.add_key_down(pygame.K_SPACE)
         system.update()
 
@@ -214,6 +213,7 @@ class TestCommandHandlers:
 
         # Register handler
         handler_called = False
+
         def handler(cmd):
             nonlocal handler_called
             handler_called = True
@@ -224,7 +224,7 @@ class TestCommandHandlers:
         system.remove_command_handler(CommandType.SHOOT, handler)
 
         # Trigger command
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
         event_source.add_key_down(pygame.K_SPACE)
         system.update()
 
@@ -238,7 +238,7 @@ class TestInputSystemStates:
     def test_key_held_detection(self):
         """Test key held detection."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Check initial state
         assert not system.is_key_held(pygame.K_w)
@@ -260,7 +260,7 @@ class TestInputSystemStates:
     def test_multiple_held_keys(self):
         """Test multiple keys held simultaneously."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Press multiple keys
         event_source.add_key_down(pygame.K_w)
@@ -276,7 +276,7 @@ class TestInputSystemStates:
     def test_system_enable_disable(self):
         """Test system enable/disable."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Disable system
         system.disable()
@@ -301,7 +301,7 @@ class TestInputSystemStates:
     def test_state_reset(self):
         """Test state reset."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Press some keys
         event_source.add_key_down(pygame.K_w)
@@ -324,8 +324,8 @@ class TestTimeAndStats:
     def test_precise_timing_control(self):
         """Test precise timing control."""
         system, controllers = create_for_testing(initial_time=1000.0)
-        event_source = controllers['event_source']
-        clock = controllers['clock']
+        event_source = controllers["event_source"]
+        clock = controllers["clock"]
 
         # Add event at a specific time
         event_source.add_key_down(pygame.K_SPACE)
@@ -347,11 +347,11 @@ class TestTimeAndStats:
     def test_system_statistics(self):
         """Test system statistics."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
 
         # Get initial statistics
         initial_stats = system.get_stats()
-        assert initial_stats['total_commands'] == 0
+        assert initial_stats["total_commands"] == 0
 
         # Generate some commands
         event_source.add_key_down(pygame.K_SPACE)
@@ -360,8 +360,8 @@ class TestTimeAndStats:
 
         # Check statistics update
         updated_stats = system.get_stats()
-        assert updated_stats['total_commands'] == 2
-        assert updated_stats['events_processed'] == 2
+        assert updated_stats["total_commands"] == 2
+        assert updated_stats["events_processed"] == 2
 
 
 class TestTestHelpers:
@@ -378,10 +378,9 @@ class TestTestHelpers:
         scenario = TestScenario(event_source, clock, keyboard)
 
         # Build complex scenario
-        scenario.at_time(0.0).press_key(pygame.K_w) \
-               .wait(0.5).press_key(pygame.K_SPACE) \
-               .wait(0.1).release_key(pygame.K_w) \
-               .wait(0.2).release_key(pygame.K_SPACE)
+        scenario.at_time(0.0).press_key(pygame.K_w).wait(0.5).press_key(pygame.K_SPACE).wait(0.1).release_key(
+            pygame.K_w
+        ).wait(0.2).release_key(pygame.K_SPACE)
 
         # Verify timeline
         assert clock.now() == 0.8
@@ -399,13 +398,13 @@ class TestTestHelpers:
         logger.error("Error message")
 
         # Verify logging
-        assert logger.count_level('DEBUG') == 1
-        assert logger.count_level('INFO') == 1
-        assert logger.count_level('WARNING') == 1
-        assert logger.count_level('ERROR') == 1
+        assert logger.count_level("DEBUG") == 1
+        assert logger.count_level("INFO") == 1
+        assert logger.count_level("WARNING") == 1
+        assert logger.count_level("ERROR") == 1
 
         # Verify specific messages
-        info_logs = logger.get_logs('INFO')
+        info_logs = logger.get_logs("INFO")
         assert "Info message" in info_logs
 
 
@@ -415,11 +414,12 @@ class TestIntegrationScenarios:
     def test_complex_game_sequence(self):
         """Test complex game sequence."""
         system, controllers = create_for_testing()
-        event_source = controllers['event_source']
-        clock = controllers['clock']
+        event_source = controllers["event_source"]
+        clock = controllers["clock"]
 
         # Collect all generated commands
         all_commands = []
+
         def command_collector(cmd):
             all_commands.append(cmd)
 
@@ -463,7 +463,7 @@ class TestIntegrationScenarios:
     def test_error_recovery(self):
         """Test error recovery."""
         system, controllers = create_for_testing()
-        logger = controllers['logger']
+        logger = controllers["logger"]
 
         # Register a handler that raises an exception
         def failing_handler(cmd):
@@ -472,7 +472,7 @@ class TestIntegrationScenarios:
         system.on_command(CommandType.SHOOT, failing_handler)
 
         # Trigger command (should not crash)
-        event_source = controllers['event_source']
+        event_source = controllers["event_source"]
         event_source.add_key_down(pygame.K_SPACE)
         commands = system.update()
 
@@ -480,6 +480,6 @@ class TestIntegrationScenarios:
         assert len(commands) == 1
 
         # Verify error is logged
-        error_logs = logger.get_logs('ERROR')
+        error_logs = logger.get_logs("ERROR")
         assert len(error_logs) > 0
         assert "Test error" in str(error_logs)

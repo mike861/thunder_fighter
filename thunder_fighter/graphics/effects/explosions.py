@@ -13,7 +13,7 @@ from thunder_fighter.constants import WHITE
 from thunder_fighter.graphics.effects.explosion import Explosion
 
 
-def create_explosion(center, size_str='md'):
+def create_explosion(center, size_str="md"):
     """Creates an explosion sprite at the given center position."""
     # Size parameter is no longer used since Explosion class has fixed size
     return Explosion(center)

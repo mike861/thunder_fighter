@@ -4,22 +4,23 @@ import sys
 
 # Define log levels
 LOG_LEVELS = {
-    'DEBUG': logging.DEBUG,
-    'INFO': logging.INFO,
-    'WARNING': logging.WARNING,
-    'ERROR': logging.ERROR,
-    'CRITICAL': logging.CRITICAL
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
 }
 
 # Default log level (can be overridden by environment variable)
-DEFAULT_LOG_LEVEL = 'INFO'
-LOG_LEVEL_ENV_VAR = 'THUNDER_FIGHTER_LOG_LEVEL'
+DEFAULT_LOG_LEVEL = "INFO"
+LOG_LEVEL_ENV_VAR = "THUNDER_FIGHTER_LOG_LEVEL"
 
 # Log format
-LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def setup_logger(name='thunder_fighter', level=None):
+
+def setup_logger(name="thunder_fighter", level=None):
     """Configures and returns a logger instance."""
 
     # Determine log level
@@ -61,13 +62,14 @@ def setup_logger(name='thunder_fighter', level=None):
     logger.info(f"Logger '{name}' initialized with level {log_level_str}")
     return logger
 
+
 # Create a default logger instance for easy import
 logger = setup_logger()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Example usage
     print("Testing logger setup...")
-    test_logger = setup_logger('test_module', level='DEBUG')
+    test_logger = setup_logger("test_module", level="DEBUG")
     test_logger.debug("This is a debug message.")
     test_logger.info("This is an info message.")
     test_logger.warning("This is a warning message.")

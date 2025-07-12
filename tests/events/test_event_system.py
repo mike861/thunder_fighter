@@ -22,9 +22,9 @@ class TestEventSystem:
     def test_event_system_initialization(self, event_system):
         """Test that the event system initializes correctly."""
         assert event_system is not None
-        assert hasattr(event_system, 'register_listener')
-        assert hasattr(event_system, 'dispatch_event')
-        assert hasattr(event_system, 'unregister_listener')
+        assert hasattr(event_system, "register_listener")
+        assert hasattr(event_system, "dispatch_event")
+        assert hasattr(event_system, "unregister_listener")
 
     def test_event_listener_management(self, event_system):
         """Test event listener registration and unregistration."""

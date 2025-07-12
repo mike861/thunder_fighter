@@ -14,6 +14,7 @@ import pytest
 # Initialize pygame for testing
 pygame.init()
 
+
 @pytest.fixture(scope="session", autouse=True)
 def pygame_init():
     """Initialize pygame for all tests."""
@@ -27,6 +28,7 @@ def pygame_init():
         pass
     yield
     pygame.quit()
+
 
 if TYPE_CHECKING:
     pass
@@ -76,22 +78,23 @@ class TestInputManagement:
         # Test movement event
         event = InputEventFactory.create_movement_event("up", True)
         assert event.event_type == InputEventType.MOVE_UP
-        assert event.get_data('direction') == "up"
-        assert event.get_data('pressed') is True
+        assert event.get_data("direction") == "up"
+        assert event.get_data("pressed") is True
 
         # Test action event
         event = InputEventFactory.create_action_event("shoot", True)
         assert event.event_type == InputEventType.SHOOT
-        assert event.get_data('action') == "shoot"
+        assert event.get_data("action") == "shoot"
 
         # Test game control event
         event = InputEventFactory.create_game_control_event("pause")
         assert event.event_type == InputEventType.PAUSE
-        assert event.get_data('control') == "pause"
+        assert event.get_data("control") == "pause"
 
-    @patch('pygame.key.get_pressed')
+    @patch("pygame.key.get_pressed")
     def test_input_handler_pygame_events(self, mock_get_pressed):
         """Test input handler processing pygame events."""
+
         # Mock pygame.key.get_pressed to return a dict-like object that returns False for any key
         class MockKeyState:
             def __getitem__(self, key):
@@ -143,9 +146,10 @@ class TestInputManagement:
         # Verify callback was called
         callback_mock.assert_called_once_with(event)
 
-    @patch('pygame.key.get_pressed')
+    @patch("pygame.key.get_pressed")
     def test_input_manager_pause_filtering(self, mock_get_pressed):
         """Test input manager event filtering when paused."""
+
         # Mock pygame.key.get_pressed to return a dict-like object that returns False for any key
         class MockKeyState:
             def __getitem__(self, key):
@@ -189,20 +193,18 @@ class TestEntityFactories:
 
         # Test preset configuration
         basic_preset = factory.get_preset("basic")
-        assert basic_preset['can_shoot'] is False
-        assert basic_preset['health_multiplier'] == 1.0
+        assert basic_preset["can_shoot"] is False
+        assert basic_preset["health_multiplier"] == 1.0
 
         shooter_preset = factory.get_preset("shooter")
-        assert shooter_preset['can_shoot'] is True
-        assert shooter_preset['health_multiplier'] == 1.2
+        assert shooter_preset["can_shoot"] is True
+        assert shooter_preset["health_multiplier"] == 1.2
 
     def test_enemy_factory_level_based_creation(self):
         """Test enemy factory level-based enemy selection."""
         factory = EnemyFactory()
 
         # Mock required parameters
-        all_sprites = Mock()
-        enemy_bullets = Mock()
 
         # Test level 1 enemies (should be mostly basic)
         enemy_types = []
@@ -230,8 +232,8 @@ class TestEntityFactories:
         standard = factory.get_preset("standard")
         elite = factory.get_preset("elite")
 
-        assert elite['health_multiplier'] > standard['health_multiplier']
-        assert elite['speed_multiplier'] > standard['speed_multiplier']
+        assert elite["health_multiplier"] > standard["health_multiplier"]
+        assert elite["speed_multiplier"] > standard["speed_multiplier"]
 
     def test_item_factory_random_creation(self):
         """Test item factory random item creation."""
@@ -272,8 +274,8 @@ class TestEntityFactories:
         player_bullet = factory.get_preset("player_bullet")
         enemy_bullet = factory.get_preset("enemy_bullet")
 
-        assert player_bullet['owner'] == 'player'
-        assert enemy_bullet['owner'] == 'enemy'
+        assert player_bullet["owner"] == "player"
+        assert enemy_bullet["owner"] == "enemy"
 
 
 class TestEventSystem:
@@ -347,19 +349,19 @@ class TestEventSystem:
         # Test player died event
         event = GameEvent.create_player_died("player", "collision")
         assert event.event_type == GameEventType.PLAYER_DIED
-        assert event.get_data('cause') == "collision"
+        assert event.get_data("cause") == "collision"
 
         # Test health changed event
         event = GameEvent.create_player_health_changed("player", 100, 80, 100)
         assert event.event_type == GameEventType.PLAYER_HEALTH_CHANGED
-        assert event.get_data('old_health') == 100
-        assert event.get_data('new_health') == 80
+        assert event.get_data("old_health") == 100
+        assert event.get_data("new_health") == 80
 
         # Test enemy spawned event
         event = GameEvent.create_enemy_spawned("factory", "elite", 3)
         assert event.event_type == GameEventType.ENEMY_SPAWNED
-        assert event.get_data('enemy_type') == "elite"
-        assert event.get_data('level') == 3
+        assert event.get_data("enemy_type") == "elite"
+        assert event.get_data("level") == 3
 
     def test_event_handling_chain(self):
         """Test event handling chain and early termination."""
@@ -434,12 +436,12 @@ class TestSeparationOfConcernsIntegration:
 def separated_systems():
     """Fixture providing all separated systems for integration testing."""
     return {
-        'input_manager': InputManager(),
-        'enemy_factory': EnemyFactory(),
-        'boss_factory': BossFactory(),
-        'item_factory': ItemFactory(),
-        'projectile_factory': ProjectileFactory(),
-        'event_system': EventSystem()
+        "input_manager": InputManager(),
+        "enemy_factory": EnemyFactory(),
+        "boss_factory": BossFactory(),
+        "item_factory": ItemFactory(),
+        "projectile_factory": ProjectileFactory(),
+        "event_system": EventSystem(),
     }
 
 
@@ -451,14 +453,14 @@ def test_complete_separation_integration(separated_systems):
     assert all(system is not None for system in systems.values())
 
     # Test that systems have expected functionality
-    assert systems['input_manager'].is_enabled()
-    assert len(systems['enemy_factory'].list_presets()) > 0
-    assert systems['event_system'].get_queue_size() == 0
+    assert systems["input_manager"].is_enabled()
+    assert len(systems["enemy_factory"].list_presets()) > 0
+    assert systems["event_system"].get_queue_size() == 0
 
     # Test basic operations don't interfere with each other
-    systems['input_manager'].pause()
-    systems['event_system'].emit_event(GameEventType.GAME_PAUSED, "test")
-    systems['event_system'].process_events()
+    systems["input_manager"].pause()
+    systems["event_system"].emit_event(GameEventType.GAME_PAUSED, "test")
+    systems["event_system"].process_events()
 
     # Should complete without errors
     assert True

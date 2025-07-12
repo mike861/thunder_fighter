@@ -45,6 +45,7 @@ class UIManager:
         # Initialize fonts using resource manager for Chinese support
         try:
             from thunder_fighter.utils.resource_manager import get_resource_manager
+
             resource_manager = get_resource_manager()
 
             # Use TTF files for better Chinese character support with original sizes
@@ -54,15 +55,12 @@ class UIManager:
         except (pygame.error, ImportError):
             # Fallback for test environments
             from unittest.mock import MagicMock
+
             self.font_small = self.font_medium = self.font_large = MagicMock()
             self.font_small.render.return_value = MagicMock()
 
         # Create font dictionary for components
-        fonts = {
-            'small': self.font_small,
-            'medium': self.font_medium,
-            'large': self.font_large
-        }
+        fonts = {"small": self.font_small, "medium": self.font_medium, "large": self.font_large}
 
         # Initialize UI components
         self.notification_manager = NotificationManager(screen)
@@ -73,19 +71,13 @@ class UIManager:
         self.dev_info_display = DevInfoDisplay(screen, self.font_small)
 
         # Game state tracking
-        self.game_state = {
-            'level': 1,
-            'paused': False,
-            'game_time': 0,
-            'victory': False,
-            'defeat': False
-        }
+        self.game_state = {"level": 1, "paused": False, "game_time": 0, "victory": False, "defeat": False}
 
         # Persistent info for display
         self.persistent_info = {}
 
         # Current language
-        self.current_language = 'en'
+        self.current_language = "en"
 
         logger.info("Refactored UIManager initialized with modular components")
 
@@ -96,14 +88,14 @@ class UIManager:
 
     def show_item_collected(self, item_type):
         """Display item collection notification."""
-        if item_type == 'health':
+        if item_type == "health":
             self.add_notification(_("HEALTH_RESTORED"), "achievement")
-        elif item_type == 'bullet_speed':
+        elif item_type == "bullet_speed":
             self.add_notification(_("BULLET_SPEED_INCREASED"), "achievement")
-        elif item_type == 'bullet_path':
-            bullet_paths = self.player_stats_display.player_info['bullet_paths']
+        elif item_type == "bullet_path":
+            bullet_paths = self.player_stats_display.player_info["bullet_paths"]
             self.add_notification(_("BULLET_PATHS_INCREASED", bullet_paths), "achievement")
-        elif item_type == 'player_speed':
+        elif item_type == "player_speed":
             self.add_notification(_("MOVEMENT_SPEED_INCREASED"), "achievement")
 
     def show_score_milestone(self, score):
@@ -142,15 +134,17 @@ class UIManager:
         stage_text = _("STAGE_COMPLETE")
         self.add_notification(stage_text, "achievement")
 
-        logger.info(f"Level up effects shown: {old_level} → {new_level}, cleared {enemies_cleared} enemies, bonus {score_bonus}")
+        logger.info(
+            f"Level up effects shown: {old_level} → {new_level}, cleared {enemies_cleared} enemies, bonus {score_bonus}"
+        )
 
     def show_victory_screen(self, final_score):
         """Show victory screen when game is won."""
         # Set victory state
-        self.game_state['victory'] = True
+        self.game_state["victory"] = True
 
         # Only add victory notifications once
-        if not hasattr(self, '_victory_notifications_added'):
+        if not hasattr(self, "_victory_notifications_added"):
             self._victory_notifications_added = True
             # Add victory notifications
             self.add_notification(_("FINAL_BOSS_DEFEATED"), "achievement")
@@ -161,7 +155,7 @@ class UIManager:
     # Delegating methods to BossStatusDisplay
     def update_boss_info(self, active, health=None, max_health=None, level=None, mode=None):
         """Update Boss status information."""
-        old_mode = self.boss_status_display.boss_info.get('mode', 'normal')
+        old_mode = self.boss_status_display.boss_info.get("mode", "normal")
         self.boss_status_display.update_info(active, health, max_health, level, mode)
 
         # Check mode changes and display notifications
@@ -172,33 +166,32 @@ class UIManager:
                 self.add_notification(_("BOSS_ENTERED_FINAL"), "warning")
 
     # Delegating methods to PlayerStatsDisplay
-    def update_player_info(self, health=None, max_health=None, bullet_paths=None,
-                          bullet_speed=None, speed=None, wingmen=None):
+    def update_player_info(
+        self, health=None, max_health=None, bullet_paths=None, bullet_speed=None, speed=None, wingmen=None
+    ):
         """Update player status information."""
-        self.player_stats_display.update_info(
-            health, max_health, bullet_paths, bullet_speed, speed, wingmen
-        )
+        self.player_stats_display.update_info(health, max_health, bullet_paths, bullet_speed, speed, wingmen)
 
     # Game state management
     def update_game_state(self, level=None, paused=None, game_time=None, victory=None, defeat=None):
         """Update game state."""
         # Check level changes
-        if level is not None and level != self.game_state['level']:
+        if level is not None and level != self.game_state["level"]:
             self.screen_overlay_manager.start_level_change_animation(level)
-            self.game_state['level'] = level
+            self.game_state["level"] = level
 
         if paused is not None:
-            self.game_state['paused'] = paused
+            self.game_state["paused"] = paused
         if game_time is not None:
-            self.game_state['game_time'] = game_time
+            self.game_state["game_time"] = game_time
         if victory is not None:
-            if victory and not self.game_state['victory']:
+            if victory and not self.game_state["victory"]:
                 self.add_notification(_("VICTORY"), "achievement")
-            self.game_state['victory'] = victory
+            self.game_state["victory"] = victory
         if defeat is not None:
-            if defeat and not self.game_state['defeat']:
+            if defeat and not self.game_state["defeat"]:
                 self.add_notification(_("GAME_OVER"), "warning")
-            self.game_state['defeat'] = defeat
+            self.game_state["defeat"] = defeat
 
     def update(self):
         """Update all UI components."""
@@ -207,22 +200,16 @@ class UIManager:
 
     def reset_game_state(self):
         """Reset game state to initial values."""
-        self.game_state = {
-            'level': 1,
-            'paused': False,
-            'game_time': 0,
-            'victory': False,
-            'defeat': False
-        }
+        self.game_state = {"level": 1, "paused": False, "game_time": 0, "victory": False, "defeat": False}
         self.persistent_info = {}
 
         # Reset component states
         self.notification_manager.clear_all()
 
         # Reset player and boss info displays
-        if hasattr(self, 'player_stats_display'):
+        if hasattr(self, "player_stats_display"):
             self.player_stats_display.reset()
-        if hasattr(self, 'boss_status_display'):
+        if hasattr(self, "boss_status_display"):
             self.boss_status_display.reset()
 
     def draw(self, score, level, game_time, enemy_count=None, target_enemy_count=None, max_level=None):
@@ -238,14 +225,14 @@ class UIManager:
             max_level: Maximum level number
         """
         # Update persistent info
-        self.persistent_info['score'] = score
+        self.persistent_info["score"] = score
 
         # Draw special screens if active
-        if self.game_state['victory']:
+        if self.game_state["victory"]:
             self.draw_victory_screen(score, max_level or level)
             return
 
-        if self.game_state['defeat']:
+        if self.game_state["defeat"]:
             self.draw_game_over_screen(score, level, game_time)
             return
 
@@ -258,20 +245,29 @@ class UIManager:
         # Draw developer info if enabled
         if enemy_count is not None and self.player:
             player_pos = (self.player.rect.centerx, self.player.rect.centery)
-            fps = self.game.clock.get_fps() if hasattr(self.game, 'clock') else 0
+            fps = self.game.clock.get_fps() if hasattr(self.game, "clock") else 0
             self.dev_info_display.draw(fps, enemy_count, target_enemy_count or 0, player_pos)
 
         # Draw overlays
         self.screen_overlay_manager.draw_level_change_animation()
-        self.screen_overlay_manager.draw_pause_screen(self.game_state['paused'])
+        self.screen_overlay_manager.draw_pause_screen(self.game_state["paused"])
 
     # Convenience methods that delegate to components
-    def draw_health_bar(self, x, y, width, height, current, maximum,
-                       border_color=WHITE, fill_color=(0, 255, 0), background_color=(60, 60, 60)):
+    def draw_health_bar(
+        self,
+        x,
+        y,
+        width,
+        height,
+        current,
+        maximum,
+        border_color=WHITE,
+        fill_color=(0, 255, 0),
+        background_color=(60, 60, 60),
+    ):
         """Draw a health bar (delegates to HealthBarComponent)."""
         health_bar = HealthBarComponent(self.screen, self.font_small)
-        health_bar.draw(x, y, width, height, current, maximum,
-                       border_color, fill_color, background_color)
+        health_bar.draw(x, y, width, height, current, maximum, border_color, fill_color, background_color)
 
     def draw_player_stats(self):
         """Draw player stats (delegates to PlayerStatsDisplay)."""
@@ -283,25 +279,21 @@ class UIManager:
 
     def draw_victory_screen(self, final_score, max_level):
         """Draw victory screen (delegates to ScreenOverlayManager)."""
-        self.screen_overlay_manager.draw_victory_screen(
-            final_score, max_level, self.game_state['game_time']
-        )
+        self.screen_overlay_manager.draw_victory_screen(final_score, max_level, self.game_state["game_time"])
 
     def draw_game_over_screen(self, final_score, level_reached, game_time):
         """Draw game over screen (delegates to ScreenOverlayManager)."""
-        self.screen_overlay_manager.draw_game_over_screen(
-            final_score, level_reached, game_time
-        )
+        self.screen_overlay_manager.draw_game_over_screen(final_score, level_reached, game_time)
 
     def draw_pause_screen(self):
         """Draw pause screen (delegates to ScreenOverlayManager)."""
-        self.screen_overlay_manager.draw_pause_screen(self.game_state['paused'])
+        self.screen_overlay_manager.draw_pause_screen(self.game_state["paused"])
 
     def draw_game_info(self):
         """Draw game information (delegates to GameInfoDisplay)."""
-        score = self.persistent_info.get('score', 0)
-        level = self.game_state.get('level', 1)
-        game_time = self.game_state.get('game_time', 0)
+        score = self.persistent_info.get("score", 0)
+        level = self.game_state.get("level", 1)
+        game_time = self.game_state.get("game_time", 0)
         self.game_info_display.draw(score, level, game_time)
 
     def draw_notifications(self):

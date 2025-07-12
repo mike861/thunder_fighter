@@ -33,6 +33,7 @@ from thunder_fighter.utils.logger import logger
 
 class Player(pygame.sprite.Sprite):
     """Player class"""
+
     def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group, sound_manager=None):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
@@ -47,7 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.y = float(HEIGHT - 10)
         self.rect.centerx = int(self.x)
         self.rect.bottom = int(self.y)
-        self.speed = PLAYER_SPEED # Use self.speed for current player speed
+        self.speed = PLAYER_SPEED  # Use self.speed for current player speed
         self.max_speed = PLAYER_MAX_SPEED
         self.speedx = 0
         self.speedy = 0
@@ -81,7 +82,7 @@ class Player(pygame.sprite.Sprite):
         self.missiles_group = missiles_group
         self.enemies_group = enemies_group
         self.last_missile_shot = ptime.get_ticks()
-        self.missile_shoot_delay = 2000 # 2 seconds
+        self.missile_shoot_delay = 2000  # 2 seconds
 
     def update(self):
         """Update player state"""
@@ -92,13 +93,13 @@ class Player(pygame.sprite.Sprite):
         # Get key states
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
-            self.speedx = -self.speed # Use current speed
+            self.speedx = -self.speed  # Use current speed
         if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
-            self.speedx = self.speed # Use current speed
+            self.speedx = self.speed  # Use current speed
         if keystate[pygame.K_UP] or keystate[pygame.K_w]:
-            self.speedy = -self.speed # Use current speed
+            self.speedy = -self.speed  # Use current speed
         if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
-            self.speedy = self.speed # Use current speed
+            self.speedy = self.speed  # Use current speed
 
         # Shooting
         if keystate[pygame.K_SPACE]:
@@ -151,7 +152,7 @@ class Player(pygame.sprite.Sprite):
         else:
             # Ensure original image is restored after flashing ends
             if self.image != self.original_image:
-                 self.image = self.original_image.copy()
+                self.image = self.original_image.copy()
 
         # Update wingmen positions
         self.wingmen.update()
@@ -179,17 +180,31 @@ class Player(pygame.sprite.Sprite):
                 self.bullets_group.add(bullet1, bullet2)
             elif self.bullet_paths == 3:
                 # Three shots: one straight, two angled
-                bullet1 = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Center straight
-                bullet2 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_SMALL)  # Left angled
-                bullet3 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_SMALL)  # Right angled
+                bullet1 = Bullet(
+                    self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                )  # Center straight
+                bullet2 = Bullet(
+                    self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_SMALL
+                )  # Left angled
+                bullet3 = Bullet(
+                    self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_SMALL
+                )  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3)
                 self.bullets_group.add(bullet1, bullet2, bullet3)
             elif self.bullet_paths >= 4:
                 # Four or more shots (max limit is 4): two straight, two angled
-                bullet1 = Bullet(self.rect.centerx - 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Left center straight
-                bullet2 = Bullet(self.rect.centerx + 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)  # Right center straight
-                bullet3 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_LARGE)  # Left angled
-                bullet4 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE)  # Right angled
+                bullet1 = Bullet(
+                    self.rect.centerx - 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                )  # Left center straight
+                bullet2 = Bullet(
+                    self.rect.centerx + 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                )  # Right center straight
+                bullet3 = Bullet(
+                    self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_LARGE
+                )  # Left angled
+                bullet4 = Bullet(
+                    self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE
+                )  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3, bullet4)
                 self.bullets_group.add(bullet1, bullet2, bullet3, bullet4)
 
@@ -216,11 +231,13 @@ class Player(pygame.sprite.Sprite):
                 return
 
             # Sort enemies by distance to the player
-            sorted_enemies = sorted(self.enemies_group.sprites(),
-                                    key=lambda e: pygame.math.Vector2(self.rect.center).distance_to(e.rect.center))
+            sorted_enemies = sorted(
+                self.enemies_group.sprites(),
+                key=lambda e: pygame.math.Vector2(self.rect.center).distance_to(e.rect.center),
+            )
 
             # Assign the closest enemies to the wingmen
-            targets = sorted_enemies[:len(self.wingmen_list)]
+            targets = sorted_enemies[: len(self.wingmen_list)]
 
         # Fire missiles
         for i, wingman in enumerate(self.wingmen_list):
@@ -231,15 +248,15 @@ class Player(pygame.sprite.Sprite):
     def add_wingman(self):
         """Add a wingman"""
         if len(self.wingmen_list) >= PLAYER_MAX_WINGMEN:
-            return False # Maximum number reached
+            return False  # Maximum number reached
 
         # Determine position for new wingman
         if not self.wingmen_list:
-            side = 'left'
+            side = "left"
         else:
             # If there's already one, check which side it's on
             existing_side = self.wingmen_list[0].side
-            side = 'right' if existing_side == 'left' else 'left'
+            side = "right" if existing_side == "left" else "left"
 
         wingman = Wingman(self, side)
         self.all_sprites.add(wingman)
@@ -255,13 +272,13 @@ class Player(pygame.sprite.Sprite):
             wingman_to_remove.kill()
 
             # Create explosion effect
-            explosion = create_explosion(wingman_to_remove.rect.center, 'sm')
+            explosion = create_explosion(wingman_to_remove.rect.center, "sm")
             self.all_sprites.add(explosion)
 
             # Play sound effect
             if self.sound_manager:
-                self.sound_manager.play_sound('enemy_explosion')
-            return False # Player not dead
+                self.sound_manager.play_sound("enemy_explosion")
+            return False  # Player not dead
 
         self.health -= damage
 
@@ -273,7 +290,7 @@ class Player(pygame.sprite.Sprite):
 
         # Play hit sound effect
         if self.sound_manager:
-            self.sound_manager.play_sound('player_hit')
+            self.sound_manager.play_sound("player_hit")
 
         return self.health <= 0  # Return whether dead
 

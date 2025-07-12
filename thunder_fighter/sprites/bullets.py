@@ -28,12 +28,13 @@ from thunder_fighter.constants import (
     HEIGHT,
     WIDTH,
 )
-from thunder_fighter.graphics.renderers import create_bullet, create_boss_bullet
+from thunder_fighter.graphics.renderers import create_bullet
 from thunder_fighter.utils.logger import logger
 
 
 class Bullet(pygame.sprite.Sprite):
     """Player bullet class"""
+
     def __init__(self, x, y, speed=10, angle=0):
         pygame.sprite.Sprite.__init__(self)
         # Use custom drawn graphics instead of rectangles
@@ -62,10 +63,9 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x += self.speedx
 
         # Remove bullet if it goes off screen
-        if (self.rect.bottom < 0 or
-            self.rect.right < 0 or
-            self.rect.left > WIDTH):
+        if self.rect.bottom < 0 or self.rect.right < 0 or self.rect.left > WIDTH:
             self.kill()
+
 
 class BossBullet(pygame.sprite.Sprite):
     """Boss bullet class that supports bullet variations for different attack modes.
@@ -83,8 +83,9 @@ class BossBullet(pygame.sprite.Sprite):
         rect (pygame.Rect): Bullet collision rectangle
     """
 
-    def __init__(self, x: int, y: int, shoot_pattern: str = "normal",
-                 target_pos: Optional[Tuple[int, int]] = None) -> None:
+    def __init__(
+        self, x: int, y: int, shoot_pattern: str = "normal", target_pos: Optional[Tuple[int, int]] = None
+    ) -> None:
         """Initialize Boss bullet.
 
         Args:
@@ -128,8 +129,10 @@ class BossBullet(pygame.sprite.Sprite):
                 self.speedx: float = 0.0
                 self.speedy: float = float(self.base_speed)
 
-            logger.debug(f"BossBullet created: pattern={shoot_pattern}, "
-                        f"damage={self.damage}, speed=({self.speedx:.1f}, {self.speedy:.1f})")
+            logger.debug(
+                f"BossBullet created: pattern={shoot_pattern}, "
+                f"damage={self.damage}, speed=({self.speedx:.1f}, {self.speedy:.1f})"
+            )
 
         except Exception as e:
             logger.error(f"Error creating BossBullet: {e}", exc_info=True)
@@ -165,8 +168,7 @@ class BossBullet(pygame.sprite.Sprite):
             if distance > 0:
                 # Normalize direction vector and apply speed
                 self.speedx = (dx / distance) * self.base_speed * BOSS_BULLET_TRACKING_HORIZONTAL_FACTOR
-                self.speedy = max(BOSS_BULLET_MINIMUM_VERTICAL_SPEED,
-                                (dy / distance) * self.base_speed)
+                self.speedy = max(BOSS_BULLET_MINIMUM_VERTICAL_SPEED, (dy / distance) * self.base_speed)
             else:
                 self.speedx = 0.0
                 self.speedy = float(self.base_speed)
@@ -203,16 +205,13 @@ class BossBullet(pygame.sprite.Sprite):
         try:
             if self.shoot_pattern == "normal":
                 # Normal mode: purple bullet
-                return self._create_bullet_sprite(
-                    BOSS_BULLET_NORMAL_COLOR_PRIMARY,
-                    BOSS_BULLET_NORMAL_COLOR_SECONDARY
-                )
+                return self._create_bullet_sprite(BOSS_BULLET_NORMAL_COLOR_PRIMARY, BOSS_BULLET_NORMAL_COLOR_SECONDARY)
             elif self.shoot_pattern == "aggressive":
                 # Aggressive mode: red bullet, slightly larger
                 return self._create_bullet_sprite(
                     BOSS_BULLET_AGGRESSIVE_COLOR_PRIMARY,
                     BOSS_BULLET_AGGRESSIVE_COLOR_SECONDARY,
-                    size_multiplier=BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER
+                    size_multiplier=BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER,
                 )
             else:  # final mode
                 # Final mode: blue-white tracking bullet with effects
@@ -220,7 +219,7 @@ class BossBullet(pygame.sprite.Sprite):
                     BOSS_BULLET_FINAL_COLOR_PRIMARY,
                     BOSS_BULLET_FINAL_COLOR_SECONDARY,
                     size_multiplier=BOSS_BULLET_FINAL_SIZE_MULTIPLIER,
-                    glow=True
+                    glow=True,
                 )
         except Exception as e:
             logger.error(f"Error creating boss bullet sprite: {e}", exc_info=True)
@@ -229,10 +228,13 @@ class BossBullet(pygame.sprite.Sprite):
             surface.fill(BOSS_BULLET_NORMAL_COLOR_PRIMARY)
             return surface
 
-    def _create_bullet_sprite(self, primary_color: Tuple[int, int, int],
-                            secondary_color: Tuple[int, int, int],
-                            size_multiplier: float = 1.0,
-                            glow: bool = False) -> pygame.Surface:
+    def _create_bullet_sprite(
+        self,
+        primary_color: Tuple[int, int, int],
+        secondary_color: Tuple[int, int, int],
+        size_multiplier: float = 1.0,
+        glow: bool = False,
+    ) -> pygame.Surface:
         """Create bullet sprite image.
 
         Args:
@@ -256,15 +258,12 @@ class BossBullet(pygame.sprite.Sprite):
 
             # Draw bullet body
             main_body_height = base_height - 5
-            pygame.draw.rect(bullet_surface, primary_color,
-                           (0, 0, base_width, main_body_height))
-            pygame.draw.rect(bullet_surface, secondary_color,
-                           (0, main_body_height, base_width, 5))
+            pygame.draw.rect(bullet_surface, primary_color, (0, 0, base_width, main_body_height))
+            pygame.draw.rect(bullet_surface, secondary_color, (0, main_body_height, base_width, 5))
 
             # Add light effect edges
             center_x = base_width // 2
-            pygame.draw.line(bullet_surface, (255, 255, 255),
-                           (center_x, 0), (center_x, main_body_height), 2)
+            pygame.draw.line(bullet_surface, (255, 255, 255), (center_x, 0), (center_x, main_body_height), 2)
 
             # Add glow effect for Final mode
             if glow:
@@ -279,9 +278,9 @@ class BossBullet(pygame.sprite.Sprite):
             surface.fill(primary_color)
             return surface
 
-    def _add_glow_effect(self, bullet_surface: pygame.Surface,
-                        primary_color: Tuple[int, int, int],
-                        base_width: int, base_height: int) -> pygame.Surface:
+    def _add_glow_effect(
+        self, bullet_surface: pygame.Surface, primary_color: Tuple[int, int, int], base_width: int, base_height: int
+    ) -> pygame.Surface:
         """Add glow effect to bullet.
 
         Args:
@@ -295,10 +294,7 @@ class BossBullet(pygame.sprite.Sprite):
         """
         try:
             glow_size = BOSS_BULLET_GLOW_EFFECT_SIZE
-            glow_surface = pygame.Surface(
-                (base_width + glow_size, base_height + glow_size),
-                pygame.SRCALPHA
-            )
+            glow_surface = pygame.Surface((base_width + glow_size, base_height + glow_size), pygame.SRCALPHA)
 
             # Create glow circle
             for i in range(BOSS_BULLET_GLOW_LAYERS):
@@ -307,10 +303,7 @@ class BossBullet(pygame.sprite.Sprite):
                 offset = 2 - i
                 size_add = i * 2
                 pygame.draw.ellipse(
-                    glow_surface, glow_color,
-                    (offset, offset,
-                     base_width + 4 + size_add,
-                     base_height + 4 + size_add)
+                    glow_surface, glow_color, (offset, offset, base_width + 4 + size_add, base_height + 4 + size_add)
                 )
 
             # Draw main bullet on glow surface
@@ -331,9 +324,7 @@ class BossBullet(pygame.sprite.Sprite):
             self.rect.x += int(self.speedx)
 
             # Remove bullet if it goes off bottom or left/right edges of screen
-            if (self.rect.top > HEIGHT or
-                self.rect.right < 0 or
-                self.rect.left > WIDTH):
+            if self.rect.top > HEIGHT or self.rect.right < 0 or self.rect.left > WIDTH:
                 self.kill()
                 logger.debug(f"BossBullet destroyed: out of bounds at ({self.rect.x}, {self.rect.y})")
 
@@ -347,10 +338,12 @@ class BossBullet(pygame.sprite.Sprite):
         Returns:
             Damage value caused by bullet
         """
-        return getattr(self, 'damage', BOSS_BULLET_NORMAL_DAMAGE)
+        return getattr(self, "damage", BOSS_BULLET_NORMAL_DAMAGE)
+
 
 class EnemyBullet(pygame.sprite.Sprite):
     """Enemy bullet class with level-based variations"""
+
     def __init__(self, x, y, enemy_level=0):
         pygame.sprite.Sprite.__init__(self)
         # Create bullets with different appearances based on enemy level
@@ -386,7 +379,9 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.curve = False
 
         # Log bullet creation
-        logger.debug(f"EnemyBullet created: Pos=({x}, {self.rect.top}), SpeedY={self.speedy:.2f}, SpeedX={getattr(self, 'speedx', 0)}, Level={enemy_level}")
+        logger.debug(
+            f"EnemyBullet created: Pos=({x}, {self.rect.top}), SpeedY={self.speedy:.2f}, SpeedX={getattr(self, 'speedx', 0)}, Level={enemy_level}"
+        )
 
     def _create_enemy_bullet(self):
         """Create bullet appearance based on enemy level"""
@@ -415,22 +410,28 @@ class EnemyBullet(pygame.sprite.Sprite):
             glow_color = (220, 100, 250, 120)  # Reduced glow opacity
 
         # Draw bullet core with reduced size
-        pygame.draw.rect(bullet_surface, bullet_color, (bullet_size/2, 0, bullet_size/1.5, bullet_size * 1.5))
+        pygame.draw.rect(bullet_surface, bullet_color, (bullet_size / 2, 0, bullet_size / 1.5, bullet_size * 1.5))
 
         # Draw bullet tail with reduced size
-        pygame.draw.rect(bullet_surface, (200, 200, 200), (bullet_size/2, bullet_size * 1.5, bullet_size/1.5, bullet_size/2))
+        pygame.draw.rect(
+            bullet_surface, (200, 200, 200), (bullet_size / 2, bullet_size * 1.5, bullet_size / 1.5, bullet_size / 2)
+        )
 
         # Add white border to increase visibility
-        pygame.draw.rect(bullet_surface, (255, 255, 255), (bullet_size/2, 0, bullet_size/1.5, bullet_size * 1.5), 1)
+        pygame.draw.rect(bullet_surface, (255, 255, 255), (bullet_size / 2, 0, bullet_size / 1.5, bullet_size * 1.5), 1)
 
         # Reduce glow effect
         # Create smaller glow circle
         glow_size = bullet_size * 3  # Previously * 5, reduced glow range
         glow_surface = pygame.Surface((glow_size, glow_size), pygame.SRCALPHA)
-        pygame.draw.circle(glow_surface, glow_color, (glow_size/2, glow_size/2), bullet_size * 1)  # Previously * 1.5
+        pygame.draw.circle(
+            glow_surface, glow_color, (glow_size / 2, glow_size / 2), bullet_size * 1
+        )  # Previously * 1.5
 
         # Draw glow effect on bullet surface, adjust offset for new size
-        bullet_surface.blit(glow_surface, (-glow_size/2 + bullet_size/2, -bullet_size/2), special_flags=pygame.BLEND_ALPHA_SDL2)
+        bullet_surface.blit(
+            glow_surface, (-glow_size / 2 + bullet_size / 2, -bullet_size / 2), special_flags=pygame.BLEND_ALPHA_SDL2
+        )
 
         return bullet_surface
 
@@ -441,24 +442,22 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.rect.y += self.speedy
 
             # Horizontal movement
-            if hasattr(self, 'speedx') and self.speedx != 0:
+            if hasattr(self, "speedx") and self.speedx != 0:
                 self.rect.x += self.speedx
 
                 # Curve movement (only for high-level enemy bullets)
-                if hasattr(self, 'curve') and self.curve:
-                    if not hasattr(self, 'angle'):
+                if hasattr(self, "curve") and self.curve:
+                    if not hasattr(self, "angle"):
                         self.angle = 0
                     self.angle = (self.angle + 5) % 360
                     curve_offset = int(self.curve_amplitude * pygame.math.Vector2(1, 0).rotate(self.angle).x)
                     self.rect.x += curve_offset
 
             # Remove bullet if it goes off screen
-            if (self.rect.top > HEIGHT or
-                self.rect.right < 0 or
-                self.rect.left > WIDTH):
+            if self.rect.top > HEIGHT or self.rect.right < 0 or self.rect.left > WIDTH:
                 logger.debug(f"EnemyBullet {id(self)} killed (off-screen).")
                 self.kill()
         except Exception as e:
             # Log update error
             logger.error(f"EnemyBullet update error: {str(e)}", exc_info=True)
-            self.kill() # Remove bullet on error
+            self.kill()  # Remove bullet on error

@@ -19,18 +19,16 @@ from .projectiles.projectile_factory import ProjectileFactory
 
 __all__ = [
     # Base entity classes
-    'GameObject',
-    'Entity',
-    'EntityFactory',
-    'MovableEntity',
-    'LivingEntity',
-
+    "GameObject",
+    "Entity",
+    "EntityFactory",
+    "MovableEntity",
+    "LivingEntity",
     # Factory classes
-    'EnemyFactory',
-    'BossFactory',
-    'ItemFactory',
-    'ProjectileFactory',
-
+    "EnemyFactory",
+    "BossFactory",
+    "ItemFactory",
+    "ProjectileFactory",
     # Primary entity classes
-    'Player',
+    "Player",
 ]

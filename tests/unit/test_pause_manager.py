@@ -108,7 +108,7 @@ class TestPauseManager:
         manager.pause(1000.0)
 
         # Check current pause duration
-        with patch('time.time', return_value=1002.0):
+        with patch("time.time", return_value=1002.0):
             stats = manager.get_pause_stats()
             assert stats.current_pause_duration == 2.0
             assert stats.total_pause_duration == 0.0  # Not yet accumulated
@@ -240,7 +240,7 @@ class TestPauseManager:
         """Test that methods work with default time.time() when no time provided."""
         manager = PauseManager(cooldown_ms=0)
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             mock_time.side_effect = [1000.0, 1002.0, 1005.0]
 
             # Toggle pause (uses time.time())

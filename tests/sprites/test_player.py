@@ -18,6 +18,7 @@ from thunder_fighter.entities.player.player import Player
 pygame.init()
 pygame.display.set_mode((800, 600))
 
+
 @pytest.fixture
 def mock_game():
     """Create a mock game object"""
@@ -26,6 +27,7 @@ def mock_game():
     game.enemies_group = MagicMock()
     game.enemies_group.sprites.return_value = []
     return game
+
 
 @pytest.fixture
 def mock_sprite_groups():
@@ -36,16 +38,19 @@ def mock_sprite_groups():
     enemies_group = MagicMock()
     return all_sprites, bullets_group, missiles_group, enemies_group
 
+
 @pytest.fixture
 def mock_sound_manager():
     """Create a mock sound manager"""
     return MagicMock()
+
 
 @pytest.fixture
 def player(mock_game, mock_sprite_groups, mock_sound_manager):
     """Create a player instance for testing"""
     all_sprites, bullets_group, missiles_group, enemies_group = mock_sprite_groups
     return Player(mock_game, all_sprites, bullets_group, missiles_group, enemies_group, mock_sound_manager)
+
 
 class TestPlayer:
     """Test Player class functionality"""
@@ -64,7 +69,7 @@ class TestPlayer:
     def test_player_shoot(self, player):
         """Test player shooting functionality"""
         # Mock the time to ensure shooting is allowed
-        with patch('thunder_fighter.sprites.player.ptime') as mock_ptime:
+        with patch("thunder_fighter.sprites.player.ptime") as mock_ptime:
             mock_ptime.get_ticks.return_value = 1000  # Set current time
             player.last_shot = 0  # Ensure enough time has passed
 

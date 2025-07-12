@@ -20,12 +20,14 @@ class InputProcessor:
     Uses external interfaces through dependency injection, making it fully testable.
     """
 
-    def __init__(self,
-                 event_source: EventSource,
-                 keyboard_state: KeyboardState,
-                 clock: Clock,
-                 key_mapping: Dict[int, CommandType],
-                 logger: Optional[Logger] = None):
+    def __init__(
+        self,
+        event_source: EventSource,
+        keyboard_state: KeyboardState,
+        clock: Clock,
+        key_mapping: Dict[int, CommandType],
+        logger: Optional[Logger] = None,
+    ):
         """
         Initializes the input processor.
 
@@ -57,15 +59,11 @@ class InputProcessor:
             CommandType.MOVE_UP,
             CommandType.MOVE_DOWN,
             CommandType.MOVE_LEFT,
-            CommandType.MOVE_RIGHT
+            CommandType.MOVE_RIGHT,
         }
 
         # Statistics
-        self.stats = {
-            'events_processed': 0,
-            'commands_generated': 0,
-            'fallback_triggered': 0
-        }
+        self.stats = {"events_processed": 0, "commands_generated": 0, "fallback_triggered": 0}
 
     def process(self) -> List[Command]:
         """
@@ -82,17 +80,19 @@ class InputProcessor:
             events = self.event_source.poll_events()
             for event in events:
                 event.timestamp = current_time
-                if cmd := self._process_event(event):
+                cmd = self._process_event(event)
+                if cmd:
                     commands.append(cmd)
-                self.stats['events_processed'] += 1
+                self.stats["events_processed"] += 1
 
             # Process held keys
             for key in self.held_keys.copy():
-                if cmd := self._process_held_key(key, current_time):
+                cmd = self._process_held_key(key, current_time)
+                if cmd:
                     commands.append(cmd)
 
             # Update statistics
-            self.stats['commands_generated'] += len(commands)
+            self.stats["commands_generated"] += len(commands)
 
             if self.logger:
                 if commands:
@@ -166,11 +166,7 @@ class InputProcessor:
         return Command(
             type=command_type,
             timestamp=current_time,
-            data={
-                'key': key_code,
-                'modifiers': event.modifiers.copy(),
-                'continuous': False
-            }
+            data={"key": key_code, "modifiers": event.modifiers.copy(), "continuous": False},
         )
 
     def _handle_key_up(self, event: Event) -> Optional[Command]:
@@ -218,11 +214,7 @@ class InputProcessor:
             return Command(
                 type=command_type,
                 timestamp=current_time,
-                data={
-                    'key': key,
-                    'continuous': True,
-                    'time_held': time_since_last
-                }
+                data={"key": key, "continuous": True, "time_held": time_since_last},
             )
 
         return None

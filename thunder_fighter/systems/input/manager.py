@@ -88,7 +88,7 @@ class InputManager:
             InputEventType.TOGGLE_SOUND,
             InputEventType.VOLUME_UP,
             InputEventType.VOLUME_DOWN,
-            InputEventType.CHANGE_LANGUAGE
+            InputEventType.CHANGE_LANGUAGE,
         }
 
         return [event for event in events if event.event_type in allowed_when_paused]
@@ -303,15 +303,20 @@ class InputManager:
         Returns:
             Event handler function
         """
+
         def handle_movement(event: InputEvent):
             if event.event_type in [
-                InputEventType.MOVE_UP, InputEventType.MOVE_DOWN,
-                InputEventType.MOVE_LEFT, InputEventType.MOVE_RIGHT,
-                InputEventType.STOP_MOVE_UP, InputEventType.STOP_MOVE_DOWN,
-                InputEventType.STOP_MOVE_LEFT, InputEventType.STOP_MOVE_RIGHT
+                InputEventType.MOVE_UP,
+                InputEventType.MOVE_DOWN,
+                InputEventType.MOVE_LEFT,
+                InputEventType.MOVE_RIGHT,
+                InputEventType.STOP_MOVE_UP,
+                InputEventType.STOP_MOVE_DOWN,
+                InputEventType.STOP_MOVE_LEFT,
+                InputEventType.STOP_MOVE_RIGHT,
             ]:
-                direction = event.get_data('direction')
-                pressed = event.get_data('pressed')
+                direction = event.get_data("direction")
+                pressed = event.get_data("pressed")
                 if direction:
                     move_callback(direction, pressed)
 
@@ -327,18 +332,15 @@ class InputManager:
         Returns:
             Event handler function
         """
+
         def handle_action(event: InputEvent):
-            if event.event_type in [
-                InputEventType.SHOOT, InputEventType.STOP_SHOOT,
-                InputEventType.LAUNCH_MISSILE
-            ]:
-                action = event.get_data('action')
-                pressed = event.get_data('pressed', True)
+            if event.event_type in [InputEventType.SHOOT, InputEventType.STOP_SHOOT, InputEventType.LAUNCH_MISSILE]:
+                action = event.get_data("action")
+                pressed = event.get_data("pressed", True)
                 if action:
                     action_callback(action, pressed)
 
         return handle_action
 
     def __str__(self):
-        return (f"InputManager(enabled={self._enabled}, paused={self._paused}, "
-                f"callbacks={len(self._event_callbacks)})")
+        return f"InputManager(enabled={self._enabled}, paused={self._paused}, callbacks={len(self._event_callbacks)})"

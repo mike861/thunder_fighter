@@ -36,13 +36,11 @@ class InputHandler:
         self._event_queue: List[InputEvent] = []
 
         # Track continuous actions (like movement and shooting)
-        self._continuous_actions = {
-            'move_up', 'move_down', 'move_left', 'move_right', 'shoot'
-        }
+        self._continuous_actions = {"move_up", "move_down", "move_left", "move_right", "shoot"}
         self._active_continuous_actions: Set[str] = set()
 
         # macOS screenshot function interference detection
-        self._last_activity_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
+        self._last_activity_time = pygame.time.get_ticks() if hasattr(pygame, "time") else 0
         self._focus_lost_recovery_needed = False
 
         logger.info("InputHandler initialized")
@@ -120,10 +118,10 @@ class InputHandler:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
                 logger.info("Fallback: Creating PAUSE event for P key")
-                return [InputEventFactory.create_game_control_event('pause')]
+                return [InputEventFactory.create_game_control_event("pause")]
             elif event.key == pygame.K_l:
                 logger.info("Fallback: Creating CHANGE_LANGUAGE event for L key")
-                return [InputEventFactory.create_ui_event('change_language')]
+                return [InputEventFactory.create_ui_event("change_language")]
         return []
 
     def _process_single_event(self, event: pygame.event.Event) -> List[InputEvent]:
@@ -139,7 +137,7 @@ class InputHandler:
         events = []
 
         if event.type == pygame.QUIT:
-            events.append(InputEventFactory.create_game_control_event('quit'))
+            events.append(InputEventFactory.create_game_control_event("quit"))
 
         elif event.type == pygame.KEYDOWN:
             events.extend(self._handle_keydown(event))
@@ -173,40 +171,35 @@ class InputHandler:
         action = self.key_bindings.get_action(key, modifiers)
 
         if action:
-            if action in ['move_up', 'move_down', 'move_left', 'move_right']:
+            if action in ["move_up", "move_down", "move_left", "move_right"]:
                 # Movement actions
-                direction = action.replace('move_', '')
+                direction = action.replace("move_", "")
                 events.append(InputEventFactory.create_movement_event(direction, True))
                 self._active_continuous_actions.add(action)
 
-            elif action == 'shoot':
+            elif action == "shoot":
                 # Shooting action (continuous)
-                events.append(InputEventFactory.create_action_event('shoot', True))
+                events.append(InputEventFactory.create_action_event("shoot", True))
                 self._active_continuous_actions.add(action)
 
-            elif action == 'launch_missile':
+            elif action == "launch_missile":
                 # Missile action (single press)
-                events.append(InputEventFactory.create_action_event('missile', True))
+                events.append(InputEventFactory.create_action_event("missile", True))
 
-            elif action in ['pause', 'quit', 'restart', 'skip_animation']:
+            elif action in ["pause", "quit", "restart", "skip_animation"]:
                 # Game control actions
-                control_map = {
-                    'pause': 'pause',
-                    'quit': 'quit',
-                    'restart': 'restart',
-                    'skip_animation': 'skip'
-                }
+                control_map = {"pause": "pause", "quit": "quit", "restart": "restart", "skip_animation": "skip"}
                 events.append(InputEventFactory.create_game_control_event(control_map[action]))
 
-            elif action in ['toggle_music', 'toggle_sound', 'volume_up', 'volume_down']:
+            elif action in ["toggle_music", "toggle_sound", "volume_up", "volume_down"]:
                 # Audio actions
                 events.append(InputEventFactory.create_audio_event(action))
 
-            elif action in ['change_language', 'toggle_dev_mode']:
+            elif action in ["change_language", "toggle_dev_mode"]:
                 # UI actions
                 events.append(InputEventFactory.create_ui_event(action))
 
-            elif action == 'reset_input_state':
+            elif action == "reset_input_state":
                 # Debug action - immediately reset input state
                 logger.info("Manual input state reset triggered (F1 key)")
                 self.force_key_state_validation()
@@ -236,15 +229,15 @@ class InputHandler:
         action = self.key_bindings.get_action(key, modifiers)
 
         if action:
-            if action in ['move_up', 'move_down', 'move_left', 'move_right']:
+            if action in ["move_up", "move_down", "move_left", "move_right"]:
                 # Stop movement
-                direction = action.replace('move_', '')
+                direction = action.replace("move_", "")
                 events.append(InputEventFactory.create_movement_event(direction, False))
                 self._active_continuous_actions.discard(action)
 
-            elif action == 'shoot':
+            elif action == "shoot":
                 # Stop shooting
-                events.append(InputEventFactory.create_action_event('shoot', False))
+                events.append(InputEventFactory.create_action_event("shoot", False))
                 self._active_continuous_actions.discard(action)
 
         return events
@@ -264,15 +257,15 @@ class InputHandler:
             return events
 
         for action in self._active_continuous_actions:
-            if action in ['move_up', 'move_down', 'move_left', 'move_right']:
-                direction = action.replace('move_', '')
+            if action in ["move_up", "move_down", "move_left", "move_right"]:
+                direction = action.replace("move_", "")
                 event = InputEventFactory.create_movement_event(direction, True)
-                event.set_data('continuous', True)
+                event.set_data("continuous", True)
                 events.append(event)
 
-            elif action == 'shoot':
-                event = InputEventFactory.create_action_event('shoot', True)
-                event.set_data('continuous', True)
+            elif action == "shoot":
+                event = InputEventFactory.create_action_event("shoot", True)
+                event.set_data("continuous", True)
                 events.append(event)
 
         return events
@@ -364,26 +357,26 @@ class InputHandler:
         import platform
 
         # Only apply this fix on macOS
-        if platform.system() != 'Darwin':
+        if platform.system() != "Darwin":
             return
 
-        current_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
+        current_time = pygame.time.get_ticks() if hasattr(pygame, "time") else 0
 
         # Check for specific focus-related events that indicate real focus loss
         has_actual_focus_events = False
         for event in pygame_events:
             # Look for window focus events that indicate actual focus loss/gain
-            if hasattr(pygame, 'WINDOWEVENT') and event.type == pygame.WINDOWEVENT:
-                if hasattr(event, 'event') and event.event in [
+            if hasattr(pygame, "WINDOWEVENT") and event.type == pygame.WINDOWEVENT:
+                if hasattr(event, "event") and event.event in [
                     pygame.WINDOWEVENT_FOCUS_LOST,
-                    pygame.WINDOWEVENT_FOCUS_GAINED
+                    pygame.WINDOWEVENT_FOCUS_GAINED,
                 ]:
                     has_actual_focus_events = True
                     logger.debug(f"Detected actual window focus event: {event.event}")
                     break
-            elif hasattr(pygame, 'ACTIVEEVENT') and event.type == pygame.ACTIVEEVENT:
+            elif hasattr(pygame, "ACTIVEEVENT") and event.type == pygame.ACTIVEEVENT:
                 # Older pygame versions
-                if hasattr(event, 'state') and event.state & pygame.APPINPUTFOCUS:
+                if hasattr(event, "state") and event.state & pygame.APPINPUTFOCUS:
                     has_actual_focus_events = True
                     logger.debug("Detected legacy focus event")
                     break
@@ -469,5 +462,7 @@ class InputHandler:
         logger.info("Key bindings updated")
 
     def __str__(self):
-        return (f"InputHandler(pressed_keys={len(self._pressed_keys)}, "
-                f"active_actions={len(self._active_continuous_actions)})")
+        return (
+            f"InputHandler(pressed_keys={len(self._pressed_keys)}, "
+            f"active_actions={len(self._active_continuous_actions)})"
+        )

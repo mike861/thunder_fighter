@@ -11,6 +11,7 @@ from thunder_fighter.constants import WHITE
 
 class FlashEffect:
     """Flash effect that modifies entity's color directly"""
+
     def __init__(self, entity, color=WHITE, duration=200, flash_speed=50):
         self.entity = entity  # The sprite to flash
         self.color = color
@@ -22,7 +23,7 @@ class FlashEffect:
         self.active = True
 
         # Store original image to restore later
-        if hasattr(entity, 'image'):
+        if hasattr(entity, "image"):
             self.original_image = entity.image.copy()
         else:
             self.original_image = None
@@ -60,12 +61,13 @@ class FlashEffect:
     def stop(self):
         """Stop the flash effect and restore original image"""
         self.active = False
-        if self.original_image and hasattr(self.entity, 'image'):
+        if self.original_image and hasattr(self.entity, "image"):
             self.entity.image = self.original_image.copy()
 
 
 class FlashEffectManager:
     """Manages flash effects for entities"""
+
     def __init__(self):
         self.effects = []
 

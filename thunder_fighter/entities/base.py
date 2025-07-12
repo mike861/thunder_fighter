@@ -83,12 +83,12 @@ class Entity(GameObject):
         self.rect.y = int(self.y)
 
         # Update sprite's built-in update (for animation, etc.)
-        if hasattr(super(), 'update') and callable(super().update):
+        if hasattr(super(), "update") and callable(super().update):
             super().update()
 
     def render(self, screen: pygame.Surface):
         """Default render implementation."""
-        if hasattr(self, 'image') and hasattr(self, 'rect') and self.image:
+        if hasattr(self, "image") and hasattr(self, "rect") and self.image:
             screen.blit(self.image, self.rect)
 
 
@@ -140,8 +140,7 @@ class MovableEntity(Entity):
 class LivingEntity(MovableEntity):
     """Base class for living entities"""
 
-    def __init__(self, x: float, y: float, width: int, height: int,
-                 speed: float = 100.0, max_health: int = 100):
+    def __init__(self, x: float, y: float, width: int, height: int, speed: float = 100.0, max_health: int = 100):
         super().__init__(x, y, width, height, speed)
         self.max_health = max_health
         self.health = max_health
@@ -179,7 +178,7 @@ class LivingEntity(MovableEntity):
     def on_death(self):
         """Callback when dead."""
         self.active = False
-        if hasattr(self, 'kill'):
+        if hasattr(self, "kill"):
             self.kill()
 
     def get_health_percentage(self) -> float:

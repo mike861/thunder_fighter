@@ -44,11 +44,13 @@ class MockEventSourceAdapter(EventSource):
             key_code: The key code.
             modifiers: The modifier key state.
         """
-        self.add_event(Event(
-            type=EventType.KEY_DOWN,
-            key_code=key_code,
-            modifiers=modifiers or {'ctrl': False, 'shift': False, 'alt': False}
-        ))
+        self.add_event(
+            Event(
+                type=EventType.KEY_DOWN,
+                key_code=key_code,
+                modifiers=modifiers or {"ctrl": False, "shift": False, "alt": False},
+            )
+        )
 
     def add_key_up(self, key_code: int, modifiers: Dict[str, bool] = None):
         """
@@ -58,11 +60,13 @@ class MockEventSourceAdapter(EventSource):
             key_code: The key code.
             modifiers: The modifier key state.
         """
-        self.add_event(Event(
-            type=EventType.KEY_UP,
-            key_code=key_code,
-            modifiers=modifiers or {'ctrl': False, 'shift': False, 'alt': False}
-        ))
+        self.add_event(
+            Event(
+                type=EventType.KEY_UP,
+                key_code=key_code,
+                modifiers=modifiers or {"ctrl": False, "shift": False, "alt": False},
+            )
+        )
 
     def add_key_sequence(self, key_code: int, duration: float = 0.1):
         """
@@ -295,19 +299,19 @@ class MockLoggerAdapter(Logger):
 
     def debug(self, message: str):
         """Logs a debug message."""
-        self._log('DEBUG', message)
+        self._log("DEBUG", message)
 
     def info(self, message: str):
         """Logs a general information message."""
-        self._log('INFO', message)
+        self._log("INFO", message)
 
     def warning(self, message: str):
         """Logs a warning message."""
-        self._log('WARNING', message)
+        self._log("WARNING", message)
 
     def error(self, message: str):
         """Logs an error message."""
-        self._log('ERROR', message)
+        self._log("ERROR", message)
 
     def _log(self, level: str, message: str):
         """Internal logging method."""
@@ -342,8 +346,9 @@ class MockLoggerAdapter(Logger):
         return sum(1 for lvl, _ in self.logs if lvl == level)
 
 
-def create_test_environment(initial_time: float = 0.0,
-                          print_logs: bool = False) -> tuple[MockEventSourceAdapter, MockKeyboardStateAdapter, MockClockAdapter, MockLoggerAdapter]:
+def create_test_environment(
+    initial_time: float = 0.0, print_logs: bool = False
+) -> tuple[MockEventSourceAdapter, MockKeyboardStateAdapter, MockClockAdapter, MockLoggerAdapter]:
     """
     Creates a complete test environment.
 
@@ -368,7 +373,9 @@ def create_test_environment(initial_time: float = 0.0,
 class MockScenarioBuilder:
     """Test Scenario Builder - Simplifies the creation of complex test scenarios"""
 
-    def __init__(self, event_source: MockEventSourceAdapter, clock: MockClockAdapter, keyboard: MockKeyboardStateAdapter):
+    def __init__(
+        self, event_source: MockEventSourceAdapter, clock: MockClockAdapter, keyboard: MockKeyboardStateAdapter
+    ):
         """
         Initializes the test scenario.
 

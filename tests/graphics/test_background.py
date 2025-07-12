@@ -1,4 +1,3 @@
-
 import pygame
 import pytest
 
@@ -47,6 +46,7 @@ class TestStar:
         # Star should reset to top
         assert star.y < 0
 
+
 class TestNebula:
     """Test Nebula class"""
 
@@ -54,12 +54,12 @@ class TestNebula:
         """Test nebula initialization"""
         nebula = Nebula()
 
-        assert hasattr(nebula, 'x')
-        assert hasattr(nebula, 'y')
-        assert hasattr(nebula, 'speed')
-        assert hasattr(nebula, 'size')
-        assert hasattr(nebula, 'color')
-        assert hasattr(nebula, 'alpha')
+        assert hasattr(nebula, "x")
+        assert hasattr(nebula, "y")
+        assert hasattr(nebula, "speed")
+        assert hasattr(nebula, "size")
+        assert hasattr(nebula, "color")
+        assert hasattr(nebula, "alpha")
 
     def test_nebula_update(self):
         """Test nebula position update"""
@@ -71,6 +71,7 @@ class TestNebula:
         # Nebula should move down
         assert nebula.y >= initial_y
 
+
 class TestPlanet:
     """Test Planet class"""
 
@@ -78,12 +79,12 @@ class TestPlanet:
         """Test planet initialization"""
         planet = Planet()
 
-        assert hasattr(planet, 'x')
-        assert hasattr(planet, 'y')
-        assert hasattr(planet, 'speed')
-        assert hasattr(planet, 'size')
-        assert hasattr(planet, 'color')
-        assert hasattr(planet, 'has_rings')
+        assert hasattr(planet, "x")
+        assert hasattr(planet, "y")
+        assert hasattr(planet, "speed")
+        assert hasattr(planet, "size")
+        assert hasattr(planet, "color")
+        assert hasattr(planet, "has_rings")
 
     def test_planet_update(self):
         """Test planet position update"""
@@ -94,6 +95,7 @@ class TestPlanet:
 
         # Planet should move down
         assert planet.y >= initial_y
+
 
 class TestDynamicBackground:
     """Test DynamicBackground class"""
@@ -112,8 +114,8 @@ class TestDynamicBackground:
         assert len(background.planets) == 1
 
         # Check animation variables
-        assert hasattr(background, 'color_phase')
-        assert hasattr(background, 'color_speed')
+        assert hasattr(background, "color_phase")
+        assert hasattr(background, "color_speed")
 
         # Check level-related attributes
         assert background.current_level == 1
@@ -202,6 +204,7 @@ class TestDynamicBackground:
         assert background.space_storm is not None
         assert background.asteroid_field is None
 
+
 class TestSpaceStorm:
     """Test SpaceStorm class"""
 
@@ -209,21 +212,22 @@ class TestSpaceStorm:
         """Test space storm initialization"""
         storm = SpaceStorm()
 
-        assert hasattr(storm, 'particles')
-        assert hasattr(storm, 'intensity')
+        assert hasattr(storm, "particles")
+        assert hasattr(storm, "intensity")
         assert len(storm.particles) == 20
         assert storm.intensity == 1.0
 
     def test_space_storm_update(self):
         """Test space storm particle update"""
         storm = SpaceStorm()
-        initial_positions = [(p['x'], p['y']) for p in storm.particles]
+        initial_positions = [(p["x"], p["y"]) for p in storm.particles]
 
         storm.update()
 
         # At least some particles should have moved
-        current_positions = [(p['x'], p['y']) for p in storm.particles]
+        current_positions = [(p["x"], p["y"]) for p in storm.particles]
         assert initial_positions != current_positions
+
 
 class TestAsteroidField:
     """Test AsteroidField class"""
@@ -232,25 +236,25 @@ class TestAsteroidField:
         """Test asteroid field initialization"""
         field = AsteroidField()
 
-        assert hasattr(field, 'asteroids')
+        assert hasattr(field, "asteroids")
         assert len(field.asteroids) == 8
 
         # Check each asteroid has required properties
         for asteroid in field.asteroids:
-            assert 'x' in asteroid
-            assert 'y' in asteroid
-            assert 'speed' in asteroid
-            assert 'rotation' in asteroid
-            assert 'size' in asteroid
-            assert 'shape' in asteroid
+            assert "x" in asteroid
+            assert "y" in asteroid
+            assert "speed" in asteroid
+            assert "rotation" in asteroid
+            assert "size" in asteroid
+            assert "shape" in asteroid
 
     def test_asteroid_field_update(self):
         """Test asteroid field update"""
         field = AsteroidField()
-        initial_rotations = [a['rotation'] for a in field.asteroids]
+        initial_rotations = [a["rotation"] for a in field.asteroids]
 
         field.update()
 
         # Rotations should have changed
-        current_rotations = [a['rotation'] for a in field.asteroids]
+        current_rotations = [a["rotation"] for a in field.asteroids]
         assert initial_rotations != current_rotations

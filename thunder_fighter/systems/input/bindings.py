@@ -68,30 +68,25 @@ class KeyBindings:
             KeyBinding(pygame.K_LEFT, "move_left", "Move left (arrow)", "movement"),
             KeyBinding(pygame.K_d, "move_right", "Move right", "movement"),
             KeyBinding(pygame.K_RIGHT, "move_right", "Move right (arrow)", "movement"),
-
             # Actions
             KeyBinding(pygame.K_SPACE, "shoot", "Shoot", "action"),
             KeyBinding(pygame.K_j, "shoot", "Shoot (J)", "action"),
             KeyBinding(pygame.K_x, "launch_missile", "Launch missile", "action"),
             KeyBinding(pygame.K_k, "launch_missile", "Launch missile (K)", "action"),
-
             # Game controls
             KeyBinding(pygame.K_p, "pause", "Pause/Resume", "game"),
             KeyBinding(pygame.K_ESCAPE, "quit", "Quit game", "game"),
             KeyBinding(pygame.K_r, "restart", "Restart game", "game"),
-
             # Audio controls
             KeyBinding(pygame.K_m, "toggle_music", "Toggle music", "audio"),
             KeyBinding(pygame.K_n, "toggle_sound", "Toggle sound effects", "audio"),
             KeyBinding(pygame.K_PLUS, "volume_up", "Volume up", "audio"),
             KeyBinding(pygame.K_EQUALS, "volume_up", "Volume up (=)", "audio"),
             KeyBinding(pygame.K_MINUS, "volume_down", "Volume down", "audio"),
-
             # UI controls
             KeyBinding(pygame.K_l, "change_language", "Change language", "ui"),
             KeyBinding(pygame.K_F3, "toggle_dev_mode", "Toggle developer mode", "ui"),
             KeyBinding(pygame.K_F1, "reset_input_state", "Reset input state (macOS fix)", "debug"),
-
             # Special
             KeyBinding(pygame.K_RETURN, "skip_animation", "Skip animation", "special"),
             KeyBinding(pygame.K_KP_ENTER, "skip_animation", "Skip animation (numpad)", "special"),
@@ -197,8 +192,7 @@ class KeyBindings:
         Returns:
             List of KeyBinding objects in the category
         """
-        return [binding for binding in self._bindings.values()
-                if binding.category == category]
+        return [binding for binding in self._bindings.values() if binding.category == category]
 
     def get_all_categories(self) -> Set[str]:
         """
@@ -250,8 +244,7 @@ class KeyBindings:
 
         return conflicts
 
-    def rebind_key(self, action: str, old_key: int, new_key: int,
-                   modifiers: Set[int] = None) -> bool:
+    def rebind_key(self, action: str, old_key: int, new_key: int, modifiers: Set[int] = None) -> bool:
         """
         Rebind an action from one key to another.
 
@@ -286,7 +279,7 @@ class KeyBindings:
                 action=action,
                 description=old_binding.description,
                 category=old_binding.category,
-                modifiers=modifiers
+                modifiers=modifiers,
             )
             self.add_binding(new_binding)
 
@@ -317,11 +310,9 @@ class KeyBindings:
             info[category] = []
 
             for binding in bindings:
-                info[category].append({
-                    'key': pygame.key.name(binding.key),
-                    'action': binding.action,
-                    'description': binding.description
-                })
+                info[category].append(
+                    {"key": pygame.key.name(binding.key), "action": binding.action, "description": binding.description}
+                )
 
         return info
 

@@ -18,6 +18,7 @@ class GameState:
 
     This class holds all the essential game state information in a centralized manner.
     """
+
     # Basic game control
     running: bool = True
     paused: bool = False
@@ -317,9 +318,11 @@ class GameStateManager:
         self.state.update_game_time()
 
         # Handle level transition timeout
-        if (self.state.current_state == "level_transition" and
-            self.state.level_change_active and
-            time.time() - self.state.level_change_timer > 3.0):
+        if (
+            self.state.current_state == "level_transition"
+            and self.state.level_change_active
+            and time.time() - self.state.level_change_timer > 3.0
+        ):
             self.state.level_change_active = False
             self.set_current_state("playing")
 
@@ -331,14 +334,14 @@ class GameStateManager:
             Dictionary containing current state information
         """
         return {
-            'current_state': self.state.current_state,
-            'running': self.state.running,
-            'paused': self.state.paused,
-            'level': self.state.level,
-            'score': self.state.score,
-            'game_time': self.state.game_time,
-            'player_health': self.state.player_health,
-            'boss_active': self.state.boss_active,
-            'game_won': self.state.game_won,
-            'game_over': self.state.game_over
+            "current_state": self.state.current_state,
+            "running": self.state.running,
+            "paused": self.state.paused,
+            "level": self.state.level,
+            "score": self.state.score,
+            "game_time": self.state.game_time,
+            "player_health": self.state.player_health,
+            "boss_active": self.state.boss_active,
+            "game_won": self.state.game_won,
+            "game_over": self.state.game_over,
         }

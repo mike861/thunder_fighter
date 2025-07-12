@@ -13,11 +13,11 @@ from .player_stats_display import PlayerStatsDisplay
 from .screen_overlay_manager import ScreenOverlayManager
 
 __all__ = [
-    'BossStatusDisplay',
-    'GameInfoDisplay',
-    'HealthBarComponent',
-    'NotificationManager',
-    'PlayerStatsDisplay',
-    'DevInfoDisplay',
-    'ScreenOverlayManager',
+    "BossStatusDisplay",
+    "GameInfoDisplay",
+    "HealthBarComponent",
+    "NotificationManager",
+    "PlayerStatsDisplay",
+    "DevInfoDisplay",
+    "ScreenOverlayManager",
 ]

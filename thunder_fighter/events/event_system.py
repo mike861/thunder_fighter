@@ -16,6 +16,7 @@ from thunder_fighter.utils.logger import logger
 
 class EventType(Enum):
     """Base event types."""
+
     UNKNOWN = "unknown"
 
 
@@ -218,7 +219,7 @@ class EventSystem:
         for listener in self._global_listeners:
             try:
                 # Support both function and object listeners
-                if hasattr(listener, 'handle_event'):
+                if hasattr(listener, "handle_event"):
                     # Object with handle_event method
                     if listener.handle_event(event):
                         event.mark_handled()
@@ -236,7 +237,7 @@ class EventSystem:
             for listener in self._listeners[event.event_type]:
                 try:
                     # Support both function and object listeners
-                    if hasattr(listener, 'handle_event'):
+                    if hasattr(listener, "handle_event"):
                         # Object with handle_event method
                         if listener.handle_event(event):
                             event.mark_handled()
@@ -261,14 +262,9 @@ class EventSystem:
         Returns:
             Created Event instance
         """
-        return Event(
-            event_type=event_type,
-            data=data,
-            source=source
-        )
+        return Event(event_type=event_type, data=data, source=source)
 
-    def emit_event(self, event_type: EventType, source: str = "unknown",
-                   immediate: bool = False, **data):
+    def emit_event(self, event_type: EventType, source: str = "unknown", immediate: bool = False, **data):
         """
         Create and dispatch an event in one call.
 
@@ -329,6 +325,8 @@ class EventSystem:
         logger.debug("Event system statistics reset")
 
     def __str__(self):
-        return (f"EventSystem(listeners={len(self._listeners)}, "
-                f"queue_size={len(self._event_queue)}, "
-                f"processed={self._events_processed})")
+        return (
+            f"EventSystem(listeners={len(self._listeners)}, "
+            f"queue_size={len(self._event_queue)}, "
+            f"processed={self._events_processed})"
+        )

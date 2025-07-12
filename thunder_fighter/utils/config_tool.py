@@ -49,17 +49,18 @@ def show_config():
     print(f"  Dev Mode: {config_manager.debug.dev_mode}")
     print(f"  Log Level: {config_manager.debug.log_level}")
 
+
 def set_config(section, key, value):
     """Set a configuration value"""
     try:
         # Parse the value to appropriate type
-        if value.lower() in ('true', 'false'):
-            value = value.lower() == 'true'
-        elif value.replace('.', '').isdigit():
-            value = float(value) if '.' in value else int(value)
-        elif value.startswith('[') and value.endswith(']'):
+        if value.lower() in ("true", "false"):
+            value = value.lower() == "true"
+        elif value.replace(".", "").isdigit():
+            value = float(value) if "." in value else int(value)
+        elif value.startswith("[") and value.endswith("]"):
             # Parse list (e.g., "[LEFT, a]")
-            value = [item.strip().strip('"\'') for item in value[1:-1].split(',')]
+            value = [item.strip().strip("\"'") for item in value[1:-1].split(",")]
 
         # Set the value
         section_obj = getattr(config_manager, section)
@@ -77,6 +78,7 @@ def set_config(section, key, value):
 
     return True
 
+
 def reset_config():
     """Reset configuration to defaults"""
     try:
@@ -85,6 +87,7 @@ def reset_config():
         print("Configuration reset to defaults successfully.")
     except Exception as e:
         print(f"Error resetting configuration: {e}")
+
 
 def main():
     """Main entry point for the configuration tool"""
@@ -98,23 +101,24 @@ Examples:
   %(prog)s set gameplay difficulty hard      # Set difficulty to hard
   %(prog)s set debug dev_mode true           # Enable developer mode
   %(prog)s reset                             # Reset to defaults
-        """
+        """,
     )
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Show command
-    subparsers.add_parser('show', help='Show current configuration')
+    subparsers.add_parser("show", help="Show current configuration")
 
     # Set command
-    set_parser = subparsers.add_parser('set', help='Set configuration value')
-    set_parser.add_argument('section', choices=['sound', 'display', 'gameplay', 'controls', 'debug'],
-                           help='Configuration section')
-    set_parser.add_argument('key', help='Configuration key')
-    set_parser.add_argument('value', help='Configuration value')
+    set_parser = subparsers.add_parser("set", help="Set configuration value")
+    set_parser.add_argument(
+        "section", choices=["sound", "display", "gameplay", "controls", "debug"], help="Configuration section"
+    )
+    set_parser.add_argument("key", help="Configuration key")
+    set_parser.add_argument("value", help="Configuration value")
 
     # Reset command
-    subparsers.add_parser('reset', help='Reset configuration to defaults')
+    subparsers.add_parser("reset", help="Reset configuration to defaults")
 
     args = parser.parse_args()
 
@@ -122,12 +126,13 @@ Examples:
         parser.print_help()
         return
 
-    if args.command == 'show':
+    if args.command == "show":
         show_config()
-    elif args.command == 'set':
+    elif args.command == "set":
         set_config(args.section, args.key, args.value)
-    elif args.command == 'reset':
+    elif args.command == "reset":
         reset_config()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

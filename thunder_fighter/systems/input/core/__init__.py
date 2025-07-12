@@ -10,13 +10,13 @@ from .events import Event, EventType
 from .processor import InputProcessor
 
 __all__ = [
-    'Command',
-    'CommandType',
-    'Event',
-    'EventType',
-    'EventSource',
-    'KeyboardState',
-    'Clock',
-    'Logger',
-    'InputProcessor'
+    "Command",
+    "CommandType",
+    "Event",
+    "EventType",
+    "EventSource",
+    "KeyboardState",
+    "Clock",
+    "Logger",
+    "InputProcessor",
 ]

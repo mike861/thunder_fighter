@@ -95,19 +95,27 @@ class TestGameFlow:
 
         return mock_group
 
-    @patch('thunder_fighter.game.pygame.sprite.Group')
-    @patch('thunder_fighter.game.pygame.init')
-    @patch('thunder_fighter.game.pygame.display.set_mode')
-    @patch('thunder_fighter.game.SoundManager')
-    @patch('thunder_fighter.game.get_resource_manager')
-    @patch('thunder_fighter.game.Player')
-    @patch('thunder_fighter.game.DynamicBackground')
-    @patch('thunder_fighter.game.Score')
-    @patch('thunder_fighter.game.UIManager')
-    def test_game_initialization_components(self, mock_ui, mock_score, mock_bg,
-                                          mock_player, mock_resource_manager,
-                                          mock_sound_manager, mock_display, mock_pygame_init,
-                                          mock_sprite_group):
+    @patch("thunder_fighter.game.pygame.sprite.Group")
+    @patch("thunder_fighter.game.pygame.init")
+    @patch("thunder_fighter.game.pygame.display.set_mode")
+    @patch("thunder_fighter.game.SoundManager")
+    @patch("thunder_fighter.game.get_resource_manager")
+    @patch("thunder_fighter.game.Player")
+    @patch("thunder_fighter.game.DynamicBackground")
+    @patch("thunder_fighter.game.Score")
+    @patch("thunder_fighter.game.UIManager")
+    def test_game_initialization_components(
+        self,
+        mock_ui,
+        mock_score,
+        mock_bg,
+        mock_player,
+        mock_resource_manager,
+        mock_sound_manager,
+        mock_display,
+        mock_pygame_init,
+        mock_sprite_group,
+    ):
         """Test that game initialization creates all required components."""
         from thunder_fighter.game import RefactoredGame
 
@@ -115,7 +123,7 @@ class TestGameFlow:
         mock_rm = Mock()
         mock_rm.preload_common_assets.return_value = None
         mock_rm.get_music_path.return_value = "test_music.mp3"
-        mock_rm.get_cache_stats.return_value = {'loaded': 10, 'cached': 5}
+        mock_rm.get_cache_stats.return_value = {"loaded": 10, "cached": 5}
         mock_resource_manager.return_value = mock_rm
 
         mock_screen = Mock()
@@ -165,24 +173,24 @@ class TestGameFlow:
 
         # Create a minimal game instance for testing event handlers
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Test level up event handling
                 initial_level = game.game_level
                 level_up_event = GameEvent.create_level_changed(
-                    source="test",
-                    old_level=initial_level,
-                    new_level=initial_level + 1
+                    source="test", old_level=initial_level, new_level=initial_level + 1
                 )
 
                 game._handle_level_up_event(level_up_event)
@@ -195,23 +203,23 @@ class TestGameFlow:
         from thunder_fighter.game import RefactoredGame
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Simulate boss defeat event
                 boss_defeat_event = GameEvent.create_boss_died(
-                    source="boss",
-                    boss_level=game.game_level,
-                    score_awarded=1000
+                    source="boss", boss_level=game.game_level, score_awarded=1000
                 )
 
                 initial_level = game.game_level
@@ -230,29 +238,27 @@ class TestGameFlow:
         from thunder_fighter.game import RefactoredGame
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Simulate item collection events
                 health_event = GameEvent.create_item_collected(
-                    source="health_item",
-                    item_type="health",
-                    player_id="player"
+                    source="health_item", item_type="health", player_id="player"
                 )
 
                 wingman_event = GameEvent.create_item_collected(
-                    source="wingman_item",
-                    item_type="wingman",
-                    player_id="player"
+                    source="wingman_item", item_type="wingman", player_id="player"
                 )
 
                 # Handle events (should not raise exceptions)
@@ -267,23 +273,22 @@ class TestGameFlow:
         from thunder_fighter.game import RefactoredGame
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Simulate player death event
-                player_death_event = GameEvent.create_player_died(
-                    source="player",
-                    cause="enemy_collision"
-                )
+                player_death_event = GameEvent.create_player_died(source="player", cause="enemy_collision")
 
                 # Handle player death
                 game._handle_player_died(player_death_event)
@@ -296,29 +301,31 @@ class TestGameFlow:
         from thunder_fighter.game import RefactoredGame
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Verify all factories are available
-                assert hasattr(game, 'enemy_factory')
-                assert hasattr(game, 'boss_factory')
-                assert hasattr(game, 'item_factory')
-                assert hasattr(game, 'projectile_factory')
+                assert hasattr(game, "enemy_factory")
+                assert hasattr(game, "boss_factory")
+                assert hasattr(game, "item_factory")
+                assert hasattr(game, "projectile_factory")
 
                 # Verify factories have expected methods
-                assert hasattr(game.enemy_factory, 'create')
-                assert hasattr(game.boss_factory, 'create')
-                assert hasattr(game.item_factory, 'create')
-                assert hasattr(game.projectile_factory, 'create')
+                assert hasattr(game.enemy_factory, "create")
+                assert hasattr(game.boss_factory, "create")
+                assert hasattr(game.item_factory, "create")
+                assert hasattr(game.projectile_factory, "create")
 
     def test_input_system_integration(self):
         """Test input system integration."""
@@ -329,16 +336,18 @@ class TestGameFlow:
         mock_pygame.event.get.return_value = []
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=mock_pygame,
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Verify input manager is initialized
@@ -357,19 +366,21 @@ class TestGameFlow:
         mock_rm = Mock()
         mock_rm.preload_common_assets.return_value = None
         mock_rm.get_music_path.return_value = None
-        mock_rm.get_cache_stats.return_value = {'loaded': 10, 'cached': 5}
+        mock_rm.get_cache_stats.return_value = {"loaded": 10, "cached": 5}
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=mock_rm),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Verify resource manager is working
@@ -384,16 +395,18 @@ class TestGameFlow:
         from thunder_fighter.game import RefactoredGame
 
         with patch.multiple(
-            'thunder_fighter.game',
+            "thunder_fighter.game",
             pygame=Mock(),
             SoundManager=Mock(),
             get_resource_manager=Mock(return_value=Mock()),
             Player=Mock(return_value=self._create_mock_player()),
             DynamicBackground=Mock(),
             Score=Mock(return_value=self._create_mock_score()),
-            UIManager=Mock(return_value=self._create_mock_ui_manager())
+            UIManager=Mock(return_value=self._create_mock_ui_manager()),
         ):
-            with patch('thunder_fighter.game.pygame.sprite.Group', return_value=self._create_mock_pygame_sprite_group()):
+            with patch(
+                "thunder_fighter.game.pygame.sprite.Group", return_value=self._create_mock_pygame_sprite_group()
+            ):
                 game = RefactoredGame()
 
                 # Test initial state

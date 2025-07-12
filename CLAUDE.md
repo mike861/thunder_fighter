@@ -26,7 +26,7 @@ python -m thunder_fighter.utils.config_tool reset
 
 ### Testing
 ```bash
-# Run all tests (354 comprehensive tests)
+# Run all tests (375 comprehensive tests)
 ./venv/bin/python -m pytest tests/ -v
 
 # Run specific test categories
@@ -40,9 +40,12 @@ python -m thunder_fighter.utils.config_tool reset
 
 ### Code Quality
 ```bash
-# Lint and format
+# Lint and format (Python 3.7+ compatible)
 ruff check .
 ruff format .
+
+# Auto-fix safe issues
+ruff check --fix .
 
 # Type checking
 mypy thunder_fighter/
@@ -116,10 +119,14 @@ Thunder Fighter is a vertical scrolling space shooter built with Pygame using mo
 ## Development Standards
 
 ### Code Style
-- Use Ruff for formatting and linting (line length: 120)
+- Use Ruff for formatting and linting (line length: 120, Python 3.7+ compatible)
+- Configuration follows modern `[tool.ruff.lint]` section in `pyproject.toml`
+- No walrus operator (`:=`) - use compatible assignment syntax for Python 3.7
+- Specific imports only - no star imports (`from module import *`)
 - All functions/classes must have type annotations
 - Follow Google Style docstrings
 - Constants in UPPER_SNAKE_CASE in `constants.py`
+- Proper exception handling with `except Exception:` (no bare `except:`)
 
 ### Language Requirements (MANDATORY)
 - All code comments must be written in English
@@ -202,7 +209,7 @@ thunder_fighter/
 
 ## Testing Architecture
 
-The project has 357+ comprehensive tests organized by category:
+The project has 375 comprehensive tests organized by category:
 - **Unit Tests (90+)**: Entity factories, individual components, pause system, localization, enemy entity tests
 - **Integration Tests (9)**: Event system flow, component interactions
 - **End-to-End Tests (9)**: Complete game flow scenarios
@@ -259,6 +266,15 @@ Key configurable aspects:
 **macOS Screenshot Interference Fix**: The input system now includes hybrid processing with fallback mechanisms to handle macOS screenshot interference. When using `Shift+Cmd+5` with delayed capture, P (pause) and L (language) keys may trigger fallback processing but remain fully functional. The fix is implemented in `thunder_fighter/systems/input/handler.py` with `_process_single_event_with_fallback()` method. Use F1 key for manual input state reset if needed.
 
 **Boss Spawn Timing Fix**: Fixed critical issue where boss generation intervals included pause time. Boss spawning now uses pause-aware timing calculations (`pause_manager.calculate_game_time()`) consistent with display time handling. The fix is implemented in `thunder_fighter/game.py:890-891` and includes comprehensive test coverage in `tests/unit/test_boss_spawn_timing.py` to prevent regression.
+
+**Code Quality and Python 3.7 Compatibility (Latest Update)**: Comprehensive ruff linting fixes completed with full Python 3.7 compatibility:
+- **Configuration Modernization**: Updated `pyproject.toml` to use `[tool.ruff.lint]` section (deprecated warnings resolved)
+- **Python 3.7 Compatibility**: Replaced walrus operator (`:=`) with compatible assignments in `systems/input/adapters/pygame_adapter.py` and `systems/input/core/processor.py`
+- **Import Cleanup**: Replaced star imports (`from module import *`) with specific imports in `graphics/renderers.py` and `graphics/effects/__init__.py`
+- **Exception Handling**: Fixed bare `except:` clauses to use `except Exception:` in `utils/resource_manager.py` and `utils/sound_manager.py`
+- **Dead Code Removal**: Eliminated unused variables (`max_movement_range`, `continuous`, `rect`, `all_sprites`, `enemy_bullets`) and imports
+- **Test Fix**: Updated boss test mock path from `bullets.create_boss_bullet` to `renderers.create_boss_bullet`
+- **All 375 tests passing** with zero regressions after code quality improvements
 
 ## Major Architecture Refactoring (Systems-Based Design)
 

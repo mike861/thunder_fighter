@@ -3,6 +3,7 @@ from thunder_fighter.constants import FONT_NAME, FONT_SIZE_MEDIUM, WHITE
 
 class Score:
     """Game score class"""
+
     def __init__(self):
         # Use resource manager to load font with caching
         from thunder_fighter.utils.resource_manager import get_resource_manager
@@ -37,6 +38,7 @@ class Score:
     def update_display(self):
         """Update score display"""
         from thunder_fighter.localization import _
+
         score_text = _("SCORE_DISPLAY", self.value)
         self.text = self.font.render(score_text, True, WHITE)
         self.rect = self.text.get_rect()

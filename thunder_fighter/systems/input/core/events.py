@@ -11,6 +11,7 @@ from typing import Dict, Optional
 
 class EventType(Enum):
     """Event Type Enumeration"""
+
     KEY_DOWN = "key_down"
     KEY_UP = "key_up"
     MOUSE_DOWN = "mouse_down"
@@ -26,6 +27,7 @@ class Event:
     This class represents an input event in the system, without relying on any external libraries.
     All input events will be converted to this unified format.
     """
+
     type: EventType
     key_code: Optional[int] = None
     mouse_button: Optional[int] = None
@@ -36,7 +38,7 @@ class Event:
     def __post_init__(self):
         """Post-initialization processing to ensure the modifier keys dictionary always exists."""
         if self.modifiers is None:
-            self.modifiers = {'ctrl': False, 'shift': False, 'alt': False}
+            self.modifiers = {"ctrl": False, "shift": False, "alt": False}
 
     def has_modifier(self, modifier: str) -> bool:
         """Checks if a specific modifier key is included."""

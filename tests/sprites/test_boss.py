@@ -8,8 +8,9 @@ from thunder_fighter.entities.enemies.boss import Boss
 
 @pytest.fixture
 def mock_pygame():
-    with patch('thunder_fighter.sprites.boss.pygame') as mock, \
-         patch('thunder_fighter.sprites.boss.ptime') as mock_ptime:
+    with patch("thunder_fighter.sprites.boss.pygame") as mock, patch(
+        "thunder_fighter.sprites.boss.ptime"
+    ) as mock_ptime:
         # Mock pygame attributes and methods
         mock.Rect = pygame.Rect
         # Create real Surface instead of MagicMock
@@ -23,9 +24,10 @@ def mock_pygame():
         # Return two mocks
         yield mock, mock_ptime
 
+
 @pytest.fixture
 def mock_random():
-    with patch('thunder_fighter.sprites.boss.random') as mock:
+    with patch("thunder_fighter.sprites.boss.random") as mock:
         # Default return values, can be changed in tests as needed
         mock.random.return_value = 0.5
         mock.randint.return_value = 50
@@ -35,20 +37,24 @@ def mock_random():
         mock.choices.return_value = [1]  # Ensure list contains integers
         yield mock
 
+
 @pytest.fixture
 def mock_sprites_group():
     return MagicMock()
+
 
 @pytest.fixture
 def mock_bullets_group():
     return MagicMock()
 
+
 @pytest.fixture
 def mock_create_boss_ship():
-    with patch('thunder_fighter.sprites.boss.create_boss_ship') as mock:
+    with patch("thunder_fighter.sprites.boss.create_boss_ship") as mock:
         # Return real Surface object instead of MagicMock
         mock.return_value = pygame.Surface((100, 100))
         yield mock
+
 
 @pytest.fixture
 def boss(mocker):
@@ -56,15 +62,16 @@ def boss(mocker):
     mock_all_sprites = mocker.MagicMock(spec=pygame.sprite.Group)
     # Use a real group for bullets to test add() behavior
     mock_boss_bullets = pygame.sprite.Group()
-    mocker.patch('thunder_fighter.sprites.boss.create_boss_ship', return_value=pygame.Surface((100, 80)))
+    mocker.patch("thunder_fighter.sprites.boss.create_boss_ship", return_value=pygame.Surface((100, 80)))
 
     # Mock pygame.time.get_ticks
-    mocker.patch('pygame.time.get_ticks', return_value=0)
+    mocker.patch("pygame.time.get_ticks", return_value=0)
 
     boss_instance = Boss(mock_all_sprites, mock_boss_bullets, level=2, game_level=1)
     # Set a predictable position for tests
     boss_instance.rect.centerx = 240
     return boss_instance
+
 
 class TestBoss:
     """Test suite for the Boss sprite."""
@@ -79,7 +86,7 @@ class TestBoss:
     def test_boss_shooting(self, boss, mocker):
         """Test Boss shooting logic"""
         # Patch the rendering function for bullets to avoid graphical operations
-        mocker.patch('thunder_fighter.sprites.bullets.create_boss_bullet', return_value=pygame.Surface((5, 10)))
+        mocker.patch("thunder_fighter.graphics.renderers.create_boss_bullet", return_value=pygame.Surface((5, 10)))
 
         initial_bullet_count = len(boss.boss_bullets_group)
         boss.shoot()
@@ -110,9 +117,9 @@ class TestBoss:
         original_image = boss.original_image
         # Check that flash images are different from the original
         # by comparing a sample of their bytes
-        assert pygame.image.tostring(original_image, 'RGB') != pygame.image.tostring(flash_images[1], 'RGB')
-        assert pygame.image.tostring(original_image, 'RGB') != pygame.image.tostring(flash_images[2], 'RGB')
-        assert pygame.image.tostring(flash_images[1], 'RGB') != pygame.image.tostring(flash_images[2], 'RGB')
+        assert pygame.image.tostring(original_image, "RGB") != pygame.image.tostring(flash_images[1], "RGB")
+        assert pygame.image.tostring(original_image, "RGB") != pygame.image.tostring(flash_images[2], "RGB")
+        assert pygame.image.tostring(flash_images[1], "RGB") != pygame.image.tostring(flash_images[2], "RGB")
 
     def test_flash_effect_update_cycle(self, boss):
         """
@@ -131,7 +138,9 @@ class TestBoss:
 
         # After the cycle, the image should be restored
         boss.update()
-        assert pygame.image.tostring(boss.image, 'RGB') == pygame.image.tostring(boss.original_image, 'RGB'), "Image should be restored after flash ends"
+        assert pygame.image.tostring(boss.image, "RGB") == pygame.image.tostring(boss.original_image, "RGB"), (
+            "Image should be restored after flash ends"
+        )
 
         # Check that multiple different images were displayed during the cycle
         assert len(seen_images) > 2, "The flash cycle should display multiple different images"

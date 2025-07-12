@@ -40,7 +40,8 @@ class PygameEventSource(EventSource):
             pygame_events = pygame.event.get()
 
             for pg_event in pygame_events:
-                if event := self._convert_event(pg_event):
+                event = self._convert_event(pg_event)
+                if event:
                     events.append(event)
 
             if self.logger and events:
@@ -74,34 +75,15 @@ class PygameEventSource(EventSource):
         """
         try:
             if pg_event.type == pygame.KEYDOWN:
-                return Event(
-                    type=EventType.KEY_DOWN,
-                    key_code=pg_event.key,
-                    modifiers=self._get_modifiers()
-                )
+                return Event(type=EventType.KEY_DOWN, key_code=pg_event.key, modifiers=self._get_modifiers())
             elif pg_event.type == pygame.KEYUP:
-                return Event(
-                    type=EventType.KEY_UP,
-                    key_code=pg_event.key,
-                    modifiers=self._get_modifiers()
-                )
+                return Event(type=EventType.KEY_UP, key_code=pg_event.key, modifiers=self._get_modifiers())
             elif pg_event.type == pygame.MOUSEBUTTONDOWN:
-                return Event(
-                    type=EventType.MOUSE_DOWN,
-                    mouse_button=pg_event.button,
-                    position=pg_event.pos
-                )
+                return Event(type=EventType.MOUSE_DOWN, mouse_button=pg_event.button, position=pg_event.pos)
             elif pg_event.type == pygame.MOUSEBUTTONUP:
-                return Event(
-                    type=EventType.MOUSE_UP,
-                    mouse_button=pg_event.button,
-                    position=pg_event.pos
-                )
+                return Event(type=EventType.MOUSE_UP, mouse_button=pg_event.button, position=pg_event.pos)
             elif pg_event.type == pygame.MOUSEMOTION:
-                return Event(
-                    type=EventType.MOUSE_MOVE,
-                    position=pg_event.pos
-                )
+                return Event(type=EventType.MOUSE_MOVE, position=pg_event.pos)
 
         except Exception as e:
             if self.logger:
@@ -119,12 +101,12 @@ class PygameEventSource(EventSource):
         try:
             mods = pygame.key.get_mods()
             return {
-                'ctrl': bool(mods & pygame.KMOD_CTRL),
-                'shift': bool(mods & pygame.KMOD_SHIFT),
-                'alt': bool(mods & pygame.KMOD_ALT)
+                "ctrl": bool(mods & pygame.KMOD_CTRL),
+                "shift": bool(mods & pygame.KMOD_SHIFT),
+                "alt": bool(mods & pygame.KMOD_ALT),
             }
         except Exception:
-            return {'ctrl': False, 'shift': False, 'alt': False}
+            return {"ctrl": False, "shift": False, "alt": False}
 
 
 class PygameKeyboardState(KeyboardState):
@@ -285,7 +267,9 @@ class PygameLogger(Logger):
         print(f"[ERROR] {message}")
 
 
-def create_pygame_adapters(enable_debug: bool = False) -> tuple[PygameEventSource, PygameKeyboardState, PygameClock, PygameLogger]:
+def create_pygame_adapters(
+    enable_debug: bool = False,
+) -> tuple[PygameEventSource, PygameKeyboardState, PygameClock, PygameLogger]:
     """
     Creates a complete set of Pygame adapters.
 

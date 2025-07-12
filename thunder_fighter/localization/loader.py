@@ -62,10 +62,10 @@ class FileLanguageLoader(LanguageLoader):
 
     def load(self, language_code: str) -> Optional[Dict[str, str]]:
         """Load language data from a JSON file."""
-        file_path = os.path.join(self.base_path, f'{language_code}.json')
+        file_path = os.path.join(self.base_path, f"{language_code}.json")
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
             logger.info(f"Loaded language file: {file_path}")
             return data
@@ -87,7 +87,7 @@ class FileLanguageLoader(LanguageLoader):
             languages = []
 
             for file in files:
-                if file.endswith('.json') and not file.startswith('_'):
+                if file.endswith(".json") and not file.startswith("_"):
                     # Extract language code from filename
                     lang_code = file[:-5]  # Remove .json extension
                     languages.append(lang_code)

@@ -8,6 +8,7 @@ from thunder_fighter.constants import HEIGHT, WHITE, WIDTH
 
 class Star:
     """Enhanced background star class with multiple layers and effects"""
+
     def __init__(self, layer=1):
         self.x = random.randint(0, WIDTH)
         self.y = random.randint(-HEIGHT, 0)  # Start above screen
@@ -32,7 +33,7 @@ class Star:
         self.twinkle_speed = random.uniform(0.02, 0.05)
 
         # Color variation
-        self.color_type = random.choice(['white', 'blue', 'cyan'])
+        self.color_type = random.choice(["white", "blue", "cyan"])
 
     def update(self):
         """Update star position and effects"""
@@ -51,9 +52,9 @@ class Star:
         brightness = int(self.brightness * twinkle_factor)
 
         # Choose color based on type
-        if self.color_type == 'white':
+        if self.color_type == "white":
             color = (brightness, brightness, brightness)
-        elif self.color_type == 'blue':
+        elif self.color_type == "blue":
             color = (brightness // 3, brightness // 2, brightness)
         else:  # cyan
             color = (brightness // 4, brightness, brightness)
@@ -62,19 +63,23 @@ class Star:
         size = self.size if twinkle_factor > 0.7 else max(1, self.size - 1)
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), size)
 
+
 class Nebula:
     """Background nebula cloud effect"""
+
     def __init__(self):
         self.x = random.randint(-100, WIDTH + 100)
         self.y = random.randint(-200, HEIGHT + 200)
         self.speed = random.uniform(0.1, 0.3)
         self.size = random.randint(80, 200)
-        self.color = random.choice([
-            (50, 20, 80),   # Purple
-            (20, 50, 80),   # Blue
-            (80, 20, 50),   # Red
-            (20, 80, 50),   # Green
-        ])
+        self.color = random.choice(
+            [
+                (50, 20, 80),  # Purple
+                (20, 50, 80),  # Blue
+                (80, 20, 50),  # Red
+                (20, 80, 50),  # Green
+            ]
+        )
         self.alpha = random.randint(10, 30)
         self.rotation = 0
         self.rotation_speed = random.uniform(-0.01, 0.01)
@@ -105,8 +110,9 @@ class Nebula:
             pygame.draw.circle(circle_surface, color, (radius, radius), radius)
 
             # Blit to nebula surface
-            nebula_surface.blit(circle_surface, (center[0] - radius, center[1] - radius),
-                              special_flags=pygame.BLEND_ALPHA_SDL2)
+            nebula_surface.blit(
+                circle_surface, (center[0] - radius, center[1] - radius), special_flags=pygame.BLEND_ALPHA_SDL2
+            )
 
         # Rotate if needed
         if self.rotation != 0:
@@ -116,8 +122,10 @@ class Nebula:
         rect = nebula_surface.get_rect(center=(self.x, self.y))
         screen.blit(nebula_surface, rect, special_flags=pygame.BLEND_ADD)
 
+
 class SpaceStorm:
     """Space storm effect for higher difficulty levels"""
+
     def __init__(self):
         self.particles = []
         self.spawn_timer = 0
@@ -126,27 +134,29 @@ class SpaceStorm:
 
         # Create initial particles
         for _ in range(20):
-            self.particles.append({
-                'x': random.randint(0, WIDTH),
-                'y': random.randint(0, HEIGHT),
-                'speed': random.uniform(3, 6),
-                'size': random.randint(1, 3),
-                'alpha': random.randint(100, 200),
-                'angle': random.uniform(0, math.pi * 2)
-            })
+            self.particles.append(
+                {
+                    "x": random.randint(0, WIDTH),
+                    "y": random.randint(0, HEIGHT),
+                    "speed": random.uniform(3, 6),
+                    "size": random.randint(1, 3),
+                    "alpha": random.randint(100, 200),
+                    "angle": random.uniform(0, math.pi * 2),
+                }
+            )
 
     def update(self):
         """Update storm particles"""
         # Update existing particles
         for particle in self.particles:
-            particle['y'] += particle['speed'] * self.intensity
-            particle['x'] += math.sin(particle['angle']) * 2
-            particle['angle'] += 0.1
+            particle["y"] += particle["speed"] * self.intensity
+            particle["x"] += math.sin(particle["angle"]) * 2
+            particle["angle"] += 0.1
 
             # Respawn if off screen
-            if particle['y'] > HEIGHT + 10:
-                particle['y'] = random.randint(-50, -10)
-                particle['x'] = random.randint(0, WIDTH)
+            if particle["y"] > HEIGHT + 10:
+                particle["y"] = random.randint(-50, -10)
+                particle["x"] = random.randint(0, WIDTH)
 
     def draw(self, screen):
         """Draw storm particles with alpha support"""
@@ -155,33 +165,37 @@ class SpaceStorm:
 
         for particle in self.particles:
             # Apply global alpha to particle alpha
-            particle_alpha = int((particle['alpha'] / 255.0) * (self.alpha / 255.0) * 255)
+            particle_alpha = int((particle["alpha"] / 255.0) * (self.alpha / 255.0) * 255)
             color = (200, 100, 100, particle_alpha)
 
             # Create particle surface
-            particle_surface = pygame.Surface((particle['size'] * 2, particle['size'] * 2), pygame.SRCALPHA)
-            pygame.draw.circle(particle_surface, color, (particle['size'], particle['size']), particle['size'])
+            particle_surface = pygame.Surface((particle["size"] * 2, particle["size"] * 2), pygame.SRCALPHA)
+            pygame.draw.circle(particle_surface, color, (particle["size"], particle["size"]), particle["size"])
 
             # Draw with blend mode
-            screen.blit(particle_surface, (int(particle['x']), int(particle['y'])), special_flags=pygame.BLEND_ADD)
+            screen.blit(particle_surface, (int(particle["x"]), int(particle["y"])), special_flags=pygame.BLEND_ADD)
+
 
 class AsteroidField:
     """Asteroid field effect for asteroid belt level"""
+
     def __init__(self):
         self.asteroids = []
         self.alpha = 255  # Add alpha support for smooth transitions
 
         # Create asteroids
         for _ in range(8):
-            self.asteroids.append({
-                'x': random.randint(0, WIDTH),
-                'y': random.randint(-HEIGHT, HEIGHT),
-                'speed': random.uniform(0.5, 2),
-                'rotation': 0,
-                'rotation_speed': random.uniform(-0.02, 0.02),
-                'size': random.randint(20, 50),
-                'shape': self._generate_asteroid_shape()
-            })
+            self.asteroids.append(
+                {
+                    "x": random.randint(0, WIDTH),
+                    "y": random.randint(-HEIGHT, HEIGHT),
+                    "speed": random.uniform(0.5, 2),
+                    "rotation": 0,
+                    "rotation_speed": random.uniform(-0.02, 0.02),
+                    "size": random.randint(20, 50),
+                    "shape": self._generate_asteroid_shape(),
+                }
+            )
 
     def _generate_asteroid_shape(self):
         """Generate random asteroid shape"""
@@ -196,12 +210,12 @@ class AsteroidField:
     def update(self):
         """Update asteroids"""
         for asteroid in self.asteroids:
-            asteroid['y'] += asteroid['speed']
-            asteroid['rotation'] += asteroid['rotation_speed']
+            asteroid["y"] += asteroid["speed"]
+            asteroid["rotation"] += asteroid["rotation_speed"]
 
-            if asteroid['y'] > HEIGHT + 100:
-                asteroid['y'] = random.randint(-200, -50)
-                asteroid['x'] = random.randint(0, WIDTH)
+            if asteroid["y"] > HEIGHT + 100:
+                asteroid["y"] = random.randint(-200, -50)
+                asteroid["x"] = random.randint(0, WIDTH)
 
     def draw(self, screen):
         """Draw asteroids with alpha support"""
@@ -210,15 +224,15 @@ class AsteroidField:
 
         for asteroid in self.asteroids:
             # Create asteroid surface
-            size = asteroid['size']
+            size = asteroid["size"]
             asteroid_surface = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
 
             # Draw asteroid shape
             points = []
-            for px, py in asteroid['shape']:
+            for px, py in asteroid["shape"]:
                 # Apply rotation
-                cos_r = math.cos(asteroid['rotation'])
-                sin_r = math.sin(asteroid['rotation'])
+                cos_r = math.cos(asteroid["rotation"])
+                sin_r = math.sin(asteroid["rotation"])
                 rx = px * cos_r - py * sin_r
                 ry = px * sin_r + py * cos_r
 
@@ -238,21 +252,25 @@ class AsteroidField:
             asteroid_surface.set_alpha(self.alpha)
 
             # Blit to screen
-            screen.blit(asteroid_surface, (int(asteroid['x'] - size), int(asteroid['y'] - size)))
+            screen.blit(asteroid_surface, (int(asteroid["x"] - size), int(asteroid["y"] - size)))
+
 
 class Planet:
     """Background planet object"""
+
     def __init__(self):
         self.x = random.randint(-50, WIDTH + 50)
         self.y = random.randint(-300, -100)
         self.speed = random.uniform(0.2, 0.5)
         self.size = random.randint(30, 80)
-        self.color = random.choice([
-            (100, 150, 200),  # Blue planet
-            (200, 150, 100),  # Brown planet
-            (150, 200, 100),  # Green planet
-            (200, 100, 150),  # Pink planet
-        ])
+        self.color = random.choice(
+            [
+                (100, 150, 200),  # Blue planet
+                (200, 150, 100),  # Brown planet
+                (150, 200, 100),  # Green planet
+                (200, 100, 150),  # Pink planet
+            ]
+        )
         self.has_rings = random.choice([True, False])
         self.ring_color = (150, 150, 150)
 
@@ -271,26 +289,27 @@ class Planet:
 
         # Add shading for 3D effect
         shadow_color = tuple(c // 2 for c in self.color)
-        pygame.draw.circle(screen, shadow_color,
-                         (int(self.x + self.size // 3), int(self.y + self.size // 3)),
-                         self.size // 3)
+        pygame.draw.circle(
+            screen, shadow_color, (int(self.x + self.size // 3), int(self.y + self.size // 3)), self.size // 3
+        )
 
         # Add highlight
         highlight_color = tuple(min(255, c + 50) for c in self.color)
-        pygame.draw.circle(screen, highlight_color,
-                         (int(self.x - self.size // 4), int(self.y - self.size // 4)),
-                         self.size // 6)
+        pygame.draw.circle(
+            screen, highlight_color, (int(self.x - self.size // 4), int(self.y - self.size // 4)), self.size // 6
+        )
 
         # Draw rings if planet has them
         if self.has_rings:
             ring_width = self.size + 20
             ring_height = self.size // 3
-            ring_rect = pygame.Rect(self.x - ring_width // 2, self.y - ring_height // 2,
-                                  ring_width, ring_height)
+            ring_rect = pygame.Rect(self.x - ring_width // 2, self.y - ring_height // 2, ring_width, ring_height)
             pygame.draw.ellipse(screen, self.ring_color, ring_rect, 2)
+
 
 class DynamicBackground:
     """Dynamic scrolling background system with level-based themes"""
+
     def __init__(self):
         # Create multiple star layers for parallax effect
         self.stars_layer1 = [Star(layer=1) for _ in range(30)]  # Far stars
@@ -327,50 +346,50 @@ class DynamicBackground:
         # Level themes with progressive difficulty colors
         self.level_themes = {
             1: {  # Level 1 - Deep Space (Blue/Black)
-                'primary_colors': [(5, 5, 20), (10, 5, 30), (5, 10, 25)],
-                'nebula_colors': [(20, 50, 80), (50, 20, 80)],
-                'star_brightness': 1.0,
-                'nebula_count': 2,
-                'planet_count': 1,
-                'special_effect': None,
-                'description_key': 'LEVEL_THEME_DEEP_SPACE'
+                "primary_colors": [(5, 5, 20), (10, 5, 30), (5, 10, 25)],
+                "nebula_colors": [(20, 50, 80), (50, 20, 80)],
+                "star_brightness": 1.0,
+                "nebula_count": 2,
+                "planet_count": 1,
+                "special_effect": None,
+                "description_key": "LEVEL_THEME_DEEP_SPACE",
             },
             2: {  # Level 2 - Nebula Field (Purple/Blue)
-                'primary_colors': [(15, 5, 30), (25, 10, 40), (20, 5, 35)],
-                'nebula_colors': [(80, 20, 100), (60, 40, 120)],
-                'star_brightness': 0.9,
-                'nebula_count': 4,
-                'planet_count': 2,
-                'special_effect': None,
-                'description_key': 'LEVEL_THEME_NEBULA_FIELD'
+                "primary_colors": [(15, 5, 30), (25, 10, 40), (20, 5, 35)],
+                "nebula_colors": [(80, 20, 100), (60, 40, 120)],
+                "star_brightness": 0.9,
+                "nebula_count": 4,
+                "planet_count": 2,
+                "special_effect": None,
+                "description_key": "LEVEL_THEME_NEBULA_FIELD",
             },
             3: {  # Level 3 - Asteroid Belt (Brown/Orange)
-                'primary_colors': [(30, 15, 10), (40, 20, 15), (35, 18, 12)],
-                'nebula_colors': [(120, 60, 30), (100, 50, 20)],
-                'star_brightness': 0.8,
-                'nebula_count': 3,
-                'planet_count': 3,
-                'special_effect': 'asteroid_field',
-                'description_key': 'LEVEL_THEME_ASTEROID_BELT'
+                "primary_colors": [(30, 15, 10), (40, 20, 15), (35, 18, 12)],
+                "nebula_colors": [(120, 60, 30), (100, 50, 20)],
+                "star_brightness": 0.8,
+                "nebula_count": 3,
+                "planet_count": 3,
+                "special_effect": "asteroid_field",
+                "description_key": "LEVEL_THEME_ASTEROID_BELT",
             },
             4: {  # Level 4 - Red Zone (Red/Orange)
-                'primary_colors': [(40, 10, 10), (50, 15, 15), (45, 12, 12)],
-                'nebula_colors': [(150, 30, 30), (120, 40, 20)],
-                'star_brightness': 0.7,
-                'nebula_count': 5,
-                'planet_count': 2,
-                'special_effect': 'space_storm',
-                'description_key': 'LEVEL_THEME_RED_ZONE'
+                "primary_colors": [(40, 10, 10), (50, 15, 15), (45, 12, 12)],
+                "nebula_colors": [(150, 30, 30), (120, 40, 20)],
+                "star_brightness": 0.7,
+                "nebula_count": 5,
+                "planet_count": 2,
+                "special_effect": "space_storm",
+                "description_key": "LEVEL_THEME_RED_ZONE",
             },
             5: {  # Level 5 - Final Battle (Dark Red/Black)
-                'primary_colors': [(30, 5, 5), (40, 10, 10), (35, 8, 8)],
-                'nebula_colors': [(100, 20, 20), (80, 10, 10)],
-                'star_brightness': 0.6,
-                'nebula_count': 6,
-                'planet_count': 1,
-                'special_effect': 'space_storm',
-                'description_key': 'LEVEL_THEME_FINAL_BATTLE'
-            }
+                "primary_colors": [(30, 5, 5), (40, 10, 10), (35, 8, 8)],
+                "nebula_colors": [(100, 20, 20), (80, 10, 10)],
+                "star_brightness": 0.6,
+                "nebula_count": 6,
+                "planet_count": 1,
+                "special_effect": "space_storm",
+                "description_key": "LEVEL_THEME_FINAL_BATTLE",
+            },
         }
 
         # Animation variables
@@ -413,28 +432,28 @@ class DynamicBackground:
 
         # Prepare target nebulae
         self.target_nebulae = []
-        target_nebula_count = theme['nebula_count']
+        target_nebula_count = theme["nebula_count"]
         for _ in range(target_nebula_count):
             nebula = Nebula()
-            nebula.color = random.choice(theme['nebula_colors'])
+            nebula.color = random.choice(theme["nebula_colors"])
             self.target_nebulae.append(nebula)
 
         # Prepare target planets
         self.target_planets = []
-        target_planet_count = theme['planet_count']
+        target_planet_count = theme["planet_count"]
         for _ in range(target_planet_count):
             self.target_planets.append(Planet())
 
         # Prepare target special effects
-        special_effect = theme.get('special_effect')
+        special_effect = theme.get("special_effect")
         self.target_space_storm = None
         self.target_asteroid_field = None
 
-        if special_effect == 'space_storm':
+        if special_effect == "space_storm":
             self.target_space_storm = SpaceStorm()
             if level >= 5:
                 self.target_space_storm.intensity = 1.5
-        elif special_effect == 'asteroid_field':
+        elif special_effect == "asteroid_field":
             self.target_asteroid_field = AsteroidField()
 
     def _smooth_ease_in_out(self, t):
@@ -448,7 +467,7 @@ class DynamicBackground:
 
         # Adjust nebula count
         current_nebula_count = len(self.nebulae)
-        target_nebula_count = theme['nebula_count']
+        target_nebula_count = theme["nebula_count"]
 
         if current_nebula_count < target_nebula_count:
             for _ in range(target_nebula_count - current_nebula_count):
@@ -458,11 +477,11 @@ class DynamicBackground:
 
         # Update nebula colors
         for nebula in self.nebulae:
-            nebula.color = random.choice(theme['nebula_colors'])
+            nebula.color = random.choice(theme["nebula_colors"])
 
         # Adjust planet count
         current_planet_count = len(self.planets)
-        target_planet_count = theme['planet_count']
+        target_planet_count = theme["planet_count"]
 
         if current_planet_count < target_planet_count:
             for _ in range(target_planet_count - current_planet_count):
@@ -471,18 +490,18 @@ class DynamicBackground:
             self.planets = self.planets[:target_planet_count]
 
         # Handle special effects
-        special_effect = theme.get('special_effect')
+        special_effect = theme.get("special_effect")
 
         # Clear existing effects
         self.space_storm = None
         self.asteroid_field = None
 
         # Create new effect if needed
-        if special_effect == 'space_storm':
+        if special_effect == "space_storm":
             self.space_storm = SpaceStorm()
             if level >= 5:
                 self.space_storm.intensity = 1.5  # More intense for final level
-        elif special_effect == 'asteroid_field':
+        elif special_effect == "asteroid_field":
             self.asteroid_field = AsteroidField()
 
     def update(self):
@@ -551,10 +570,10 @@ class DynamicBackground:
             space_storm = self.space_storm
             asteroid_field = self.asteroid_field
         else:
-            nebulae = elements.get('nebulae', [])
-            planets = elements.get('planets', [])
-            space_storm = special_effects.get('space_storm') if special_effects else None
-            asteroid_field = special_effects.get('asteroid_field') if special_effects else None
+            nebulae = elements.get("nebulae", [])
+            planets = elements.get("planets", [])
+            space_storm = special_effects.get("space_storm") if special_effects else None
+            asteroid_field = special_effects.get("asteroid_field") if special_effects else None
 
         # Draw nebulae
         for nebula in nebulae:
@@ -567,14 +586,14 @@ class DynamicBackground:
         # Draw special effects (before stars) with alpha support
         if asteroid_field:
             # Store original alpha
-            original_alpha = getattr(asteroid_field, 'alpha', 255)
+            original_alpha = getattr(asteroid_field, "alpha", 255)
             asteroid_field.alpha = effect_alpha
             asteroid_field.draw(surface)
             # Restore original alpha
             asteroid_field.alpha = original_alpha
 
         # Draw stars with level-appropriate brightness
-        brightness_factor = theme['star_brightness']
+        brightness_factor = theme["star_brightness"]
 
         for star in self.stars_layer1:
             original_brightness = star.brightness
@@ -597,7 +616,7 @@ class DynamicBackground:
         # Draw space storm on top with alpha support
         if space_storm:
             # Store original alpha
-            original_alpha = getattr(space_storm, 'alpha', 255)
+            original_alpha = getattr(space_storm, "alpha", 255)
             space_storm.alpha = effect_alpha
             space_storm.draw(surface)
             # Restore original alpha
@@ -609,7 +628,7 @@ class DynamicBackground:
         phase = (math.sin(self.color_phase) + 1) * 0.5  # Normalize to 0-1
 
         # Get base colors
-        colors = theme['primary_colors']
+        colors = theme["primary_colors"]
         color1 = colors[0]
         color2 = colors[1]
 
@@ -632,17 +651,13 @@ class DynamicBackground:
                 gradient_factor = gradient_factor * gradient_factor  # Quadratic darkening
 
             gradient_color = tuple(
-                min(255, int(current_color[i] + gradient_factor * gradient_intensity))
-                for i in range(3)
+                min(255, int(current_color[i] + gradient_factor * gradient_intensity)) for i in range(3)
             )
             pygame.draw.line(surface, gradient_color, (0, y), (surface.get_width(), y), 4)
 
     def _interpolate_color(self, color1, color2, progress):
         """Interpolate between two colors"""
-        return tuple(
-            int(color1[i] + (color2[i] - color1[i]) * progress)
-            for i in range(3)
-        )
+        return tuple(int(color1[i] + (color2[i] - color1[i]) * progress) for i in range(3))
 
     def draw(self, screen):
         """Draw background using double buffering for smooth transitions"""
@@ -657,14 +672,8 @@ class DynamicBackground:
             self._render_level_background(
                 screen,
                 self.current_level,
-                elements={
-                    'nebulae': self.nebulae,
-                    'planets': self.planets
-                },
-                special_effects={
-                    'space_storm': self.space_storm,
-                    'asteroid_field': self.asteroid_field
-                }
+                elements={"nebulae": self.nebulae, "planets": self.planets},
+                special_effects={"space_storm": self.space_storm, "asteroid_field": self.asteroid_field},
             )
 
         # Draw level indicator overlay (always on top)
@@ -682,30 +691,18 @@ class DynamicBackground:
         self._render_level_background(
             self.current_background_buffer,
             self.current_level,
-            elements={
-                'nebulae': self.nebulae,
-                'planets': self.planets
-            },
-            special_effects={
-                'space_storm': self.space_storm,
-                'asteroid_field': self.asteroid_field
-            },
-            effect_alpha=current_effect_alpha
+            elements={"nebulae": self.nebulae, "planets": self.planets},
+            special_effects={"space_storm": self.space_storm, "asteroid_field": self.asteroid_field},
+            effect_alpha=current_effect_alpha,
         )
 
         # Render target level to buffer
         self._render_level_background(
             self.target_background_buffer,
             self.target_level,
-            elements={
-                'nebulae': self.target_nebulae,
-                'planets': self.target_planets
-            },
-            special_effects={
-                'space_storm': self.target_space_storm,
-                'asteroid_field': self.target_asteroid_field
-            },
-            effect_alpha=target_effect_alpha
+            elements={"nebulae": self.target_nebulae, "planets": self.target_planets},
+            special_effects={"space_storm": self.target_space_storm, "asteroid_field": self.target_asteroid_field},
+            effect_alpha=target_effect_alpha,
         )
 
         # Draw current level background
@@ -742,6 +739,7 @@ class DynamicBackground:
                 # Main level text using resource manager for Chinese support
                 from thunder_fighter.localization import _
                 from thunder_fighter.utils.resource_manager import get_resource_manager
+
                 resource_manager = get_resource_manager()
 
                 font = resource_manager.load_font(None, 32, system_font=True)
@@ -751,7 +749,7 @@ class DynamicBackground:
 
                 # Description text
                 desc_font = resource_manager.load_font(None, 28, system_font=True)
-                description = _(target_theme['description_key'])
+                description = _(target_theme["description_key"])
                 desc_text = desc_font.render(description, True, WHITE)
                 desc_text.set_alpha(text_alpha)
 

@@ -1,4 +1,3 @@
-
 import pygame
 
 from thunder_fighter.utils.logger import logger
@@ -60,7 +59,9 @@ class SoundManager:
         if pygame.mixer.music.get_busy():
             pygame.mixer.music.set_volume(self.music_volume)
 
-        logger.debug(f"Sound manager configuration updated: volume={self.sound_volume}, music_volume={self.music_volume}")
+        logger.debug(
+            f"Sound manager configuration updated: volume={self.sound_volume}, music_volume={self.music_volume}"
+        )
 
     def _init_pygame_mixer(self):
         """Initialize pygame.mixer with proper error handling"""
@@ -98,7 +99,7 @@ class SoundManager:
             logger.info("Sound manager initialized successfully.")
         except Exception as e:
             logger.error(f"Failed to initialize pygame.mixer: {e}")
-            self._initialized = False # Explicitly set to false on error
+            self._initialized = False  # Explicitly set to false on error
 
     def _load_sounds(self):
         """Load all sound effects using the resource manager."""
@@ -111,11 +112,11 @@ class SoundManager:
         # Define sound effect files
         sound_files = {
             # 'player_shoot': 'player_shoot.wav',  # Commented out as file doesn't exist
-            'enemy_explosion': 'enemy_explosion.wav',
-            'player_hit': 'player_hit.wav',
-            'item_pickup': 'item_pickup.wav',
-            'boss_death': 'boss_death.wav',
-            'player_death': 'player_death.wav'
+            "enemy_explosion": "enemy_explosion.wav",
+            "player_hit": "player_hit.wav",
+            "item_pickup": "item_pickup.wav",
+            "boss_death": "boss_death.wav",
+            "player_death": "player_death.wav",
         }
 
         # Load sound effects via resource manager
@@ -179,6 +180,7 @@ class SoundManager:
 
         # Get music path via resource manager
         from thunder_fighter.utils.resource_manager import get_resource_manager
+
         resource_manager = get_resource_manager()
         music_path = resource_manager.get_music_path(music_file)
         if not music_path:
@@ -212,6 +214,7 @@ class SoundManager:
                     # Try to reinitialize for next attempt
                     self._init_pygame_mixer()
                     import time
+
                     time.sleep(0.1)  # Brief delay before retry
                 else:
                     logger.error("Failed to play background music after all retries")
@@ -275,7 +278,7 @@ class SoundManager:
             self.stop_music()
         else:
             # Resume playing background music
-            self.play_music('background_music.mp3')
+            self.play_music("background_music.mp3")
 
     def is_healthy(self):
         """Check if the sound system is working properly"""
@@ -290,15 +293,17 @@ class SoundManager:
 
             # Check if we have loaded sounds (allow empty sounds dict during testing)
             # Only fail if sounds should be loaded but aren't
-            if hasattr(self, 'sounds') and self.sounds is None:
+            if hasattr(self, "sounds") and self.sounds is None:
                 return False
 
             # Check if background music should be playing but isn't
             # Only check this if music is enabled AND we have sounds loaded (not in test mode)
-            if (self.music_enabled and
-                hasattr(self, 'sounds') and
-                len(self.sounds) > 0 and
-                not pygame.mixer.music.get_busy()):
+            if (
+                self.music_enabled
+                and hasattr(self, "sounds")
+                and len(self.sounds) > 0
+                and not pygame.mixer.music.get_busy()
+            ):
                 logger.warning("Background music should be playing but isn't")
                 return False
 
@@ -316,13 +321,13 @@ class SoundManager:
         try:
             pygame.mixer.stop()
             pygame.mixer.music.stop()
-        except:
+        except Exception:
             pass
 
         # Quit and reinitialize mixer
         try:
             pygame.mixer.quit()
-        except:
+        except Exception:
             pass
 
         self._init_pygame_mixer()
@@ -334,7 +339,7 @@ class SoundManager:
 
             # Restart background music if it should be playing
             if self.music_enabled:
-                self.play_music('background_music.mp3')
+                self.play_music("background_music.mp3")
         else:
             logger.error("Failed to reinitialize sound system")
 
@@ -347,11 +352,12 @@ class SoundManager:
             # Check if music should be playing but isn't
             if not pygame.mixer.music.get_busy():
                 logger.info("Background music stopped unexpectedly, restarting...")
-                self.play_music('background_music.mp3')
+                self.play_music("background_music.mp3")
         except Exception as e:
             logger.error(f"Error ensuring music is playing: {e}")
             # Try to recover
             self.reinitialize()
+
 
 # Global sound manager instance
 sound_manager = SoundManager()

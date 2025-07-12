@@ -28,21 +28,21 @@ class FontManager:
 
         # Language-specific font configurations
         self.language_fonts = {
-            'zh': {
-                'normal': 'PingFang SC',  # macOS Chinese font
-                'bold': 'PingFang SC',
-                'fallback': ['STHeiti', 'Heiti SC', 'Microsoft YaHei']
+            "zh": {
+                "normal": "PingFang SC",  # macOS Chinese font
+                "bold": "PingFang SC",
+                "fallback": ["STHeiti", "Heiti SC", "Microsoft YaHei"],
             },
-            'en': {
-                'normal': None,  # Use pygame default
-                'bold': None,
-                'fallback': []
-            }
+            "en": {
+                "normal": None,  # Use pygame default
+                "bold": None,
+                "fallback": [],
+            },
         }
 
         logger.info("FontManager initialized")
 
-    def get_font(self, language: str, size: int, style: str = 'normal') -> pygame.font.Font:
+    def get_font(self, language: str, size: int, style: str = "normal") -> pygame.font.Font:
         """
         Get the appropriate font for a language and style.
 
@@ -68,7 +68,7 @@ class FontManager:
     def _create_font(self, language: str, size: int, style: str) -> pygame.font.Font:
         """Create a font for the given parameters."""
         # Get font configuration for the language
-        font_config = self.language_fonts.get(language, self.language_fonts['en'])
+        font_config = self.language_fonts.get(language, self.language_fonts["en"])
 
         # Try primary font
         font_name = font_config.get(style, None)
@@ -82,7 +82,7 @@ class FontManager:
                 logger.warning(f"Failed to load font '{font_name}': {e}")
 
         # Try fallback fonts
-        for fallback_name in font_config.get('fallback', []):
+        for fallback_name in font_config.get("fallback", []):
             try:
                 font = self.resource_manager.load_font(fallback_name, size, system_font=True)
                 logger.debug(f"Loaded fallback font '{fallback_name}' for language '{language}'")
@@ -94,9 +94,9 @@ class FontManager:
         logger.info(f"Using default font for language '{language}'")
         return self.resource_manager.load_font(None, size)
 
-    def render_text(self, text: str, font: pygame.font.Font,
-                   color: Tuple[int, int, int],
-                   antialias: bool = True) -> pygame.Surface:
+    def render_text(
+        self, text: str, font: pygame.font.Font, color: Tuple[int, int, int], antialias: bool = True
+    ) -> pygame.Surface:
         """
         Render text with the given font and color.
 
@@ -165,7 +165,7 @@ def get_font_manager() -> FontManager:
     return _font_manager
 
 
-def get_localized_font(language: str, size: int, style: str = 'normal') -> pygame.font.Font:
+def get_localized_font(language: str, size: int, style: str = "normal") -> pygame.font.Font:
     """
     Convenience function to get a font for a specific language.
 

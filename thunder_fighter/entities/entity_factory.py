@@ -11,7 +11,7 @@ from typing import Any, Dict, Generic, Optional, Type, TypeVar
 from thunder_fighter.utils.logger import logger
 
 # Type variable for entity types
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class EntityFactory(ABC, Generic[T]):
@@ -160,7 +160,7 @@ class EntityFactory(ABC, Generic[T]):
         for i in range(count):
             # Add batch index to config
             batch_config = kwargs.copy()
-            batch_config['batch_index'] = i
+            batch_config["batch_index"] = i
             entities.append(self.create(**batch_config))
 
         logger.debug(f"Created batch of {count} {self.entity_type.__name__} entities")
@@ -265,7 +265,7 @@ class ConfigurableEntityFactory(EntityFactory[T]):
         entities = []
         for i in range(count):
             batch_overrides = overrides.copy()
-            batch_overrides['batch_index'] = i
+            batch_overrides["batch_index"] = i
             entities.append(self.create_from_preset(preset_name, **batch_overrides))
 
         logger.debug(f"Created batch of {count} {self.entity_type.__name__} entities from preset '{preset_name}'")

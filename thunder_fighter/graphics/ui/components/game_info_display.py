@@ -24,6 +24,7 @@ class GameInfoDisplay:
         # Use resource manager for font if not provided
         if font is None:
             from thunder_fighter.utils.resource_manager import get_resource_manager
+
             resource_manager = get_resource_manager()
             # Use original font size with Chinese character support
             self.font = resource_manager.load_font(None, 24, system_font=True)

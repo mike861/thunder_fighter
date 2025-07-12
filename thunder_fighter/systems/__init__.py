@@ -10,8 +10,8 @@ from .scoring import ScoringSystem
 from .spawning import SpawningSystem
 
 __all__ = [
-    'CollisionSystem',
-    'ScoringSystem',
-    'SpawningSystem',
-    'PhysicsSystem',
+    "CollisionSystem",
+    "ScoringSystem",
+    "SpawningSystem",
+    "PhysicsSystem",
 ]

@@ -15,6 +15,7 @@ from thunder_fighter.utils.logger import logger
 @dataclass
 class PauseStats:
     """Statistics about pause state and timing."""
+
     is_paused: bool
     total_pause_duration: float
     current_pause_duration: float
@@ -22,9 +23,11 @@ class PauseStats:
     last_toggle_time: float
 
     def __str__(self) -> str:
-        return (f"PauseStats(paused={self.is_paused}, "
-                f"total_duration={self.total_pause_duration:.2f}s, "
-                f"pause_count={self.pause_count})")
+        return (
+            f"PauseStats(paused={self.is_paused}, "
+            f"total_duration={self.total_pause_duration:.2f}s, "
+            f"pause_count={self.pause_count})"
+        )
 
 
 class PauseManager:
@@ -74,8 +77,7 @@ class PauseManager:
         # Check cooldown
         if current_time - self._last_toggle_time < self.cooldown_seconds:
             time_since_toggle = current_time - self._last_toggle_time
-            logger.debug(f"Pause toggle blocked by cooldown: "
-                        f"{time_since_toggle:.3f}s < {self.cooldown_seconds}s")
+            logger.debug(f"Pause toggle blocked by cooldown: {time_since_toggle:.3f}s < {self.cooldown_seconds}s")
             return False
 
         self._last_toggle_time = current_time
@@ -145,11 +147,10 @@ class PauseManager:
             total_pause_duration=self._total_paused_time,
             current_pause_duration=current_pause_duration,
             pause_count=self._pause_count,
-            last_toggle_time=self._last_toggle_time
+            last_toggle_time=self._last_toggle_time,
         )
 
-    def calculate_game_time(self, start_time: float,
-                          current_time: Optional[float] = None) -> float:
+    def calculate_game_time(self, start_time: float, current_time: Optional[float] = None) -> float:
         """
         Calculate pause-aware game time.
 

@@ -2,27 +2,28 @@
 Localization module for Thunder Fighter
 Handles loading and managing text in different languages
 """
+
 import json
 import os
 from typing import Dict, Optional
 
 from thunder_fighter.utils.logger import logger
 
-from .loader import FileLanguageLoader, LanguageLoader
+from .loader import CachedLanguageLoader, FileLanguageLoader, LanguageLoader, MemoryLanguageLoader
 
 try:
     # Try to import the config file
     from thunder_fighter.config import LANGUAGE as CONFIG_LANGUAGE
 except ImportError:
     # Default to English if config file is missing
-    CONFIG_LANGUAGE = 'en'
+    CONFIG_LANGUAGE = "en"
     logger.warning("Could not load config file, using default language: English")
+
 
 class LanguageManager:
     """Manages text loading from language files with injectable loader."""
 
-    def __init__(self, language_code: Optional[str] = None,
-                 loader: Optional[LanguageLoader] = None):
+    def __init__(self, language_code: Optional[str] = None, loader: Optional[LanguageLoader] = None):
         """
         Initialize the language manager.
 
@@ -58,9 +59,9 @@ class LanguageManager:
             return True
         else:
             # Try fallback to English if not already English
-            if language_code != 'en':
+            if language_code != "en":
                 logger.info("Falling back to English")
-                return self.load_language('en')
+                return self.load_language("en")
 
             # If even English fails, use empty dictionary
             logger.error("Failed to load any language data")
@@ -113,7 +114,7 @@ class LanguageManager:
         """Get list of available languages from the loader."""
         return self.loader.available_languages()
 
-    def get_font_for_current_language(self, size: int, style: str = 'normal'):
+    def get_font_for_current_language(self, size: int, style: str = "normal"):
         """
         Get appropriate font for the current language.
 
@@ -125,10 +126,13 @@ class LanguageManager:
             pygame.font.Font appropriate for current language
         """
         from .font_support import get_localized_font
+
         return get_localized_font(self.language_code, size, style)
+
 
 # Create a singleton instance to be imported elsewhere
 language_manager = LanguageManager()
+
 
 # Export a simple function for getting text
 def get_text(key, *args, **kwargs):
@@ -143,8 +147,10 @@ def get_text(key, *args, **kwargs):
     """
     return language_manager.get_text(key, *args, **kwargs)
 
+
 # For syntactic sugar, provide a shorter alias
 _ = get_text
+
 
 # Export a function to change language at runtime
 def change_language(language_code):
@@ -158,16 +164,16 @@ def change_language(language_code):
     """
     return language_manager.change_language(language_code)
 
+
 # Export loader classes for testing
-from .loader import CachedLanguageLoader, LanguageLoader, MemoryLanguageLoader
 
 __all__ = [
-    'language_manager',
-    'get_text',
-    '_',
-    'change_language',
-    'LanguageLoader',
-    'FileLanguageLoader',
-    'MemoryLanguageLoader',
-    'CachedLanguageLoader'
+    "language_manager",
+    "get_text",
+    "_",
+    "change_language",
+    "LanguageLoader",
+    "FileLanguageLoader",
+    "MemoryLanguageLoader",
+    "CachedLanguageLoader",
 ]

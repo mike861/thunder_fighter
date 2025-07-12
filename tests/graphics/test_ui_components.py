@@ -142,16 +142,16 @@ class TestPlayerStatsDisplay:
         """Test player stats display initialization."""
         assert player_stats_display.screen is not None
         assert player_stats_display.font is not None
-        assert player_stats_display.player_info['health'] == 100
+        assert player_stats_display.player_info["health"] == 100
 
     def test_update_info(self, player_stats_display):
         """Test updating player information."""
         player_stats_display.update_info(health=80, bullet_speed=10, wingmen=2)
-        assert player_stats_display.player_info['health'] == 80
-        assert player_stats_display.player_info['bullet_speed'] == 10
-        assert player_stats_display.player_info['wingmen'] == 2
+        assert player_stats_display.player_info["health"] == 80
+        assert player_stats_display.player_info["bullet_speed"] == 10
+        assert player_stats_display.player_info["wingmen"] == 2
 
-    @patch('thunder_fighter.utils.config_manager.config_manager')
+    @patch("thunder_fighter.utils.config_manager.config_manager")
     def test_draw_normal_mode(self, mock_config, player_stats_display):
         """Test drawing in normal mode (not dev mode)."""
         mock_config.debug.dev_mode = False
@@ -159,7 +159,7 @@ class TestPlayerStatsDisplay:
         # Should draw health bar, bullet speed, and movement speed
         assert player_stats_display.font.render.call_count >= 2
 
-    @patch('thunder_fighter.utils.config_manager.config_manager')
+    @patch("thunder_fighter.utils.config_manager.config_manager")
     def test_draw_dev_mode(self, mock_config, player_stats_display):
         """Test drawing in dev mode."""
         mock_config.debug.dev_mode = True
@@ -182,15 +182,15 @@ class TestBossStatusDisplay:
         """Test boss status display initialization."""
         assert boss_status_display.screen is not None
         assert boss_status_display.font is not None
-        assert not boss_status_display.boss_info['active']
+        assert not boss_status_display.boss_info["active"]
 
     def test_update_info(self, boss_status_display):
         """Test updating boss information."""
         boss_status_display.update_info(True, health=500, max_health=1000, level=3)
-        assert boss_status_display.boss_info['active']
-        assert boss_status_display.boss_info['health'] == 500
-        assert boss_status_display.boss_info['max_health'] == 1000
-        assert boss_status_display.boss_info['level'] == 3
+        assert boss_status_display.boss_info["active"]
+        assert boss_status_display.boss_info["health"] == 500
+        assert boss_status_display.boss_info["max_health"] == 1000
+        assert boss_status_display.boss_info["level"] == 3
 
     def test_draw_inactive(self, boss_status_display):
         """Test that nothing is drawn when boss is inactive."""
@@ -222,14 +222,14 @@ class TestDevInfoDisplay:
         assert dev_info_display.screen is not None
         assert dev_info_display.font is not None
 
-    @patch('thunder_fighter.graphics.ui.components.dev_info_display.config_manager')
+    @patch("thunder_fighter.graphics.ui.components.dev_info_display.config_manager")
     def test_draw_dev_mode_enabled(self, mock_config, dev_info_display):
         """Test drawing when dev mode is enabled."""
         mock_config.debug.dev_mode = True
         dev_info_display.draw(60.5, 10, 15, (400, 300))
         assert dev_info_display.font.render.call_count == 3
 
-    @patch('thunder_fighter.graphics.ui.components.dev_info_display.config_manager')
+    @patch("thunder_fighter.graphics.ui.components.dev_info_display.config_manager")
     def test_draw_dev_mode_disabled(self, mock_config, dev_info_display):
         """Test that nothing is drawn when dev mode is disabled."""
         mock_config.debug.dev_mode = False
@@ -243,11 +243,7 @@ class TestScreenOverlayManager:
     @pytest.fixture
     def screen_overlay_manager(self):
         screen = MagicMock()
-        fonts = {
-            'small': MagicMock(),
-            'medium': MagicMock(),
-            'large': MagicMock()
-        }
+        fonts = {"small": MagicMock(), "medium": MagicMock(), "large": MagicMock()}
         for font in fonts.values():
             font.render.return_value = MagicMock()
         return ScreenOverlayManager(screen, fonts)
@@ -297,7 +293,7 @@ class TestUIManagerIntegration:
         game.clock.get_fps.return_value = 60.0
 
         # Create UIManager with mocked fonts that return real surfaces
-        with patch('thunder_fighter.graphics.ui_manager.pygame.font.Font') as mock_font:
+        with patch("thunder_fighter.graphics.ui_manager.pygame.font.Font") as mock_font:
             mock_font_instance = MagicMock()
             mock_font_instance.render.return_value = pygame.Surface((50, 20))
             mock_font.return_value = mock_font_instance
@@ -331,21 +327,21 @@ class TestUIManagerIntegration:
     def test_update_player_info(self, ui_manager):
         """Test updating player info through UI manager."""
         ui_manager.update_player_info(health=80, bullet_speed=15)
-        assert ui_manager.player_info['health'] == 80
-        assert ui_manager.player_info['bullet_speed'] == 15
+        assert ui_manager.player_info["health"] == 80
+        assert ui_manager.player_info["bullet_speed"] == 15
 
     def test_update_boss_info(self, ui_manager):
         """Test updating boss info through UI manager."""
         ui_manager.update_boss_info(True, health=1000, max_health=2000)
-        assert ui_manager.boss_info['active']
-        assert ui_manager.boss_info['health'] == 1000
+        assert ui_manager.boss_info["active"]
+        assert ui_manager.boss_info["health"] == 1000
 
     def test_update_game_state(self, ui_manager):
         """Test updating game state through UI manager."""
         ui_manager.update_game_state(level=5, paused=True, game_time=120)
-        assert ui_manager.game_state['level'] == 5
-        assert ui_manager.game_state['paused']
-        assert ui_manager.game_state['game_time'] == 120
+        assert ui_manager.game_state["level"] == 5
+        assert ui_manager.game_state["paused"]
+        assert ui_manager.game_state["game_time"] == 120
 
     def test_backwards_compatibility(self, ui_manager):
         """Test backwards compatibility properties."""
@@ -354,16 +350,16 @@ class TestUIManagerIntegration:
         assert len(ui_manager.notifications) > 0
 
         # Test boss_info property
-        assert 'active' in ui_manager.boss_info
+        assert "active" in ui_manager.boss_info
 
         # Test player_info property
-        assert 'health' in ui_manager.player_info
+        assert "health" in ui_manager.player_info
 
     def test_draw_methods(self, ui_manager):
         """Test all draw methods work without errors."""
         # Set up some test data
         ui_manager.update_game_state(level=5, game_time=120)
-        ui_manager.persistent_info['score'] = 1000
+        ui_manager.persistent_info["score"] = 1000
 
         # Test individual draw methods
         ui_manager.draw_game_info()

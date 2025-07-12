@@ -16,31 +16,38 @@ from thunder_fighter.utils.logger import logger
 @dataclass
 class SoundConfig:
     """Sound and music configuration settings"""
+
     music_volume: float = 0.5
     sound_volume: float = 0.7
     music_enabled: bool = True
     sound_enabled: bool = True
 
+
 @dataclass
 class DisplayConfig:
     """Display and rendering configuration settings"""
+
     fullscreen: bool = False
     screen_scaling: float = 1.0
     width: int = 800
     height: int = 600
 
+
 @dataclass
 class GameplayConfig:
     """Gameplay mechanics configuration settings"""
+
     difficulty: str = "normal"  # "easy", "normal", "hard"
     initial_lives: int = 3
     player_speed_multiplier: float = 1.0
     enemy_speed_multiplier: float = 1.0
     score_multiplier: float = 1.0
 
+
 @dataclass
 class ControlsConfig:
     """Input controls configuration"""
+
     move_left: List[str] = None
     move_right: List[str] = None
     move_up: List[str] = None
@@ -63,13 +70,16 @@ class ControlsConfig:
         if self.pause is None:
             self.pause = ["p"]
 
+
 @dataclass
 class DebugConfig:
     """Debug and development configuration settings"""
+
     dev_mode: bool = False
     log_level: str = "INFO"
     show_fps: bool = False
     show_collision_boxes: bool = False
+
 
 class ConfigManager:
     """
@@ -127,20 +137,20 @@ class ConfigManager:
 
     def _load_from_json(self):
         """Load configuration from JSON file"""
-        with open(self.config_file, encoding='utf-8') as f:
+        with open(self.config_file, encoding="utf-8") as f:
             data = json.load(f)
 
         # Update each configuration section
-        if 'sound' in data:
-            self.sound = SoundConfig(**data['sound'])
-        if 'display' in data:
-            self.display = DisplayConfig(**data['display'])
-        if 'gameplay' in data:
-            self.gameplay = GameplayConfig(**data['gameplay'])
-        if 'controls' in data:
-            self.controls = ControlsConfig(**data['controls'])
-        if 'debug' in data:
-            self.debug = DebugConfig(**data['debug'])
+        if "sound" in data:
+            self.sound = SoundConfig(**data["sound"])
+        if "display" in data:
+            self.display = DisplayConfig(**data["display"])
+        if "gameplay" in data:
+            self.gameplay = GameplayConfig(**data["gameplay"])
+        if "controls" in data:
+            self.controls = ControlsConfig(**data["controls"])
+        if "debug" in data:
+            self.debug = DebugConfig(**data["debug"])
 
     def _load_from_legacy_config(self):
         """Load configuration from legacy config.py file"""
@@ -148,27 +158,27 @@ class ConfigManager:
             from thunder_fighter import config as legacy_config
 
             # Map legacy config to new structure
-            self.sound.music_volume = getattr(legacy_config, 'DEFAULT_MUSIC_VOLUME', 0.5)
-            self.sound.sound_volume = getattr(legacy_config, 'DEFAULT_SOUND_VOLUME', 0.7)
-            self.sound.music_enabled = getattr(legacy_config, 'MUSIC_ENABLED', True)
-            self.sound.sound_enabled = getattr(legacy_config, 'SOUND_ENABLED', True)
+            self.sound.music_volume = getattr(legacy_config, "DEFAULT_MUSIC_VOLUME", 0.5)
+            self.sound.sound_volume = getattr(legacy_config, "DEFAULT_SOUND_VOLUME", 0.7)
+            self.sound.music_enabled = getattr(legacy_config, "MUSIC_ENABLED", True)
+            self.sound.sound_enabled = getattr(legacy_config, "SOUND_ENABLED", True)
 
-            self.display.fullscreen = getattr(legacy_config, 'FULLSCREEN', False)
-            self.display.screen_scaling = getattr(legacy_config, 'SCREEN_SCALING', 1.0)
+            self.display.fullscreen = getattr(legacy_config, "FULLSCREEN", False)
+            self.display.screen_scaling = getattr(legacy_config, "SCREEN_SCALING", 1.0)
 
-            self.gameplay.difficulty = getattr(legacy_config, 'DIFFICULTY', 'normal')
+            self.gameplay.difficulty = getattr(legacy_config, "DIFFICULTY", "normal")
 
-            self.debug.dev_mode = getattr(legacy_config, 'DEV_MODE', False)
+            self.debug.dev_mode = getattr(legacy_config, "DEV_MODE", False)
 
             # Handle key mapping
-            key_mapping = getattr(legacy_config, 'KEY_MAPPING', {})
+            key_mapping = getattr(legacy_config, "KEY_MAPPING", {})
             if key_mapping:
-                self.controls.move_left = key_mapping.get('MOVE_LEFT', ['LEFT', 'a'])
-                self.controls.move_right = key_mapping.get('MOVE_RIGHT', ['RIGHT', 'd'])
-                self.controls.move_up = key_mapping.get('MOVE_UP', ['UP', 'w'])
-                self.controls.move_down = key_mapping.get('MOVE_DOWN', ['DOWN', 's'])
-                self.controls.shoot = key_mapping.get('SHOOT', ['SPACE'])
-                self.controls.pause = key_mapping.get('PAUSE', ['p'])
+                self.controls.move_left = key_mapping.get("MOVE_LEFT", ["LEFT", "a"])
+                self.controls.move_right = key_mapping.get("MOVE_RIGHT", ["RIGHT", "d"])
+                self.controls.move_up = key_mapping.get("MOVE_UP", ["UP", "w"])
+                self.controls.move_down = key_mapping.get("MOVE_DOWN", ["DOWN", "s"])
+                self.controls.shoot = key_mapping.get("SHOOT", ["SPACE"])
+                self.controls.pause = key_mapping.get("PAUSE", ["p"])
 
         except ImportError:
             logger.warning("Legacy config.py not found, using default values")
@@ -177,17 +187,17 @@ class ConfigManager:
         """Save current configuration to JSON file"""
         try:
             config_data = {
-                'sound': asdict(self.sound),
-                'display': asdict(self.display),
-                'gameplay': asdict(self.gameplay),
-                'controls': asdict(self.controls),
-                'debug': asdict(self.debug)
+                "sound": asdict(self.sound),
+                "display": asdict(self.display),
+                "gameplay": asdict(self.gameplay),
+                "controls": asdict(self.controls),
+                "debug": asdict(self.debug),
             }
 
             # Ensure directory exists
             os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
 
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+            with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2)
 
             logger.info(f"Configuration saved to {self.config_file}")
@@ -226,27 +236,12 @@ class ConfigManager:
     def get_difficulty_multipliers(self) -> Dict[str, float]:
         """Get difficulty-based multipliers for game mechanics"""
         difficulty_settings = {
-            'easy': {
-                'player_speed': 1.2,
-                'enemy_speed': 0.8,
-                'enemy_health': 0.7,
-                'score_multiplier': 0.8
-            },
-            'normal': {
-                'player_speed': 1.0,
-                'enemy_speed': 1.0,
-                'enemy_health': 1.0,
-                'score_multiplier': 1.0
-            },
-            'hard': {
-                'player_speed': 0.9,
-                'enemy_speed': 1.3,
-                'enemy_health': 1.5,
-                'score_multiplier': 1.5
-            }
+            "easy": {"player_speed": 1.2, "enemy_speed": 0.8, "enemy_health": 0.7, "score_multiplier": 0.8},
+            "normal": {"player_speed": 1.0, "enemy_speed": 1.0, "enemy_health": 1.0, "score_multiplier": 1.0},
+            "hard": {"player_speed": 0.9, "enemy_speed": 1.3, "enemy_health": 1.5, "score_multiplier": 1.5},
         }
 
-        return difficulty_settings.get(self.gameplay.difficulty, difficulty_settings['normal'])
+        return difficulty_settings.get(self.gameplay.difficulty, difficulty_settings["normal"])
 
     def reset_to_defaults(self):
         """Reset all configuration to default values"""
@@ -259,13 +254,16 @@ class ConfigManager:
 
     def __str__(self) -> str:
         """String representation of current configuration"""
-        return (f"ConfigManager(\n"
-                f"  sound={self.sound},\n"
-                f"  display={self.display},\n"
-                f"  gameplay={self.gameplay},\n"
-                f"  controls={self.controls},\n"
-                f"  debug={self.debug}\n"
-                f")")
+        return (
+            f"ConfigManager(\n"
+            f"  sound={self.sound},\n"
+            f"  display={self.display},\n"
+            f"  gameplay={self.gameplay},\n"
+            f"  controls={self.controls},\n"
+            f"  debug={self.debug}\n"
+            f")"
+        )
+
 
 # Global configuration manager instance
 config_manager = ConfigManager()

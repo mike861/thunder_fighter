@@ -30,16 +30,12 @@ class TestSoundConfig:
 
     def test_custom_values(self):
         """Test custom configuration values"""
-        config = SoundConfig(
-            music_volume=0.8,
-            sound_volume=0.9,
-            music_enabled=False,
-            sound_enabled=False
-        )
+        config = SoundConfig(music_volume=0.8, sound_volume=0.9, music_enabled=False, sound_enabled=False)
         assert config.music_volume == 0.8
         assert config.sound_volume == 0.9
         assert config.music_enabled is False
         assert config.sound_enabled is False
+
 
 class TestDisplayConfig:
     """Test DisplayConfig dataclass"""
@@ -52,6 +48,7 @@ class TestDisplayConfig:
         assert config.width == 800
         assert config.height == 600
 
+
 class TestGameplayConfig:
     """Test GameplayConfig dataclass"""
 
@@ -63,6 +60,7 @@ class TestGameplayConfig:
         assert config.player_speed_multiplier == 1.0
         assert config.enemy_speed_multiplier == 1.0
         assert config.score_multiplier == 1.0
+
 
 class TestControlsConfig:
     """Test ControlsConfig dataclass"""
@@ -77,6 +75,7 @@ class TestControlsConfig:
         assert config.shoot == ["SPACE"]
         assert config.pause == ["p"]
 
+
 class TestDebugConfig:
     """Test DebugConfig dataclass"""
 
@@ -88,16 +87,14 @@ class TestDebugConfig:
         assert config.show_fps is False
         assert config.show_collision_boxes is False
 
+
 class TestConfigManager:
     """Test ConfigManager class"""
 
     def test_init_with_temp_file(self):
         """Test initialization with temporary config file"""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            config_data = {
-                'sound': {'music_volume': 0.8, 'sound_volume': 0.9},
-                'debug': {'dev_mode': True}
-            }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            config_data = {"sound": {"music_volume": 0.8, "sound_volume": 0.9}, "debug": {"dev_mode": True}}
             json.dump(config_data, f)
             temp_file = f.name
 
@@ -111,7 +108,7 @@ class TestConfigManager:
 
     def test_save_configuration(self):
         """Test saving configuration to file"""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -124,15 +121,15 @@ class TestConfigManager:
             with open(temp_file) as f:
                 data = json.load(f)
 
-            assert data['sound']['music_volume'] == 0.6
-            assert data['debug']['dev_mode'] is True
+            assert data["sound"]["music_volume"] == 0.6
+            assert data["debug"]["dev_mode"] is True
         finally:
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
     def test_update_sound_config(self):
         """Test updating sound configuration"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -147,7 +144,7 @@ class TestConfigManager:
 
     def test_update_gameplay_config(self):
         """Test updating gameplay configuration"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -162,7 +159,7 @@ class TestConfigManager:
 
     def test_get_difficulty_multipliers(self):
         """Test getting difficulty-based multipliers"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -171,27 +168,27 @@ class TestConfigManager:
             # Test easy difficulty
             manager.gameplay.difficulty = "easy"
             multipliers = manager.get_difficulty_multipliers()
-            assert multipliers['player_speed'] == 1.2
-            assert multipliers['enemy_speed'] == 0.8
+            assert multipliers["player_speed"] == 1.2
+            assert multipliers["enemy_speed"] == 0.8
 
             # Test hard difficulty
             manager.gameplay.difficulty = "hard"
             multipliers = manager.get_difficulty_multipliers()
-            assert multipliers['player_speed'] == 0.9
-            assert multipliers['enemy_speed'] == 1.3
+            assert multipliers["player_speed"] == 0.9
+            assert multipliers["enemy_speed"] == 1.3
 
             # Test normal difficulty
             manager.gameplay.difficulty = "normal"
             multipliers = manager.get_difficulty_multipliers()
-            assert multipliers['player_speed'] == 1.0
-            assert multipliers['enemy_speed'] == 1.0
+            assert multipliers["player_speed"] == 1.0
+            assert multipliers["enemy_speed"] == 1.0
         finally:
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
     def test_reset_to_defaults(self):
         """Test resetting configuration to defaults"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -213,10 +210,10 @@ class TestConfigManager:
             if os.path.exists(temp_file):
                 os.unlink(temp_file)
 
-    @patch('thunder_fighter.utils.config_manager.logger')
+    @patch("thunder_fighter.utils.config_manager.logger")
     def test_load_from_legacy_config(self, mock_logger):
         """Test loading from legacy config.py"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:
@@ -239,7 +236,7 @@ class TestConfigManager:
 
     def test_load_from_nonexistent_legacy_config(self):
         """Test graceful handling when legacy config doesn't exist"""
-        with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
             temp_file = f.name
 
         try:

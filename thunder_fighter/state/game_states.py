@@ -61,10 +61,8 @@ class PlayingState(State):
 
         # If coming from pause, resume music
         if previous_state and previous_state.name == "paused":
-            if self.game and hasattr(self.game, 'sound_manager'):
-                self.game.sound_manager.set_music_volume(
-                    min(1.0, self.game.sound_manager.music_volume * 2)
-                )
+            if self.game and hasattr(self.game, "sound_manager"):
+                self.game.sound_manager.set_music_volume(min(1.0, self.game.sound_manager.music_volume * 2))
 
     def exit(self, next_state: Optional[State] = None):
         """Exit the playing state."""
@@ -72,10 +70,8 @@ class PlayingState(State):
 
         # If going to pause, lower music volume
         if next_state and next_state.name == "paused":
-            if self.game and hasattr(self.game, 'sound_manager'):
-                self.game.sound_manager.set_music_volume(
-                    max(0.1, self.game.sound_manager.music_volume / 2)
-                )
+            if self.game and hasattr(self.game, "sound_manager"):
+                self.game.sound_manager.set_music_volume(max(0.1, self.game.sound_manager.music_volume / 2))
 
     def update(self, dt: float):
         """Update playing state logic."""
@@ -86,15 +82,13 @@ class PlayingState(State):
         current_time = time.time()
 
         # Enemy spawning logic
-        if (len(self.game.enemies) < self.game.target_enemy_count and
-            current_time - self.last_enemy_spawn > 2.0):
+        if len(self.game.enemies) < self.game.target_enemy_count and current_time - self.last_enemy_spawn > 2.0:
             game_time = (current_time - self.game.game_start_time) / 60.0
             self.game.spawn_enemy(game_time, self.game.game_level)
             self.last_enemy_spawn = current_time
 
         # Boss spawning logic
-        if (self.game.game_level > 1 and
-            current_time - self.game.boss_spawn_timer > self.game.BOSS_SPAWN_INTERVAL):
+        if self.game.game_level > 1 and current_time - self.game.boss_spawn_timer > self.game.BOSS_SPAWN_INTERVAL:
             if not self.game.boss or not self.game.boss.alive():
                 self.game.spawn_boss()
 
@@ -105,8 +99,7 @@ class PlayingState(State):
             self.last_item_spawn = current_time
 
         # Check for level progression
-        if (self.game.game_level <= 1 and
-            self.game.score.value // self.game.SCORE_THRESHOLD >= self.game.game_level):
+        if self.game.game_level <= 1 and self.game.score.value // self.game.SCORE_THRESHOLD >= self.game.game_level:
             self.game.level_up()
 
         # Check for game over conditions
@@ -191,7 +184,7 @@ class GameOverState(State):
 
         if self.game:
             # Stop music and play game over sound
-            if hasattr(self.game, 'sound_manager'):
+            if hasattr(self.game, "sound_manager"):
                 self.game.sound_manager.fadeout_music(2000)
                 # Could play game over sound here if we had one
 
@@ -236,7 +229,7 @@ class VictoryState(State):
 
         if self.game:
             # Play victory music/sound
-            if hasattr(self.game, 'sound_manager'):
+            if hasattr(self.game, "sound_manager"):
                 self.game.sound_manager.fadeout_music(3000)
                 # Could play victory sound here
 
@@ -330,7 +323,7 @@ class StateFactory:
             "paused": PausedState,
             "game_over": GameOverState,
             "victory": VictoryState,
-            "level_transition": LevelTransitionState
+            "level_transition": LevelTransitionState,
         }
 
         state_class = state_map.get(state_name)

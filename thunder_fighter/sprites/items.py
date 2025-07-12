@@ -16,6 +16,7 @@ from thunder_fighter.utils.logger import logger
 
 class HealthItem(pygame.sprite.Sprite):
     """Health item class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = create_health_item()
@@ -50,8 +51,10 @@ class HealthItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+
 class BulletSpeedItem(pygame.sprite.Sprite):
     """Bullet speed boost item class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = create_bullet_speed_item()
@@ -86,8 +89,10 @@ class BulletSpeedItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+
 class BulletPathItem(pygame.sprite.Sprite):
     """Bullet path increase item class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = create_bullet_path_item()
@@ -119,18 +124,20 @@ class BulletPathItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+
 class PlayerSpeedItem(pygame.sprite.Sprite):
     """Player speed boost item class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = create_player_speed_item()
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(30, WIDTH - 30)
         self.rect.y = -30
-        self.speedy = 2.2 # Slightly different speed
+        self.speedy = 2.2  # Slightly different speed
         self.direction = random.choice([-1, 1])
         self.angle = random.randrange(360)
-        self.type = "player_speed" # Item type identifier
+        self.type = "player_speed"  # Item type identifier
 
         # Player speed increase amount (can be fixed or random)
         self.speed_increase = 1
@@ -155,8 +162,10 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT:
             self.kill()
 
+
 class WingmanItem(pygame.sprite.Sprite):
     """Wingman item class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = create_wingman_item()
@@ -184,6 +193,7 @@ class WingmanItem(pygame.sprite.Sprite):
 
         if self.rect.top > HEIGHT:
             self.kill()
+
 
 def create_random_item(game_time, game_level, all_sprites, items_group, player):
     """Create items dynamically based on game time and player status"""

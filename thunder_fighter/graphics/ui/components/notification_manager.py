@@ -73,11 +73,11 @@ class NotificationManager:
         bottom_notifications = []
 
         for notification in self.notifications:
-            if notification.position == 'top':
+            if notification.position == "top":
                 top_notifications.append(notification)
-            elif notification.position == 'center':
+            elif notification.position == "center":
                 center_notifications.append(notification)
-            elif notification.position == 'bottom':
+            elif notification.position == "bottom":
                 bottom_notifications.append(notification)
 
         # Sort by creation time to display newer messages first

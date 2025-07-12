@@ -14,8 +14,15 @@ import pygame
 class Particle:
     """Single Particle Class"""
 
-    def __init__(self, x: float, y: float, velocity: Tuple[float, float],
-                 color: Tuple[int, int, int], lifetime: float, size: int = 2):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        velocity: Tuple[float, float],
+        color: Tuple[int, int, int],
+        lifetime: float,
+        size: int = 2,
+    ):
         self.x = x
         self.y = y
         self.velocity_x, self.velocity_y = velocity
@@ -77,8 +84,7 @@ class ParticleSystem:
             particle = Particle(x, y, velocity, color, lifetime, size)
             self.particles.append(particle)
 
-    def create_trail(self, x: float, y: float, direction: Tuple[float, float],
-                     particle_count: int = 5):
+    def create_trail(self, x: float, y: float, direction: Tuple[float, float], particle_count: int = 5):
         """Creates a trail effect."""
         colors = [(255, 255, 255), (200, 200, 255), (150, 150, 255)]  # White to Blue
 
@@ -106,7 +112,7 @@ class ParticleSystem:
 
         for _ in range(particle_count):
             # Upward sparks
-            angle = random.uniform(-math.pi/3, -2*math.pi/3)  # 60-degree range upwards
+            angle = random.uniform(-math.pi / 3, -2 * math.pi / 3)  # 60-degree range upwards
             speed = random.uniform(80, 120)
             velocity = (math.cos(angle) * speed, math.sin(angle) * speed)
 
@@ -171,8 +177,7 @@ def create_particle_explosion(x: float, y: float, particle_count: int = 20):
     get_particle_system().create_explosion(x, y, particle_count)
 
 
-def create_particle_trail(x: float, y: float, direction: Tuple[float, float],
-                         particle_count: int = 5):
+def create_particle_trail(x: float, y: float, direction: Tuple[float, float], particle_count: int = 5):
     """Convenience function: Creates a trail particle effect."""
     get_particle_system().create_trail(x, y, direction, particle_count)
 

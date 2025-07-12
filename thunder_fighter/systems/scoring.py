@@ -109,6 +109,7 @@ class ScoringSystem:
     def update_display(self):
         """Updates the score display."""
         from thunder_fighter.localization import _
+
         score_text = _("SCORE_DISPLAY", self.score)
         self.text = self.font.render(score_text, True, WHITE)
         self.rect = self.text.get_rect()

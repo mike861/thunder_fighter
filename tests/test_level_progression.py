@@ -1,6 +1,7 @@
 """
 Test module for level progression functionality
 """
+
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
@@ -23,10 +24,9 @@ class TestLevelProgression:
 
     def test_initial_game_level(self):
         """Test that game starts at correct level"""
-        with patch('pygame.init'), \
-             patch('pygame.display.set_mode'), \
-             patch('thunder_fighter.sprites.player.Player'), \
-             patch('thunder_fighter.graphics.effects.stars.create_stars'):
+        with patch("pygame.init"), patch("pygame.display.set_mode"), patch(
+            "thunder_fighter.sprites.player.Player"
+        ), patch("thunder_fighter.graphics.effects.stars.create_stars"):
             game = Game()
             assert game.game_level == 1
 
@@ -42,11 +42,10 @@ class TestLevelProgression:
 
     def test_level_progression_event_system_exists(self):
         """Test that game has event system for level progression"""
-        with patch('pygame.init'), \
-             patch('pygame.display.set_mode'), \
-             patch('thunder_fighter.sprites.player.Player'), \
-             patch('thunder_fighter.graphics.effects.stars.create_stars'):
+        with patch("pygame.init"), patch("pygame.display.set_mode"), patch(
+            "thunder_fighter.sprites.player.Player"
+        ), patch("thunder_fighter.graphics.effects.stars.create_stars"):
             game = Game()
-            assert hasattr(game, 'event_system')
-            assert hasattr(game.event_system, 'dispatch_event')
-            assert hasattr(game.event_system, 'register_listener')
+            assert hasattr(game, "event_system")
+            assert hasattr(game.event_system, "dispatch_event")
+            assert hasattr(game.event_system, "register_listener")

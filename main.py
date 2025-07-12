@@ -31,5 +31,6 @@ def main():
     finally:
         logger.info("Game ended")
 
+
 if __name__ == "__main__":
     main()

@@ -29,11 +29,11 @@ class ItemFactory(ConfigurableEntityFactory):
         """Initialize the item factory."""
         super().__init__(HealthItem)  # Default type, will be overridden
         self._item_types = {
-            'health': HealthItem,
-            'bullet_speed': BulletSpeedItem,
-            'bullet_path': BulletPathItem,
-            'player_speed': PlayerSpeedItem,
-            'wingman': WingmanItem
+            "health": HealthItem,
+            "bullet_speed": BulletSpeedItem,
+            "bullet_path": BulletPathItem,
+            "player_speed": PlayerSpeedItem,
+            "wingman": WingmanItem,
         }
         self._setup_default_presets()
 
@@ -42,20 +42,17 @@ class ItemFactory(ConfigurableEntityFactory):
     def _setup_default_presets(self):
         """Set up default item configuration presets."""
         for item_type in self._item_types.keys():
-            self.add_preset(item_type, {
-                'item_type': item_type,
-                'spawn_position': None
-            })
+            self.add_preset(item_type, {"item_type": item_type, "spawn_position": None})
 
     def _get_required_fields(self) -> list:
         """Get required fields for item creation."""
-        return ['all_sprites', 'items', 'player']
+        return ["all_sprites", "items", "player"]
 
     def _create_entity(self, config: Dict[str, Any]):
         """Create an item entity."""
-        item_type = config.get('item_type', 'health')
-        all_sprites = config['all_sprites']
-        items = config['items']
+        item_type = config.get("item_type", "health")
+        all_sprites = config["all_sprites"]
+        items = config["items"]
 
         item_class = self._item_types.get(item_type, HealthItem)
         # Create item instance without parameters
@@ -67,13 +64,7 @@ class ItemFactory(ConfigurableEntityFactory):
 
         return item
 
-    def create_random_item(self, all_sprites: pygame.sprite.Group,
-                          items: pygame.sprite.Group, player):
+    def create_random_item(self, all_sprites: pygame.sprite.Group, items: pygame.sprite.Group, player):
         """Create a random item."""
         item_type = random.choice(list(self._item_types.keys()))
-        return self.create_from_preset(
-            item_type,
-            all_sprites=all_sprites,
-            items=items,
-            player=player
-        )
+        return self.create_from_preset(item_type, all_sprites=all_sprites, items=items, player=player)

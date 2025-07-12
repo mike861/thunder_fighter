@@ -39,7 +39,7 @@ class State(ABC):
         self._context = context
 
     @abstractmethod
-    def enter(self, previous_state: Optional['State'] = None):
+    def enter(self, previous_state: Optional["State"] = None):
         """
         Called when entering this state.
 
@@ -49,7 +49,7 @@ class State(ABC):
         pass
 
     @abstractmethod
-    def exit(self, next_state: Optional['State'] = None):
+    def exit(self, next_state: Optional["State"] = None):
         """
         Called when exiting this state.
 
@@ -182,9 +182,7 @@ class StateMachine:
         new_state = self._states[state_name]
 
         # Check if transition is allowed
-        if (self._current_state and
-            not force and
-            not self._current_state.can_transition_to(state_name)):
+        if self._current_state and not force and not self._current_state.can_transition_to(state_name):
             logger.warning(f"Transition not allowed from {self._current_state.name} to {state_name}")
             return False
 

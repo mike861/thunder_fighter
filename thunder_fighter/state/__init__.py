@@ -19,15 +19,15 @@ from .game_states import (
 from .state_machine import State, StateMachine
 
 __all__ = [
-    'GameState',
-    'GameStateManager',
-    'StateMachine',
-    'State',
-    'MenuState',
-    'PlayingState',
-    'PausedState',
-    'GameOverState',
-    'VictoryState',
-    'LevelTransitionState',
-    'StateFactory'
+    "GameState",
+    "GameStateManager",
+    "StateMachine",
+    "State",
+    "MenuState",
+    "PlayingState",
+    "PausedState",
+    "GameOverState",
+    "VictoryState",
+    "LevelTransitionState",
+    "StateFactory",
 ]

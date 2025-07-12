@@ -22,7 +22,7 @@ class ResourceManager:
     including images, sounds, and fonts to improve performance and maintainability.
     """
 
-    _instance: Optional['ResourceManager'] = None
+    _instance: Optional["ResourceManager"] = None
 
     def __init__(self):
         """Initialize the resource manager."""
@@ -36,10 +36,10 @@ class ResourceManager:
 
         # Asset directories
         self.assets_dir = ASSETS_DIR
-        self.images_dir = os.path.join(self.assets_dir, 'images')
-        self.sounds_dir = os.path.join(self.assets_dir, 'sounds')
-        self.music_dir = os.path.join(self.assets_dir, 'music')
-        self.fonts_dir = os.path.join(self.assets_dir, 'fonts')
+        self.images_dir = os.path.join(self.assets_dir, "images")
+        self.sounds_dir = os.path.join(self.assets_dir, "sounds")
+        self.music_dir = os.path.join(self.assets_dir, "music")
+        self.fonts_dir = os.path.join(self.assets_dir, "fonts")
 
         # Create directories if they don't exist
         for directory in [self.images_dir, self.sounds_dir, self.music_dir, self.fonts_dir]:
@@ -48,7 +48,7 @@ class ResourceManager:
         logger.info("ResourceManager initialized")
 
     @classmethod
-    def get_instance(cls) -> 'ResourceManager':
+    def get_instance(cls) -> "ResourceManager":
         """Get the singleton instance of ResourceManager."""
         if cls._instance is None:
             cls._instance = cls()
@@ -59,8 +59,9 @@ class ResourceManager:
         """Reset the singleton instance (for testing)."""
         cls._instance = None
 
-    def load_image(self, filename: str, colorkey: Optional[Any] = None,
-                   alpha: bool = True, scale: Optional[tuple] = None) -> pygame.Surface:
+    def load_image(
+        self, filename: str, colorkey: Optional[Any] = None, alpha: bool = True, scale: Optional[tuple] = None
+    ) -> pygame.Surface:
         """
         Load an image with caching.
 
@@ -86,8 +87,8 @@ class ResourceManager:
         possible_paths = [
             os.path.join(self.images_dir, filename),
             os.path.join(self.assets_dir, filename),
-            os.path.join('thunder_fighter', 'assets', filename),  # Legacy path
-            filename  # Direct path
+            os.path.join("thunder_fighter", "assets", filename),  # Legacy path
+            filename,  # Direct path
         ]
 
         image_path = None
@@ -153,8 +154,8 @@ class ResourceManager:
         # Try multiple paths for the sound
         possible_paths = [
             os.path.join(self.sounds_dir, filename),
-            os.path.join(self.assets_dir, 'sounds', filename),
-            filename  # Direct path
+            os.path.join(self.assets_dir, "sounds", filename),
+            filename,  # Direct path
         ]
 
         sound_path = None
@@ -177,8 +178,7 @@ class ResourceManager:
             logger.error(f"Failed to load sound {filename}: {e}")
             return None
 
-    def load_font(self, font_name: Optional[str] = None, size: int = 24,
-                  system_font: bool = True) -> pygame.font.Font:
+    def load_font(self, font_name: Optional[str] = None, size: int = 24, system_font: bool = True) -> pygame.font.Font:
         """
         Load a font with caching.
 
@@ -232,7 +232,7 @@ class ResourceManager:
             font_files = [
                 "/System/Library/Fonts/PingFang.ttc",
                 "/System/Library/Fonts/STHeiti Medium.ttc",
-                "/System/Library/Fonts/STHeiti Light.ttc"
+                "/System/Library/Fonts/STHeiti Light.ttc",
             ]
 
             for font_path in font_files:
@@ -268,7 +268,7 @@ class ResourceManager:
                 "Default": "/System/Library/Fonts/PingFang.ttc",
                 "PingFang SC": "/System/Library/Fonts/PingFang.ttc",
                 "Heiti SC": "/System/Library/Fonts/STHeiti Medium.ttc",
-                "STHeiti": "/System/Library/Fonts/STHeiti Medium.ttc"
+                "STHeiti": "/System/Library/Fonts/STHeiti Medium.ttc",
             }
 
             # Try TTF file first
@@ -290,7 +290,7 @@ class ResourceManager:
         # For non-macOS systems, use system fonts (may not support Chinese properly)
         try:
             return pygame.font.SysFont(font_name, size)
-        except:
+        except Exception:
             # Final fallback
             return self._get_optimized_default_font(size)
 
@@ -306,8 +306,8 @@ class ResourceManager:
         """
         possible_paths = [
             os.path.join(self.music_dir, filename),
-            os.path.join(self.assets_dir, 'music', filename),
-            filename  # Direct path
+            os.path.join(self.assets_dir, "music", filename),
+            filename,  # Direct path
         ]
 
         for path in possible_paths:
@@ -324,11 +324,11 @@ class ResourceManager:
 
         # Common sounds
         common_sounds = [
-            'enemy_explosion.wav',
-            'player_hit.wav',
-            'item_pickup.wav',
-            'boss_death.wav',
-            'player_death.wav'
+            "enemy_explosion.wav",
+            "player_hit.wav",
+            "item_pickup.wav",
+            "boss_death.wav",
+            "player_death.wav",
         ]
 
         for sound_file in common_sounds:
@@ -340,7 +340,7 @@ class ResourceManager:
             (None, 20),  # Default medium
             (None, 28),  # Default large
             (None, 32),  # Default extra large
-            ('Arial', 20),  # System Arial
+            ("Arial", 20),  # System Arial
         ]
 
         for font_name, size in common_fonts:
@@ -362,14 +362,9 @@ class ResourceManager:
         Returns:
             Dictionary with cache sizes
         """
-        return {
-            'images': len(self._image_cache),
-            'sounds': len(self._sound_cache),
-            'fonts': len(self._font_cache)
-        }
+        return {"images": len(self._image_cache), "sounds": len(self._sound_cache), "fonts": len(self._font_cache)}
 
-    def create_surface(self, size: tuple, alpha: bool = True,
-                      fill_color: Optional[tuple] = None) -> pygame.Surface:
+    def create_surface(self, size: tuple, alpha: bool = True, fill_color: Optional[tuple] = None) -> pygame.Surface:
         """
         Create a new surface with optional initial fill.
 

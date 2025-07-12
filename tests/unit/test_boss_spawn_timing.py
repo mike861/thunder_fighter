@@ -29,7 +29,7 @@ class TestBossSpawnTimingWithPause:
     def test_boss_spawn_interval_without_pause(self):
         """Test boss spawn interval calculation without any pause."""
         # Simulate time passing without pause
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             mock_time.return_value = self.boss_spawn_timer + BOSS_SPAWN_INTERVAL + 1
 
             elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
@@ -41,7 +41,7 @@ class TestBossSpawnTimingWithPause:
     def test_boss_spawn_interval_with_pause(self):
         """Test boss spawn interval calculation with pause time excluded."""
         # Simulate normal gameplay for 10 seconds
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             mock_time.return_value = self.boss_spawn_timer + 10
 
             elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
@@ -72,7 +72,7 @@ class TestBossSpawnTimingWithPause:
 
     def test_boss_spawn_interval_with_multiple_pauses(self):
         """Test boss spawn interval with multiple pause/resume cycles."""
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Initial gameplay: 5 seconds
             mock_time.return_value = self.boss_spawn_timer + 5
             elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
@@ -108,7 +108,7 @@ class TestBossSpawnTimingWithPause:
 
     def test_boss_spawn_timing_edge_cases(self):
         """Test edge cases for boss spawn timing."""
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Test exactly at spawn interval
             mock_time.return_value = self.boss_spawn_timer + BOSS_SPAWN_INTERVAL
             elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
@@ -123,7 +123,7 @@ class TestBossSpawnTimingWithPause:
 
     def test_boss_spawn_with_long_pause(self):
         """Test boss spawn timing with very long pause periods."""
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Play for 5 seconds
             mock_time.return_value = self.boss_spawn_timer + 5
             elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
@@ -147,7 +147,7 @@ class TestBossSpawnTimingWithPause:
 
     def test_boss_spawn_level_requirement(self):
         """Test that boss spawn level requirement is correctly enforced."""
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Test level 1 (should not spawn boss)
             game_level = 1
             mock_time.return_value = self.boss_spawn_timer + BOSS_SPAWN_INTERVAL + 1
@@ -224,7 +224,7 @@ class TestBossSpawnTimingIntegration:
             pause_manager = PauseManager()
             boss_spawn_timer = time.time()
 
-            with patch('time.time') as mock_time:
+            with patch("time.time") as mock_time:
                 # Each session: 10 seconds play, 20 seconds pause, 25 seconds play
                 mock_time.return_value = boss_spawn_timer + 10
                 elapsed_time_1 = pause_manager.calculate_game_time(boss_spawn_timer)
@@ -254,7 +254,7 @@ class TestBossSpawnTimingEdgeCases:
         pause_manager = PauseManager()
         boss_spawn_timer = time.time()
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             mock_time.return_value = boss_spawn_timer
 
             elapsed_time = pause_manager.calculate_game_time(boss_spawn_timer)
@@ -339,7 +339,7 @@ class TestBossSpawnTimingEdgeCases:
         pause_manager = PauseManager()
         boss_spawn_timer = time.time()
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             mock_time.return_value = boss_spawn_timer + BOSS_SPAWN_INTERVAL + 1
             elapsed_time = pause_manager.calculate_game_time(boss_spawn_timer)
 
@@ -355,7 +355,7 @@ class TestBossSpawnTimingEdgeCases:
         pause_manager = PauseManager()
         boss_spawn_timer = time.time()
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Test with microsecond precision
             mock_time.return_value = boss_spawn_timer + BOSS_SPAWN_INTERVAL + 0.000001
 
@@ -377,7 +377,7 @@ class TestBossSpawnTimingEdgeCases:
         pause_manager = PauseManager()
         boss_spawn_timer = time.time()
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Play for some time
             mock_time.return_value = boss_spawn_timer + 10
             elapsed_time_1 = pause_manager.calculate_game_time(boss_spawn_timer)
@@ -403,7 +403,7 @@ class TestBossSpawnTimingEdgeCases:
         """Test boss spawn timing resilience to system clock changes."""
         pause_manager = PauseManager()
 
-        with patch('time.time') as mock_time:
+        with patch("time.time") as mock_time:
             # Start time
             start_time = 1000000000  # Arbitrary timestamp
             mock_time.return_value = start_time

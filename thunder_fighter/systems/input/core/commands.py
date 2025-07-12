@@ -43,6 +43,7 @@ class Command:
     Represents a specific game command, including the command type, timestamp, and related data.
     This is the interface between the input system and the game logic.
     """
+
     type: CommandType
     timestamp: float
     data: Dict[str, Any] = None
@@ -62,19 +63,11 @@ class Command:
 
     def is_movement_command(self) -> bool:
         """Checks if it is a movement command."""
-        return self.type in (
-            CommandType.MOVE_UP,
-            CommandType.MOVE_DOWN,
-            CommandType.MOVE_LEFT,
-            CommandType.MOVE_RIGHT
-        )
+        return self.type in (CommandType.MOVE_UP, CommandType.MOVE_DOWN, CommandType.MOVE_LEFT, CommandType.MOVE_RIGHT)
 
     def is_action_command(self) -> bool:
         """Checks if it is an action command."""
-        return self.type in (
-            CommandType.SHOOT,
-            CommandType.LAUNCH_MISSILE
-        )
+        return self.type in (CommandType.SHOOT, CommandType.LAUNCH_MISSILE)
 
     def is_system_command(self) -> bool:
         """Checks if it is a system command."""
@@ -85,5 +78,5 @@ class Command:
             CommandType.TOGGLE_SOUND,
             CommandType.CHANGE_LANGUAGE,
             CommandType.TOGGLE_DEBUG,
-            CommandType.RESET_INPUT
+            CommandType.RESET_INPUT,
         )

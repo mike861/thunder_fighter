@@ -81,11 +81,7 @@ class TestEventFlow:
         self.event_system.register_listener(GameEventType.ENEMY_DIED, self.listener2)
 
         # Dispatch event
-        event = GameEvent.create_enemy_died(
-            source="enemy",
-            enemy_type="basic",
-            score_awarded=100
-        )
+        event = GameEvent.create_enemy_died(source="enemy", enemy_type="basic", score_awarded=100)
         self.event_system.dispatch_event(event)
         self.event_system.process_events()
 
@@ -109,11 +105,7 @@ class TestEventFlow:
         self.event_system.register_listener(GameEventType.BOSS_DIED, self.listener2)
 
         # Dispatch event
-        event = GameEvent.create_boss_died(
-            source="boss",
-            boss_level=1,
-            score_awarded=1000
-        )
+        event = GameEvent.create_boss_died(source="boss", boss_level=1, score_awarded=1000)
         self.event_system.dispatch_event(event)
         self.event_system.process_events()
 
@@ -130,7 +122,7 @@ class TestEventFlow:
             GameEvent.create_player_died(source="test"),
             GameEvent.create_enemy_spawned(source="factory", enemy_type="advanced"),
             GameEvent.create_score_changed(source="score", old_score=0, new_score=100),
-            GameEvent.create_level_changed(source="game", old_level=1, new_level=2)
+            GameEvent.create_level_changed(source="game", old_level=1, new_level=2),
         ]
 
         for event in events:
@@ -147,7 +139,7 @@ class TestEventFlow:
             GameEventType.PLAYER_DIED,
             GameEventType.ENEMY_SPAWNED,
             GameEventType.SCORE_CHANGED,
-            GameEventType.LEVEL_CHANGED
+            GameEventType.LEVEL_CHANGED,
         ]
         assert received_types == expected_types
 
@@ -156,20 +148,14 @@ class TestEventFlow:
         self.event_system.register_listener(GameEventType.ITEM_COLLECTED, self.listener1)
 
         # Dispatch queued event
-        queued_event = GameEvent.create_item_collected(
-            source="item",
-            item_type="health"
-        )
+        queued_event = GameEvent.create_item_collected(source="item", item_type="health")
         self.event_system.dispatch_event(queued_event, immediate=False)
 
         # Should not be processed yet
         assert len(self.listener1.events_received) == 0
 
         # Dispatch immediate event
-        immediate_event = GameEvent.create_item_collected(
-            source="item",
-            item_type="power"
-        )
+        immediate_event = GameEvent.create_item_collected(source="item", item_type="power")
         self.event_system.dispatch_event(immediate_event, immediate=True)
 
         # Immediate event should be processed
@@ -196,9 +182,7 @@ class TestEventFlow:
         # Dispatch events
         for i in range(5):
             event = GameEvent.create_player_health_changed(
-                source="player",
-                old_health=100 - i * 10,
-                new_health=100 - (i + 1) * 10
+                source="player", old_health=100 - i * 10, new_health=100 - (i + 1) * 10
             )
             self.event_system.dispatch_event(event)
 
@@ -257,22 +241,9 @@ class TestEventFlow:
 
         # Simulate a game scenario: enemy dies -> score changes -> player levels up
         events_sequence = [
-            GameEvent.create_enemy_died(
-                source="enemy_basic",
-                enemy_type="basic",
-                score_awarded=50
-            ),
-            GameEvent.create_score_changed(
-                source="score_manager",
-                old_score=450,
-                new_score=500,
-                delta=50
-            ),
-            GameEvent.create_level_changed(
-                source="game",
-                old_level=1,
-                new_level=2
-            )
+            GameEvent.create_enemy_died(source="enemy_basic", enemy_type="basic", score_awarded=50),
+            GameEvent.create_score_changed(source="score_manager", old_score=450, new_score=500, delta=50),
+            GameEvent.create_level_changed(source="game", old_level=1, new_level=2),
         ]
 
         # Dispatch all events
@@ -299,6 +270,7 @@ class TestEventFlow:
 
     def test_event_system_error_handling(self):
         """Test event system behavior with listener errors."""
+
         class ErrorListener(EventListener):
             def handle_event(self, event: Event) -> bool:
                 raise RuntimeError("Test error in listener")
@@ -308,11 +280,7 @@ class TestEventFlow:
         self.event_system.register_listener(GameEventType.GAME_STARTED, self.listener1)
 
         # Dispatch event that will cause error
-        event = GameEvent.create_game_state_changed(
-            source="game",
-            old_state="menu",
-            new_state="started"
-        )
+        event = GameEvent.create_game_state_changed(source="game", old_state="menu", new_state="started")
 
         # Event processing should handle errors gracefully
         self.event_system.dispatch_event(event)

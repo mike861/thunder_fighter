@@ -7,6 +7,7 @@ from thunder_fighter.constants import HEIGHT, WIDTH
 
 class Star:
     """Background star class"""
+
     def __init__(self):
         self.x = random.randint(0, WIDTH)
         self.y = random.randint(0, HEIGHT)
@@ -25,6 +26,7 @@ class Star:
         """Draw star"""
         color = (self.brightness, self.brightness, self.brightness)
         pygame.draw.circle(screen, color, (int(self.x), int(self.y)), self.size)
+
 
 def create_stars(count):
     """Create specified number of stars"""

@@ -69,6 +69,7 @@ class InputEvent:
 
         if self.timestamp == 0.0:
             import time
+
             self.timestamp = time.time()
 
     def get_data(self, key: str, default: Any = None) -> Any:
@@ -115,24 +116,20 @@ class InputEventFactory:
         """
         if pressed:
             event_type = {
-                'up': InputEventType.MOVE_UP,
-                'down': InputEventType.MOVE_DOWN,
-                'left': InputEventType.MOVE_LEFT,
-                'right': InputEventType.MOVE_RIGHT
+                "up": InputEventType.MOVE_UP,
+                "down": InputEventType.MOVE_DOWN,
+                "left": InputEventType.MOVE_LEFT,
+                "right": InputEventType.MOVE_RIGHT,
             }.get(direction)
         else:
             event_type = {
-                'up': InputEventType.STOP_MOVE_UP,
-                'down': InputEventType.STOP_MOVE_DOWN,
-                'left': InputEventType.STOP_MOVE_LEFT,
-                'right': InputEventType.STOP_MOVE_RIGHT
+                "up": InputEventType.STOP_MOVE_UP,
+                "down": InputEventType.STOP_MOVE_DOWN,
+                "left": InputEventType.STOP_MOVE_LEFT,
+                "right": InputEventType.STOP_MOVE_RIGHT,
             }.get(direction)
 
-        return InputEvent(
-            event_type=event_type,
-            data={'direction': direction, 'pressed': pressed},
-            source='keyboard'
-        )
+        return InputEvent(event_type=event_type, data={"direction": direction, "pressed": pressed}, source="keyboard")
 
     @staticmethod
     def create_action_event(action: str, pressed: bool = True) -> InputEvent:
@@ -146,18 +143,14 @@ class InputEventFactory:
         Returns:
             InputEvent for action
         """
-        if action == 'shoot':
+        if action == "shoot":
             event_type = InputEventType.SHOOT if pressed else InputEventType.STOP_SHOOT
-        elif action == 'missile':
+        elif action == "missile":
             event_type = InputEventType.LAUNCH_MISSILE
         else:
             raise ValueError(f"Unknown action: {action}")
 
-        return InputEvent(
-            event_type=event_type,
-            data={'action': action, 'pressed': pressed},
-            source='keyboard'
-        )
+        return InputEvent(event_type=event_type, data={"action": action, "pressed": pressed}, source="keyboard")
 
     @staticmethod
     def create_game_control_event(control: str) -> InputEvent:
@@ -171,22 +164,18 @@ class InputEventFactory:
             InputEvent for game control
         """
         event_type_map = {
-            'pause': InputEventType.PAUSE,
-            'resume': InputEventType.RESUME,
-            'quit': InputEventType.QUIT,
-            'restart': InputEventType.RESTART_GAME,
-            'skip': InputEventType.SKIP_ANIMATION
+            "pause": InputEventType.PAUSE,
+            "resume": InputEventType.RESUME,
+            "quit": InputEventType.QUIT,
+            "restart": InputEventType.RESTART_GAME,
+            "skip": InputEventType.SKIP_ANIMATION,
         }
 
         event_type = event_type_map.get(control)
         if not event_type:
             raise ValueError(f"Unknown control: {control}")
 
-        return InputEvent(
-            event_type=event_type,
-            data={'control': control},
-            source='keyboard'
-        )
+        return InputEvent(event_type=event_type, data={"control": control}, source="keyboard")
 
     @staticmethod
     def create_audio_event(audio_action: str) -> InputEvent:
@@ -200,21 +189,17 @@ class InputEventFactory:
             InputEvent for audio control
         """
         event_type_map = {
-            'toggle_music': InputEventType.TOGGLE_MUSIC,
-            'toggle_sound': InputEventType.TOGGLE_SOUND,
-            'volume_up': InputEventType.VOLUME_UP,
-            'volume_down': InputEventType.VOLUME_DOWN
+            "toggle_music": InputEventType.TOGGLE_MUSIC,
+            "toggle_sound": InputEventType.TOGGLE_SOUND,
+            "volume_up": InputEventType.VOLUME_UP,
+            "volume_down": InputEventType.VOLUME_DOWN,
         }
 
         event_type = event_type_map.get(audio_action)
         if not event_type:
             raise ValueError(f"Unknown audio action: {audio_action}")
 
-        return InputEvent(
-            event_type=event_type,
-            data={'audio_action': audio_action},
-            source='keyboard'
-        )
+        return InputEvent(event_type=event_type, data={"audio_action": audio_action}, source="keyboard")
 
     @staticmethod
     def create_ui_event(ui_action: str) -> InputEvent:
@@ -228,16 +213,12 @@ class InputEventFactory:
             InputEvent for UI control
         """
         event_type_map = {
-            'change_language': InputEventType.CHANGE_LANGUAGE,
-            'toggle_dev_mode': InputEventType.TOGGLE_DEV_MODE
+            "change_language": InputEventType.CHANGE_LANGUAGE,
+            "toggle_dev_mode": InputEventType.TOGGLE_DEV_MODE,
         }
 
         event_type = event_type_map.get(ui_action)
         if not event_type:
             raise ValueError(f"Unknown UI action: {ui_action}")
 
-        return InputEvent(
-            event_type=event_type,
-            data={'ui_action': ui_action},
-            source='keyboard'
-        )
+        return InputEvent(event_type=event_type, data={"ui_action": ui_action}, source="keyboard")

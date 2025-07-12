@@ -11,10 +11,12 @@ from thunder_fighter.constants import GREEN, HEIGHT, RED, WHITE, WIDTH, YELLOW
 
 class Notification:
     """Class for displaying temporary notification messages"""
-    def __init__(self, text, duration=2000, color=WHITE, size=24, position='center'):
+
+    def __init__(self, text, duration=2000, color=WHITE, size=24, position="center"):
         try:
             # Use resource manager for better Chinese font support
             from thunder_fighter.utils.resource_manager import get_resource_manager
+
             resource_manager = get_resource_manager()
             self.font = resource_manager.load_font(None, size, system_font=True)
         except (pygame.error, AttributeError):
@@ -23,25 +25,27 @@ class Notification:
             class DummyFont:
                 def render(self, text, antialias=True, color=(255, 255, 255)):
                     # Create a dummy surface with the essential methods
-                    if hasattr(pygame, 'Surface'):
+                    if hasattr(pygame, "Surface"):
                         surf = pygame.Surface((len(text) * 10, size))
-                        rect = surf.get_rect()
                         return surf
                     else:
                         # Pure mock for extreme cases
-                        mock_surf = type('MockSurface', (), {
-                            'get_rect': lambda: type('MockRect', (), {
-                                'center': (0, 0),
-                                'centerx': 0,
-                                'centery': 0
-                            })()
-                        })()
+                        mock_surf = type(
+                            "MockSurface",
+                            (),
+                            {
+                                "get_rect": lambda: type(
+                                    "MockRect", (), {"center": (0, 0), "centerx": 0, "centery": 0}
+                                )()
+                            },
+                        )()
                         return mock_surf
+
             self.font = DummyFont()
 
         self.text = text
         self.color = color
-        self.creation_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
+        self.creation_time = pygame.time.get_ticks() if hasattr(pygame, "time") else 0
         self.duration = duration  # Duration in milliseconds
         self.alpha = 255  # Fully opaque
         self.position = position
@@ -52,22 +56,20 @@ class Notification:
             self.rect = self.surface.get_rect()
         except (pygame.error, AttributeError):
             # Create dummy surface and rect for test environments
-            if hasattr(pygame, 'Surface'):
+            if hasattr(pygame, "Surface"):
                 self.surface = pygame.Surface((len(text) * 10, size))
             else:
-                self.surface = type('MockSurface', (), {})()
-            self.rect = type('MockRect', (), {
-                'center': (WIDTH // 2, HEIGHT // 2),
-                'centerx': WIDTH // 2,
-                'centery': HEIGHT // 2
-            })()
+                self.surface = type("MockSurface", (), {})()
+            self.rect = type(
+                "MockRect", (), {"center": (WIDTH // 2, HEIGHT // 2), "centerx": WIDTH // 2, "centery": HEIGHT // 2}
+            )()
 
         # Set position based on position parameter
-        if position == 'center':
+        if position == "center":
             self.rect.center = (WIDTH // 2, HEIGHT // 2)
-        elif position == 'top':
+        elif position == "top":
             self.rect.center = (WIDTH // 2, 100)
-        elif position == 'bottom':
+        elif position == "bottom":
             self.rect.center = (WIDTH // 2, HEIGHT - 100)
 
         # Add vertical offset for stacking multiple messages
@@ -75,7 +77,7 @@ class Notification:
 
     def update(self):
         """Update notification state, check if it should disappear"""
-        if hasattr(pygame, 'time'):
+        if hasattr(pygame, "time"):
             current_time = pygame.time.get_ticks()
         else:
             # For test environments without pygame.time
@@ -120,7 +122,8 @@ class Notification:
 
 class WarningNotification(Notification):
     """Special warning notification with flashing effect and longer duration"""
-    def __init__(self, text, duration=3000, color=YELLOW, size=28, position='top'):
+
+    def __init__(self, text, duration=3000, color=YELLOW, size=28, position="top"):
         super().__init__(text, duration, color, size, position)
         self.flash_speed = 200  # Flash speed (milliseconds)
         self.flash_colors = [YELLOW, RED]  # Flash colors
@@ -143,6 +146,7 @@ class WarningNotification(Notification):
 
 class AchievementNotification(Notification):
     """Achievement or positive event notification with green color and special effects"""
-    def __init__(self, text, duration=2500, color=GREEN, size=24, position='bottom'):
+
+    def __init__(self, text, duration=2500, color=GREEN, size=24, position="bottom"):
         super().__init__(text, duration, color, size, position)
         # Add any special effects or custom logic

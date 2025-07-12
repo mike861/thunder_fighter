@@ -24,9 +24,20 @@ class HealthBarComponent:
         self.screen = screen
         self.font = font
 
-    def draw(self, x, y, width, height, current, maximum,
-             border_color=WHITE, fill_color=GREEN, background_color=(60, 60, 60),
-             show_text=True, text_format="{current}/{maximum}"):
+    def draw(
+        self,
+        x,
+        y,
+        width,
+        height,
+        current,
+        maximum,
+        border_color=WHITE,
+        fill_color=GREEN,
+        background_color=(60, 60, 60),
+        show_text=True,
+        text_format="{current}/{maximum}",
+    ):
         """
         Draw a health bar.
 
@@ -67,7 +78,7 @@ class HealthBarComponent:
         if show_text:
             text = text_format.format(current=current, maximum=maximum)
             value_text = self.font.render(text, True, WHITE)
-            text_rect = value_text.get_rect(center=(x + width//2, y + height//2))
+            text_rect = value_text.get_rect(center=(x + width // 2, y + height // 2))
             self.screen.blit(value_text, text_rect)
 
         logger.debug(f"Drew health bar at ({x}, {y}) - {current}/{maximum}")

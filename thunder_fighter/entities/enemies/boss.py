@@ -15,8 +15,14 @@ from thunder_fighter.utils.logger import logger
 class Boss(pygame.sprite.Sprite):
     """Boss class representing the main enemy with multiple attack patterns and health bar display"""
 
-    def __init__(self, all_sprites: pygame.sprite.Group, boss_bullets_group: pygame.sprite.Group,
-                 level: Optional[int] = None, game_level: int = 1, player: Optional[object] = None) -> None:
+    def __init__(
+        self,
+        all_sprites: pygame.sprite.Group,
+        boss_bullets_group: pygame.sprite.Group,
+        level: Optional[int] = None,
+        game_level: int = 1,
+        player: Optional[object] = None,
+    ) -> None:
         super().__init__()
 
         # Determine Boss level - if not specified, generate randomly based on game progress
@@ -65,7 +71,7 @@ class Boss(pygame.sprite.Sprite):
 
         # Define base movement speed and range
         self.base_speedx = 2
-        self.move_margin = 10 # Minimum margin from screen edge
+        self.move_margin = 10  # Minimum margin from screen edge
 
         # Sprite groups
         self.all_sprites = all_sprites
@@ -122,9 +128,7 @@ class Boss(pygame.sprite.Sprite):
         health_percentage = self.health / self.max_health
 
         # Level 2+ Bosses can enter aggressive mode
-        if (health_percentage <= 0.5 and
-            self.shoot_pattern == "normal" and
-            self.level >= 2):
+        if health_percentage <= 0.5 and self.shoot_pattern == "normal" and self.level >= 2:
             self.shoot_pattern = "aggressive"
             # When health decreases, reduce shooting delay to increase attack frequency
             self.shoot_delay = max(150, self.shoot_delay * 0.7)
@@ -132,9 +136,7 @@ class Boss(pygame.sprite.Sprite):
             logger.debug(f"Level {self.level} Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
 
         # Level 3+ Bosses can enter final mode
-        if (health_percentage <= 0.25 and
-            self.shoot_pattern == "aggressive" and
-            self.level >= 3):
+        if health_percentage <= 0.25 and self.shoot_pattern == "aggressive" and self.level >= 3:
             self.shoot_pattern = "final"
             # Reduce shooting delay again
             self.shoot_delay = max(100, self.shoot_delay * 0.8)
@@ -156,13 +158,12 @@ class Boss(pygame.sprite.Sprite):
         else:
             # Left-right movement
             self.move_counter += 1
-            if self.move_counter >= 100: # Change direction periodically
+            if self.move_counter >= 100:  # Change direction periodically
                 self.direction *= -1
                 self.move_counter = 0
 
             # Calculate dynamic movement boundaries based on game_level
             # Higher game_level allows moving closer to the edges
-            max_movement_range = (WIDTH - self.rect.width - 2 * self.move_margin)
             # Reduce margin based on game level, but keep at least a small margin
             current_margin = max(5, self.move_margin + 50 - self.game_level * 5)
 
@@ -177,12 +178,12 @@ class Boss(pygame.sprite.Sprite):
             # Prevent Boss from flying out of dynamic boundaries
             if self.rect.left < left_boundary:
                 self.rect.left = left_boundary
-                self.direction = 1 # Force move right
-                self.move_counter = 0 # Reset move counter to prevent getting stuck
+                self.direction = 1  # Force move right
+                self.move_counter = 0  # Reset move counter to prevent getting stuck
             if self.rect.right > right_boundary:
                 self.rect.right = right_boundary
-                self.direction = -1 # Force move left
-                self.move_counter = 0 # Reset move counter
+                self.direction = -1  # Force move left
+                self.move_counter = 0  # Reset move counter
 
         # Boss shooting
         now = ptime.get_ticks()
@@ -255,7 +256,7 @@ class Boss(pygame.sprite.Sprite):
 
         # Get player position (for Final mode tracking)
         target_pos = None
-        if self.shoot_pattern == "final" and self.player and hasattr(self.player, 'rect'):
+        if self.shoot_pattern == "final" and self.player and hasattr(self.player, "rect"):
             target_pos = (self.player.rect.centerx, self.player.rect.centery)
 
         # Fire bullets
@@ -283,8 +284,7 @@ class Boss(pygame.sprite.Sprite):
             bar_x = WIDTH - bar_width - 5
 
         # Draw health bar body
-        draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height,
-                        self.health, self.max_health)
+        draw_health_bar(surface, bar_x, bar_y, bar_width, bar_height, self.health, self.max_health)
 
         # Add health bar border effects based on attack mode
         import pygame
@@ -312,6 +312,7 @@ class Boss(pygame.sprite.Sprite):
 
         # Use resource manager for better Chinese font support
         from thunder_fighter.utils.resource_manager import get_resource_manager
+
         resource_manager = get_resource_manager()
         font = resource_manager.load_font(None, 20, system_font=True)
 

@@ -4,7 +4,6 @@ Tests for the Localization System.
 Tests the multi-language support and font management.
 """
 
-
 import pytest
 
 from thunder_fighter.localization import LanguageManager
