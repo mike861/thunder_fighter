@@ -38,11 +38,16 @@ class InputHandler:
         }
         self._active_continuous_actions: Set[str] = set()
         
+        # macOS screenshot function interference detection
+        self._last_activity_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
+        self._focus_lost_recovery_needed = False
+        
         logger.info("InputHandler initialized")
     
     def process_pygame_events(self, pygame_events: List[pygame.event.Event]) -> List[InputEvent]:
         """
         Process pygame events and convert them to input events.
+        Uses hybrid processing with fallback for macOS screenshot interference.
         
         Args:
             pygame_events: List of pygame events to process
@@ -52,14 +57,71 @@ class InputHandler:
         """
         input_events = []
         
+        # Note: Automatic focus detection disabled due to false positives
+        # Use F1 key to manually reset input state if needed after macOS screenshot
+        # self._detect_focus_issues(pygame_events)
+        
         for event in pygame_events:
-            processed_events = self._process_single_event(event)
+            processed_events = self._process_single_event_with_fallback(event)
             input_events.extend(processed_events)
         
         # Add continuous action events for held keys
         input_events.extend(self._generate_continuous_events())
         
         return input_events
+    
+    def _process_single_event_with_fallback(self, event: pygame.event.Event) -> List[InputEvent]:
+        """
+        Process a single pygame event with fallback for macOS screenshot interference.
+        
+        Args:
+            event: The pygame event to process
+            
+        Returns:
+            List of InputEvent objects generated from the event
+        """
+        try:
+            # First try normal processing
+            events = self._process_single_event(event)
+            
+            # Check if critical events (P, L) might have been lost
+            if event.type == pygame.KEYDOWN and event.key in [pygame.K_p, pygame.K_l]:
+                # If normal processing didn't generate expected events, use fallback
+                expected_events = self._get_expected_events_for_key(event.key)
+                actual_events = [str(e.event_type) for e in events]
+                
+                # If we didn't get the expected event types, use fallback
+                if not any(expected in actual for expected in expected_events for actual in actual_events):
+                    logger.warning(f"Input processing failed for key {pygame.key.name(event.key)}, using fallback")
+                    fallback_events = self._create_fallback_events(event)
+                    if fallback_events:
+                        return fallback_events
+            
+            return events
+            
+        except Exception as e:
+            logger.error(f"Event processing failed: {e}, using fallback")
+            # If processing fails completely, use fallback
+            return self._create_fallback_events(event)
+    
+    def _get_expected_events_for_key(self, key: int) -> List[str]:
+        """Get expected event types for a given key."""
+        if key == pygame.K_p:
+            return ["PAUSE"]
+        elif key == pygame.K_l:
+            return ["CHANGE_LANGUAGE"]
+        return []
+    
+    def _create_fallback_events(self, event: pygame.event.Event) -> List[InputEvent]:
+        """Create fallback events for critical keys that failed normal processing."""
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                logger.info("Fallback: Creating PAUSE event for P key")
+                return [InputEventFactory.create_game_control_event('pause')]
+            elif event.key == pygame.K_l:
+                logger.info("Fallback: Creating CHANGE_LANGUAGE event for L key")
+                return [InputEventFactory.create_ui_event('change_language')]
+        return []
     
     def _process_single_event(self, event: pygame.event.Event) -> List[InputEvent]:
         """
@@ -140,6 +202,12 @@ class InputHandler:
             elif action in ['change_language', 'toggle_dev_mode']:
                 # UI actions
                 events.append(InputEventFactory.create_ui_event(action))
+                
+            elif action == 'reset_input_state':
+                # Debug action - immediately reset input state
+                logger.info("Manual input state reset triggered (F1 key)")
+                self.force_key_state_validation()
+                # Don't generate an event for this, it's handled internally
         
         return events
     
@@ -282,6 +350,101 @@ class InputHandler:
         self._held_keys.clear()
         self._active_continuous_actions.clear()
         logger.debug("Input handler state cleared")
+    
+    def _detect_focus_issues(self, pygame_events: List[pygame.event.Event]):
+        """
+        Detect potential focus loss issues that can occur with macOS screenshot function.
+        
+        Args:
+            pygame_events: List of pygame events to analyze
+        """
+        import platform
+        
+        # Only apply this fix on macOS
+        if platform.system() != 'Darwin':
+            return
+            
+        current_time = pygame.time.get_ticks() if hasattr(pygame, 'time') else 0
+        
+        # Check for specific focus-related events that indicate real focus loss
+        has_actual_focus_events = False
+        for event in pygame_events:
+            # Look for window focus events that indicate actual focus loss/gain
+            if hasattr(pygame, 'WINDOWEVENT') and event.type == pygame.WINDOWEVENT:
+                if hasattr(event, 'event') and event.event in [
+                    pygame.WINDOWEVENT_FOCUS_LOST, 
+                    pygame.WINDOWEVENT_FOCUS_GAINED
+                ]:
+                    has_actual_focus_events = True
+                    logger.debug(f"Detected actual window focus event: {event.event}")
+                    break
+            elif hasattr(pygame, 'ACTIVEEVENT') and event.type == pygame.ACTIVEEVENT:
+                # Older pygame versions
+                if hasattr(event, 'state') and event.state & pygame.APPINPUTFOCUS:
+                    has_actual_focus_events = True
+                    logger.debug("Detected legacy focus event")
+                    break
+        
+        # Only perform recovery for actual focus events, not gaps
+        # Gaps are too unreliable and cause false positives
+        if has_actual_focus_events:
+            logger.info("Detected real focus change - performing recovery")
+            self._recover_from_focus_loss()
+        else:
+            # Update activity time but don't trigger recovery on gaps
+            if pygame_events:
+                self._last_activity_time = current_time
+    
+    def _recover_from_focus_loss(self):
+        """
+        Recover from potential focus loss by validating key states.
+        This addresses the macOS screenshot function interference issue.
+        """
+        logger.debug("Performing focus recovery - validating key states")
+        
+        # Get current actual key states from pygame
+        try:
+            current_pressed = pygame.key.get_pressed()
+            
+            # Validate our tracked key states against actual pygame state
+            keys_to_remove = []
+            for key in self._pressed_keys:
+                if not current_pressed[key]:
+                    keys_to_remove.append(key)
+                    logger.debug(f"Key {key} no longer pressed - removing from tracked state")
+            
+            for key in keys_to_remove:
+                self._pressed_keys.discard(key)
+                self._held_keys.discard(key)
+            
+            # Clear actions for keys that are no longer pressed
+            actions_to_remove = []
+            for action in self._active_continuous_actions:
+                # Get the key for this action
+                key = self.key_bindings.get_key_for_action(action)
+                if key is not None and not current_pressed[key]:
+                    actions_to_remove.append(action)
+                    logger.debug(f"Action {action} no longer active - removing")
+            
+            for action in actions_to_remove:
+                self._active_continuous_actions.discard(action)
+                
+        except (AttributeError, IndexError) as e:
+            logger.warning(f"Could not validate key states during recovery: {e}")
+            # If we can't validate, just clear everything to be safe
+            self.clear_state()
+        
+        self._focus_lost_recovery_needed = False
+        logger.debug("Focus recovery completed")
+    
+    def force_key_state_validation(self):
+        """
+        Force a validation of all tracked key states against actual pygame state.
+        This can be called externally when input issues are detected.
+        """
+        logger.debug("Force validating key states due to external request")
+        self._focus_lost_recovery_needed = True
+        self._recover_from_focus_loss()
     
     def get_key_bindings(self) -> KeyBindings:
         """

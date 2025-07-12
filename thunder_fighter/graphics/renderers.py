@@ -96,117 +96,156 @@ def create_player_surface():
     return surface
 
 def create_enemy_surface(level=0):
-    """Create enemy aircraft surface with fighter jet appearance based on level"""
-    # Keep the improved size: 40x50
-    surface = pygame.Surface((40, 50))
+    """Create alien/biomechanical enemy ship with organic design to contrast player's tech fighter"""
+    # Slightly larger and different aspect ratio: 45x45 (more square/organic)
+    surface = pygame.Surface((45, 45))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
     
-    # Choose color scheme based on level
+    # Choose color scheme based on level - darker, more organic colors
     if level < 3:
-        # Low level enemies: red/dark red
-        main_color = (220, 50, 50)  # Brighter red
-        secondary_color = (150, 30, 30)  # Dark red
-        accent_color = (255, 100, 100)  # Light red
+        # Low level enemies: dark red/crimson (insectoid)
+        main_color = (180, 20, 20)     # Dark crimson
+        secondary_color = (120, 15, 15)  # Very dark red
+        accent_color = (220, 60, 60)     # Bright red details
+        organic_color = (100, 40, 40)    # Brownish red
         glow_color = None
     elif level < 6:
-        # Medium level enemies: orange/yellow
-        main_color = (255, 140, 0)  # Orange
-        secondary_color = (200, 80, 0)  # Dark orange
-        accent_color = (255, 200, 0)  # Yellow
-        glow_color = (255, 200, 0, 100)  # Glow effect
+        # Medium level enemies: toxic green (alien)
+        main_color = (60, 150, 40)      # Toxic green
+        secondary_color = (40, 100, 25)  # Dark green
+        accent_color = (120, 255, 80)    # Bright green
+        organic_color = (80, 120, 60)    # Olive green
+        glow_color = (120, 255, 80, 100)  # Green glow
     elif level < 9:
-        # High level enemies: blue/cyan
-        main_color = (30, 144, 255)  # Dodge blue
-        secondary_color = (20, 80, 180)  # Dark blue
-        accent_color = (100, 200, 255)  # Light blue
-        glow_color = (0, 191, 255, 120)  # Sky blue glow
+        # High level enemies: purple/void (energy beings)
+        main_color = (80, 30, 120)      # Deep purple
+        secondary_color = (50, 15, 80)   # Dark purple
+        accent_color = (150, 80, 200)    # Bright purple
+        organic_color = (60, 40, 90)     # Gray purple
+        glow_color = (150, 80, 200, 120)  # Purple glow
     else:
-        # Super high level enemies: purple/magenta
-        main_color = (160, 50, 200)  # Purple
-        secondary_color = (100, 20, 130)  # Dark purple
-        accent_color = (220, 100, 255)  # Light purple
-        glow_color = (186, 85, 211, 150)  # Purple glow
+        # Super high level enemies: black/void with energy (nightmare)
+        main_color = (40, 40, 60)       # Dark gray-blue
+        secondary_color = (20, 20, 30)   # Almost black
+        accent_color = (200, 150, 255)   # Bright energy
+        organic_color = (60, 50, 70)     # Dark purple-gray
+        glow_color = (200, 150, 255, 150)  # Energy glow
     
-    # Draw main fuselage (fighter jet body)
-    fuselage_points = [(20, 5), (16, 15), (18, 35), (22, 35), (24, 15)]
-    pygame.draw.polygon(surface, main_color, fuselage_points)
+    # Draw organic/biomechanical hull (irregular, non-geometric)
+    # Main body - more organic blob shape
+    hull_points = [(22, 8), (15, 12), (12, 20), (15, 30), (20, 38), (25, 38), (30, 30), (33, 20), (30, 12)]
+    pygame.draw.polygon(surface, main_color, hull_points)
     
-    # Draw nose cone
-    nose_points = [(20, 5), (18, 12), (22, 12)]
-    pygame.draw.polygon(surface, accent_color, nose_points)
+    # Add organic texture patches
+    pygame.draw.ellipse(surface, secondary_color, (16, 15, 8, 6))  # Left patch
+    pygame.draw.ellipse(surface, secondary_color, (21, 15, 8, 6))  # Right patch
+    pygame.draw.ellipse(surface, organic_color, (18, 22, 9, 4))    # Center organic strip
     
-    # Draw main wings (delta wing design)
-    left_wing = [(5, 25), (18, 20), (18, 30), (8, 35)]
-    right_wing = [(35, 25), (22, 20), (22, 30), (32, 35)]
-    pygame.draw.polygon(surface, secondary_color, left_wing)
-    pygame.draw.polygon(surface, secondary_color, right_wing)
+    # Draw alien "wings" - more like fins or appendages
+    left_appendage = [(8, 22), (15, 18), (18, 25), (12, 28)]
+    right_appendage = [(37, 22), (30, 18), (27, 25), (33, 28)]
+    pygame.draw.polygon(surface, secondary_color, left_appendage)
+    pygame.draw.polygon(surface, secondary_color, right_appendage)
     
-    # Draw rear stabilizers
-    left_stabilizer = [(15, 35), (12, 45), (18, 40)]
-    right_stabilizer = [(25, 35), (28, 45), (22, 40)]
-    pygame.draw.polygon(surface, main_color, left_stabilizer)
-    pygame.draw.polygon(surface, main_color, right_stabilizer)
+    # Add spines/ridges on appendages
+    pygame.draw.polygon(surface, accent_color, [(8, 22), (10, 20), (12, 24)])
+    pygame.draw.polygon(surface, accent_color, [(37, 22), (35, 20), (33, 24)])
     
-    # Draw cockpit canopy
-    pygame.draw.ellipse(surface, (80, 80, 120), (17, 12, 6, 8))  # Dark blue canopy
-    pygame.draw.ellipse(surface, (120, 120, 160), (18, 13, 4, 6))  # Lighter reflection
+    # Draw alien propulsion - organic exhaust ports instead of engines
+    # Multiple smaller organic thrusters
+    pygame.draw.ellipse(surface, accent_color, (18, 35, 4, 6))   # Center exhaust
+    pygame.draw.ellipse(surface, accent_color, (23, 35, 4, 6))   # Center exhaust
+    pygame.draw.circle(surface, (255, 100, 100), (20, 38), 2)   # Left bio-thruster
+    pygame.draw.circle(surface, (255, 100, 100), (25, 38), 2)   # Right bio-thruster
     
-    # Draw engines/exhausts
-    pygame.draw.circle(surface, (200, 100, 100), (15, 42), 3)  # Left engine
-    pygame.draw.circle(surface, (200, 100, 100), (25, 42), 3)  # Right engine
-    pygame.draw.circle(surface, (255, 150, 150), (15, 42), 1)  # Engine glow
-    pygame.draw.circle(surface, (255, 150, 150), (25, 42), 1)  # Engine glow
+    # Add organic glow inside exhausts
+    pygame.draw.ellipse(surface, (255, 150, 100), (19, 36, 2, 4))
+    pygame.draw.ellipse(surface, (255, 150, 100), (24, 36, 2, 4))
     
-    # Add glow effect for high level enemies (simplified to avoid black shadows)
+    # Draw alien "eye" or sensor array instead of cockpit
+    pygame.draw.ellipse(surface, (50, 50, 80), (19, 12, 7, 8))   # Main eye
+    pygame.draw.ellipse(surface, accent_color, (21, 14, 3, 4))    # Pupil/sensor
+    pygame.draw.circle(surface, (255, 255, 255), (22, 15), 1)    # Highlight
+    
+    # Add smaller sensors around main eye
+    if level >= 2:
+        pygame.draw.circle(surface, accent_color, (17, 16), 1)   # Left sensor
+        pygame.draw.circle(surface, accent_color, (28, 16), 1)   # Right sensor
+    
+    # Add bio-luminescent details based on level
     if level >= 4 and glow_color:
-        # Instead of complex glow, add simple bright outline effect
-        glow_rgb = glow_color[:3]  # Extract RGB without alpha
+        glow_rgb = glow_color[:3]
         
-        # Draw multiple colored outlines for glow effect
-        pygame.draw.lines(surface, glow_rgb, True, fuselage_points, 1)
-        pygame.draw.lines(surface, glow_rgb, True, left_wing, 1)
-        pygame.draw.lines(surface, glow_rgb, True, right_wing, 1)
+        # Bio-luminescent veins/lines
+        pygame.draw.line(surface, glow_rgb, (22, 8), (22, 20), 1)    # Center vein
+        pygame.draw.line(surface, glow_rgb, (15, 15), (30, 15), 1)   # Horizontal vein
         
-        # Add bright spots at key points for energy effect
-        pygame.draw.circle(surface, glow_rgb, (20, 8), 2, 1)   # Nose glow
-        pygame.draw.circle(surface, glow_rgb, (15, 42), 4, 1)  # Left engine glow
-        pygame.draw.circle(surface, glow_rgb, (25, 42), 4, 1)  # Right engine glow
+        # Glowing spots along the hull
+        pygame.draw.circle(surface, glow_rgb, (18, 18), 1)
+        pygame.draw.circle(surface, glow_rgb, (27, 18), 1)
+        pygame.draw.circle(surface, glow_rgb, (22, 25), 1)
     
-    # Add level-specific details
+    # Add level-specific organic features
     if level >= 5:
-        # Weapon hardpoints
-        pygame.draw.circle(surface, accent_color, (10, 28), 2)
-        pygame.draw.circle(surface, accent_color, (30, 28), 2)
+        # Bio-weapon pods
+        pygame.draw.ellipse(surface, accent_color, (10, 25, 3, 4))
+        pygame.draw.ellipse(surface, accent_color, (32, 25, 3, 4))
     
     if level >= 7:
-        # Extra armor plating
-        pygame.draw.rect(surface, secondary_color, (17, 8, 6, 4))
-        # Sensor array
-        pygame.draw.circle(surface, accent_color, (20, 10), 1)
+        # Armored carapace
+        pygame.draw.polygon(surface, organic_color, [(20, 10), (25, 10), (24, 14), (21, 14)])
+        # Additional sensors
+        pygame.draw.circle(surface, accent_color, (15, 22), 1)
+        pygame.draw.circle(surface, accent_color, (30, 22), 1)
     
     if level >= 9:
-        # Advanced features - energy weapons
-        pygame.draw.line(surface, (255, 255, 100), (20, 5), (20, 12), 2)
-        # Thruster enhancement
-        pygame.draw.circle(surface, (255, 255, 0), (15, 42), 4)
-        pygame.draw.circle(surface, (255, 255, 0), (25, 42), 4)
+        # Energy weapon array
+        pygame.draw.line(surface, (255, 255, 150), (22, 8), (22, 12), 2)
+        # Enhanced bio-thrusters
+        pygame.draw.circle(surface, (255, 200, 100), (20, 38), 3)
+        pygame.draw.circle(surface, (255, 200, 100), (25, 38), 3)
     
-    # Strong outline for visibility against background
-    # Black outline first (shadow effect)
-    pygame.draw.lines(surface, (0, 0, 0), True, fuselage_points, 2)
-    pygame.draw.lines(surface, (0, 0, 0), True, left_wing, 2)
-    pygame.draw.lines(surface, (0, 0, 0), True, right_wing, 2)
+    # Flip enemy ship 180 degrees so engines point toward player (front-facing)
+    surface = pygame.transform.rotate(surface, 180)
     
-    # White highlight outline
-    pygame.draw.lines(surface, (255, 255, 255), True, fuselage_points, 1)
-    pygame.draw.lines(surface, (255, 255, 255), True, left_wing, 1)
-    pygame.draw.lines(surface, (255, 255, 255), True, right_wing, 1)
+    # After rotation, add organic outline for visibility against background
+    # Calculate rotated positions for new organic design (45x45 surface)
+    rotated_hull_points = []
+    for x, y in hull_points:
+        # Rotate point 180 degrees around center (22.5, 22.5)
+        new_x = 45 - x
+        new_y = 45 - y
+        rotated_hull_points.append((new_x, new_y))
     
-    # Add level indicator (small dots at bottom)
+    rotated_left_appendage = []
+    for x, y in left_appendage:
+        new_x = 45 - x
+        new_y = 45 - y
+        rotated_left_appendage.append((new_x, new_y))
+        
+    rotated_right_appendage = []
+    for x, y in right_appendage:
+        new_x = 45 - x
+        new_y = 45 - y
+        rotated_right_appendage.append((new_x, new_y))
+    
+    # Organic outline for visibility - softer than mechanical outlines
+    # Dark outline first (shadow effect) - thinner for organic look
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_hull_points, 2)
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_left_appendage, 1)
+    pygame.draw.lines(surface, (0, 0, 0), True, rotated_right_appendage, 1)
+    
+    # Subtle highlight outline - organic glow effect
+    glow_outline_color = accent_color if level < 4 else (glow_color[:3] if glow_color else accent_color)
+    pygame.draw.lines(surface, glow_outline_color, True, rotated_hull_points, 1)
+    
+    # Add level indicator (organic spots instead of geometric dots)
     for i in range(min(3, (level + 2) // 3)):
-        dot_x = 16 + i * 4
-        pygame.draw.circle(surface, (255, 255, 255), (dot_x, 47), 1)
-        pygame.draw.circle(surface, accent_color, (dot_x, 47), 1)
+        spot_x = 20 + i * 3  # Closer together, more organic
+        # Draw as small organic blobs instead of perfect circles
+        pygame.draw.ellipse(surface, accent_color, (spot_x, 2, 2, 3))  # Slightly oval
+        if level >= 4 and glow_color:
+            pygame.draw.ellipse(surface, glow_color[:3], (spot_x, 2, 2, 3), 1)  # Glow outline
     
     return surface
 
@@ -431,15 +470,73 @@ def create_player_speed_item():
     return item_surface
 
 def create_wingman():
-    """Create wingman surface"""
-    wingman_surface = pygame.Surface((20, 25), pygame.SRCALPHA)
+    """Create wingman surface - mini version of player fighter"""
+    # Smaller size: 35x30 (scaled down from player's 60x50)
+    surface = pygame.Surface((35, 30))
+    surface.set_colorkey((0, 0, 0))  # Set black as transparent
     
-    # Body
-    pygame.draw.polygon(wingman_surface, (0, 180, 255), [(10, 0), (0, 25), (20, 25)])
-    # Details
-    pygame.draw.polygon(wingman_surface, (200, 200, 200), [(10, 5), (5, 20), (15, 20)])
+    # Slightly different color scheme - lighter blue to distinguish from main player
+    main_color = (140, 190, 255)     # Lighter blue main body
+    secondary_color = (100, 150, 240)  # Lighter darker blue for details
+    accent_color = (220, 235, 255)    # Very light blue accents
+    engine_color = (255, 140, 120)    # Slightly lighter orange-red engines
     
-    return wingman_surface
+    # Draw main fuselage (simplified, scaled down from player design)
+    # Original: [(30, 5), (25, 15), (27, 38), (33, 38), (35, 15)]
+    # Scaled to ~58% size and adjusted for 35x30 surface
+    fuselage_points = [(17, 3), (14, 9), (15, 23), (20, 23), (21, 9)]
+    pygame.draw.polygon(surface, main_color, fuselage_points)
+    
+    # Draw nose cone (simplified)
+    # Original: [(30, 5), (27, 12), (33, 12)]
+    nose_points = [(17, 3), (15, 7), (19, 7)]
+    pygame.draw.polygon(surface, accent_color, nose_points)
+    
+    # Draw simplified swept wings
+    # Original left: [(8, 28), (27, 22), (27, 32), (12, 38)]
+    # Original right: [(52, 28), (33, 22), (33, 32), (48, 38)]
+    left_wing = [(5, 17), (15, 13), (15, 19), (7, 23)]
+    right_wing = [(30, 17), (20, 13), (20, 19), (28, 23)]
+    pygame.draw.polygon(surface, secondary_color, left_wing)
+    pygame.draw.polygon(surface, secondary_color, right_wing)
+    
+    # Draw simplified wing tips
+    pygame.draw.polygon(surface, accent_color, [(5, 17), (7, 18), (8, 21), (7, 23)])
+    pygame.draw.polygon(surface, accent_color, [(30, 17), (28, 18), (27, 21), (28, 23)])
+    
+    # Draw rear stabilizers (simplified)
+    # Original left: [(24, 38), (20, 48), (27, 42)]
+    # Original right: [(36, 38), (40, 48), (33, 42)]
+    left_stabilizer = [(14, 23), (12, 29), (15, 25)]
+    right_stabilizer = [(21, 23), (23, 29), (20, 25)]
+    pygame.draw.polygon(surface, main_color, left_stabilizer)
+    pygame.draw.polygon(surface, main_color, right_stabilizer)
+    
+    # Draw simplified cockpit canopy
+    # Original: (26, 14, 8, 12) with multiple layers
+    # Simplified to single layer for wingman
+    pygame.draw.ellipse(surface, (80, 120, 170), (15, 8, 5, 7))  # Dark canopy
+    pygame.draw.ellipse(surface, (170, 200, 240), (16, 9, 3, 4))   # Reflection
+    
+    # Draw twin engines (simplified)
+    # Original: (24, 42), (36, 42) with multiple glow layers
+    # Simplified for wingman
+    pygame.draw.circle(surface, engine_color, (14, 25), 2)  # Left engine
+    pygame.draw.circle(surface, engine_color, (21, 25), 2)  # Right engine
+    # Engine glow (simplified)
+    pygame.draw.circle(surface, (255, 180, 160), (14, 25), 1)
+    pygame.draw.circle(surface, (255, 180, 160), (21, 25), 1)
+    
+    # Add simple outline for visibility (thinner than main player)
+    # Black shadow outline
+    pygame.draw.lines(surface, (0, 0, 0), True, fuselage_points, 1)
+    pygame.draw.lines(surface, (0, 0, 0), True, left_wing, 1)
+    pygame.draw.lines(surface, (0, 0, 0), True, right_wing, 1)
+    
+    # Light highlight outline
+    pygame.draw.lines(surface, (255, 255, 255), True, fuselage_points, 1)
+    
+    return surface
 
 def create_tracking_missile():
     """Creates the surface for a tracking missile."""

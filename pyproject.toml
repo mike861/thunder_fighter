@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thunder-fighter"
-version = "0.2.0"
+version = "0.8.0"
 description = "A classic vertical scrolling space shooter game built with Pygame"
 readme = "README.md"
 license = {text = "GPL-2.0"}  # Consider changing to MIT or Apache-2.0
 authors = [
-    {name = "Mike", email = "mike861@example.com"},
+    {name = "Mike", email = "mike861.only@gmail.com"},
 ]
 maintainers = [
-    {name = "Mike", email = "mike861@example.com"},
+    {name = "Mike", email = "mike861.only@gmail.com"},
 ]
 keywords = ["game", "pygame", "shooter", "arcade", "space"]
 classifiers = [

@@ -48,7 +48,7 @@ def _draw_hit_effect(hit_obj):
 
 class Notification:
     """Class for displaying temporary notification messages"""
-    def __init__(self, text, duration=2000, color=WHITE, size=30, position='center'):
+    def __init__(self, text, duration=2000, color=WHITE, size=24, position='center'):
         try:
             # Use resource manager for better Chinese font support
             from thunder_fighter.utils.resource_manager import get_resource_manager
@@ -157,7 +157,7 @@ class Notification:
 
 class WarningNotification(Notification):
     """Special warning notification with flashing effect and longer duration"""
-    def __init__(self, text, duration=3000, color=YELLOW, size=36, position='top'):
+    def __init__(self, text, duration=3000, color=YELLOW, size=28, position='top'):
         super().__init__(text, duration, color, size, position)
         self.flash_speed = 200  # Flash speed (milliseconds)
         self.flash_colors = [YELLOW, RED]  # Flash colors
@@ -180,7 +180,7 @@ class WarningNotification(Notification):
 
 class AchievementNotification(Notification):
     """Achievement or positive event notification with green color and special effects"""
-    def __init__(self, text, duration=2500, color=GREEN, size=32, position='bottom'):
+    def __init__(self, text, duration=2500, color=GREEN, size=24, position='bottom'):
         super().__init__(text, duration, color, size, position)
         # Add any special effects or custom logic 
 

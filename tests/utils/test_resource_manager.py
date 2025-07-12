@@ -292,11 +292,11 @@ class TestResourceManager(unittest.TestCase):
                 
                 # Verify fonts were loaded
                 expected_fonts = [
-                    (None, 18),
-                    (None, 24),
-                    (None, 36),
-                    (None, 48),
-                    ('Arial', 24),
+                    (None, 16),  # Default small
+                    (None, 20),  # Default medium
+                    (None, 28),  # Default large
+                    (None, 32),  # Default extra large
+                    ('Arial', 20),  # System Arial
                 ]
                 
                 for font_name, size in expected_fonts:

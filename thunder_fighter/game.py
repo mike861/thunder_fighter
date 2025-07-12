@@ -54,6 +54,9 @@ from thunder_fighter.entities import (
     ProjectileFactory
 )
 
+# Import pause manager
+from thunder_fighter.utils.pause_manager import PauseManager
+
 
 class RefactoredGame:
     """
@@ -143,10 +146,13 @@ class RefactoredGame:
         
         # Game state variables
         self.running = True
-        self.paused = False
         self.game_level = INITIAL_GAME_LEVEL
         self.game_won = False
         self.game_over = False  # New: game over state flag
+        
+        # Initialize pause manager
+        self.pause_manager = PauseManager(cooldown_ms=200)
+        self.paused = False  # Keep for backward compatibility
         
         # Set initial background level
         self.background.set_level(self.game_level)
@@ -156,6 +162,10 @@ class RefactoredGame:
         self.enemy_spawn_timer = time.time()
         self.item_spawn_timer = time.time()
         self.boss_spawn_timer = time.time()
+        
+        # macOS keyboard focus recovery
+        self.last_input_validation_time = time.time()
+        self.input_validation_interval = 10.0  # Check every 10 seconds (reduced frequency)
         
         # Create initial enemies using factory (after game_start_time is set)
         for i in range(BASE_ENEMY_COUNT):
@@ -194,7 +204,8 @@ class RefactoredGame:
         # Reset game state
         self.game_over = False
         self.game_won = False
-        self.paused = False
+        self.pause_manager.reset()  # Reset pause manager
+        self.paused = False  # Keep for backward compatibility
         self.game_level = INITIAL_GAME_LEVEL
         
         # Reset timing
@@ -511,22 +522,71 @@ class RefactoredGame:
         self.player.launch_missile()
     
     def _handle_pause_input(self, event: InputEvent):
-        """Handle pause input events."""
-        self.paused = not self.paused
-        self._update_ui_state()
+        """Handle pause input events using PauseManager."""
+        # Use PauseManager for toggle logic
+        if not self.pause_manager.toggle_pause():
+            # Blocked by cooldown
+            return
+        
+        # Update backward compatibility flag
+        self.paused = self.pause_manager.is_paused
+        
+        # Check for state synchronization issues
+        input_manager_paused = self.input_manager.is_paused()
+        if self.paused != input_manager_paused:
+            logger.warning(f"Pause state mismatch detected: game={self.paused}, input_manager={input_manager_paused}")
+            # Force synchronization - trust game state
+            if self.paused:
+                self.input_manager.pause()
+            else:
+                self.input_manager.resume()
+            logger.info(f"Pause state synchronized: both now set to {self.paused}")
         
         if self.paused:
-            logger.debug("Game paused via input")
+            logger.info("Game paused via input")
+            
+            # Reduce audio volume
             self.sound_manager.set_music_volume(
-                max(0.1, self.sound_manager.music_volume / 2)
+                max(0.0, self.sound_manager.music_volume / 2)
             )
+            
+            # Pause input processing (only allow pause/system events)
             self.input_manager.pause()
         else:
-            logger.debug("Game resumed via input")
+            logger.info("Game resumed via input")
+            
+            # Restore audio volume
             self.sound_manager.set_music_volume(
                 min(1.0, self.sound_manager.music_volume * 2)
             )
+            
+            # Resume input processing
             self.input_manager.resume()
+        
+        self._update_ui_state()
+    
+    def get_game_time(self):
+        """Get pause-aware game time in minutes."""
+        # Use PauseManager to calculate game time
+        game_time_seconds = self.pause_manager.calculate_game_time(self.game_start_time)
+        return game_time_seconds / 60.0  # Convert to minutes
+    
+    def _validate_input_state(self):
+        """Validate input state to recover from macOS screenshot interference."""
+        current_time = time.time()
+        
+        # Only check periodically to avoid performance impact
+        if current_time - self.last_input_validation_time < self.input_validation_interval:
+            return
+            
+        self.last_input_validation_time = current_time
+        
+        # Force validation of input handler state
+        try:
+            self.input_manager.input_handler.force_key_state_validation()
+            logger.debug("Periodic input state validation completed")
+        except Exception as e:
+            logger.warning(f"Input state validation failed: {e}")
     
     def _handle_quit_input(self, event: InputEvent):
         """Handle quit input events."""
@@ -729,7 +789,7 @@ class RefactoredGame:
     
     def _update_ui_state(self):
         """Update UI state."""
-        game_time = (time.time() - self.game_start_time) / 60.0
+        game_time = self.get_game_time()
         
         self.ui_manager.update_game_state(
             level=self.game_level,
@@ -787,7 +847,7 @@ class RefactoredGame:
     
     def update(self):
         """Update game state."""
-        game_time = (time.time() - self.game_start_time) / 60.0
+        game_time = self.get_game_time()
         
         # Update UI
         self._update_ui_state()
@@ -795,6 +855,10 @@ class RefactoredGame:
         
         # Update flash effects
         flash_manager.update()
+        
+        # Note: Periodic input validation disabled due to performance impact
+        # Use F1 key to manually reset input state if needed after macOS screenshot
+        # self._validate_input_state()
         
         # Check sound system health
         if hasattr(self, '_last_sound_check'):
@@ -823,7 +887,8 @@ class RefactoredGame:
                 self.enemy_spawn_timer = time.time()
         
         # Boss spawning logic
-        if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
+        boss_elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
+        if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
             if not self.boss or not self.boss.alive():
                 self._spawn_boss_via_factory()
         
@@ -997,7 +1062,7 @@ class RefactoredGame:
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
         elif self.game_over or self.player.health <= 0:
-            game_time = (time.time() - self.game_start_time) / 60.0
+            game_time = self.get_game_time()
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)
         
         if self.paused:
