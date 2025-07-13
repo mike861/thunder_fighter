@@ -748,6 +748,20 @@ class RefactoredGame:
                     self.running = False
             return
 
+        # Handle victory state events separately
+        if self.game_won:
+            for event in pygame_events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        # Exit game
+                        self.running = False
+                    elif event.key == pygame.K_r:
+                        # Restart game
+                        self._restart_game()
+                elif event.type == pygame.QUIT:
+                    self.running = False
+            return
+
         # Process events through input manager for normal gameplay
         self.input_manager.update(pygame_events)
 
