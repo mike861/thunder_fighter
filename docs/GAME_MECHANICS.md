@@ -1,6 +1,6 @@
-# Project Details
+# Game Mechanics Guide
 
-This document contains more detailed information about the Thunder Fighter game mechanics and technical aspects.
+This document contains detailed information about Thunder Fighter's game mechanics, systems, and gameplay features.
 
 ## Related Documentation
 
@@ -173,142 +173,34 @@ The game uses the following sound and music files located in the `assets/` direc
 
 If these files are missing, the game will handle the missing sounds gracefully, logging a warning but not affecting gameplay.
 
-## Development Status
+## Implementation Status
 
-- ✅ Core gameplay mechanics implemented
-- ✅ Complete victory system with final boss battles
-- ✅ Enemy system with varied behaviors
-- ✅ Boss battles with unique patterns
-- ✅ Item drop and collection system
-- ✅ Enhanced sound system with stability improvements and independent audio controls
-- ✅ Comprehensive test coverage (350+ tests passing)
-- ✅ Refined visual feedback system (explosions vs. damage flashes)
-- ✅ Multi-language support (English, Chinese)
-- ✅ Dynamic UI with notifications and victory interface
-- ✅ Configurable game parameters (wingmen, enemy counts, etc.)
-- ✅ Victory screen with background preservation and elegant statistics display
-- ✅ **🛸 Distinct ship design system**: Complete visual differentiation between player and enemy forces
-  - ✅ Player ships: Modern blue fighter jets with geometric design
-  - ✅ Enemy ships: Organic alien biomechanical entities with progressive thematic evolution
-  - ✅ Front-facing orientation system for realistic space combat
-  - ✅ Size differentiation for enhanced gameplay clarity
-- ✅ **🎯 Boss spawn timing system**: Pause-aware boss generation with consistent timing
-  - ✅ Unified timing architecture across all game systems
-  - ✅ Accurate boss spawn intervals that exclude pause periods
-  - ✅ Comprehensive test coverage for timing edge cases and regression prevention
+### ✅ Completed Features
+- **Core Gameplay**: Player movement, shooting, collision detection
+- **Victory System**: Final boss battles and game completion
+- **Enemy System**: Multi-level enemies with progressive difficulty
+- **Boss Battles**: Three attack modes with health-based transitions
+- **Item System**: Five types of power-ups with configurable effects
+- **Sound System**: Background music, sound effects, and volume control
+- **Visual Effects**: Explosions, damage flashes, and dynamic backgrounds
+- **Multi-language Support**: English and Chinese with dynamic switching
+- **Wingman System**: Companion fighters with tracking missiles
+- **Level Progression**: Score-based and boss-defeat progression mechanics
 
-## Technical Details
+### 🔧 System Reliability
+- **Pause System**: Pause-aware timing calculations
+- **Input Handling**: Cross-platform input with fallback mechanisms  
+- **Font Rendering**: Optimized Chinese font support on macOS
+- **Test Coverage**: 375+ comprehensive tests across all systems
 
-- Object-Oriented Programming used for game entity design.
-- Pygame Sprite Groups manage game objects and collision detection.
-- Custom rendering system creates game visual effects.
-- Centralized `FlashEffectManager` for handling entity damage flashes.
-- Standardized logging system tracks game events.
-- **Enhanced Sound Manager**: Controls game audio playback with robust health-check, auto-recovery system, and independent audio channel management.
-- **🛸 Advanced Ship Rendering System**: 
-  - **Dual Design Architecture**: Separate rendering pipelines for player (geometric/tech) and enemy (organic/alien) ships
-  - **Progressive Alien Themes**: Dynamic color scheme selection based on enemy level progression
-  - **Bio-luminescent Effects**: Organic glow systems for high-level alien entities
-  - **Orientation System**: 180-degree rotation system ensuring front-facing combat positioning
-  - **Size Optimization**: Different sprite dimensions (60×50 vs 45×45) for enhanced visual distinction
-- **Victory System Architecture**:
-  - State-based victory detection with final boss recognition
-  - Duplicate prevention mechanisms for victory processing
-  - Background preservation rendering system
-  - Semi-transparent overlay composition
-  - Comprehensive statistics collection and display
-- **🎨 Dynamic Background System Architecture**:
-  - Double buffer rendering pipeline with lazy initialization
-  - Target-based element preparation for smooth transitions
-  - Cubic bezier easing function for professional-grade animations
-  - Hardware-accelerated alpha blending using SDL2 blend modes
-  - Modular special effects system with alpha support
-  - Level-specific theme management with progressive difficulty visualization
-- **Advanced Boss System Architecture**:
-  - State-based attack pattern management with health-triggered transitions
-  - Dynamic bullet generation with mode-specific properties and targeting
-  - Multi-layer visual effects system with pre-computed flash sequences
-  - Adaptive movement boundaries based on game progression
-  - Comprehensive collision detection with mask-based precision
-  - Real-time health bar rendering with mode indicators
-- **Boss Bullet System**: 
-  - Factory pattern for mode-specific bullet creation
-  - Dynamic size and color adjustment based on attack mode
-  - Player tracking algorithms for final mode bullets. The bullet's vertical speed is capped to ensure the player can still dodge them.
-  - Multi-layer glow effects for enhanced visual appeal.
-- **UI System Enhancements**:
-  - Notification deduplication system
-  - Background-preserving overlay rendering
-  - Multi-layer transparency effects
-  - Responsive layout management
-- Modular architecture allows for easy extension and maintenance.
-- **Test-Driven Development**: Extensive test suite with 350+ tests covering all game mechanics, victory conditions, collision systems, edge cases, timing systems, and architectural improvements.
-- **Localization system** for multi-language support.
+## Related Documentation
 
-## Recent Technical Improvements
+- **[Architecture Guide](ARCHITECTURE.md)** - System architecture and design patterns
+- **[Technical Details](TECHNICAL_DETAILS.md)** - Technical implementations and optimizations
+- **[Development Roadmap](DEVELOPMENT_ROADMAP.md)** - Development roadmap and planned features
+- **[Localization Guide](LOCALIZATION.md)** - Multi-language support guide
+- **[Development History](DEVELOPMENT_HISTORY.md)** - Project evolution timeline
 
-### macOS Screenshot Interference Resolution
-- **Problem Identified**: macOS screenshot function (`Shift+Cmd+5` with delayed capture) interfered with Thunder Fighter's multi-layer input processing system, causing P (pause) and L (language) keys to become non-functional while movement and shooting keys remained operational.
-- **Root Cause Analysis**: The complex input chain (pygame → InputHandler → InputManager → Game callbacks) created vulnerability points where macOS system functions could disrupt event processing for specific keys.
-- **Solution Implemented**: Hybrid input processing architecture in `thunder_fighter/input/input_handler.py`:
-  - **Primary Processing**: Standard Thunder Fighter input chain for normal operation
-  - **Intelligent Fallback Detection**: Monitors critical keys (P, L) for processing failures
-  - **Automatic Event Generation**: Creates correct events directly when normal processing fails
-  - **Seamless Recovery**: Users experience no functional difference during interference scenarios
-- **Technical Implementation**: `_process_single_event_with_fallback()` method provides transparent operation with comprehensive logging
-- **Manual Recovery**: F1 key provides manual input state reset for edge cases
+---
 
-### Enhanced Pause System Reliability
-- **Pause-Aware Timing**: Game time calculation now properly excludes pause periods using `get_game_time()` method with accumulated pause duration tracking
-- **Robust State Synchronization**: Enhanced pause/resume logic with cooldown mechanisms and comprehensive state validation
-- **Reliability Improvements**: Fixed intermittent pause failures after repeated pause/resume cycles through improved state management and deduplication systems
-- **Comprehensive Logging**: Added detailed pause/resume logging for debugging and monitoring state transitions
-
-### Font System Optimization
-- **Enhanced Chinese Font Support**: Resolved "tofu blocks" (□□□) display issues on macOS through TTF-based font loading system
-- **Complete Localization Coverage**: All UI elements now support dynamic language switching including level transitions and boss status displays
-- **ResourceManager Integration**: Optimized font loading with platform-specific optimizations and automatic fallback mechanisms
-
-### Interface Testability Improvements (Plan A Implementation)
-- **PauseManager Component**: Extracted pause logic from RefactoredGame into dedicated `thunder_fighter/utils/pause_manager.py`
-  - **Dependency Injection**: Clean interface with injectable timing dependencies for testing
-  - **Pause-Aware Calculations**: Comprehensive timing system that correctly excludes pause periods
-  - **Statistics Tracking**: PauseStats dataclass provides complete pause session information
-  - **Cooldown Management**: Configurable cooldown mechanisms prevent rapid pause toggling
-  - **Test Coverage**: 16 comprehensive tests covering all functionality and edge cases
-- **Enhanced Localization System**: Implemented loader abstraction pattern in `thunder_fighter/localization/loader.py`
-  - **FileLanguageLoader**: Production implementation reading from JSON files
-  - **MemoryLanguageLoader**: Testing implementation using in-memory dictionaries
-  - **CachedLanguageLoader**: Performance decorator with configurable caching
-  - **Dependency Injection**: LanguageManager now accepts loader instances for better testability
-  - **FontManager Integration**: Language-specific font management in `thunder_fighter/localization/font_support.py`
-  - **Test Coverage**: 39 comprehensive tests covering all loader implementations and integration scenarios
-- **Architectural Benefits**:
-  - **Better Separation of Concerns**: Logic extracted into focused, single-responsibility classes
-  - **Enhanced Testability**: Clean interfaces enable easier unit testing and mocking
-  - **Improved Maintainability**: Clear dependencies make future changes safer and more predictable
-  - **Backward Compatibility**: All existing functionality preserved while improving internal structure
-
-### Boss Spawn Timing Fix (Critical Bug Resolution)
-- **Problem Identified**: Boss generation interval calculation used `time.time()` direct comparison without excluding pause periods, causing boss spawning inconsistencies during paused gameplay
-- **Root Cause Analysis**: Boss spawning logic in `thunder_fighter/game.py:890-891` didn't leverage the existing pause-aware timing system that was already implemented for display time calculations
-- **Solution Implemented**: Replaced direct time comparison with pause-aware calculation:
-  ```python
-  # Before (problematic):
-  if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
-  
-  # After (fixed):
-  boss_elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
-  if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
-  ```
-- **Technical Benefits**:
-  - **Consistent Timing**: Boss spawning now uses the same pause-aware timing system as display time calculations
-  - **Accurate Intervals**: Boss generation intervals correctly exclude pause periods, maintaining intended gameplay balance
-  - **Unified Architecture**: Eliminates timing calculation inconsistencies across different game systems
-- **Regression Prevention**: Added comprehensive test suite with 18 specialized test cases covering:
-  - Basic pause-aware boss spawn timing scenarios
-  - Multiple pause/resume cycles with boss generation
-  - Edge cases and boundary conditions
-  - Integration scenarios with realistic gameplay patterns
-  - Error handling and system resilience testing
-- **Test Coverage**: All test cases verify that boss spawn timing correctly excludes pause periods and maintains consistent behavior across different pause scenarios 
+*For technical implementation details, platform-specific optimizations, and architectural improvements, see [Technical Details](TECHNICAL_DETAILS.md).* 

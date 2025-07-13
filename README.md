@@ -27,7 +27,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 
 ## 📚 Documentation
 
-- **[Game Mechanics Guide](docs/DETAILS.md)** - Detailed game systems and mechanics
+- **[Game Mechanics Guide](docs/GAME_MECHANICS.md)** - Detailed game systems and mechanics
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - System architecture and design patterns
 - **[Technical Details](docs/TECHNICAL_DETAILS.md)** - Technical implementations and optimizations
 - **[Development Roadmap](docs/DEVELOPMENT_ROADMAP.md)** - Development roadmap and planned features
@@ -112,62 +112,18 @@ Starting from game level 3, a new power-up item may appear. Collecting this item
 - **Limits**: You can have a maximum of two wingmen at a time
 - **Configuration**: The initial number of wingmen, maximum number, and formation spacing are all configurable in `thunder_fighter/constants.py`
 
-## Configuration Management
+## Configuration
 
-Thunder Fighter includes a comprehensive configuration system that allows you to customize various aspects of the game.
-
-### Configuration Tool
-
-Use the built-in configuration tool to manage settings:
+Thunder Fighter uses a JSON-based configuration system:
 
 ```bash
-# Show current configuration
+# View and modify settings
 python -m thunder_fighter.utils.config_tool show
-
-# Set music volume to 80%
 python -m thunder_fighter.utils.config_tool set sound music_volume 0.8
-
-# Enable developer mode
-python -m thunder_fighter.utils.config_tool set debug dev_mode true
-
-# Set difficulty to hard
-python -m thunder_fighter.utils.config_tool set gameplay difficulty hard
-
-# Reset all settings to defaults
 python -m thunder_fighter.utils.config_tool reset
 ```
 
-### Available Settings
-
-| Section | Setting | Description | Default |
-|---------|---------|-------------|---------|
-| **Sound** | `music_volume` | Background music volume (0.0-1.0) | 0.5 |
-| | `sound_volume` | Sound effects volume (0.0-1.0) | 0.7 |
-| | `music_enabled` | Enable/disable music | true |
-| | `sound_enabled` | Enable/disable sound effects | true |
-| **Display** | `fullscreen` | Enable fullscreen mode | false |
-| | `screen_scaling` | Screen scaling factor | 1.0 |
-| **Gameplay** | `difficulty` | Game difficulty (easy/normal/hard) | normal |
-| | `initial_lives` | Starting number of lives | 3 |
-| **Debug** | `dev_mode` | Enable developer mode | false |
-| | `log_level` | Logging level | INFO |
-
-### Configuration File
-
-Settings are automatically saved to `~/.thunder_fighter/config.json`. You can also edit this file directly if preferred.
-
-### Advanced Configuration
-
-```bash
-# Adjust Log Level (Optional)
-# Set the THUNDER_FIGHTER_LOG_LEVEL environment variable
-# Windows
-set THUNDER_FIGHTER_LOG_LEVEL=DEBUG
-python main.py
-
-# Linux/macOS
-THUNDER_FIGHTER_LOG_LEVEL=DEBUG python main.py
-```
+Settings are saved to `~/.thunder_fighter/config.json`. For detailed configuration options, see [Technical Details](docs/TECHNICAL_DETAILS.md#configuration-options-reference).
 
 ## Architecture Overview
 
@@ -178,7 +134,7 @@ Thunder Fighter uses modern software engineering patterns:
 - **State management** for game flow
 - **Modular UI components** with single responsibility
 
-See [Architecture Guide](docs/ARCHITECTURE.md) for detailed technical documentation.
+See [Architecture Guide](docs/ARCHITECTURE.md) for detailed technical documentation and [code organization](docs/ARCHITECTURE.md#code-organization).
 
 ## Testing
 
@@ -209,7 +165,7 @@ python -m pytest tests/systems/ -v       # Systems architecture tests
 ```
 thunder_fighter/
 ├── docs/                     # Documentation
-│   ├── DETAILS.md           # Game mechanics guide
+│   ├── GAME_MECHANICS.md    # Game mechanics guide
 │   ├── ARCHITECTURE.md      # System architecture
 │   ├── TECHNICAL_DETAILS.md # Technical implementations
 │   └── ...
@@ -237,20 +193,6 @@ See [Technical Details](docs/TECHNICAL_DETAILS.md) for complete technical inform
 
 ## Development
 
-### Configuration
-
-```bash
-# View current settings
-python -m thunder_fighter.utils.config_tool show
-
-# Modify settings
-python -m thunder_fighter.utils.config_tool set sound music_volume 0.8
-python -m thunder_fighter.utils.config_tool set debug dev_mode true
-
-# Reset to defaults
-python -m thunder_fighter.utils.config_tool reset
-```
-
 ### Contributing
 
 1. Fork the repository
@@ -262,6 +204,6 @@ python -m thunder_fighter.utils.config_tool reset
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL License - see the [LICENSE](LICENSE) file for details.
 
 ## Screenshots

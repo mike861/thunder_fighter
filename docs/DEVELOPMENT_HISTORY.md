@@ -221,6 +221,145 @@ This document chronicles the evolution of Thunder Fighter from its initial imple
 3. **Performance Monitoring**: Regular benchmarking and optimization
 4. **Security Audits**: Regular dependency and code security reviews
 
+## Phase 4: Documentation Organization and Clarity
+
+**Objective**: Reorganize project documentation with distinct responsibilities and improved clarity.
+
+### Documentation Structure Improvements
+
+**File Naming Optimization**:
+- **DETAILS.md → GAME_MECHANICS.md**: Renamed for clearer purpose identification
+- **Clear Separation**: Each documentation file now has distinct, non-overlapping responsibilities
+- **Cross-Reference Updates**: All English documentation updated with correct file references
+
+**Document Responsibilities**:
+- **README.md** - Main project overview and quick start guide
+- **GAME_MECHANICS.md** - Pure game mechanics guide (victory, boss, items systems)
+- **TECHNICAL_DETAILS.md** - Technical implementations and platform-specific optimizations
+- **ARCHITECTURE.md** - System architecture, design patterns, and detailed code organization
+- **DEVELOPMENT_ROADMAP.md** - Development planning and implementation roadmap
+
+**Code Organization Documentation**:
+- **Detailed Directory Structure**: Complete code organization added to ARCHITECTURE.md
+- **File Responsibilities**: Clear explanation of each module and file's purpose
+- **Architecture Benefits**: Documentation of modular design advantages
+- **Navigation Links**: README.md includes direct links to detailed code organization
+
+### Documentation Quality Improvements
+
+**Enhanced Architecture Documentation**:
+- Added comprehensive "Code Organization" section with complete directory tree
+- Detailed explanation of core modules and their responsibilities
+- Clear file-level documentation for all major components
+- Architecture benefits and design rationale
+
+**Improved Navigation**:
+- Clear links from README.md to detailed documentation sections
+- Consistent cross-referencing between related documents
+- Hierarchical information presentation (overview → details)
+
+**CLAUDE.md Streamlining**:
+- **Problem**: 480-line guidance document with 67% redundant content
+- **Solution**: Streamlined to 160 lines focusing on essential development guidance
+- **Impact**: Improved context efficiency while maintaining all necessary information
+
+**Benefits Achieved**:
+- ✅ **Clearer Purpose**: Each document has a clearly defined scope
+- ✅ **Better Navigation**: Developers can quickly find relevant information
+- ✅ **Reduced Redundancy**: No duplicate information across documents
+- ✅ **Maintainability**: Changes require updates in fewer places
+- ✅ **Developer Experience**: New contributors can understand project structure quickly
+
+## Phase 5: Interface Testability Improvements
+
+**Objective**: Enhance code testability through interface design and dependency injection patterns.
+
+### Key Improvements
+
+**PauseManager Component**: Extracted pause logic from main game into dedicated component
+- **Dependency Injection**: Clean interface with injectable timing dependencies for testing
+- **Pause-Aware Calculations**: Comprehensive timing system that correctly excludes pause periods
+- **Statistics Tracking**: PauseStats dataclass provides complete pause session information
+- **Cooldown Management**: Configurable cooldown mechanisms prevent rapid pause toggling
+- **Test Coverage**: 16 comprehensive tests covering all functionality and edge cases
+
+**Enhanced Localization System**: Implemented loader abstraction pattern
+- **FileLanguageLoader**: Production implementation reading from JSON files
+- **MemoryLanguageLoader**: Testing implementation using in-memory dictionaries
+- **CachedLanguageLoader**: Performance decorator with configurable caching
+- **Dependency Injection**: LanguageManager now accepts loader instances for better testability
+- **FontManager Integration**: Language-specific font management system
+- **Test Coverage**: 39 comprehensive tests covering all loader implementations
+
+**Architectural Benefits**:
+- **Better Separation of Concerns**: Logic extracted into focused, single-responsibility classes
+- **Enhanced Testability**: Clean interfaces enable easier unit testing and mocking
+- **Improved Maintainability**: Clear dependencies make future changes safer and more predictable
+- **Backward Compatibility**: All existing functionality preserved while improving internal structure
+
+## Phase 6: Critical Bug Fixes and Platform Optimization
+
+### macOS Screenshot Interference Resolution
+
+**Problem Identified**: macOS screenshot function (`Shift+Cmd+5` with delayed capture) interfered with Thunder Fighter's multi-layer input processing system, causing P (pause) and L (language) keys to become non-functional.
+
+**Root Cause Analysis**: The complex input chain (pygame → InputHandler → InputManager → Game callbacks) created vulnerability points where macOS system functions could disrupt event processing for specific keys.
+
+**Solution Implemented**: Hybrid input processing architecture in `thunder_fighter/systems/input/handler.py`:
+- **Primary Processing**: Standard Thunder Fighter input chain for normal operation
+- **Intelligent Fallback Detection**: Monitors critical keys (P, L) for processing failures
+- **Automatic Event Generation**: Creates correct events directly when normal processing fails
+- **Seamless Recovery**: Users experience no functional difference during interference scenarios
+
+**Technical Implementation**: `_process_single_event_with_fallback()` method provides transparent operation with comprehensive logging
+
+### Boss Spawn Timing Fix (Critical Bug Resolution)
+
+**Problem Identified**: Boss generation interval calculation used `time.time()` direct comparison without excluding pause periods, causing boss spawning inconsistencies during paused gameplay.
+
+**Root Cause Analysis**: Boss spawning logic in `thunder_fighter/game.py:890-891` didn't leverage the existing pause-aware timing system that was already implemented for display time calculations.
+
+**Solution Implemented**: Replaced direct time comparison with pause-aware calculation:
+```python
+# Before (problematic):
+if self.game_level > 1 and time.time() - self.boss_spawn_timer > BOSS_SPAWN_INTERVAL:
+
+# After (fixed):
+boss_elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
+if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
+```
+
+**Technical Benefits**:
+- **Consistent Timing**: Boss spawning now uses the same pause-aware timing system as display time calculations
+- **Accurate Intervals**: Boss generation intervals correctly exclude pause periods, maintaining intended gameplay balance
+- **Unified Architecture**: Eliminates timing calculation inconsistencies across different game systems
+
+**Regression Prevention**: Added comprehensive test suite with 18 specialized test cases covering:
+- Basic pause-aware boss spawn timing scenarios
+- Multiple pause/resume cycles with boss generation
+- Edge cases and boundary conditions
+- Integration scenarios with realistic gameplay patterns
+
+### Code Quality and Python 3.7 Compatibility
+
+**Configuration Modernization**: Updated `pyproject.toml` to use `[tool.ruff.lint]` section, resolving deprecated warnings
+
+**Python 3.7 Compatibility**: 
+- Replaced walrus operator (`:=`) with compatible assignments in `systems/input/adapters/pygame_adapter.py` and `systems/input/core/processor.py`
+- Ensured all code constructs work with Python 3.7+
+
+**Import Cleanup**: 
+- Replaced star imports (`from module import *`) with specific imports in `graphics/renderers.py` and `graphics/effects/__init__.py`
+- Improved code clarity and reduced namespace pollution
+
+**Exception Handling**: Fixed bare `except:` clauses to use `except Exception:` in `utils/resource_manager.py` and `utils/sound_manager.py`
+
+**Dead Code Removal**: Eliminated unused variables and imports to improve code quality
+
+**Test Fix**: Updated boss test mock path from `bullets.create_boss_bullet` to `renderers.create_boss_bullet`
+
+**Results**: All 375 tests passing with zero regressions after code quality improvements
+
 ## Conclusion
 
 Thunder Fighter has evolved from a functional game to a modern, well-architected Python application that serves as an excellent example of:
@@ -229,6 +368,8 @@ Thunder Fighter has evolved from a functional game to a modern, well-architected
 - **Comprehensive Testing**: Complete test coverage with modern practices
 - **Professional Standards**: Contemporary Python development conventions
 - **Maintainable Code**: Clear separation of concerns and responsibilities
+- **Documentation Excellence**: Clear, hierarchical documentation structure
+- **Platform Optimization**: Robust cross-platform compatibility with platform-specific fixes
 
 The project's evolution demonstrates the value of systematic refactoring, comprehensive testing, and adherence to modern development practices. The current architecture provides a solid foundation for continued development and feature enhancement.
 

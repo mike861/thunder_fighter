@@ -244,7 +244,7 @@ ENEMY_LEVEL_SYSTEM = {
 1. **Constants Organization**: Group related constants into dictionaries for better organization
 2. **Backward Compatibility**: Ensure all changes maintain existing functionality
 3. **Testing**: Add tests for any new configuration systems
-4. **Documentation**: Update DETAILS.md with new configurable parameters
+4. **Documentation**: Update configuration documentation in TECHNICAL_DETAILS.md
 
 ### Configuration Philosophy
 - **Centralization**: Move hardcoded values to constants.py
