@@ -119,3 +119,32 @@ SCORE_THRESHOLD = 200  # Generate an item every 200 points
 # Game balance
 MAX_GAME_LEVEL = 8  # Maximum game level
 INITIAL_GAME_LEVEL = 1  # Starting game level
+
+# Dynamic Item Weight System Configuration
+ITEM_WEIGHT_SYSTEM = {
+    # Base probabilities for each item type
+    "BASE_WEIGHTS": {"health": 20, "bullet_speed": 18, "bullet_path": 15, "player_speed": 12, "wingman": 10},
+    # Phase 1: Core intelligent weights
+    "HEALTH_ADAPTATION": {
+        "critical_threshold": 0.3,  # Below 30% health is critical
+        "injured_threshold": 0.7,  # Below 70% health is injured
+        "critical_multiplier": 2.5,  # 2.5x weight when critical
+        "injured_multiplier": 1.5,  # 1.5x weight when injured
+        "healthy_multiplier": 0.5,  # 0.5x weight when healthy
+    },
+    "LEVEL_GATING": {
+        "wingman_min_level": 3,  # Wingman only available from level 3+
+    },
+    "ABILITY_CAPS": {
+        "bullet_speed_max": BULLET_SPEED_MAX,
+        "bullet_paths_max": BULLET_PATHS_MAX,
+        "player_speed_max": PLAYER_MAX_SPEED,
+        "wingman_max": PLAYER_MAX_WINGMEN,
+    },
+    # Phase 2: Duplicate prevention
+    "DUPLICATE_PREVENTION": {
+        "min_same_item_interval": 15,  # Minimum 15 seconds between same items
+        "burst_penalty_multiplier": 0.2,  # Reduce weight to 20% if too recent
+        "max_consecutive_same": 2,  # Maximum 2 consecutive same items
+    },
+}

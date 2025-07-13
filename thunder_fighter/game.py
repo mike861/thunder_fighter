@@ -384,7 +384,9 @@ class RefactoredGame:
     def _spawn_item_via_factory(self, game_time: float) -> bool:
         """Spawn an item using the factory pattern."""
         try:
-            item = self.item_factory.create_random_item(self.all_sprites, self.items, self.player)
+            item = self.item_factory.create_random_item(
+                self.all_sprites, self.items, self.player, game_level=self.game_level
+            )
 
             if item:
                 # Emit event
@@ -392,8 +394,11 @@ class RefactoredGame:
                     GameEvent(GameEventType.ITEM_SPAWNED, {"item": item, "game_time": game_time})
                 )
 
-                logger.debug(f"Factory spawned item at game time {game_time:.1f}m")
+                logger.debug(f"Factory spawned intelligent item at game time {game_time:.1f}m, level {self.game_level}")
                 return True
+            else:
+                logger.debug("No item spawned (intelligent weight system decision)")
+                return False
         except Exception as e:
             logger.error(f"Error spawning item via factory: {e}", exc_info=True)
 

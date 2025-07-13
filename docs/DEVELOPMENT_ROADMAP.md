@@ -23,33 +23,39 @@ This document outlines planned improvements, missing implementations, and techni
 
 **Estimated Effort**: 2-4 hours
 
-#### Dynamic Item Weight System
-**Status**: Missing Implementation  
+#### Dynamic Item Weight System (Phase 1 & 2)
+**Status**: Ready for Implementation  
 **Current State**: Simple `random.choice()` selection  
-**Required Implementation**:
-- Implement weight-based item selection in `ItemFactory.create_random_item()`
-- Add configurable weight system that adjusts based on:
-  - Player health percentage
-  - Current game level
-  - Time since last item of each type
-  - Player progression needs
+**Implementation Strategy**: Phased approach for risk management
+
+**Phase 1 - Core Intelligent Weights** (Current Sprint):
+- Health-based weight adaptation (critical/injured/healthy states)
+- Level-based item gating (Wingman at Level 3+)
+- Ability cap detection (prevent useless items)
+
+**Phase 2 - Duplicate Prevention** (Current Sprint):
+- Time-based same-item suppression
+- Burst prevention mechanisms
+- Cooling period implementation
 
 **Files to Modify**:
 - `thunder_fighter/entities/items/item_factory.py` (line 69)
-- `thunder_fighter/constants.py` (add ITEM_WEIGHTS configuration)
+- `thunder_fighter/constants.py` (add BASIC_ITEM_WEIGHTS configuration)
+- `thunder_fighter/game.py` (pass game_level parameter)
 
-**Implementation Plan**:
+**Basic Configuration**:
 ```python
-ITEM_WEIGHTS = {
-    'HEALTH_ITEM': {'base': 15, 'health_modifier': 2.0},
-    'BULLET_SPEED_ITEM': {'base': 12, 'level_modifier': 0.8},
-    'BULLET_PATH_ITEM': {'base': 10, 'progression_modifier': 1.2},
-    'PLAYER_SPEED_ITEM': {'base': 8, 'balance_modifier': 1.0},
-    'WINGMAN_ITEM': {'base': 5, 'level_threshold': 3}
+BASIC_ITEM_WEIGHTS = {
+    'health_critical_threshold': 0.3,
+    'health_boost_multiplier': 2.5,
+    'wingman_level_requirement': 3,
+    'min_same_item_interval': 15
 }
 ```
 
-**Estimated Effort**: 4-6 hours
+**Advanced Implementation**: See [Advanced Item System Strategy](ADVANCED_ITEM_SYSTEM.md) for comprehensive Phase 3-5 roadmap
+
+**Estimated Effort**: 3-5 hours (Phase 1-2 only)
 
 ### 2. **Critical Configuration Improvements**
 

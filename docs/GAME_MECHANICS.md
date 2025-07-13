@@ -59,12 +59,49 @@ This document contains detailed information about Thunder Fighter's game mechani
 - **Boss Bullets**: Special large bullets with higher damage.
 
 ### Item System
-- **Health Item**: Restores player health.
-- **Bullet Speed Item**: Increases player bullet speed.
-- **Bullet Path Item**: Increases the number of player shooting paths.
-- **Player Speed Item**: Increases the player's movement speed.
-- **Wingman Item**: Adds a wingman to fight alongside the player.
-- **Item Generation**: Items are randomly generated as the game progresses and points are earned by defeating enemies.
+- **Health Item**: Restores player health (10 points).
+- **Bullet Speed Item**: Increases player bullet speed (up to maximum of 20).
+- **Bullet Path Item**: Increases the number of player shooting paths (up to maximum of 4).
+- **Player Speed Item**: Increases the player's movement speed (up to maximum of 15).
+- **Wingman Item**: Adds a wingman to fight alongside the player (maximum 2 wingmen, available from level 3+).
+
+#### Intelligent Item Distribution System
+The game features an adaptive item distribution system that replaces simple random generation with context-aware algorithms:
+
+**Base Item Probabilities**:
+- Health Item: 20% (survival priority)
+- Bullet Speed Item: 18% (attack enhancement)
+- Bullet Path Item: 15% (firepower increase)
+- Player Speed Item: 12% (mobility boost)
+- Wingman Item: 10% (advanced support)
+
+**Smart Weight Adjustments**:
+
+*Health-Based Adaptation*:
+- **Critical State** (≤30% health): Health item probability ×2.5
+- **Injured State** (30-70% health): Health item probability ×1.5
+- **Healthy State** (>70% health): Health item probability ×0.5
+
+*Level-Based Item Gating*:
+- **Levels 1-2**: Wingman items unavailable (0% probability)
+- **Level 3+**: Full wingman availability
+
+*Ability Cap Detection*:
+- Items automatically disabled when player reaches maximum values
+- Prevents useless item drops when abilities are fully upgraded
+
+*Duplicate Prevention System*:
+- Same item type within 15 seconds receives 80% probability reduction
+- Maximum 2 consecutive identical items before automatic suppression
+- Prevents item flooding while maintaining variety
+
+**Intelligent Benefits**:
+- **Contextual Relevance**: Items appear when most needed (health during combat, upgrades during progression)
+- **Strategic Depth**: Players can anticipate item patterns based on their current state
+- **Balance Maintenance**: Prevents both item drought and oversaturation scenarios
+- **Difficulty Adaptation**: System responds to player performance and game progression
+
+For advanced implementation details, see [Advanced Item System Strategy](../ADVANCED_ITEM_SYSTEM.md).
 
 ### Boss System
 - **Boss Levels**: Bosses are dynamically generated based on game progression. Their level is calculated as `max(1, (game_level + 1) // 2)`. This means boss levels increase as the player advances through the game's 10 levels.
