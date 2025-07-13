@@ -16,6 +16,7 @@ Use arrow keys or WASD to control the aircraft movement, space key to shoot bull
 from thunder_fighter.game import RefactoredGame
 from thunder_fighter.utils.logger import logger
 
+
 def main():
     """Main entry point for the refactored game"""
     try:
@@ -30,5 +31,6 @@ def main():
     finally:
         logger.info("Game ended")
 
+
 if __name__ == "__main__":
-    main() 
+    main()

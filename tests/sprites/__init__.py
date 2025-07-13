@@ -1,1 +1,1 @@
-# Ensure tests/sprites is a valid Python package 
+# Ensure tests/sprites is a valid Python package

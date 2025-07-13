@@ -1,21 +1,34 @@
 """
-Entities Package
+Game Entity Module
 
-This package provides entity factories and creation patterns for the Thunder Fighter game.
-It centralizes entity creation logic and provides consistent interfaces for creating
-game objects like enemies, bosses, items, and projectiles.
+Contains all game object definitions and factory classes.
+Refactored entity system organized by type.
 """
 
-from .entity_factory import EntityFactory
-from .enemy_factory import EnemyFactory
-from .boss_factory import BossFactory
-from .item_factory import ItemFactory
-from .projectile_factory import ProjectileFactory
+# Base entity classes
+from .base import Entity, EntityFactory, GameObject, LivingEntity, MovableEntity
+from .enemies.boss_factory import BossFactory
+
+# Factory classes
+from .enemies.enemy_factory import EnemyFactory
+from .items.item_factory import ItemFactory
+
+# Primary entity classes (frequently used)
+from .player.player import Player
+from .projectiles.projectile_factory import ProjectileFactory
 
 __all__ = [
-    'EntityFactory',
-    'EnemyFactory',
-    'BossFactory', 
-    'ItemFactory',
-    'ProjectileFactory'
-] 
+    # Base entity classes
+    "GameObject",
+    "Entity",
+    "EntityFactory",
+    "MovableEntity",
+    "LivingEntity",
+    # Factory classes
+    "EnemyFactory",
+    "BossFactory",
+    "ItemFactory",
+    "ProjectileFactory",
+    # Primary entity classes
+    "Player",
+]

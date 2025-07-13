@@ -1,1 +1,1 @@
-"""Graphics module tests""" 
+"""Graphics module tests"""

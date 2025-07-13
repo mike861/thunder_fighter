@@ -1,15 +1,23 @@
-import pytest
-import pygame
 from unittest.mock import MagicMock, patch
-from thunder_fighter.sprites.player import Player
+
+import pygame
+import pytest
+
 from thunder_fighter.constants import (
-    PLAYER_HEALTH, PLAYER_SPEED, BULLET_SPEED_DEFAULT, BULLET_PATHS_DEFAULT,
-    PLAYER_MAX_SPEED, BULLET_SPEED_MAX, BULLET_PATHS_MAX
+    BULLET_PATHS_DEFAULT,
+    BULLET_PATHS_MAX,
+    BULLET_SPEED_DEFAULT,
+    BULLET_SPEED_MAX,
+    PLAYER_HEALTH,
+    PLAYER_MAX_SPEED,
+    PLAYER_SPEED,
 )
+from thunder_fighter.entities.player.player import Player
 
 # Mock pygame for testing
 pygame.init()
 pygame.display.set_mode((800, 600))
+
 
 @pytest.fixture
 def mock_game():
@@ -20,6 +28,7 @@ def mock_game():
     game.enemies_group.sprites.return_value = []
     return game
 
+
 @pytest.fixture
 def mock_sprite_groups():
     """Create mock sprite groups"""
@@ -29,16 +38,19 @@ def mock_sprite_groups():
     enemies_group = MagicMock()
     return all_sprites, bullets_group, missiles_group, enemies_group
 
+
 @pytest.fixture
 def mock_sound_manager():
     """Create a mock sound manager"""
     return MagicMock()
+
 
 @pytest.fixture
 def player(mock_game, mock_sprite_groups, mock_sound_manager):
     """Create a player instance for testing"""
     all_sprites, bullets_group, missiles_group, enemies_group = mock_sprite_groups
     return Player(mock_game, all_sprites, bullets_group, missiles_group, enemies_group, mock_sound_manager)
+
 
 class TestPlayer:
     """Test Player class functionality"""
@@ -57,13 +69,13 @@ class TestPlayer:
     def test_player_shoot(self, player):
         """Test player shooting functionality"""
         # Mock the time to ensure shooting is allowed
-        with patch('thunder_fighter.sprites.player.ptime') as mock_ptime:
+        with patch("thunder_fighter.sprites.player.ptime") as mock_ptime:
             mock_ptime.get_ticks.return_value = 1000  # Set current time
             player.last_shot = 0  # Ensure enough time has passed
-            
+
             # Test shooting with default bullet paths (1)
             player.shoot()
-            
+
             # Verify bullets were added to groups
             assert player.all_sprites.add.called
             assert player.bullets_group.add.called
@@ -72,11 +84,11 @@ class TestPlayer:
         """Test player healing functionality"""
         # Damage player first
         player.health = 50
-        
+
         # Heal player
         initial_health = player.health
         player.heal(30)
-        
+
         # Verify health increased but doesn't exceed max
         assert player.health == min(PLAYER_HEALTH, initial_health + 30)
 
@@ -84,7 +96,7 @@ class TestPlayer:
         """Test increasing bullet speed"""
         initial_speed = player.bullet_speed
         new_speed = player.increase_bullet_speed(2)
-        
+
         assert player.bullet_speed == initial_speed + 2
         assert new_speed == player.bullet_speed
 
@@ -92,7 +104,7 @@ class TestPlayer:
         """Test increasing bullet paths"""
         initial_paths = player.bullet_paths
         new_paths = player.increase_bullet_paths()
-        
+
         assert player.bullet_paths == initial_paths + 1
         assert new_paths == player.bullet_paths
 
@@ -100,7 +112,7 @@ class TestPlayer:
         """Test increasing player speed"""
         initial_speed = player.speed
         result = player.increase_speed()
-        
+
         assert result is True
         assert player.speed > initial_speed
 
@@ -110,10 +122,10 @@ class TestPlayer:
         player.add_wingman()
         initial_wingmen = len(player.wingmen_list)
         initial_health = player.health
-        
+
         # Take damage
         result = player.take_damage(10)
-        
+
         # Wingman should be consumed, player health unchanged
         assert len(player.wingmen_list) == initial_wingmen - 1
         assert player.health == initial_health
@@ -122,10 +134,10 @@ class TestPlayer:
     def test_player_take_damage_without_wingman(self, player):
         """Test player takes damage when having no wingmen"""
         initial_health = player.health
-        
+
         # Take damage
         result = player.take_damage(10)
-        
+
         # Player health should decrease
         assert player.health == initial_health - 10
         assert result is False  # Player not dead (still has health)
@@ -133,10 +145,10 @@ class TestPlayer:
     def test_player_take_fatal_damage(self, player):
         """Test player takes fatal damage"""
         player.health = 5  # Low health
-        
+
         # Take fatal damage
         result = player.take_damage(10)
-        
+
         # Player should be dead
         assert player.health <= 0
         assert result is True  # Player dead
@@ -144,23 +156,23 @@ class TestPlayer:
     def test_player_add_wingman(self, player):
         """Test adding wingmen to player"""
         initial_count = len(player.wingmen_list)
-        
+
         # Add wingman
         result = player.add_wingman()
-        
+
         assert result is True
         assert len(player.wingmen_list) == initial_count + 1
 
     def test_player_max_wingmen_limit(self, player):
         """Test that player cannot exceed maximum wingmen"""
         from thunder_fighter.constants import PLAYER_MAX_WINGMEN
-        
+
         # Add maximum wingmen
         for _ in range(PLAYER_MAX_WINGMEN):
             player.add_wingman()
-        
+
         # Try to add one more
         result = player.add_wingman()
-        
+
         assert result is False
-        assert len(player.wingmen_list) == PLAYER_MAX_WINGMEN 
+        assert len(player.wingmen_list) == PLAYER_MAX_WINGMEN
