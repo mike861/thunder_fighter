@@ -789,11 +789,10 @@ class RefactoredGame:
         # self._validate_input_state()
 
         # Check sound system health
-        if hasattr(self, "_last_sound_check"):
-            if time.time() - self._last_sound_check > 2:
-                self._check_sound_system()
-                self._last_sound_check = time.time()
-        else:
+        if not hasattr(self, "_last_sound_check"):
+            self._last_sound_check: float = time.time()
+        elif time.time() - self._last_sound_check > 2:
+            self._check_sound_system()
             self._last_sound_check = time.time()
 
         # Skip updates if paused, game won, or game over

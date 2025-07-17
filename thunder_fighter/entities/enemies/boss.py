@@ -56,7 +56,7 @@ class Boss(pygame.sprite.Sprite):
         self.health = self.max_health
 
         # Adjust shooting based on level
-        self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # Higher levels shoot faster
+        self.shoot_delay = float(max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150))  # Higher levels shoot faster
 
         # Set initial attack mode
         self.shoot_pattern = "normal"

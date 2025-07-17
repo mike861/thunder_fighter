@@ -48,12 +48,12 @@ class GameplayConfig:
 class ControlsConfig:
     """Input controls configuration"""
 
-    move_left: List[str] = None
-    move_right: List[str] = None
-    move_up: List[str] = None
-    move_down: List[str] = None
-    shoot: List[str] = None
-    pause: List[str] = None
+    move_left: Optional[List[str]] = None
+    move_right: Optional[List[str]] = None
+    move_up: Optional[List[str]] = None
+    move_down: Optional[List[str]] = None
+    shoot: Optional[List[str]] = None
+    pause: Optional[List[str]] = None
 
     def __post_init__(self):
         """Set default key mappings if none provided"""

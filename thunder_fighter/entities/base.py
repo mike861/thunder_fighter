@@ -83,8 +83,9 @@ class Entity(GameObject):
         self.rect.y = int(self.y)
 
         # Update sprite's built-in update (for animation, etc.)
-        if hasattr(super(), "update") and callable(super().update):
-            super().update()
+        # Note: pygame.sprite.Sprite.update() doesn't require dt parameter
+        if hasattr(pygame.sprite.Sprite, "update"):
+            pygame.sprite.Sprite.update(self)
 
     def render(self, screen: pygame.Surface):
         """Default render implementation."""

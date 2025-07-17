@@ -417,8 +417,8 @@ class InputHandler:
             actions_to_remove = []
             for action in self._active_continuous_actions:
                 # Get the key for this action
-                key = self.key_bindings.get_key_for_action(action)
-                if key is not None and not current_pressed[key]:
+                action_key: Optional[int] = self.key_bindings.get_key_for_action(action)
+                if action_key is not None and not current_pressed[action_key]:
                     actions_to_remove.append(action)
                     logger.debug(f"Action {action} no longer active - removing")
 

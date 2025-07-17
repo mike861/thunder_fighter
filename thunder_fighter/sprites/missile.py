@@ -20,7 +20,7 @@ class TrackingMissile(pygame.sprite.Sprite):
 
         self.speed = 8
         self.target = target
-        self.angle = 0
+        self.angle = 0.0
         self.last_target_pos = self.target.rect.center if self.target else None
 
     def update(self):

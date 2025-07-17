@@ -34,9 +34,9 @@ class NotificationManager:
         if notification_type == "warning":
             notification = WarningNotification(text)
         elif notification_type == "achievement":
-            notification = AchievementNotification(text)
+            notification = AchievementNotification(text)  # type: ignore
         else:
-            notification = Notification(text)
+            notification = Notification(text)  # type: ignore
 
         self.notifications.append(notification)
         logger.info(f"Added {notification_type} notification: {text}")

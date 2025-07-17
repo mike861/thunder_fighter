@@ -175,7 +175,7 @@ class GameOverState(State):
     def __init__(self, game_instance=None):
         super().__init__("game_over")
         self.game = game_instance
-        self.enter_time = 0
+        self.enter_time = 0.0
 
     def enter(self, previous_state: Optional[State] = None):
         """Enter the game over state."""
@@ -220,7 +220,7 @@ class VictoryState(State):
     def __init__(self, game_instance=None):
         super().__init__("victory")
         self.game = game_instance
-        self.enter_time = 0
+        self.enter_time = 0.0
 
     def enter(self, previous_state: Optional[State] = None):
         """Enter the victory state."""
@@ -264,7 +264,7 @@ class LevelTransitionState(State):
     def __init__(self, game_instance=None):
         super().__init__("level_transition")
         self.game = game_instance
-        self.transition_start_time = 0
+        self.transition_start_time = 0.0
         self.transition_duration = 3.0  # 3 seconds
 
     def enter(self, previous_state: Optional[State] = None):

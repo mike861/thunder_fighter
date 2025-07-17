@@ -27,7 +27,7 @@ class HealthItem(pygame.sprite.Sprite):
         self.speedy = 2  # Vertical falling speed
         # Add horizontal swinging effect
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "health"  # Item type identifier
 
     def update(self):
@@ -63,7 +63,7 @@ class BulletSpeedItem(pygame.sprite.Sprite):
         self.rect.y = -30
         self.speedy = 2.5  # Slightly faster than normal items
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "bullet_speed"  # Item type identifier
 
         # Bullet speed increase amount
@@ -101,7 +101,7 @@ class BulletPathItem(pygame.sprite.Sprite):
         self.rect.y = -30
         self.speedy = 1.5  # Slower falling speed
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "bullet_path"  # Item type identifier
 
     def update(self):
@@ -136,7 +136,7 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         self.rect.y = -30
         self.speedy = 2.2  # Slightly different speed
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "player_speed"  # Item type identifier
 
         # Player speed increase amount (can be fixed or random)
@@ -174,7 +174,7 @@ class WingmanItem(pygame.sprite.Sprite):
         self.rect.y = -30
         self.speedy = 2.0
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "wingman"
 
     def update(self):
@@ -238,5 +238,5 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
     all_sprites.add(item)
     items_group.add(item)
 
-    logger.info(f"Created item: {item.type} at level {game_level}")
+    logger.info(f"Created item: {getattr(item, 'type', 'unknown')} at level {game_level}")
     return item

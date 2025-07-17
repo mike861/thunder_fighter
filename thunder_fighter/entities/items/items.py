@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Optional
 
 import pygame
 
@@ -136,7 +137,7 @@ class PlayerSpeedItem(pygame.sprite.Sprite):
         self.rect.y = -30
         self.speedy = 2.2  # Slightly different speed
         self.direction = random.choice([-1, 1])
-        self.angle = random.randrange(360)
+        self.angle = float(random.randrange(360))
         self.type = "player_speed"  # Item type identifier
 
         # Player speed increase amount (can be fixed or random)
@@ -195,7 +196,7 @@ class WingmanItem(pygame.sprite.Sprite):
             self.kill()
 
 
-def create_random_item(game_time, game_level, all_sprites, items_group, player):
+def create_random_item(game_time, game_level, all_sprites, items_group, player) -> Optional[pygame.sprite.Sprite]:
     """Create items dynamically based on game time and player status"""
 
     weights = {
@@ -233,10 +234,15 @@ def create_random_item(game_time, game_level, all_sprites, items_group, player):
     # Randomly select an item type based on weights
     chosen_item_class = random.choices(item_classes, weights=item_weights, k=1)[0]
 
+    # Type assertion to help mypy understand the type
+    assert callable(chosen_item_class)
+
     # Create item instance
     item = chosen_item_class()
     all_sprites.add(item)
     items_group.add(item)
 
-    logger.info(f"Created item: {item.type} at level {game_level}")
+    # Log creation - all item classes have a type attribute
+    item_type = getattr(item, "type", "unknown")
+    logger.info(f"Created item: {item_type} at level {game_level}")
     return item

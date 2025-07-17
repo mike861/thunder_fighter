@@ -36,7 +36,7 @@ class MockEventSourceAdapter(EventSource):
             event.timestamp = self._current_time
         self.events.append(event)
 
-    def add_key_down(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def add_key_down(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """
         Convenience method to add a key down event.
 
@@ -52,7 +52,7 @@ class MockEventSourceAdapter(EventSource):
             )
         )
 
-    def add_key_up(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def add_key_up(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """
         Convenience method to add a key up event.
 
@@ -395,7 +395,7 @@ class MockScenarioBuilder:
         self._current_time = time
         return self
 
-    def press_key(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def press_key(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """Presses a key at the current time."""
         self.clock.set_time(self._current_time)
         self.event_source.set_time(self._current_time)
@@ -403,7 +403,7 @@ class MockScenarioBuilder:
         self.keyboard.press_key(key_code)
         return self
 
-    def release_key(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def release_key(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """Releases a key at the current time."""
         self.clock.set_time(self._current_time)
         self.event_source.set_time(self._current_time)

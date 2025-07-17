@@ -7,11 +7,14 @@ between input handling and game logic.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 class InputEventType(Enum):
     """Types of input events."""
+
+    # Base event
+    UNKNOWN = "unknown"
 
     # Movement events
     MOVE_UP = "move_up"
@@ -58,7 +61,7 @@ class InputEvent:
     """
 
     event_type: InputEventType
-    data: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
     timestamp: float = 0.0
     source: str = "unknown"
 
@@ -83,7 +86,7 @@ class InputEvent:
         Returns:
             The data value or default
         """
-        return self.data.get(key, default)
+        return self.data.get(key, default) if self.data else default
 
     def set_data(self, key: str, value: Any):
         """
@@ -93,6 +96,8 @@ class InputEvent:
             key: The data key to set
             value: The value to set
         """
+        if self.data is None:
+            self.data = {}
         self.data[key] = value
 
     def __str__(self):
@@ -129,7 +134,15 @@ class InputEventFactory:
                 "right": InputEventType.STOP_MOVE_RIGHT,
             }.get(direction)
 
-        return InputEvent(event_type=event_type, data={"direction": direction, "pressed": pressed}, source="keyboard")
+        if event_type is not None:
+            return InputEvent(
+                event_type=event_type, data={"direction": direction, "pressed": pressed}, source="keyboard"
+            )
+        else:
+            # Fallback for unknown direction
+            return InputEvent(
+                event_type=InputEventType.UNKNOWN, data={"direction": direction, "pressed": pressed}, source="keyboard"
+            )
 
     @staticmethod
     def create_action_event(action: str, pressed: bool = True) -> InputEvent:

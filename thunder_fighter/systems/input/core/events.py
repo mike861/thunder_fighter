@@ -32,7 +32,7 @@ class Event:
     key_code: Optional[int] = None
     mouse_button: Optional[int] = None
     position: Optional[tuple[int, int]] = None
-    modifiers: Dict[str, bool] = None
+    modifiers: Optional[Dict[str, bool]] = None
     timestamp: float = 0.0
 
     def __post_init__(self):
@@ -42,7 +42,7 @@ class Event:
 
     def has_modifier(self, modifier: str) -> bool:
         """Checks if a specific modifier key is included."""
-        return self.modifiers.get(modifier, False)
+        return self.modifiers.get(modifier, False) if self.modifiers else False
 
     def is_key_event(self) -> bool:
         """Checks if it is a keyboard event."""

@@ -23,7 +23,7 @@ class KeyBinding:
     category: str = "general"
     modifiers: Set[int] = field(default_factory=set)
 
-    def matches(self, key: int, modifiers: Set[int] = None) -> bool:
+    def matches(self, key: int, modifiers: Optional[Set[int]] = None) -> bool:
         """
         Check if this binding matches the given key and modifiers.
 
@@ -130,7 +130,7 @@ class KeyBindings:
 
             logger.debug(f"Removed key binding: {pygame.key.name(key)} -> {action}")
 
-    def get_action(self, key: int, modifiers: Set[int] = None) -> Optional[str]:
+    def get_action(self, key: int, modifiers: Optional[Set[int]] = None) -> Optional[str]:
         """
         Get the action for a given key and modifiers.
 
@@ -203,7 +203,7 @@ class KeyBindings:
         """
         return {binding.category for binding in self._bindings.values()}
 
-    def has_conflict(self, key: int, modifiers: Set[int] = None) -> bool:
+    def has_conflict(self, key: int, modifiers: Optional[Set[int]] = None) -> bool:
         """
         Check if a key binding would conflict with existing bindings.
 
@@ -223,7 +223,7 @@ class KeyBindings:
 
         return False
 
-    def get_conflicts(self, key: int, modifiers: Set[int] = None) -> List[KeyBinding]:
+    def get_conflicts(self, key: int, modifiers: Optional[Set[int]] = None) -> List[KeyBinding]:
         """
         Get all bindings that conflict with the given key.
 
@@ -244,7 +244,7 @@ class KeyBindings:
 
         return conflicts
 
-    def rebind_key(self, action: str, old_key: int, new_key: int, modifiers: Set[int] = None) -> bool:
+    def rebind_key(self, action: str, old_key: int, new_key: int, modifiers: Optional[Set[int]] = None) -> bool:
         """
         Rebind an action from one key to another.
 

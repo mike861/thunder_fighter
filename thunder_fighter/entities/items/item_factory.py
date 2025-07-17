@@ -7,7 +7,7 @@ types and configurations, featuring intelligent weight-based selection.
 
 import random
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import pygame
 
@@ -40,7 +40,7 @@ class ItemFactory(ConfigurableEntityFactory):
         self._setup_default_presets()
 
         # Phase 2: Duplicate prevention tracking
-        self._last_spawn_times = dict.fromkeys(self._item_types.keys(), 0)
+        self._last_spawn_times = dict.fromkeys(self._item_types.keys(), 0.0)
         self._last_item_type = None
         self._consecutive_count = 0
 
@@ -97,8 +97,8 @@ class ItemFactory(ConfigurableEntityFactory):
 
     def _calculate_dynamic_weights(self, player, game_level: int) -> Dict[str, float]:
         """Calculate dynamic weights based on game state."""
-        config = ITEM_WEIGHT_SYSTEM
-        base_weights = config["BASE_WEIGHTS"].copy()
+        config: Dict[str, Any] = ITEM_WEIGHT_SYSTEM
+        base_weights: Dict[str, float] = config["BASE_WEIGHTS"].copy()
 
         # Phase 1: Health-based adaptation
         health_ratio = player.health / PLAYER_HEALTH
@@ -143,7 +143,7 @@ class ItemFactory(ConfigurableEntityFactory):
 
         return base_weights
 
-    def _weighted_choice(self, weights: Dict[str, float]) -> str:
+    def _weighted_choice(self, weights: Dict[str, float]) -> Optional[str]:
         """Select item type based on weights."""
         # Filter out zero weights
         valid_items = {k: v for k, v in weights.items() if v > 0}
@@ -161,7 +161,7 @@ class ItemFactory(ConfigurableEntityFactory):
 
         # Random selection based on weights
         random_value = random.uniform(0, total_weight)
-        cumulative = 0
+        cumulative = 0.0
 
         for item_type, weight in valid_items.items():
             cumulative += weight

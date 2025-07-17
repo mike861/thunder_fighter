@@ -23,7 +23,8 @@ def create_hit_effect(x, y, size=20):
     """Create hit effect"""
     hit = Explosion((x, y))
     # Modify explosion effect color and appearance for hit effect
-    hit.draw_explosion = lambda: _draw_hit_effect(hit)
+    hit._custom_draw = True
+    hit._draw_function = lambda: _draw_hit_effect(hit)
     hit.frame_rate = 40  # Hit effect is slightly faster
     _draw_hit_effect(hit)  # Draw first frame immediately
     return hit

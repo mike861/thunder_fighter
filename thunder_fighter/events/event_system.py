@@ -9,15 +9,15 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from thunder_fighter.utils.logger import logger
 
 
 class EventType(Enum):
-    """Base event types."""
+    """Base event types. Empty base class for type hierarchy."""
 
-    UNKNOWN = "unknown"
+    pass
 
 
 @dataclass
@@ -101,6 +101,37 @@ class EventListener(ABC):
         return set()  # Override in subclasses to specify event types
 
 
+class FunctionListener(EventListener):
+    """
+    Wrapper class that adapts callable functions to EventListener interface.
+
+    This allows backward compatibility for code that passes functions directly
+    to register_listener instead of EventListener objects.
+    """
+
+    def __init__(self, func):
+        """
+        Initialize with a callable function.
+
+        Args:
+            func: The function to wrap (should accept an Event parameter)
+        """
+        self.func = func
+
+    def handle_event(self, event: Event) -> bool:
+        """
+        Handle an event by calling the wrapped function.
+
+        Args:
+            event: The event to handle
+
+        Returns:
+            False (functions don't stop event propagation by default)
+        """
+        self.func(event)
+        return False
+
+
 class EventSystem:
     """
     Central event system for managing event dispatch and handling.
@@ -119,19 +150,28 @@ class EventSystem:
 
         logger.info("EventSystem initialized")
 
-    def register_listener(self, event_type: EventType, listener: EventListener):
+    def register_listener(
+        self, event_type: EventType, listener: Union[EventListener, Callable[[Event], None], Callable[[Any], None]]
+    ):
         """
         Register a listener for a specific event type.
 
         Args:
             event_type: The event type to listen for
-            listener: The listener to register
+            listener: The listener to register (EventListener object or callable function)
         """
         if event_type not in self._listeners:
             self._listeners[event_type] = []
 
-        if listener not in self._listeners[event_type]:
-            self._listeners[event_type].append(listener)
+        # Wrap callable functions with FunctionListener for backward compatibility
+        # but don't wrap objects that already have handle_event method (like Mock objects)
+        if callable(listener) and not isinstance(listener, EventListener) and not hasattr(listener, "handle_event"):
+            listener = FunctionListener(listener)
+
+        # Ensure listener is treated as EventListener after wrapping
+        listener_obj: EventListener = listener  # type: ignore
+        if listener_obj not in self._listeners[event_type]:
+            self._listeners[event_type].append(listener_obj)
             logger.debug(f"Registered listener for event type: {event_type.value}")
 
     def unregister_listener(self, event_type: EventType, listener: EventListener):
@@ -292,7 +332,7 @@ class EventSystem:
         """
         return len(self._event_queue)
 
-    def get_listener_count(self, event_type: EventType = None) -> int:
+    def get_listener_count(self, event_type: Optional[EventType] = None) -> int:
         """
         Get the number of listeners for an event type.
 

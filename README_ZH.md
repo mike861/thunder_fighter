@@ -37,7 +37,7 @@
 
 ### 系统要求
 
-- Python 3.7+
+- Python 3.8+
 - Pygame 2.0.0+
 - `requirements.txt` 中列出的其他依赖项
 

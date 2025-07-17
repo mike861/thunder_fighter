@@ -131,7 +131,7 @@ class Boss(pygame.sprite.Sprite):
         if health_percentage <= 0.5 and self.shoot_pattern == "normal" and self.level >= 2:
             self.shoot_pattern = "aggressive"
             # When health decreases, reduce shooting delay to increase attack frequency
-            self.shoot_delay = max(150, self.shoot_delay * 0.7)
+            self.shoot_delay = int(max(150, self.shoot_delay * 0.7))
             # Boss entering aggressive mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
 
@@ -139,7 +139,7 @@ class Boss(pygame.sprite.Sprite):
         if health_percentage <= 0.25 and self.shoot_pattern == "aggressive" and self.level >= 3:
             self.shoot_pattern = "final"
             # Reduce shooting delay again
-            self.shoot_delay = max(100, self.shoot_delay * 0.8)
+            self.shoot_delay = int(max(100, self.shoot_delay * 0.8))
             # Boss entering final mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered final mode! Shoot delay: {self.shoot_delay}")
 

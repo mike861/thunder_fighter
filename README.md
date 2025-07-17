@@ -37,7 +37,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 
 ### Requirements
 
-- Python 3.7+
+- Python 3.8+
 - Pygame 2.0.0+
 - Other dependencies listed in `requirements.txt`
 

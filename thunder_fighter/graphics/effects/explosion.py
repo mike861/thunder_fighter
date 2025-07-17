@@ -15,6 +15,8 @@ class Explosion(pygame.sprite.Sprite):
         self.frame = 0
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = 50
+        self._custom_draw = False
+        self._draw_function = None
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -24,7 +26,10 @@ class Explosion(pygame.sprite.Sprite):
             if self.frame > 6:  # 6 frames for smoother explosion effect
                 self.kill()
             else:
-                self.draw_explosion()
+                if self._custom_draw and self._draw_function:
+                    self._draw_function()
+                else:
+                    self.draw_explosion()
 
     def draw_explosion(self):
         """Draw explosion effect"""

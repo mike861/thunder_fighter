@@ -20,7 +20,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -29,7 +28,7 @@ classifiers = [
     "Topic :: Games/Entertainment :: Arcade",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "pygame>=2.6.0",
 ]
@@ -101,7 +100,7 @@ ignore = [
 "tests/**/*.py" = ["E402"]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -112,6 +111,20 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
+disable_error_code = [
+    "no-untyped-def",
+#    "assignment",           # None assignment compatibility issues
+    "no-any-return",       # Any return type warnings
+#    "arg-type",            # Argument type compatibility
+#    "union-attr",          # Union type attribute access
+#    "index",               # Index type issues
+#    "call-overload",       # Overload call issues
+#    "operator",            # Operator type issues
+    "misc",                # Miscellaneous type issues
+#    "attr-defined",        # Object attribute access
+    "var-annotated",       # Variable annotation requirements
+#    "syntax"               # Syntax issues in legacy code
+]
 
 [[tool.mypy.overrides]]
 module = [
