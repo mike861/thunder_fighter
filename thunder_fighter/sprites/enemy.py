@@ -12,6 +12,7 @@ from thunder_fighter.constants import (
     ENEMY_SHOOT_LEVEL,
     ENEMY_SPAWN_Y_MAX,
     ENEMY_SPAWN_Y_MIN,
+    ENEMY_SYSTEM,
     HEIGHT,
     WIDTH,
 )
@@ -39,15 +40,22 @@ class Enemy(pygame.sprite.Sprite):
         logger.debug(f"Enemy spawned - Level: {self.level}, ENEMY_SHOOT_LEVEL: {ENEMY_SHOOT_LEVEL}")
 
         # Adjust speed based on game time and level
-        base_speed_factor = min(3.0, 1.0 + game_time / 60.0)
-        level_speed_bonus = self.level * 0.2
+        base_speed_factor = min(
+            ENEMY_SYSTEM["MAX_SPEED_FACTOR"],
+            ENEMY_SYSTEM["BASE_SPEED_FACTOR"] + game_time / ENEMY_SYSTEM["SPEED_TIME_DIVISOR"],
+        )
+        level_speed_bonus = self.level * ENEMY_SYSTEM["LEVEL_SPEED_BONUS"]
         total_speed_factor = base_speed_factor + level_speed_bonus
-        self.speedy = random.randrange(1, int(3 + 3 * total_speed_factor))
+        self.speedy = random.randrange(
+            int(ENEMY_SYSTEM["MIN_BASE_SPEED"]), int(ENEMY_SYSTEM["MAX_BASE_SPEED"] + 3 * total_speed_factor)
+        )
         self.speedx = random.randrange(ENEMY_HORIZONTAL_MOVE_MIN, ENEMY_HORIZONTAL_MOVE_MAX)
 
         # Rotation animation properties
         self.rot = 0
-        self.rot_speed = random.randrange(-8, 8)
+        self.rot_speed = random.randrange(
+            int(ENEMY_SYSTEM["ROTATION_SPEED_MIN"]), int(ENEMY_SYSTEM["ROTATION_SPEED_MAX"])
+        )
         self.last_update = pygame.time.get_ticks()
         self.original_image = self.image.copy()
 
@@ -63,8 +71,8 @@ class Enemy(pygame.sprite.Sprite):
 
         # Shooting properties
         # Initialize shooting properties for all enemies (even non-shooting ones)
-        base_delay = 800
-        level_reduction = self.level * 50
+        base_delay = int(ENEMY_SYSTEM["BASE_SHOOT_DELAY"])
+        level_reduction = self.level * int(ENEMY_SYSTEM["LEVEL_DELAY_REDUCTION"])
         self.shoot_delay = max(ENEMY_MIN_SHOOT_DELAY, base_delay - level_reduction)
         if self.level >= 5:
             self.shoot_delay = max(300, self.shoot_delay - 100)
