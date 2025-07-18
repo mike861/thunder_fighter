@@ -4,23 +4,9 @@ import pygame
 import pygame.time as ptime
 
 from thunder_fighter.constants import (
-    BULLET_ANGLE_SPREAD_LARGE,
-    BULLET_ANGLE_SPREAD_SMALL,
-    BULLET_ANGLE_STRAIGHT,
-    BULLET_PATHS_DEFAULT,
-    BULLET_PATHS_MAX,
-    BULLET_SPEED_DEFAULT,
-    BULLET_SPEED_MAX,
-    BULLET_SPEED_UPGRADE_AMOUNT,
+    BULLET_CONFIG,
     HEIGHT,
-    PLAYER_FLASH_FRAMES,
-    PLAYER_HEAL_AMOUNT,
-    PLAYER_HEALTH,
-    PLAYER_MAX_SPEED,
-    PLAYER_MAX_WINGMEN,
-    PLAYER_SHOOT_DELAY,
-    PLAYER_SPEED,
-    PLAYER_SPEED_UPGRADE_AMOUNT,
+    PLAYER_CONFIG,
     WHITE,
     WIDTH,
 )
@@ -48,21 +34,21 @@ class Player(pygame.sprite.Sprite):
         self.y = float(HEIGHT - 10)
         self.rect.centerx = int(self.x)
         self.rect.bottom = int(self.y)
-        self.speed = PLAYER_SPEED  # Use self.speed for current player speed
-        self.max_speed = PLAYER_MAX_SPEED
+        self.speed = int(PLAYER_CONFIG["SPEED"])  # Use self.speed for current player speed
+        self.max_speed = int(PLAYER_CONFIG["MAX_SPEED"])
         self.speedx = 0
         self.speedy = 0
-        self.health = PLAYER_HEALTH
-        self.shoot_delay = PLAYER_SHOOT_DELAY
+        self.health = int(PLAYER_CONFIG["HEALTH"])
+        self.shoot_delay = int(PLAYER_CONFIG["SHOOT_DELAY"])
         self.last_shot = ptime.get_ticks()
         # Add thruster animation effect
         self.thrust = 0
 
         # Bullet attributes
-        self.bullet_speed = BULLET_SPEED_DEFAULT
-        self.max_bullet_speed = BULLET_SPEED_MAX
-        self.bullet_paths = BULLET_PATHS_DEFAULT
-        self.max_bullet_paths = BULLET_PATHS_MAX
+        self.bullet_speed = int(BULLET_CONFIG["SPEED_DEFAULT"])
+        self.max_bullet_speed = int(BULLET_CONFIG["SPEED_MAX"])
+        self.bullet_paths = int(BULLET_CONFIG["PATHS_DEFAULT"])
+        self.max_bullet_paths = int(BULLET_CONFIG["PATHS_MAX"])
 
         # Sprite groups
         self.all_sprites = all_sprites
@@ -169,41 +155,47 @@ class Player(pygame.sprite.Sprite):
             # Create different numbers and angles of bullets based on bullet paths
             if self.bullet_paths == 1:
                 # Single straight shot
-                bullet = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
+                bullet = Bullet(
+                    self.rect.centerx, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
+                )
                 self.all_sprites.add(bullet)
                 self.bullets_group.add(bullet)
             elif self.bullet_paths == 2:
                 # Double parallel shots
-                bullet1 = Bullet(self.rect.left + 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
-                bullet2 = Bullet(self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT)
+                bullet1 = Bullet(
+                    self.rect.left + 5, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
+                )
+                bullet2 = Bullet(
+                    self.rect.right - 5, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
+                )
                 self.all_sprites.add(bullet1, bullet2)
                 self.bullets_group.add(bullet1, bullet2)
             elif self.bullet_paths == 3:
                 # Three shots: one straight, two angled
                 bullet1 = Bullet(
-                    self.rect.centerx, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                    self.rect.centerx, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
                 )  # Center straight
                 bullet2 = Bullet(
-                    self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_SMALL
+                    self.rect.left + 5, self.rect.top, self.bullet_speed, -int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"])
                 )  # Left angled
                 bullet3 = Bullet(
-                    self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_SMALL
+                    self.rect.right - 5, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"])
                 )  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3)
                 self.bullets_group.add(bullet1, bullet2, bullet3)
             elif self.bullet_paths >= 4:
                 # Four or more shots (max limit is 4): two straight, two angled
                 bullet1 = Bullet(
-                    self.rect.centerx - 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                    self.rect.centerx - 8, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
                 )  # Left center straight
                 bullet2 = Bullet(
-                    self.rect.centerx + 8, self.rect.top, self.bullet_speed, BULLET_ANGLE_STRAIGHT
+                    self.rect.centerx + 8, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_STRAIGHT"])
                 )  # Right center straight
                 bullet3 = Bullet(
-                    self.rect.left + 5, self.rect.top, self.bullet_speed, -BULLET_ANGLE_SPREAD_LARGE
+                    self.rect.left + 5, self.rect.top, self.bullet_speed, -int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"])
                 )  # Left angled
                 bullet4 = Bullet(
-                    self.rect.right - 5, self.rect.top, self.bullet_speed, BULLET_ANGLE_SPREAD_LARGE
+                    self.rect.right - 5, self.rect.top, self.bullet_speed, int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"])
                 )  # Right angled
                 self.all_sprites.add(bullet1, bullet2, bullet3, bullet4)
                 self.bullets_group.add(bullet1, bullet2, bullet3, bullet4)
@@ -247,7 +239,7 @@ class Player(pygame.sprite.Sprite):
 
     def add_wingman(self):
         """Add a wingman"""
-        if len(self.wingmen_list) >= PLAYER_MAX_WINGMEN:
+        if len(self.wingmen_list) >= int(PLAYER_CONFIG["MAX_WINGMEN"]):
             return False  # Maximum number reached
 
         # Determine position for new wingman
@@ -283,7 +275,7 @@ class Player(pygame.sprite.Sprite):
         self.health -= damage
 
         # Damage flash effect
-        self.flash_timer = PLAYER_FLASH_FRAMES
+        self.flash_timer = int(PLAYER_CONFIG["FLASH_FRAMES"])
 
         # Create flash effect instead of hit effect
         create_flash_effect(self, WHITE)
@@ -294,12 +286,16 @@ class Player(pygame.sprite.Sprite):
 
         return self.health <= 0  # Return whether dead
 
-    def heal(self, amount=PLAYER_HEAL_AMOUNT):
+    def heal(self, amount=None):
         """Player heals"""
-        self.health = min(PLAYER_HEALTH, self.health + amount)
+        if amount is None:
+            amount = int(PLAYER_CONFIG["HEAL_AMOUNT"])
+        self.health = min(int(PLAYER_CONFIG["HEALTH"]), self.health + amount)
 
-    def increase_bullet_speed(self, amount=BULLET_SPEED_UPGRADE_AMOUNT):
+    def increase_bullet_speed(self, amount=None):
         """Increase bullet speed"""
+        if amount is None:
+            amount = int(BULLET_CONFIG["SPEED_UPGRADE_AMOUNT"])
         self.bullet_speed = min(self.max_bullet_speed, self.bullet_speed + amount)
         return self.bullet_speed
 
@@ -317,15 +313,15 @@ class Player(pygame.sprite.Sprite):
             bool: Whether speed was successfully increased
         """
         # Check if already at max speed
-        if self.speed >= PLAYER_MAX_SPEED:
+        if self.speed >= int(PLAYER_CONFIG["MAX_SPEED"]):
             return False
 
-        self.speed += PLAYER_SPEED_UPGRADE_AMOUNT
+        self.speed += int(PLAYER_CONFIG["SPEED_UPGRADE_AMOUNT"])
         # Player speed increase should be shown in game UI, not just logged
         logger.info(f"Player speed increased to: {self.speed}")
         return True
 
-    def increase_player_speed(self, amount=PLAYER_SPEED_UPGRADE_AMOUNT):
+    def increase_player_speed(self, amount=None):
         """
         Increase player movement speed - matches method name called in collisions.py
 
@@ -335,8 +331,10 @@ class Player(pygame.sprite.Sprite):
         Returns:
             float: Current player speed
         """
+        if amount is None:
+            amount = int(PLAYER_CONFIG["SPEED_UPGRADE_AMOUNT"])
         # Check if already at max speed
-        if self.speed >= PLAYER_MAX_SPEED:
+        if self.speed >= int(PLAYER_CONFIG["MAX_SPEED"]):
             return self.speed
 
         # Increase speed but not exceed max

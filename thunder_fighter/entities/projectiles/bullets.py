@@ -5,26 +5,7 @@ from typing import Optional, Tuple
 import pygame
 
 from thunder_fighter.constants import (
-    BOSS_BULLET_AGGRESSIVE_COLOR_PRIMARY,
-    BOSS_BULLET_AGGRESSIVE_COLOR_SECONDARY,
-    BOSS_BULLET_AGGRESSIVE_DAMAGE,
-    BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER,
-    BOSS_BULLET_AGGRESSIVE_SPEED,
-    BOSS_BULLET_BASE_HEIGHT,
-    BOSS_BULLET_BASE_WIDTH,
-    BOSS_BULLET_FINAL_COLOR_PRIMARY,
-    BOSS_BULLET_FINAL_COLOR_SECONDARY,
-    BOSS_BULLET_FINAL_DAMAGE,
-    BOSS_BULLET_FINAL_SIZE_MULTIPLIER,
-    BOSS_BULLET_FINAL_SPEED,
-    BOSS_BULLET_GLOW_EFFECT_SIZE,
-    BOSS_BULLET_GLOW_LAYERS,
-    BOSS_BULLET_MINIMUM_VERTICAL_SPEED,
-    BOSS_BULLET_NORMAL_COLOR_PRIMARY,
-    BOSS_BULLET_NORMAL_COLOR_SECONDARY,
-    BOSS_BULLET_NORMAL_DAMAGE,
-    BOSS_BULLET_NORMAL_SPEED,
-    BOSS_BULLET_TRACKING_HORIZONTAL_FACTOR,
+    BOSS_BULLET_CONFIG,
     HEIGHT,
     WIDTH,
 )
@@ -142,14 +123,14 @@ class BossBullet(pygame.sprite.Sprite):
     def _setup_bullet_properties(self) -> None:
         """Set bullet properties based on attack mode."""
         if self.shoot_pattern == "normal":
-            self.base_speed: int = int(BOSS_BULLET_NORMAL_SPEED)
-            self.damage: int = int(BOSS_BULLET_NORMAL_DAMAGE)
+            self.base_speed: int = int(BOSS_BULLET_CONFIG["NORMAL_SPEED"])
+            self.damage: int = int(BOSS_BULLET_CONFIG["NORMAL_DAMAGE"])
         elif self.shoot_pattern == "aggressive":
-            self.base_speed = int(BOSS_BULLET_AGGRESSIVE_SPEED)
-            self.damage = int(BOSS_BULLET_AGGRESSIVE_DAMAGE)
+            self.base_speed = int(BOSS_BULLET_CONFIG["AGGRESSIVE_SPEED"])
+            self.damage = int(BOSS_BULLET_CONFIG["AGGRESSIVE_DAMAGE"])
         else:  # final mode
-            self.base_speed = int(BOSS_BULLET_FINAL_SPEED)
-            self.damage = int(BOSS_BULLET_FINAL_DAMAGE)
+            self.base_speed = int(BOSS_BULLET_CONFIG["FINAL_SPEED"])
+            self.damage = int(BOSS_BULLET_CONFIG["FINAL_DAMAGE"])
 
     def _setup_tracking_movement(self, x: int, y: int, target_pos: Tuple[int, int]) -> None:
         """Set Final mode tracking movement.
@@ -167,8 +148,12 @@ class BossBullet(pygame.sprite.Sprite):
 
             if distance > 0:
                 # Normalize direction vector and apply speed
-                self.speedx = (dx / distance) * self.base_speed * float(BOSS_BULLET_TRACKING_HORIZONTAL_FACTOR)
-                self.speedy = max(float(BOSS_BULLET_MINIMUM_VERTICAL_SPEED), (dy / distance) * self.base_speed)
+                self.speedx = (
+                    (dx / distance) * self.base_speed * float(BOSS_BULLET_CONFIG["TRACKING_HORIZONTAL_FACTOR"])
+                )
+                self.speedy = max(
+                    float(BOSS_BULLET_CONFIG["MINIMUM_VERTICAL_SPEED"]), (dy / distance) * self.base_speed
+                )
             else:
                 self.speedx = 0.0
                 self.speedy = float(self.base_speed)
@@ -180,8 +165,8 @@ class BossBullet(pygame.sprite.Sprite):
     def _setup_fallback_bullet(self) -> None:
         """Set fallback bullet properties (used in error cases)."""
         self.shoot_pattern = "normal"
-        self.base_speed = int(BOSS_BULLET_NORMAL_SPEED)
-        self.damage = int(BOSS_BULLET_NORMAL_DAMAGE)
+        self.base_speed = int(BOSS_BULLET_CONFIG["NORMAL_SPEED"])
+        self.damage = int(BOSS_BULLET_CONFIG["NORMAL_DAMAGE"])
         self.speedx = 0.0
         self.speedy = float(self.base_speed)
         try:
@@ -189,7 +174,7 @@ class BossBullet(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
         except Exception:
             # Final fallback option
-            self.image = pygame.Surface((BOSS_BULLET_BASE_WIDTH, BOSS_BULLET_BASE_HEIGHT))
+            self.image = pygame.Surface((int(BOSS_BULLET_CONFIG["BASE_WIDTH"]), int(BOSS_BULLET_CONFIG["BASE_HEIGHT"])))
             self.image.fill((255, 0, 255))  # Purple as error indicator
             self.rect = self.image.get_rect()
 
@@ -206,28 +191,29 @@ class BossBullet(pygame.sprite.Sprite):
             if self.shoot_pattern == "normal":
                 # Normal mode: purple bullet
                 return self._create_bullet_sprite(
-                    tuple(BOSS_BULLET_NORMAL_COLOR_PRIMARY), tuple(BOSS_BULLET_NORMAL_COLOR_SECONDARY)
+                    tuple(BOSS_BULLET_CONFIG["NORMAL_COLOR_PRIMARY"]),
+                    tuple(BOSS_BULLET_CONFIG["NORMAL_COLOR_SECONDARY"]),
                 )
             elif self.shoot_pattern == "aggressive":
                 # Aggressive mode: red bullet, slightly larger
                 return self._create_bullet_sprite(
-                    tuple(BOSS_BULLET_AGGRESSIVE_COLOR_PRIMARY),
-                    tuple(BOSS_BULLET_AGGRESSIVE_COLOR_SECONDARY),
-                    size_multiplier=float(BOSS_BULLET_AGGRESSIVE_SIZE_MULTIPLIER),
+                    tuple(BOSS_BULLET_CONFIG["AGGRESSIVE_COLOR_PRIMARY"]),
+                    tuple(BOSS_BULLET_CONFIG["AGGRESSIVE_COLOR_SECONDARY"]),
+                    size_multiplier=float(BOSS_BULLET_CONFIG["AGGRESSIVE_SIZE_MULTIPLIER"]),
                 )
             else:  # final mode
                 # Final mode: blue-white tracking bullet with effects
                 return self._create_bullet_sprite(
-                    tuple(BOSS_BULLET_FINAL_COLOR_PRIMARY),
-                    tuple(BOSS_BULLET_FINAL_COLOR_SECONDARY),
-                    size_multiplier=float(BOSS_BULLET_FINAL_SIZE_MULTIPLIER),
+                    tuple(BOSS_BULLET_CONFIG["FINAL_COLOR_PRIMARY"]),
+                    tuple(BOSS_BULLET_CONFIG["FINAL_COLOR_SECONDARY"]),
+                    size_multiplier=float(BOSS_BULLET_CONFIG["FINAL_SIZE_MULTIPLIER"]),
                     glow=True,
                 )
         except Exception as e:
             logger.error(f"Error creating boss bullet sprite: {e}", exc_info=True)
             # Fall back to simple purple rectangle
-            surface = pygame.Surface((BOSS_BULLET_BASE_WIDTH, BOSS_BULLET_BASE_HEIGHT))
-            surface.fill(BOSS_BULLET_NORMAL_COLOR_PRIMARY)
+            surface = pygame.Surface((int(BOSS_BULLET_CONFIG["BASE_WIDTH"]), int(BOSS_BULLET_CONFIG["BASE_HEIGHT"])))
+            surface.fill(tuple(BOSS_BULLET_CONFIG["NORMAL_COLOR_PRIMARY"]))
             return surface
 
     def _create_bullet_sprite(
@@ -253,8 +239,8 @@ class BossBullet(pygame.sprite.Sprite):
             Exception: When image creation fails
         """
         try:
-            base_width: int = int(int(BOSS_BULLET_BASE_WIDTH) * size_multiplier)
-            base_height: int = int(int(BOSS_BULLET_BASE_HEIGHT) * size_multiplier)
+            base_width: int = int(int(BOSS_BULLET_CONFIG["BASE_WIDTH"]) * size_multiplier)
+            base_height: int = int(int(BOSS_BULLET_CONFIG["BASE_HEIGHT"]) * size_multiplier)
 
             bullet_surface = pygame.Surface((base_width, base_height), pygame.SRCALPHA)
 
@@ -276,7 +262,7 @@ class BossBullet(pygame.sprite.Sprite):
         except (ValueError, TypeError) as e:
             logger.error(f"Error creating bullet sprite: {e}", exc_info=True)
             # Fall back to basic rectangle
-            surface = pygame.Surface((BOSS_BULLET_BASE_WIDTH, BOSS_BULLET_BASE_HEIGHT))
+            surface = pygame.Surface((int(BOSS_BULLET_CONFIG["BASE_WIDTH"]), int(BOSS_BULLET_CONFIG["BASE_HEIGHT"])))
             surface.fill(primary_color)
             return surface
 
@@ -295,11 +281,11 @@ class BossBullet(pygame.sprite.Sprite):
             Surface with glow effect
         """
         try:
-            glow_size = int(BOSS_BULLET_GLOW_EFFECT_SIZE)
+            glow_size = int(BOSS_BULLET_CONFIG["GLOW_EFFECT_SIZE"])
             glow_surface = pygame.Surface((base_width + glow_size, base_height + glow_size), pygame.SRCALPHA)
 
             # Create glow circle
-            for i in range(int(BOSS_BULLET_GLOW_LAYERS)):
+            for i in range(int(BOSS_BULLET_CONFIG["GLOW_LAYERS"])):
                 alpha = 60 - i * 20
                 glow_color = (*primary_color, alpha)
                 offset = 2 - i
@@ -340,7 +326,7 @@ class BossBullet(pygame.sprite.Sprite):
         Returns:
             Damage value caused by bullet
         """
-        return getattr(self, "damage", int(BOSS_BULLET_NORMAL_DAMAGE))
+        return getattr(self, "damage", int(BOSS_BULLET_CONFIG["NORMAL_DAMAGE"]))
 
 
 class EnemyBullet(pygame.sprite.Sprite):

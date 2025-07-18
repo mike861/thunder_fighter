@@ -3,15 +3,7 @@ from unittest.mock import MagicMock, patch
 import pygame
 import pytest
 
-from thunder_fighter.constants import (
-    BULLET_PATHS_DEFAULT,
-    BULLET_PATHS_MAX,
-    BULLET_SPEED_DEFAULT,
-    BULLET_SPEED_MAX,
-    PLAYER_HEALTH,
-    PLAYER_MAX_SPEED,
-    PLAYER_SPEED,
-)
+from thunder_fighter.constants import BULLET_CONFIG, PLAYER_CONFIG
 from thunder_fighter.entities.player.player import Player
 
 # Mock pygame for testing
@@ -57,13 +49,13 @@ class TestPlayer:
 
     def test_player_initialization(self, player):
         """Test player is initialized with correct default values"""
-        assert player.health == PLAYER_HEALTH
-        assert player.speed == PLAYER_SPEED
-        assert player.bullet_speed == BULLET_SPEED_DEFAULT
-        assert player.bullet_paths == BULLET_PATHS_DEFAULT
-        assert player.max_speed == PLAYER_MAX_SPEED
-        assert player.max_bullet_speed == BULLET_SPEED_MAX
-        assert player.max_bullet_paths == BULLET_PATHS_MAX
+        assert player.health == int(PLAYER_CONFIG["HEALTH"])
+        assert player.speed == int(PLAYER_CONFIG["SPEED"])
+        assert player.bullet_speed == int(BULLET_CONFIG["SPEED_DEFAULT"])
+        assert player.bullet_paths == int(BULLET_CONFIG["PATHS_DEFAULT"])
+        assert player.max_speed == int(PLAYER_CONFIG["MAX_SPEED"])
+        assert player.max_bullet_speed == int(BULLET_CONFIG["SPEED_MAX"])
+        assert player.max_bullet_paths == int(BULLET_CONFIG["PATHS_MAX"])
         assert len(player.wingmen_list) == 0
 
     def test_player_shoot(self, player):
@@ -90,7 +82,7 @@ class TestPlayer:
         player.heal(30)
 
         # Verify health increased but doesn't exceed max
-        assert player.health == min(PLAYER_HEALTH, initial_health + 30)
+        assert player.health == min(int(PLAYER_CONFIG["HEALTH"]), initial_health + 30)
 
     def test_player_increase_bullet_speed(self, player):
         """Test increasing bullet speed"""
@@ -165,7 +157,9 @@ class TestPlayer:
 
     def test_player_max_wingmen_limit(self, player):
         """Test that player cannot exceed maximum wingmen"""
-        from thunder_fighter.constants import PLAYER_MAX_WINGMEN
+        from thunder_fighter.constants import PLAYER_CONFIG
+
+        PLAYER_MAX_WINGMEN = int(PLAYER_CONFIG["MAX_WINGMEN"])
 
         # Add maximum wingmen
         for _ in range(PLAYER_MAX_WINGMEN):

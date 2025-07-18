@@ -8,7 +8,7 @@ implemented in the ItemFactory.
 import unittest
 from unittest.mock import Mock, patch
 
-from thunder_fighter.constants import ITEM_WEIGHT_SYSTEM, PLAYER_HEALTH
+from thunder_fighter.constants import ITEM_WEIGHT_SYSTEM, PLAYER_CONFIG
 from thunder_fighter.entities.items.item_factory import ItemFactory
 
 
@@ -23,7 +23,7 @@ class TestIntelligentItemSystem(unittest.TestCase):
 
         # Create a mock player with configurable attributes
         self.mock_player = Mock()
-        self.mock_player.health = PLAYER_HEALTH  # Full health by default
+        self.mock_player.health = int(PLAYER_CONFIG["HEALTH"])  # Full health by default
         self.mock_player.bullet_speed = 10
         self.mock_player.bullet_paths = 1
         self.mock_player.speed = 6
@@ -32,7 +32,7 @@ class TestIntelligentItemSystem(unittest.TestCase):
     def test_health_based_weight_adaptation_critical(self):
         """Test health-based weight adaptation for critical health."""
         # Set player to critical health (20%)
-        self.mock_player.health = PLAYER_HEALTH * 0.2
+        self.mock_player.health = int(PLAYER_CONFIG["HEALTH"]) * 0.2
 
         weights = self.factory._calculate_dynamic_weights(self.mock_player, game_level=1)
 
@@ -46,7 +46,7 @@ class TestIntelligentItemSystem(unittest.TestCase):
     def test_health_based_weight_adaptation_injured(self):
         """Test health-based weight adaptation for injured state."""
         # Set player to injured health (50%)
-        self.mock_player.health = PLAYER_HEALTH * 0.5
+        self.mock_player.health = int(PLAYER_CONFIG["HEALTH"]) * 0.5
 
         weights = self.factory._calculate_dynamic_weights(self.mock_player, game_level=1)
 
@@ -60,7 +60,7 @@ class TestIntelligentItemSystem(unittest.TestCase):
     def test_health_based_weight_adaptation_healthy(self):
         """Test health-based weight adaptation for healthy state."""
         # Set player to healthy health (90%)
-        self.mock_player.health = PLAYER_HEALTH * 0.9
+        self.mock_player.health = int(PLAYER_CONFIG["HEALTH"]) * 0.9
 
         weights = self.factory._calculate_dynamic_weights(self.mock_player, game_level=1)
 
@@ -208,7 +208,7 @@ class TestIntelligentItemSystem(unittest.TestCase):
     def test_comprehensive_weight_calculation_scenario(self):
         """Test comprehensive scenario with multiple factors."""
         # Set up complex scenario: low health, high level, some maxed abilities
-        self.mock_player.health = PLAYER_HEALTH * 0.25  # Critical health
+        self.mock_player.health = int(PLAYER_CONFIG["HEALTH"]) * 0.25  # Critical health
         self.mock_player.bullet_speed = ITEM_WEIGHT_SYSTEM["ABILITY_CAPS"]["bullet_speed_max"]  # Maxed
         self.mock_player.wingmen_list = []  # No wingmen
 

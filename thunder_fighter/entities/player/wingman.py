@@ -1,6 +1,6 @@
 import pygame
 
-from thunder_fighter.constants import WINGMAN_FORMATION_SPACING
+from thunder_fighter.constants import PLAYER_CONFIG
 from thunder_fighter.entities.projectiles.missile import TrackingMissile
 from thunder_fighter.graphics.renderers import create_wingman
 
@@ -29,9 +29,9 @@ class Wingman(pygame.sprite.Sprite):
     def update(self):
         """Update the wingman's position to follow the player."""
         if self.side == "left":
-            self.rect.centerx = self.player.rect.centerx - WINGMAN_FORMATION_SPACING
+            self.rect.centerx = self.player.rect.centerx - int(PLAYER_CONFIG["WINGMAN_FORMATION_SPACING"])
         else:  # 'right'
-            self.rect.centerx = self.player.rect.centerx + WINGMAN_FORMATION_SPACING
+            self.rect.centerx = self.player.rect.centerx + int(PLAYER_CONFIG["WINGMAN_FORMATION_SPACING"])
         self.rect.centery = self.player.rect.centery + 10
 
     def shoot(self, all_sprites, missiles_group, target):

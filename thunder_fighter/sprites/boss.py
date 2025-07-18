@@ -5,7 +5,7 @@ import pygame
 import pygame.time as ptime
 
 from thunder_fighter.constants import (
-    BOSS_SHOOT_DELAY,
+    BOSS_CONFIG,
     WIDTH,
 )
 from thunder_fighter.graphics.renderers import create_boss_ship, draw_health_bar
@@ -56,7 +56,9 @@ class Boss(pygame.sprite.Sprite):
         self.health = self.max_health
 
         # Adjust shooting based on level
-        self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # Higher levels shoot faster
+        self.shoot_delay = max(
+            300, int(BOSS_CONFIG["SHOOT_DELAY"]) - (self.level - 1) * 150
+        )  # Higher levels shoot faster
 
         # Set initial attack mode
         self.shoot_pattern = "normal"

@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 
 import pygame
 
-from thunder_fighter.constants import ITEM_WEIGHT_SYSTEM, PLAYER_HEALTH
+from thunder_fighter.constants import ITEM_WEIGHT_SYSTEM, PLAYER_CONFIG
 from thunder_fighter.entities.items.items import (
     BulletPathItem,
     BulletSpeedItem,
@@ -101,7 +101,7 @@ class ItemFactory(ConfigurableEntityFactory):
         base_weights: Dict[str, float] = config["BASE_WEIGHTS"].copy()
 
         # Phase 1: Health-based adaptation
-        health_ratio = player.health / PLAYER_HEALTH
+        health_ratio = player.health / int(PLAYER_CONFIG["HEALTH"])
         health_config = config["HEALTH_ADAPTATION"]
 
         if health_ratio <= health_config["critical_threshold"]:

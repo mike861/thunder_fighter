@@ -10,6 +10,7 @@ from typing import Optional
 
 import pygame
 
+from thunder_fighter.constants import BOSS_CONFIG, GAME_CONFIG
 from thunder_fighter.utils.logger import logger
 
 from .state_machine import State
@@ -88,7 +89,7 @@ class PlayingState(State):
             self.last_enemy_spawn = current_time
 
         # Boss spawning logic
-        if self.game.game_level > 1 and current_time - self.game.boss_spawn_timer > self.game.BOSS_SPAWN_INTERVAL:
+        if self.game.game_level > 1 and current_time - self.game.boss_spawn_timer > int(BOSS_CONFIG["SPAWN_INTERVAL"]):
             if not self.game.boss or not self.game.boss.alive():
                 self.game.spawn_boss()
 
@@ -99,7 +100,10 @@ class PlayingState(State):
             self.last_item_spawn = current_time
 
         # Check for level progression
-        if self.game.game_level <= 1 and self.game.score.value // self.game.SCORE_THRESHOLD >= self.game.game_level:
+        if (
+            self.game.game_level <= 1
+            and self.game.score.value // int(GAME_CONFIG["SCORE_THRESHOLD"]) >= self.game.game_level
+        ):
             self.game.level_up()
 
         # Check for game over conditions

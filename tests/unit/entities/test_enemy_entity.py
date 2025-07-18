@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pygame
 
-from thunder_fighter.constants import ENEMY_SHOOT_LEVEL
+from thunder_fighter.constants import ENEMY_CONFIG
 from thunder_fighter.entities.enemies.enemy import Enemy
 
 
@@ -65,6 +65,7 @@ class TestEnemyEntity:
             )
 
             # Shooting capability should be consistent with level
+            ENEMY_SHOOT_LEVEL = int(ENEMY_CONFIG["SHOOT_LEVEL"])
             if enemy.level >= ENEMY_SHOOT_LEVEL:
                 assert enemy.can_shoot is True, f"Enemy level {enemy.level} should be able to shoot"
             else:

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pygame
 import pytest
 
-from thunder_fighter.constants import BULLET_DAMAGE_TO_BOSS
+from thunder_fighter.constants import BULLET_CONFIG
 from thunder_fighter.entities.enemies.boss import Boss
 from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.entities.projectiles.bullets import Bullet
@@ -224,7 +224,7 @@ def test_bullet_hits_boss_not_defeated(
 
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
-    mock_boss.damage.assert_called_once_with(BULLET_DAMAGE_TO_BOSS)
+    mock_boss.damage.assert_called_once_with(int(BULLET_CONFIG["DAMAGE_TO_BOSS"]))
     mock_explosion.assert_not_called()  # No explosion should be created if the boss is not defeated
     assert result["boss_defeated"] is False
 
@@ -256,12 +256,12 @@ def test_bullet_defeats_boss(
 
     # Assertions
     mock_spritecollide.assert_called_once_with(mock_boss, bullets, True, pygame.sprite.collide_mask)
-    mock_boss.damage.assert_called_with(BULLET_DAMAGE_TO_BOSS)  # 应该调用damage(BULLET_DAMAGE_TO_BOSS)
+    mock_boss.damage.assert_called_with(int(BULLET_CONFIG["DAMAGE_TO_BOSS"]))  # 应该调用damage(BULLET_DAMAGE_TO_BOSS)
 
     # Check result dict
     assert result["boss_hit"] is True
     assert result["boss_defeated"] is True
-    assert result["damage"] == BULLET_DAMAGE_TO_BOSS
+    assert result["damage"] == int(BULLET_CONFIG["DAMAGE_TO_BOSS"])
 
     # Should create multiple explosions for boss defeat
     assert mock_explosion.call_count >= 2  # At least 2 explosions created (一个子弹击中爆炸，一个Boss被击败爆炸)
@@ -305,7 +305,7 @@ def test_bullet_hits_boss_triggers_internal_flash_only(
     check_bullet_boss_collisions(mock_boss, bullets, all_sprites)
 
     # Assert
-    mock_boss.damage.assert_called_once_with(BULLET_DAMAGE_TO_BOSS)
+    mock_boss.damage.assert_called_once_with(int(BULLET_CONFIG["DAMAGE_TO_BOSS"]))
     mock_create_flash.assert_not_called()  # IMPORTANT: External flash should not be called
     mock_explosion.assert_not_called()  # Explosion should only be on defeat
 

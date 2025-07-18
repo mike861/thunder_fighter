@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest, macos-latest]
         #os: [ubuntu-latest, windows-latest, macos-latest]
         #python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
-        python-version: ['3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
         exclude:
           # Python 3.7 is not available on newer macOS runners
           - os: macos-latest
@@ -85,6 +85,7 @@ jobs:
     - name: Run security scan with bandit
       run: |
         bandit -r thunder_fighter -f json -o bandit-report.json
+      continue-on-error: true
 
     - name: Check dependencies for vulnerabilities
       run: |

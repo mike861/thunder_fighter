@@ -15,7 +15,7 @@ pygame.mixer = MagicMock()
 pygame.font = MagicMock()
 pygame.display = MagicMock()
 
-from thunder_fighter.constants import MAX_GAME_LEVEL, SCORE_THRESHOLD
+from thunder_fighter.constants import GAME_CONFIG
 from thunder_fighter.game import RefactoredGame as Game
 
 
@@ -32,11 +32,13 @@ class TestLevelProgression:
 
     def test_score_threshold_constant(self):
         """Test that score threshold is properly defined"""
+        SCORE_THRESHOLD = int(GAME_CONFIG["SCORE_THRESHOLD"])
         assert SCORE_THRESHOLD > 0
         assert isinstance(SCORE_THRESHOLD, int)
 
     def test_max_game_level_constant(self):
         """Test that max game level is properly defined"""
+        MAX_GAME_LEVEL = int(GAME_CONFIG["MAX_GAME_LEVEL"])
         assert MAX_GAME_LEVEL > 1
         assert isinstance(MAX_GAME_LEVEL, int)
 
