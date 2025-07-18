@@ -19,6 +19,8 @@ __test__ = False
 class MockEventSourceAdapter(EventSource):
     """Test Event Source - Fully controllable event queue"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(self):
         """Initializes the test event source."""
         self.events: List[Event] = []
@@ -115,6 +117,8 @@ class MockEventSourceAdapter(EventSource):
 class MockKeyboardStateAdapter(KeyboardState):
     """Test Keyboard State - Fully controllable keyboard state simulation"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(self):
         """Initializes the test keyboard state."""
         self.pressed_keys: Set[int] = set()
@@ -207,6 +211,8 @@ class MockKeyboardStateAdapter(KeyboardState):
 class MockClockAdapter(Clock):
     """Test Clock - Fully controllable time flow"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(self, initial_time: float = 0.0):
         """
         Initializes the test clock.
@@ -286,6 +292,8 @@ class MockClockAdapter(Clock):
 
 class MockLoggerAdapter(Logger):
     """Test Logger - Collects log messages for validation"""
+
+    __test__ = False  # Tell pytest this is not a test class
 
     def __init__(self, print_logs: bool = False):
         """
@@ -372,6 +380,8 @@ def create_test_environment(
 
 class MockScenarioBuilder:
     """Test Scenario Builder - Simplifies the creation of complex test scenarios"""
+
+    __test__ = False  # Tell pytest this is not a test class
 
     def __init__(
         self, event_source: MockEventSourceAdapter, clock: MockClockAdapter, keyboard: MockKeyboardStateAdapter

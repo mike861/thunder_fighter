@@ -399,7 +399,7 @@ class DynamicBackground:
 
         # Transition effect variables
         self.transition_duration = 3.0  # Increased duration for smoother transition
-        self.transition_start_time = 0
+        self.transition_start_time = 0.0
 
         # Initialize buffers (will be created when screen size is known)
         self._screen_size = None

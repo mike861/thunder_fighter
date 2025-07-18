@@ -5,7 +5,7 @@ Manages game score, level, achievements, and related logic in a unified way.
 Refactored from utils/score.py.
 """
 
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import pygame
 
@@ -23,9 +23,9 @@ class ScoringSystem:
         self.achievement_callbacks: List[Callable] = []
 
         # Display related
-        self.font = None
-        self.text = None
-        self.rect = None
+        self.font: Optional[pygame.font.Font] = None
+        self.text: Optional[pygame.Surface] = None
+        self.rect: Optional[pygame.Rect] = None
 
         self._init_display()
         self.update_display()
@@ -124,7 +124,7 @@ class ScoringSystem:
 
     def draw(self, screen: pygame.Surface):
         """Draws the score."""
-        if self.text:
+        if self.text and self.rect:
             screen.blit(self.text, self.rect)
 
     @property

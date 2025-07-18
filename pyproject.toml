@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thunder-fighter"
-version = "0.8.0"
+version = "0.9.0"
 description = "A classic vertical scrolling space shooter game built with Pygame"
 readme = "README.md"
 license = {text = "GPL-2.0"}  # Consider changing to MIT or Apache-2.0
@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Arcade",
     "Operating System :: OS Independent",
 ]
@@ -100,7 +101,7 @@ ignore = [
 "tests/**/*.py" = ["E402"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -142,6 +143,10 @@ addopts = [
     "-v", 
     "--strict-markers",
     "--tb=short",
+]
+filterwarnings = [
+    # Ignore pygame's pkg_resources deprecation warning
+    "ignore:pkg_resources is deprecated:UserWarning:pygame.pkgdata",
 ]
 
 [tool.coverage.run]

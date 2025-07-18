@@ -237,6 +237,10 @@ class Player(pygame.sprite.Sprite):
                 target = targets[i]
                 wingman.shoot(self.all_sprites, self.missiles_group, target)
 
+    def launch_missile(self):
+        """Launch missile - alias for shoot_missiles for compatibility."""
+        self.shoot_missiles()
+
     def add_wingman(self):
         """Add a wingman"""
         if len(self.wingmen_list) >= int(PLAYER_CONFIG["MAX_WINGMEN"]):

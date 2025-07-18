@@ -4,6 +4,8 @@ Notification System
 Handles all types of notifications including regular, warning, and achievement notifications.
 """
 
+from typing import Union
+
 import pygame
 
 from thunder_fighter.constants import GREEN, HEIGHT, RED, WHITE, WIDTH, YELLOW
@@ -13,6 +15,25 @@ class Notification:
     """Class for displaying temporary notification messages"""
 
     def __init__(self, text, duration=2000, color=WHITE, size=24, position="center"):
+        # Define DummyFont class for type compatibility
+        class DummyFont:
+            def render(self, text, antialias=True, color=(255, 255, 255)):
+                # Create a dummy surface with the essential methods
+                if hasattr(pygame, "Surface"):
+                    surf = pygame.Surface((len(text) * 10, size))
+                    return surf
+                else:
+                    # Pure mock for extreme cases
+                    mock_surf = type(
+                        "MockSurface",
+                        (),
+                        {"get_rect": lambda: type("MockRect", (), {"center": (0, 0), "centerx": 0, "centery": 0})()},
+                    )()
+                    return mock_surf
+
+        # Type annotation for font attribute
+        self.font: Union[pygame.font.Font, DummyFont]
+
         try:
             # Use resource manager for better Chinese font support
             from thunder_fighter.utils.resource_manager import get_resource_manager
@@ -22,25 +43,6 @@ class Notification:
         except (pygame.error, AttributeError):
             # If pygame font is not initialized or available (test environment)
             # Create a dummy font interface
-            class DummyFont:
-                def render(self, text, antialias=True, color=(255, 255, 255)):
-                    # Create a dummy surface with the essential methods
-                    if hasattr(pygame, "Surface"):
-                        surf = pygame.Surface((len(text) * 10, size))
-                        return surf
-                    else:
-                        # Pure mock for extreme cases
-                        mock_surf = type(
-                            "MockSurface",
-                            (),
-                            {
-                                "get_rect": lambda: type(
-                                    "MockRect", (), {"center": (0, 0), "centerx": 0, "centery": 0}
-                                )()
-                            },
-                        )()
-                        return mock_surf
-
             self.font = DummyFont()
 
         self.text = text
