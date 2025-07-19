@@ -33,11 +33,6 @@ tests/
 │   ├── entities/            # Entity factory tests
 │   ├── test_pause_system.py # Pause functionality tests
 │   └── test_*.py            # Individual component tests
-├── sprites/                 # Game Object Tests (27 tests)
-│   ├── test_player.py       # Player behavior tests
-│   ├── test_enemy.py        # Enemy behavior tests
-│   ├── test_boss.py         # Boss mechanics tests
-│   └── test_items.py        # Item system tests
 ├── graphics/                # Visual Component Tests (80 tests)
 │   ├── test_ui_components.py # UI component tests
 │   ├── test_renderers.py    # Rendering system tests
@@ -178,7 +173,7 @@ def test_enemy_factory_creation():
 ./venv/bin/python -m pytest tests/ -k "test_enemy" -v
 
 # Run tests in a specific file
-./venv/bin/python -m pytest tests/sprites/test_player.py -v
+./venv/bin/python -m pytest tests/unit/entities/test_factories.py -v
 
 # Run tests with specific markers
 ./venv/bin/python -m pytest tests/ -m "slow" -v

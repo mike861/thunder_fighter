@@ -693,15 +693,6 @@ thunder_fighter/
 │   ├── zh.json            # Chinese translations
 │   ├── font_support.py    # Font management system
 │   └── loader.py          # Language loading abstractions
-├── sprites/                # Legacy sprite classes (maintained for compatibility)
-│   ├── boss.py            # Legacy boss sprite
-│   ├── bullets.py         # Legacy bullet sprites
-│   ├── enemy.py           # Legacy enemy sprite
-│   ├── explosion.py       # Legacy explosion sprite
-│   ├── items.py           # Legacy item sprites
-│   ├── missile.py         # Legacy missile sprite
-│   ├── player.py          # Legacy player sprite
-│   └── wingman.py         # Legacy wingman sprite
 ├── state/                  # Game state management
 │   ├── game_state.py      # Game state data structures
 │   ├── game_states.py     # Concrete state implementations

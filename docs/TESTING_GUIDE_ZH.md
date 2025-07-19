@@ -33,11 +33,6 @@ tests/
 │   ├── entities/            # 实体工厂测试
 │   ├── test_pause_system.py # 暂停功能测试
 │   └── test_*.py            # 单个组件测试
-├── sprites/                 # 游戏对象测试 (27个测试)
-│   ├── test_player.py       # 玩家行为测试
-│   ├── test_enemy.py        # 敌人行为测试
-│   ├── test_boss.py         # Boss机制测试
-│   └── test_items.py        # 物品系统测试
 ├── graphics/                # 视觉组件测试 (80个测试)
 │   ├── test_ui_components.py # UI组件测试
 │   ├── test_renderers.py    # 渲染系统测试
@@ -178,7 +173,7 @@ def test_enemy_factory_creation():
 ./venv/bin/python -m pytest tests/ -k "test_enemy" -v
 
 # 运行特定文件中的测试
-./venv/bin/python -m pytest tests/sprites/test_player.py -v
+./venv/bin/python -m pytest tests/unit/entities/test_factories.py -v
 
 # 运行带有特定标记的测试
 ./venv/bin/python -m pytest tests/ -m "slow" -v

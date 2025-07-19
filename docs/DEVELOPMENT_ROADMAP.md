@@ -112,7 +112,7 @@ ENEMY_SYSTEM = {
 
 **Files to Modify**:
 - `thunder_fighter/constants.py`
-- `thunder_fighter/sprites/enemy.py`
+- `thunder_fighter/entities/enemies/enemy.py`
 - `thunder_fighter/game.py`
 
 **Estimated Effort**: 4-5 hours
