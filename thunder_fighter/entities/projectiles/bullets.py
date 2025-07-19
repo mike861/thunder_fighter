@@ -34,12 +34,6 @@ class Bullet(pygame.sprite.Sprite):
         
         # Initialize graphics (with optional injection for testing)
         self._setup_graphics(x, y, angle, renderer)
-        
-        # Backward compatibility: expose speed and angle attributes
-        self.speed = speed
-        self.angle = angle
-        self.speedy = self.logic.speed_y
-        self.speedx = self.logic.speed_x
     
     def _setup_graphics(self, x: float, y: float, angle: float, 
                        renderer: Optional[Callable[[], pygame.Surface]] = None) -> None:
@@ -64,10 +58,6 @@ class Bullet(pygame.sprite.Sprite):
         # Update graphics position
         self.rect.centerx = int(new_x)
         self.rect.centery = int(new_y)
-        
-        # Update backward compatibility attributes
-        self.speedx = self.logic.speed_x
-        self.speedy = self.logic.speed_y
 
         # Check boundaries using logic layer
         if self.logic.is_out_of_bounds(WIDTH, HEIGHT):

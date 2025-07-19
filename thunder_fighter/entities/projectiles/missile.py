@@ -33,15 +33,11 @@ class TrackingMissile(pygame.sprite.Sprite):
         # Target tracking
         self.target = target
         self.angle = 0.0
-        self.speed = 8  # Backward compatibility
         
         # Initialize target position in algorithm
         if self.target and hasattr(self.target, 'rect'):
             initial_target_pos = self.target.rect.center
             self.algorithm.last_target_position = initial_target_pos
-            self.last_target_pos = initial_target_pos  # Backward compatibility
-        else:
-            self.last_target_pos = None
 
     def _setup_graphics(self, x: float, y: float, 
                        renderer: Optional[Callable[[], pygame.Surface]] = None) -> None:
@@ -61,12 +57,8 @@ class TrackingMissile(pygame.sprite.Sprite):
         # Determine current target position
         target_pos = None
         if self.target and hasattr(self.target, 'alive') and self.target.alive():
-            # If target is alive, update its last known position
+            # If target is alive, use its current position
             target_pos = self.target.rect.center
-            self.last_target_pos = target_pos  # Backward compatibility
-        elif self.last_target_pos:
-            # If target is gone but we have a last known position, use that
-            target_pos = self.last_target_pos
 
         # Calculate movement using pure algorithm
         movement_result = self.algorithm.calculate_movement(target_pos)
