@@ -154,71 +154,76 @@ class TestProjectileFactoryCreation:
         pass
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_bullet_player(self, mock_create_preset, mock_logger):
-        """Test creating player bullet - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
+    def test_create_bullet_player(self, mock_bullet_class, mock_logger):
+        """Test creating player bullet with clean interface."""
         factory = ProjectileFactory()
         mock_bullet = Mock()
-        mock_create_preset.return_value = mock_bullet
+        mock_bullet_class.return_value = mock_bullet
         
-        result = factory.create_bullet(owner="player")
+        result = factory.create_bullet(x=100, y=200, owner="player")
         
         assert result == mock_bullet
-        # Should call create_from_preset with player_bullet preset
-        mock_create_preset.assert_called_once_with("player_bullet")
+        # Should create bullet with correct parameters
+        mock_bullet_class.assert_called_once_with(100, 200, 10, 0, None)
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_bullet_enemy(self, mock_create_preset, mock_logger):
-        """Test creating enemy bullet - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
+    def test_create_bullet_enemy(self, mock_bullet_class, mock_logger):
+        """Test creating enemy bullet with clean interface."""
         factory = ProjectileFactory()
         mock_bullet = Mock()
-        mock_create_preset.return_value = mock_bullet
+        mock_bullet_class.return_value = mock_bullet
         
-        result = factory.create_bullet(owner="enemy")
+        result = factory.create_bullet(x=150, y=250, owner="enemy")
         
         assert result == mock_bullet
-        mock_create_preset.assert_called_once_with("enemy_bullet")
+        mock_bullet_class.assert_called_once_with(150, 250, 10, 0, None)
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_bullet_default_owner(self, mock_create_preset, mock_logger):
-        """Test creating bullet with default owner - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
+    def test_create_bullet_default_owner(self, mock_bullet_class, mock_logger):
+        """Test creating bullet with default owner (clean interface)."""
         factory = ProjectileFactory()
         mock_bullet = Mock()
-        mock_create_preset.return_value = mock_bullet
+        mock_bullet_class.return_value = mock_bullet
         
-        result = factory.create_bullet()  # No owner specified, should default to player
+        result = factory.create_bullet(x=75, y=125)  # Required position parameters
         
         assert result == mock_bullet
-        # Should default to player_bullet preset
-        mock_create_preset.assert_called_once_with("player_bullet")
+        # Should use default parameters: speed=10, angle=0, owner="player", renderer=None
+        mock_bullet_class.assert_called_once_with(75, 125, 10, 0, None)
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_missile(self, mock_create_preset, mock_logger):
-        """Test creating missile - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.missile.TrackingMissile')
+    def test_create_missile(self, mock_missile_class, mock_logger):
+        """Test creating missile with clean interface."""
         factory = ProjectileFactory()
         mock_missile = Mock()
-        mock_create_preset.return_value = mock_missile
+        mock_missile_class.return_value = mock_missile
         
-        result = factory.create_missile(owner="player")
+        # Create mock target
+        mock_target = Mock()
+        
+        result = factory.create_missile(x=100, y=200, target=mock_target, owner="player")
         
         assert result == mock_missile
-        mock_create_preset.assert_called_once_with("player_missile")
+        mock_missile_class.assert_called_once_with(100, 200, mock_target, None)
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_missile_default_owner(self, mock_create_preset, mock_logger):
-        """Test creating missile with default owner - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.missile.TrackingMissile')
+    def test_create_missile_default_owner(self, mock_missile_class, mock_logger):
+        """Test creating missile with default owner (clean interface)."""
         factory = ProjectileFactory()
         mock_missile = Mock()
-        mock_create_preset.return_value = mock_missile
+        mock_missile_class.return_value = mock_missile
         
-        result = factory.create_missile()  # No owner specified, defaults to player
+        mock_target = Mock()
+        
+        result = factory.create_missile(x=50, y=100, target=mock_target)  # Default owner="player"
         
         assert result == mock_missile
-        mock_create_preset.assert_called_once_with("player_missile")
+        mock_missile_class.assert_called_once_with(50, 100, mock_target, None)
 
 
 # NOTE: TestProjectileFactoryEntityCreation removed - violates Pure Logic Mock Strategy
@@ -246,21 +251,19 @@ class TestProjectileFactoryErrorHandling:
         assert callable(getattr(factory, 'create_missile'))
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch.object(ProjectileFactory, 'create_from_preset')
-    def test_create_bullet_invalid_owner(self, mock_create_preset, mock_logger):
-        """Test creating bullet with invalid owner - interface focused."""
+    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
+    def test_create_bullet_invalid_owner(self, mock_bullet_class, mock_logger):
+        """Test creating bullet with invalid owner (clean interface)."""
         factory = ProjectileFactory()
         mock_bullet = Mock()
-        mock_create_preset.return_value = mock_bullet
+        mock_bullet_class.return_value = mock_bullet
         
-        # Should not crash with invalid owner and should fallback to enemy_bullet
-        try:
-            result = factory.create_bullet(owner="invalid")
-            assert result == mock_bullet
-            # Should fallback to enemy_bullet preset (any non-player owner)
-            mock_create_preset.assert_called_once_with("enemy_bullet")
-        except Exception as e:
-            pytest.fail(f"Factory should handle invalid owner gracefully: {e}")
+        # Should handle invalid owner gracefully (treated as non-player owner)
+        result = factory.create_bullet(x=100, y=200, owner="invalid")
+        
+        assert result == mock_bullet
+        # Should create bullet normally with position and default parameters
+        mock_bullet_class.assert_called_once_with(100, 200, 10, 0, None)
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
     def test_factory_interface_consistency(self, mock_logger):
