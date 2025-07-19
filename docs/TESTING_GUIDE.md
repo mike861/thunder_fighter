@@ -203,7 +203,30 @@ markers = [
     "integration: marks tests as integration tests",
     "e2e: marks tests as end-to-end tests"
 ]
+filterwarnings = [
+    # Ignore pygame's pkg_resources deprecation warning
+    "ignore:pkg_resources is deprecated:UserWarning:pygame.pkgdata",
+]
 ```
+
+### Technical Testing Implementation
+
+**SDL Headless Mode**: Tests run without display requirements using dummy drivers:
+```bash
+# Environment variables for headless testing
+SDL_VIDEODRIVER=dummy
+SDL_AUDIODRIVER=dummy
+```
+
+**Mock Dependencies**: Comprehensive mocking strategy for external dependencies:
+- **Pygame surfaces and audio**: Mocked to prevent hardware dependencies
+- **File I/O operations**: Mocked for deterministic test behavior
+- **Time-dependent functions**: Controlled timing for consistent test results
+
+**Interface-Focused Testing Philosophy**:
+- Test public APIs rather than implementation details
+- Use dependency injection for testable interfaces
+- Focus on behavior verification over internal state checking
 
 ## Writing New Tests
 
@@ -398,13 +421,15 @@ TEST_ENEMY_CONFIGS = {
 
 ## Specialized Test Suites
 
-### Pause System Testing
+### Pause System Testing (16 tests)
 
 **Key Test Areas**:
-- Pause-aware timing calculations
-- State synchronization during pause/resume
-- Multiple pause/resume cycles
-- Edge cases and error handling
+- **Pause-aware timing calculations**: Game time correctly excludes pause duration
+- **State synchronization during pause/resume**: Consistent state across all game components
+- **Multiple pause/resume cycles**: Handles repeated pause/resume operations correctly
+- **Edge cases and error handling**: Rapid toggling, negative time prevention, malformed state recovery
+- **Statistics tracking**: PauseStats dataclass provides complete pause session information
+- **Dependency injection**: Clean interface with injectable timing dependencies for testability
 
 **Example Test Pattern**:
 ```python
@@ -457,13 +482,15 @@ def test_input_fallback_mechanism():
         assert events[0].type == GameEventType.PAUSE_TOGGLE
 ```
 
-### Localization Testing
+### Localization Testing (39 tests)
 
 **Key Test Areas**:
-- Font loading and rendering
-- Language switching functionality
-- Text rendering without "tofu blocks"
-- Multi-language UI layout
+- **Loader abstraction pattern**: FileLanguageLoader, MemoryLanguageLoader, CachedLanguageLoader implementations
+- **Font loading and rendering**: Chinese text rendering without "tofu blocks"
+- **Language switching functionality**: Dynamic language switching during gameplay
+- **Multi-language UI layout**: Interface components adapt to different text lengths and character sets
+- **Dependency injection**: Testable language loading interfaces
+- **Performance optimization**: Cached language loading with configurable caching strategies
 
 **Example Test Pattern**:
 ```python
@@ -483,6 +510,71 @@ def test_chinese_font_rendering():
     # Verify surface is not empty (no tofu blocks)
     assert surface.get_width() > 0
     assert surface.get_height() > 0
+```
+
+### Boss Spawn Timing Testing (18 tests)
+
+**Key Test Areas**:
+- **Pause-aware boss intervals**: Boss generation correctly excludes pause periods
+- **Timing calculation consistency**: Unified architecture eliminates timing inconsistencies
+- **Level requirements**: Boss spawning only occurs at appropriate game levels (level 2+)
+- **Edge case handling**: Zero game time, negative time prevention, rapid pause toggles
+- **Integration with pause system**: Boss timing calculations use pause-aware game time
+
+**Example Test Pattern**:
+```python
+def test_boss_spawn_timing_with_pause():
+    """Test boss spawn timing excludes pause duration."""
+    pause_manager = PauseManager()
+    boss_system = BossSystem(pause_manager)
+    
+    game_start = 1000.0
+    boss_interval = BOSS_SPAWN_INTERVAL  # e.g., 30 seconds
+    
+    # Simulate gameplay to boss spawn time
+    current_time = game_start + boss_interval
+    assert boss_system.should_spawn_boss(game_start, current_time) is True
+    
+    # Add pause time - boss should not spawn yet
+    pause_manager.pause(current_time)
+    paused_time = current_time + 10.0  # 10 second pause
+    pause_manager.resume(paused_time)
+    
+    # Boss should not spawn until real game time reaches interval
+    assert boss_system.should_spawn_boss(game_start, paused_time) is False
+    
+    # Boss should spawn after accounting for pause
+    final_time = paused_time + 10.0  # Additional 10 seconds
+    assert boss_system.should_spawn_boss(game_start, final_time) is True
+```
+
+### Enemy Entity Testing (8 tests)
+
+**Key Test Areas**:
+- **Interface-focused testing**: Testing public APIs over implementation details
+- **Level-based behavior**: Enemy shooting capability based on level thresholds
+- **Factory integration**: Enemy creation through factory pattern validation
+- **Behavioral consistency**: Movement properties and interaction patterns
+- **Performance characteristics**: Entity creation and update performance
+
+**Example Test Pattern**:
+```python
+def test_enemy_level_based_behavior():
+    """Test enemy behavior changes based on level."""
+    factory = EnemyFactory()
+    
+    # Test low-level enemy (cannot shoot)
+    low_level_enemy = factory.create_enemy(level=1)
+    assert low_level_enemy.level == 1
+    assert low_level_enemy.can_shoot is False
+    assert low_level_enemy.shoot_delay is None
+    
+    # Test high-level enemy (can shoot)
+    high_level_enemy = factory.create_enemy(level=5)
+    assert high_level_enemy.level == 5
+    assert high_level_enemy.can_shoot is True
+    assert high_level_enemy.shoot_delay > 0
+    assert high_level_enemy.shoot_delay < 3000  # Within reasonable range
 ```
 
 ## Common Testing Patterns
@@ -644,7 +736,15 @@ This testing guide provides the foundation for maintaining and expanding Thunder
 - Catch regressions early
 - Validate functionality across all game systems
 
-For specific technical implementation details, refer to [Technical Details](../TECHNICAL_DETAILS.md). For architectural guidance, see [Architecture Guide](../ARCHITECTURE.md).
+## Related Documentation
+
+For additional information related to testing and development:
+
+- **[Technical Details](TECHNICAL_DETAILS.md)** - Technical implementation details and CI/CD testing setup
+- **[Architecture Guide](ARCHITECTURE.md)** - System architecture and design patterns that support testability
+- **[CI/CD Guide](CI_CD_GUIDE.md)** - Continuous integration pipeline and automated testing
+- **[Contributing Guide](../CONTRIBUTING.md)** - Testing requirements for contributors
+- **[Development Setup](../CLAUDE.md#testing)** - Quick testing commands and setup
 
 ---
 

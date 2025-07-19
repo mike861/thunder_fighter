@@ -6,6 +6,40 @@ This document contains detailed technical information about specific implementat
 
 ## Code Quality and Type Safety
 
+### Continuous Integration Pipeline
+
+**GitHub Actions CI/CD Implementation**: Thunder Fighter uses a comprehensive CI pipeline with the following jobs:
+
+**Test Job** (Multi-platform: macOS with Python 3.12, 3.13):
+- Code linting and formatting verification using Ruff
+- Type checking with MyPy (zero errors maintained)
+- Comprehensive test execution (390+ tests)
+- Coverage reporting with Codecov integration
+- SDL dummy drivers for headless testing
+
+**Security Job** (Ubuntu):
+- Security vulnerability scanning with Bandit
+- Dependency security analysis with Safety
+- Automated security reporting
+
+**Build Job** (macOS):
+- Package build verification
+- Distribution artifact generation
+- Build artifact upload for releases
+
+**GitHub Actions Versions** (Updated 2025):
+- `actions/checkout@v4` - Repository checkout
+- `actions/setup-python@v5` - Python environment setup
+- `actions/upload-artifact@v4` - Build artifact handling
+- `codecov/codecov-action@v4` - Coverage reporting
+
+**CI Configuration Features**:
+- Automatic execution on push to main/dev branches
+- Pull request validation
+- Fail-fast disabled for comprehensive testing
+- SDL headless mode for GUI testing
+- Cross-platform compatibility verification
+
 ### MyPy Type Checking Implementation
 
 **Complete Type Safety Achievement**: Successfully resolved all MyPy type checking errors (41 errors across 15 files → 0 errors in 90 source files)
@@ -138,19 +172,15 @@ if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
 
 ### Comprehensive Test Coverage
 
-**Test Architecture**: 390 comprehensive tests organized by category:
-- **Unit Tests (90+)**: Entity factories, individual components
-- **Integration Tests (9)**: Event system flow, component interactions
-- **End-to-End Tests (9)**: Complete game flow scenarios
-- **Systems Tests**: Core systems architecture validation
-- **Events Tests**: Event-driven architecture testing
-- **Localization Tests**: Multi-language support testing
+**Test Architecture**: 390+ comprehensive tests organized by category with specialized test suites for critical systems including PauseManager, Localization, Boss Spawn Timing, and Enemy Entity behavior.
 
-**Specialized Test Suites**:
-- **PauseManager Tests (16)**: Pause functionality, timing calculations, edge cases
-- **Localization Tests (39)**: Loader abstraction, dependency injection, language management
-- **Boss Spawn Timing Tests (18)**: Boss generation intervals with pause handling
-- **Enemy Entity Tests (8)**: Interface-focused testing of Enemy behavior
+**Technical Testing Implementation**:
+- **SDL Headless Mode**: GUI testing without display requirements
+- **Mock Dependencies**: Comprehensive mocking for pygame surfaces and audio
+- **Interface-Focused Testing**: Testing public APIs over implementation details
+- **Performance Testing**: Memory usage and execution time validation
+
+For detailed testing documentation, patterns, and comprehensive coverage analysis, see **[Testing Guide](../TESTING_GUIDE.md)**.
 
 ## Game Engine Technical Details
 

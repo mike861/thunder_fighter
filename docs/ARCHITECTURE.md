@@ -4,10 +4,246 @@
 
 Thunder Fighter uses a modern, modular architecture designed for maintainability, testability, and extensibility. The system is built around event-driven communication, systems-based design, and clear separation of concerns.
 
+## Architecture Diagrams
+
+### Core Architecture Overview
+
+This diagram shows the high-level relationships between major system components:
+
+```mermaid
+graph TB
+    subgraph "Game Loop"
+        Game[RefactoredGame]
+    end
+    
+    subgraph "Core Systems"
+        EventSystem[EventSystem]
+        InputManager[InputManager]
+        UIManager[UIManager]
+        PauseManager[PauseManager]
+    end
+    
+    subgraph "Game Systems"
+        CollisionSystem[CollisionSystem]
+        ScoringSystem[ScoringSystem]
+        SpawningSystem[SpawningSystem]
+        PhysicsSystem[PhysicsSystem]
+    end
+    
+    subgraph "Entity Management"
+        EnemyFactory[EnemyFactory]
+        BossFactory[BossFactory]
+        ItemFactory[ItemFactory]
+        ProjectileFactory[ProjectileFactory]
+    end
+    
+    subgraph "State Management"
+        StateMachine[StateMachine]
+        GameStates[Game States]
+    end
+    
+    subgraph "Resource Management"
+        ResourceManager[ResourceManager]
+        SoundManager[SoundManager]
+        ConfigManager[ConfigManager]
+    end
+    
+    Game --> EventSystem
+    Game --> InputManager
+    Game --> UIManager
+    Game --> PauseManager
+    Game --> CollisionSystem
+    Game --> ScoringSystem
+    Game --> SpawningSystem
+    Game --> StateMachine
+    Game --> ResourceManager
+    Game --> SoundManager
+    
+    SpawningSystem --> EnemyFactory
+    SpawningSystem --> BossFactory
+    SpawningSystem --> ItemFactory
+    SpawningSystem --> ProjectileFactory
+    
+    StateMachine --> GameStates
+    
+    EventSystem -.-> CollisionSystem
+    EventSystem -.-> ScoringSystem
+    EventSystem -.-> SpawningSystem
+    EventSystem -.-> UIManager
+    
+    style Game fill:#e1f5fe
+    style EventSystem fill:#f3e5f5
+    style StateMachine fill:#e8f5e8
+    style SpawningSystem fill:#fff3e0
+```
+
+### System Interactions
+
+This diagram illustrates how different systems communicate and interact:
+
+```mermaid
+graph TD
+    subgraph "Input Layer"
+        InputHandler[InputHandler]
+        InputManager[InputManager]
+        InputFacade[InputFacade]
+    end
+    
+    subgraph "Game Systems"
+        CollisionSystem[CollisionSystem]
+        ScoringSystem[ScoringSystem]
+        SpawningSystem[SpawningSystem]
+        PhysicsSystem[PhysicsSystem]
+    end
+    
+    subgraph "Entity Factories"
+        EnemyFactory[EnemyFactory]
+        BossFactory[BossFactory]
+        ItemFactory[ItemFactory]
+        ProjectileFactory[ProjectileFactory]
+    end
+    
+    subgraph "UI Systems"
+        UIManager[UIManager]
+        NotificationManager[NotificationManager]
+        ScreenOverlay[ScreenOverlay]
+    end
+    
+    subgraph "Resource Systems"
+        ResourceManager[ResourceManager]
+        SoundManager[SoundManager]
+        PauseManager[PauseManager]
+    end
+    
+    subgraph "Event Flow"
+        EventSystem[EventSystem]
+    end
+    
+    InputHandler --> InputManager
+    InputManager --> InputFacade
+    InputFacade --> Game
+    
+    Game --> CollisionSystem
+    Game --> ScoringSystem
+    Game --> SpawningSystem
+    Game --> PhysicsSystem
+    
+    SpawningSystem --> EnemyFactory
+    SpawningSystem --> BossFactory
+    SpawningSystem --> ItemFactory
+    SpawningSystem --> ProjectileFactory
+    
+    Game --> UIManager
+    UIManager --> NotificationManager
+    UIManager --> ScreenOverlay
+    
+    Game --> ResourceManager
+    Game --> SoundManager
+    Game --> PauseManager
+    
+    CollisionSystem --> EventSystem
+    ScoringSystem --> EventSystem
+    SpawningSystem --> EventSystem
+    
+    EventSystem --> UIManager
+    EventSystem --> SoundManager
+    EventSystem --> NotificationManager
+    
+    style EventSystem fill:#f9f,stroke:#333,stroke-width:4px
+    style Game fill:#bbf,stroke:#333,stroke-width:2px
+    style InputFacade fill:#bfb,stroke:#333,stroke-width:2px
+    style UIManager fill:#ffb,stroke:#333,stroke-width:2px
+```
+
 ## Core Design Principles
 
 ### Event-Driven Architecture
 Game components communicate through `EventSystem` rather than direct coupling. All game events are defined in `events/game_events.py`.
+
+#### Event System Class Diagram
+
+```mermaid
+classDiagram
+    class EventType {
+        <<enumeration>>
+        PLAYER_DIED
+        PLAYER_HEALTH_CHANGED
+        ENEMY_SPAWNED
+        ENEMY_DIED
+        BOSS_SPAWNED
+        BOSS_DEFEATED
+        ITEM_COLLECTED
+        GAME_PAUSED
+        LEVEL_UP
+        GAME_WON
+    }
+    
+    class Event {
+        +type: EventType
+        +data: dict
+        +timestamp: float
+        +handled: bool
+        +source: str
+        +get_data(key: str): any
+        +mark_handled()
+    }
+    
+    class GameEvent {
+        +create_player_died(player_id: str): GameEvent
+        +create_boss_spawned(boss_id: str, level: int): GameEvent
+        +create_item_collected(item_type: str, player_id: str): GameEvent
+        +create_level_up(new_level: int): GameEvent
+    }
+    
+    class EventListener {
+        <<abstract>>
+        +handle_event(event: Event)*
+    }
+    
+    class FunctionListener {
+        +callback: Callable
+        +event_types: list[EventType]
+        +handle_event(event: Event)
+    }
+    
+    class EventSystem {
+        +listeners: dict[EventType, list[EventListener]]
+        +event_queue: list[Event]
+        +max_queue_size: int
+        +register_listener(listener: EventListener, event_type: EventType)
+        +dispatch_event(event: Event)
+        +process_events()
+        +clear_queue()
+    }
+    
+    class CollisionSystem {
+        +handle_event(event: Event)
+    }
+    
+    class ScoringSystem {
+        +handle_event(event: Event)
+    }
+    
+    class UIManager {
+        +handle_event(event: Event)
+    }
+    
+    Event --> EventType : uses
+    GameEvent --|> Event
+    EventListener <|-- FunctionListener
+    EventListener <|-- CollisionSystem
+    EventListener <|-- ScoringSystem
+    EventListener <|-- UIManager
+    
+    EventSystem --> Event : manages
+    EventSystem --> EventListener : notifies
+    
+    GameEvent --> EventType : creates events of
+    
+    note for EventSystem "Central event dispatcher\nDecouples game components"
+    note for GameEvent "Factory methods for\ntype-safe event creation"
+    note for EventListener "Observer pattern\nfor event handling"
+```
 
 ### Systems-Based Architecture
 Core game logic is organized into dedicated systems in `systems/`:
@@ -65,6 +301,97 @@ The layered architecture provides:
 - **Type-Safe State Transitions**: Clear, validated transitions
 - **Event-Driven Architecture**: State change listeners and callbacks
 - **Separation of Concerns**: Each state handles its own logic
+
+#### State Management Class Diagram
+
+```mermaid
+classDiagram
+    class State {
+        <<abstract>>
+        +name: str
+        +enter(previous_state: str)*
+        +exit(next_state: str)*
+        +update(dt: float)*
+        +handle_event(event: Event)*
+        +can_transition_to(state_name: str): bool*
+    }
+    
+    class StateMachine {
+        +current_state: State
+        +states: dict[str, State]
+        +transition_history: list[str]
+        +add_state(state: State)
+        +transition_to(state_name: str)
+        +update(dt: float)
+        +handle_event(event: Event)
+        +get_current_state_name(): str
+    }
+    
+    class MenuState {
+        +enter(previous_state: str)
+        +handle_event(event: Event)
+        +update(dt: float)
+    }
+    
+    class PlayingState {
+        +enter(previous_state: str)
+        +exit(next_state: str)
+        +update(dt: float)
+        +handle_event(event: Event)
+    }
+    
+    class PausedState {
+        +enter(previous_state: str)
+        +exit(next_state: str)
+        +handle_event(event: Event)
+    }
+    
+    class GameOverState {
+        +restart_requested: bool
+        +enter(previous_state: str)
+        +handle_event(event: Event)
+        +update(dt: float)
+    }
+    
+    class VictoryState {
+        +final_score: int
+        +completion_time: float
+        +enter(previous_state: str)
+        +handle_event(event: Event)
+    }
+    
+    class LevelTransitionState {
+        +transition_duration: float
+        +target_level: int
+        +enter(previous_state: str)
+        +update(dt: float)
+    }
+    
+    class StateFactory {
+        +create_state(state_name: str, game_instance: Game): State
+        +create_all_states(game_instance: Game): dict[str, State]
+    }
+    
+    StateMachine --> State : manages
+    State <|-- MenuState
+    State <|-- PlayingState
+    State <|-- PausedState
+    State <|-- GameOverState
+    State <|-- VictoryState
+    State <|-- LevelTransitionState
+    
+    StateFactory --> State : creates
+    StateFactory --> MenuState : creates
+    StateFactory --> PlayingState : creates
+    StateFactory --> PausedState : creates
+    StateFactory --> GameOverState : creates
+    StateFactory --> VictoryState : creates
+    StateFactory --> LevelTransitionState : creates
+    
+    note for StateMachine "Manages state transitions\nand event forwarding"
+    note for PlayingState "Main gameplay state\nwith entity spawning"
+    note for LevelTransitionState "3-second level transition\nwith smooth animations"
+```
 
 ### Background System Architecture
 
@@ -139,6 +466,112 @@ The layered architecture provides:
 - **projectiles/** - Bullets and missiles with tracking capabilities
 - **items/** - Power-ups and collectibles with configurable effects
 - **player/** - Player and wingman entities with formation management
+
+#### Entity System Class Diagram
+
+```mermaid
+classDiagram
+    class GameObject {
+        <<abstract>>
+        +x: float
+        +y: float
+        +rect: pygame.Rect
+        +image: pygame.Surface
+        +active: bool
+        +update(dt: float)
+        +render(screen: pygame.Surface)
+    }
+    
+    class Entity {
+        +entity_id: str
+        +created_at: float
+        +velocity_x: float
+        +velocity_y: float
+        +update(dt: float)
+        +destroy()
+    }
+    
+    class MovableEntity {
+        +speed: float
+        +direction: float
+        +move(dx: float, dy: float)
+        +set_velocity(vx: float, vy: float)
+    }
+    
+    class LivingEntity {
+        +health: int
+        +max_health: int
+        +is_alive: bool
+        +take_damage(damage: int)
+        +heal(amount: int)
+    }
+    
+    class EntityFactory {
+        <<abstract>>
+        +create_entity(config: dict): Entity
+        +get_preset_config(preset_name: str): dict
+    }
+    
+    class EnemyFactory {
+        +presets: dict
+        +create_for_level(level: int): Enemy
+        +create_wave(size: int): list[Enemy]
+        +create_random_enemy(): Enemy
+    }
+    
+    class BossFactory {
+        +create_boss(level: int): Boss
+        +create_final_boss(): Boss
+    }
+    
+    class ItemFactory {
+        +create_power_up(): PowerUp
+        +create_health_pack(): HealthPack
+        +create_wingman_upgrade(): WingmanUpgrade
+    }
+    
+    class Player {
+        +wingmen: list[Wingman]
+        +shoot(): list[Bullet]
+        +launch_missile(): Missile
+        +handle_input(input_state: dict)
+    }
+    
+    class Enemy {
+        +can_shoot: bool
+        +shoot_delay: float
+        +shoot(): Bullet
+        +get_points(): int
+    }
+    
+    class Boss {
+        +attack_patterns: list
+        +current_pattern: int
+        +phase: int
+        +update_attack_pattern()
+    }
+    
+    pygame.sprite.Sprite <|-- GameObject
+    GameObject <|-- Entity
+    Entity <|-- MovableEntity
+    MovableEntity <|-- LivingEntity
+    LivingEntity <|-- Player
+    LivingEntity <|-- Enemy
+    Enemy <|-- Boss
+    
+    EntityFactory <|-- EnemyFactory
+    EntityFactory <|-- BossFactory
+    EntityFactory <|-- ItemFactory
+    
+    EnemyFactory --> Enemy : creates
+    BossFactory --> Boss : creates
+    ItemFactory --> PowerUp : creates
+    Player --> Wingman : manages
+    
+    note for EntityFactory "Abstract factory pattern\nfor entity creation"
+    note for Player "Manages wingman formation\nand missile system"
+    note for Boss "Multi-phase boss with\ncomplex attack patterns"
+```
 
 ## Graphics and Effects
 

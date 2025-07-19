@@ -1,5 +1,10 @@
 # Thunder Fighter
 
+[![CI](https://github.com/mike861/thunder_fighter/workflows/CI/badge.svg)](https://github.com/mike861/thunder_fighter/actions)
+[![codecov](https://codecov.io/gh/mike861/thunder_fighter/branch/main/graph/badge.svg)](https://codecov.io/gh/mike861/thunder_fighter)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 A classic vertical scrolling space shooter game built with Pygame featuring modern architecture and comprehensive testing.
 
 ![Thunder Fighter Screenshot](./docs/images/boss.png) 
@@ -21,7 +26,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 ### Technical
 - **Modern Architecture**: Event-driven, systems-based design with clean separation of concerns
 - **Multi-language Support**: Dynamic switching between English and Chinese (Press L)
-- **Comprehensive Testing**: 375+ tests ensuring stability and reliability
+- **Comprehensive Testing**: 390+ tests ensuring stability and reliability
 - **Configuration System**: JSON-based settings with command-line tools
 - **Cross-platform**: Works on Windows, macOS, and Linux with platform-specific optimizations
 
@@ -30,6 +35,7 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 - **[Game Mechanics Guide](docs/GAME_MECHANICS.md)** - Detailed game systems and mechanics
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - System architecture and design patterns
 - **[Technical Details](docs/TECHNICAL_DETAILS.md)** - Technical implementations and optimizations
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive testing guide and best practices
 - **[Development Roadmap](docs/DEVELOPMENT_ROADMAP.md)** - Development roadmap and planned features
 - **[Localization Guide](docs/LOCALIZATION.md)** - Multi-language support guide
 
@@ -37,8 +43,8 @@ In Thunder Fighter, you pilot a fighter jet battling waves of enemies in space. 
 
 ### Requirements
 
-- Python 3.8+
-- Pygame 2.0.0+
+- Python 3.12+
+- Pygame 2.6.0+
 - Other dependencies listed in `requirements.txt`
 
 ### Installation
@@ -138,7 +144,7 @@ See [Architecture Guide](docs/ARCHITECTURE.md) for detailed technical documentat
 
 ## Testing
 
-The project includes 375+ comprehensive tests covering all aspects of the game:
+The project includes 390+ comprehensive tests covering all aspects of the game:
 
 ### Running Tests
 
@@ -159,6 +165,8 @@ python -m pytest tests/systems/ -v       # Systems architecture tests
 - **Localization**: Multi-language support and font management
 - **UI Components**: Modular interface components and rendering
 - **Input Handling**: Clean input architecture and state transitions
+
+For detailed testing documentation, patterns, and best practices, see **[Testing Guide](docs/TESTING_GUIDE.md)**.
 
 ## Project Structure
 
@@ -186,7 +194,7 @@ thunder_fighter/
 - 🎨 **Dynamic Level Backgrounds**: Smooth transitions with unique visual themes
 - 🌏 **Full Chinese Support**: Optimized fonts and complete localization
 - 🔧 **Architecture Improvements**: Major code cleanup and systems-based design
-- 📊 **Enhanced Testing**: 375+ comprehensive tests with specialized coverage
+- 📊 **Enhanced Testing**: 390+ comprehensive tests with specialized coverage
 - 🍎 **macOS Optimizations**: Fixed input interference and font rendering issues
 
 See [Technical Details](docs/TECHNICAL_DETAILS.md) for complete technical information and [Development History](docs/DEVELOPMENT_HISTORY.md) for detailed changelog.

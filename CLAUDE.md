@@ -13,7 +13,7 @@ python main.py
 
 ### Testing
 ```bash
-# Run all tests (390 comprehensive tests)
+# Run all tests (390+ comprehensive tests)
 ./venv/bin/python -m pytest tests/ -v
 
 # Run specific test categories
@@ -24,6 +24,8 @@ python main.py
 # Test coverage
 ./venv/bin/python -m pytest tests/ --cov=thunder_fighter --cov-report=html
 ```
+
+For comprehensive testing documentation, see **[Testing Guide](docs/TESTING_GUIDE.md)**.
 
 ### Code Quality
 ```bash
@@ -38,10 +40,13 @@ ruff check --fix .
 mypy thunder_fighter/
 ```
 
-### Development Dependencies
+### Continuous Integration
 ```bash
-# Install development dependencies
-pip install -e .[dev]
+# The project uses GitHub Actions for CI/CD with the following checks:
+# - Code linting and formatting (Ruff)
+# - Type checking (MyPy)
+# - Test execution with coverage reporting
+# - Build verification
 ```
 
 ## Quick Architecture Reference
@@ -136,6 +141,8 @@ When fixing MyPy type errors, follow these principles:
 - Use dependency injection for testable interfaces
 - Follow interface-focused testing over implementation details
 
+For detailed testing guidelines, patterns, and best practices, see **[Testing Guide](docs/TESTING_GUIDE.md)**.
+
 ### Architecture Rules
 - Components communicate through EventSystem
 - Create entities through factory classes
@@ -160,7 +167,7 @@ When fixing MyPy type errors, follow these principles:
 
 ## Testing Quick Guide
 
-The project has 390 comprehensive tests organized by category:
+The project has 390+ comprehensive tests organized by category:
 - **Unit Tests (90+)**: Entity factories, individual components
 - **Integration Tests (9)**: Event system flow, component interactions
 - **End-to-End Tests (9)**: Complete game flow scenarios
@@ -168,7 +175,7 @@ The project has 390 comprehensive tests organized by category:
 - **Events Tests**: Event-driven architecture testing
 - **Localization Tests**: Multi-language support testing
 
-For detailed test structure, see test files in organized directories under `tests/`.
+For detailed test structure, patterns, and comprehensive testing documentation, see **[Testing Guide](docs/TESTING_GUIDE.md)**.
 
 ## Documentation Structure
 
@@ -176,6 +183,8 @@ For detailed test structure, see test files in organized directories under `test
 - **[GAME_MECHANICS.md](docs/GAME_MECHANICS.md)** - Pure game mechanics guide (victory, boss, items systems)
 - **[TECHNICAL_DETAILS.md](docs/TECHNICAL_DETAILS.md)** - Technical implementations and platform-specific optimizations
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture, design patterns, and detailed code organization
+- **[TESTING_GUIDE.md](docs/TESTING_GUIDE.md)** - Comprehensive testing guide, patterns, and best practices
+- **[CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md)** - Comprehensive CI/CD pipeline documentation and best practices
 - **[DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md)** - Development planning and implementation roadmap
 
 ## Important Notes
