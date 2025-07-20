@@ -21,6 +21,7 @@ class GameEventType(EventType):
     PLAYER_LEVELED_UP = "player_leveled_up"
     PLAYER_HEALTH_CHANGED = "player_health_changed"
     PLAYER_MOVED = "player_moved"
+    PLAYER_SHOOT = "player_shoot"
 
     # Enemy events
     ENEMY_SPAWNED = "enemy_spawned"
@@ -111,6 +112,15 @@ class GameEvent(Event):
             old_health=old_health,
             new_health=new_health,
             max_health=max_health,
+        )
+
+    @classmethod
+    def create_player_shoot(cls, source: str = "player", shooting_data: list = None) -> "GameEvent":
+        """Create a player shoot event with shooting parameters."""
+        return cls(
+            GameEventType.PLAYER_SHOOT,
+            source=source,
+            shooting_data=shooting_data or []
         )
 
     @classmethod

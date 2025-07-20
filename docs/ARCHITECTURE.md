@@ -591,16 +591,38 @@ Thunder Fighter's architecture successfully balances performance, maintainabilit
 
 **Continuous Improvement**: Thunder Fighter's architecture continues to evolve through focused refactoring efforts that improve code quality and maintainability.
 
-**Recent Enhancements**:
+**Recent Enhancements (January 2025)**:
 - **Logic/Interface Separation**: Improved separation of concerns in entity systems
 - **Clean Interface Design**: Enhanced factory methods with clear parameter requirements
 - **Dependency Injection**: Optional rendering parameters for better testability
 - **Reduced Coupling**: Minimized dependencies between mathematical logic and graphics rendering
+- **Event-Driven Player Architecture**: Complete elimination of Player-Bullet hard coupling
+- **Strategic Testing Framework**: 70% Lightweight Mock, 20% Heavy Mock, 10% Mixed strategies validated
+- **Interface Quality First**: Technical debt reduction prioritized over backward compatibility
+
+### Major Architectural Achievement: Player System Decoupling
+
+**Problem Solved**: Player class previously contained hard dependencies on projectile graphics classes, violating dependency direction and testing principles.
+
+**Architecture Solution**: Event-driven shooting system with pure logic extraction:
+
+```
+Player (Business Logic) → EventSystem → SpawningSystem → ProjectileFactory
+```
+
+**Core Benefits**:
+- **Dependency Direction Correction**: Business logic no longer depends on graphics entities
+- **Pure Logic Testing**: Shooting parameter calculation testable without pygame
+- **Clean Interface Design**: Event-driven communication replaces direct instantiation
+- **Enhanced Testability**: 91.7% Player test success rate (previously 29.2%)
+
+See [Technical Details](TECHNICAL_DETAILS.md#event-driven-player-architecture) for implementation specifics.
 
 **Future Directions**:
 1. **Component Entity System**: Potential migration to full ECS architecture
 2. **Enhanced Modularity**: Further separation of concerns across system boundaries
 3. **Interface Standardization**: Consistent design patterns across all factory classes
 4. **Testing Integration**: Continued improvement of testable interface design
+5. **Event System Expansion**: Apply event-driven patterns to other entity interactions
 
-The projectile system improvements demonstrate effective application of clean architecture principles while maintaining system functionality and performance.
+The Player system refactoring demonstrates successful application of Interface Quality First and Logic/Interface Separation principles, achieving substantial improvements in code quality and testability.

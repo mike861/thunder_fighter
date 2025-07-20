@@ -71,7 +71,35 @@ def update(self):
 - 13/19 missile tests failing due to mock complexity
 - Algorithm changes require graphics testing
 
-### **Issue 3: Dependency Direction Violation** ⚠️
+### **Issue 3: Player-Bullet Hard Coupling** 🚨
+
+**File**: `thunder_fighter/entities/player/player.py`
+
+**Problem**: Player class directly imports and instantiates Bullet classes, violating dependency direction:
+
+```python
+from thunder_fighter.entities.projectiles.bullets import Bullet  # ❌ Hard dependency
+
+class Player(pygame.sprite.Sprite):
+    def shoot(self):
+        # ❌ VIOLATION: Business logic creates graphics entities
+        bullet = Bullet(self.rect.centerx, self.rect.top, self.bullet_speed, angle)
+        self.all_sprites.add(bullet)
+        self.bullets_group.add(bullet)
+```
+
+**Testing Impact**:
+- Mock path mismatch: Tests mock `thunder_fighter.entities.projectiles.bullets.Bullet` but Player imports directly
+- 13/48 Player tests failing with `assert mock_bullet_class.call_count == 0` (expected > 0)
+- Violates Heavy Mock Strategy: Should use real pygame objects + mock external dependencies
+
+**Architecture Violation**:
+```
+Player (Business Logic)  →  Bullet (Graphics Entity)
+        ❌ WRONG DIRECTION
+```
+
+### **Issue 4: Dependency Direction Violation** ⚠️
 
 **Problem**: Entity business logic depends on graphics subsystem:
 
@@ -102,6 +130,12 @@ Business Logic Layer    ←    Graphics Layer
 - Business logic classes hard-coded to pygame
 - Cannot substitute different graphics systems
 - Violates Dependency Inversion Principle
+
+### **Violation 4: Testing Strategy Inconsistency**
+- Player Combat should use Heavy Mock Strategy (real pygame objects + mock external dependencies)
+- Current tests use Lightweight Mock Strategy with complex pygame surface mocking
+- Mock path mismatches between import statements and test patches
+- Violates CLAUDE.md Strategic Testing Framework requirements
 
 ## Refactoring Strategies
 
@@ -226,6 +260,115 @@ class ProjectileFactory:
         return Bullet(x, y, renderer=renderer, **kwargs)
 ```
 
+### **Strategy 4: Event-Driven Shooting System (CLAUDE.md Compliant)**
+
+#### **Problem Analysis**
+Current Player-Bullet coupling violates CLAUDE.md core principles:
+- **Logic/Interface Separation**: Player (business logic) directly depends on Bullet (graphics)
+- **Interface Quality First**: Technical debt maintained instead of eliminated
+- **Testing Strategy**: Should use Heavy Mock Strategy for Player Combat
+
+#### **Solution: Shooting Logic Separation + Event-Driven Architecture**
+
+```python
+# ✅ 1. Player: Pure business logic, no graphics dependencies
+class Player(pygame.sprite.Sprite):
+    def __init__(self, game, all_sprites, bullets_group, missiles_group, 
+                 enemies_group, sound_manager=None, event_system=None):
+        # ✅ Inject event system, eliminate bullet import
+        self.event_system = event_system or EventSystem()
+        # ... existing code without Bullet import ...
+    
+    def shoot(self):
+        """Pure logic: calculate shooting parameters, emit events"""
+        now = ptime.get_ticks()
+        if now - self.last_shot > self.shoot_delay:
+            self.last_shot = now
+            
+            # ✅ Pure logic: calculate shooting parameters
+            shooting_data = self._calculate_shooting_parameters()
+            
+            # ✅ Emit event, don't create bullets directly
+            self.event_system.dispatch_event(
+                GameEvent.create_player_shoot(
+                    shooting_data=shooting_data,
+                    source="player"
+                )
+            )
+    
+    def _calculate_shooting_parameters(self) -> list[dict]:
+        """Pure logic: calculate based on bullet_paths"""
+        bullets_data = []
+        
+        if self.bullet_paths == 1:
+            bullets_data.append({
+                "x": self.rect.centerx, "y": self.rect.top,
+                "speed": self.bullet_speed, "angle": 0, "owner": "player"
+            })
+        elif self.bullet_paths == 2:
+            bullets_data.extend([
+                {"x": self.rect.left + 5, "y": self.rect.top, 
+                 "speed": self.bullet_speed, "angle": 0, "owner": "player"},
+                {"x": self.rect.right - 5, "y": self.rect.top, 
+                 "speed": self.bullet_speed, "angle": 0, "owner": "player"}
+            ])
+        # ... other bullet_paths logic
+        
+        return bullets_data
+
+# ✅ 2. SpawningSystem: Handle entity creation
+class SpawningSystem:
+    def handle_player_shoot_event(self, event):
+        """Respond to shooting events, create bullet entities"""
+        shooting_data = event.get_data("shooting_data")
+        
+        for bullet_data in shooting_data:
+            bullet = self.projectile_factory.create_bullet(**bullet_data)
+            self.all_sprites.add(bullet)
+            self.bullets_group.add(bullet)
+
+# ✅ 3. Testing: Heavy Mock Strategy (CLAUDE.md compliant)
+class TestPlayerShooting:
+    def setup_method(self):
+        # ✅ Heavy Mock: Real pygame objects
+        pygame.init()
+        pygame.display.set_mode((1, 1))
+        self.all_sprites = pygame.sprite.Group()  # Real Group
+        self.bullets_group = pygame.sprite.Group()  # Real Group
+        
+        # ✅ Mock external dependencies only
+        self.mock_event_system = Mock()
+        
+    def test_single_bullet_shooting(self):
+        player = Player(
+            game=Mock(), all_sprites=self.all_sprites,
+            bullets_group=self.bullets_group, missiles_group=Mock(),
+            enemies_group=Mock(), event_system=self.mock_event_system
+        )
+        
+        player.bullet_paths = 1
+        player.shoot()
+        
+        # ✅ Verify event emission, not bullet creation
+        self.mock_event_system.dispatch_event.assert_called_once()
+        
+        # ✅ Verify shooting parameter calculation logic
+        call_args = self.mock_event_system.dispatch_event.call_args[0][0]
+        shooting_data = call_args.get_data("shooting_data")
+        
+        assert len(shooting_data) == 1
+        assert shooting_data[0]["x"] == player.rect.centerx
+        assert shooting_data[0]["owner"] == "player"
+```
+
+#### **Benefits**:
+- ✅ **Complete Decoupling**: Player class imports no projectile classes
+- ✅ **Pure Logic Testing**: Shooting parameter calculation testable independently
+- ✅ **Clear Responsibilities**: Player=logic, SpawningSystem=creation
+- ✅ **Event-Driven**: Aligns with existing architecture patterns
+- ✅ **CLAUDE.md Compliant**: Interface Quality First + Logic/Interface Separation
+- ✅ **Test Fix**: Resolves 13/48 Player test failures immediately
+
 ## Implementation Phases
 
 ### **Phase 1: Immediate (Low Risk)**
@@ -245,6 +388,13 @@ class ProjectileFactory:
    - Add new test files for logic classes
    - Immediate 100% test coverage for algorithms
 
+4. **Player Shooting Event Infrastructure (PRIORITY)**
+   - Add `PLAYER_SHOOT` event type to `GameEventType` enum
+   - Add `GameEvent.create_player_shoot()` factory method
+   - Add optional `event_system` parameter to Player constructor
+   - Update SpawningSystem to handle player shoot events
+   - **Zero breaking changes**: Default to current behavior
+
 **Risk**: ⚠️ **Very Low** (No existing code modified)
 
 ### **Phase 2: Gradual Migration (Medium Risk)**
@@ -256,13 +406,23 @@ class ProjectileFactory:
    - Modify `TrackingMissile.update` to use `TrackingAlgorithm` internally
    - Keep public interfaces identical
 
-2. **Update Tests**
-   - Migrate failing tests to use logic layer
+2. **Player Shooting System Refactor (CRITICAL)**
+   - Migrate Player.shoot() to use event-driven approach internally
+   - Extract `_calculate_shooting_parameters()` pure logic method
+   - Remove direct Bullet class import from Player
+   - Update SpawningSystem to create bullets from events
+   - **Preserve external behavior**: Game functionality identical
+
+3. **Update Tests**
+   - Migrate 13 failing Player shooting tests to Heavy Mock Strategy
+   - Use real pygame objects + mock EventSystem
+   - Add pure logic tests for shooting parameter calculation
    - Keep integration tests for graphics validation
 
-3. **Validation**
+4. **Validation**
    - All existing game functionality identical
-   - Test coverage improvement to >95%
+   - Player test success rate: 29.2% → >90%
+   - Overall test coverage improvement to >95%
 
 **Risk**: ⚠️ **Medium** (Internal changes, public API stable)
 
@@ -299,10 +459,13 @@ class ProjectileFactory:
 
 | Problem | Current Cost | Projected Cost |
 |---------|--------------|----------------|
-| **Test Maintenance** | 19 failing tests requiring complex mocks | Growing with each new projectile type |
+| **Test Maintenance** | 32 failing tests (19 projectile + 13 player shooting) requiring complex mocks | Growing with each new entity type |
+| **Player Combat Testing** | 13/48 Player tests failing (29.2% success rate) due to hard coupling | Blocks all player feature development |
+| **Architecture Violations** | Player class violates Logic/Interface Separation principle | Technical debt compounds across all entities |
 | **Development Speed** | Slow debugging due to coupled concerns | Exponentially worse as complexity grows |
 | **Code Reusability** | Cannot reuse algorithms outside pygame | Limited expansion to other platforms |
 | **Bug Detection** | Logic bugs hidden by graphics failures | Harder to isolate root causes |
+| **Testing Strategy** | Inconsistent mock strategies violate CLAUDE.md guidelines | Developer confusion, unreliable tests |
 
 ## Success Criteria
 
@@ -313,9 +476,12 @@ class ProjectileFactory:
 
 ### **Phase 2 Success Metrics**
 - ✅ All 19 currently failing projectile tests pass
+- ✅ **Player Combat Tests**: 13/48 failing tests fixed (29.2% → >90% success rate)
+- ✅ **Testing Strategy Compliance**: Player tests use Heavy Mock Strategy correctly
 - ✅ Game behavior remains identical
 - ✅ Overall test success rate increases to >90%
 - ✅ Test execution time decreases (less pygame initialization)
+- ✅ **Architecture Quality**: Player class eliminates graphics dependencies
 
 ### **Phase 3 Success Metrics**
 - ✅ Clean architecture validated by external review
