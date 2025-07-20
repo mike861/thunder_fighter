@@ -154,76 +154,106 @@ class TestProjectileFactoryCreation:
         pass
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
-    def test_create_bullet_player(self, mock_bullet_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_bullet')
+    def test_create_bullet_player(self, mock_create_bullet, mock_logger):
         """Test creating player bullet with clean interface."""
-        factory = ProjectileFactory()
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_rect.centerx = 100
+        mock_rect.bottom = 200  
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_bullet.return_value = mock_surface
         
+        factory = ProjectileFactory()
         result = factory.create_bullet(x=100, y=200, owner="player")
         
-        assert result == mock_bullet
-        # Should create bullet with correct parameters
-        mock_bullet_class.assert_called_once_with(100, 200, 10, 0, None)
+        # Interface-focused: verify returned object type and properties
+        assert hasattr(result, 'logic'), "Should have logic layer"
+        assert hasattr(result, 'rect'), "Should have graphics rect"
+        assert result.logic.x == 100.0, "Should have correct X position"
+        assert result.logic.y == 200.0, "Should have correct Y position"
+        assert result.logic.speed == 10.0, "Should have default speed"
+        assert result.logic.angle == 0.0, "Should have default angle"
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
-    def test_create_bullet_enemy(self, mock_bullet_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_bullet')
+    def test_create_bullet_enemy(self, mock_create_bullet, mock_logger):
         """Test creating enemy bullet with clean interface."""
-        factory = ProjectileFactory()
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_bullet.return_value = mock_surface
         
+        factory = ProjectileFactory()
         result = factory.create_bullet(x=150, y=250, owner="enemy")
         
-        assert result == mock_bullet
-        mock_bullet_class.assert_called_once_with(150, 250, 10, 0, None)
+        # Interface-focused: verify returned object type and properties
+        assert hasattr(result, 'logic'), "Should have logic layer"
+        assert result.logic.x == 150.0, "Should have correct X position"
+        assert result.logic.y == 250.0, "Should have correct Y position"
+        assert result.logic.speed == 10.0, "Should have default speed"
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
-    def test_create_bullet_default_owner(self, mock_bullet_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_bullet')
+    def test_create_bullet_default_owner(self, mock_create_bullet, mock_logger):
         """Test creating bullet with default owner (clean interface)."""
-        factory = ProjectileFactory()
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_bullet.return_value = mock_surface
         
+        factory = ProjectileFactory()
         result = factory.create_bullet(x=75, y=125)  # Required position parameters
         
-        assert result == mock_bullet
-        # Should use default parameters: speed=10, angle=0, owner="player", renderer=None
-        mock_bullet_class.assert_called_once_with(75, 125, 10, 0, None)
+        # Interface-focused: verify default parameters are applied
+        assert hasattr(result, 'logic'), "Should have logic layer"
+        assert result.logic.x == 75.0, "Should have correct X position"
+        assert result.logic.y == 125.0, "Should have correct Y position"
+        assert result.logic.speed == 10.0, "Should use default speed"
+        assert result.logic.angle == 0.0, "Should use default angle"
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.missile.TrackingMissile')
-    def test_create_missile(self, mock_missile_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_tracking_missile')
+    def test_create_missile(self, mock_create_missile, mock_logger):
         """Test creating missile with clean interface."""
-        factory = ProjectileFactory()
-        mock_missile = Mock()
-        mock_missile_class.return_value = mock_missile
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_missile.return_value = mock_surface
         
-        # Create mock target
+        factory = ProjectileFactory()
         mock_target = Mock()
+        mock_target.rect = Mock()
+        mock_target.rect.center = (150, 150)
         
         result = factory.create_missile(x=100, y=200, target=mock_target, owner="player")
         
-        assert result == mock_missile
-        mock_missile_class.assert_called_once_with(100, 200, mock_target, None)
+        # Interface-focused: verify returned object type and properties
+        assert hasattr(result, 'algorithm'), "Should have algorithm layer"
+        assert hasattr(result, 'target'), "Should have target reference"
+        assert result.algorithm.speed == 8.0, "Should have correct speed"
+        assert result.target == mock_target, "Should have correct target"
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.missile.TrackingMissile')
-    def test_create_missile_default_owner(self, mock_missile_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_tracking_missile')
+    def test_create_missile_default_owner(self, mock_create_missile, mock_logger):
         """Test creating missile with default owner (clean interface)."""
-        factory = ProjectileFactory()
-        mock_missile = Mock()
-        mock_missile_class.return_value = mock_missile
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_missile.return_value = mock_surface
         
+        factory = ProjectileFactory()
         mock_target = Mock()
+        mock_target.rect = Mock()
+        mock_target.rect.center = (75, 75)
         
         result = factory.create_missile(x=50, y=100, target=mock_target)  # Default owner="player"
         
-        assert result == mock_missile
-        mock_missile_class.assert_called_once_with(50, 100, mock_target, None)
+        # Interface-focused: verify object creation with defaults
+        assert hasattr(result, 'algorithm'), "Should have algorithm layer"
+        assert result.algorithm.speed == 8.0, "Should use default speed"
+        assert result.target == mock_target, "Should have correct target"
 
 
 # NOTE: TestProjectileFactoryEntityCreation removed - violates Pure Logic Mock Strategy
@@ -251,19 +281,23 @@ class TestProjectileFactoryErrorHandling:
         assert callable(getattr(factory, 'create_missile'))
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
-    @patch('thunder_fighter.entities.projectiles.bullets.Bullet')
-    def test_create_bullet_invalid_owner(self, mock_bullet_class, mock_logger):
+    @patch('thunder_fighter.graphics.renderers.create_bullet')
+    def test_create_bullet_invalid_owner(self, mock_create_bullet, mock_logger):
         """Test creating bullet with invalid owner (clean interface)."""
-        factory = ProjectileFactory()
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        mock_surface = Mock()
+        mock_rect = Mock()
+        mock_surface.get_rect.return_value = mock_rect
+        mock_create_bullet.return_value = mock_surface
         
+        factory = ProjectileFactory()
         # Should handle invalid owner gracefully (treated as non-player owner)
         result = factory.create_bullet(x=100, y=200, owner="invalid")
         
-        assert result == mock_bullet
-        # Should create bullet normally with position and default parameters
-        mock_bullet_class.assert_called_once_with(100, 200, 10, 0, None)
+        # Interface-focused: verify bullet is created despite invalid owner
+        assert hasattr(result, 'logic'), "Should have logic layer"
+        assert result.logic.x == 100.0, "Should have correct X position"
+        assert result.logic.y == 200.0, "Should have correct Y position"
+        assert result.logic.speed == 10.0, "Should use default speed"
 
     @patch('thunder_fighter.entities.projectiles.projectile_factory.logger')
     def test_factory_interface_consistency(self, mock_logger):
