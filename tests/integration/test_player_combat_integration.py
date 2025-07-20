@@ -38,9 +38,8 @@ class TestPlayerProjectileIntegration:
         self.mock_sound_manager = Mock()
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
-    @patch('thunder_fighter.entities.player.player.Bullet')
     @patch('pygame.time.get_ticks')
-    def test_player_shooting_creates_bullets_in_groups(self, mock_get_ticks, mock_bullet_class, mock_create_player_ship):
+    def test_player_shooting_creates_bullets_in_groups(self, mock_get_ticks, mock_create_player_ship):
         """Test player shooting creates bullets and adds them to correct sprite groups."""
         # Setup timing mock
         mock_get_ticks.return_value = 1000
@@ -49,8 +48,8 @@ class TestPlayerProjectileIntegration:
         mock_surface = pygame.Surface((32, 32))
         mock_create_player_ship.return_value = mock_surface
         
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        # Mock event system for event-driven shooting
+        mock_event_system = Mock()
         
         player = Player(
             game=self.mock_game,
@@ -58,7 +57,8 @@ class TestPlayerProjectileIntegration:
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
             enemies_group=self.mock_enemies_group,
-            sound_manager=self.mock_sound_manager
+            sound_manager=self.mock_sound_manager,
+            event_system=mock_event_system  # ✅ Event-driven architecture
         )
         
         # Test shooting - ensure timing allows shooting
@@ -66,17 +66,22 @@ class TestPlayerProjectileIntegration:
         player.last_shot = 0  # Allow immediate shooting
         player.shoot()
         
-        # Verify bullet creation
-        mock_bullet_class.assert_called_once()
+        # ✅ Verify event-driven shooting: Event should be dispatched
+        mock_event_system.dispatch_event.assert_called_once()
         
-        # Verify bullets added to groups
-        self.mock_all_sprites.add.assert_called_with(mock_bullet)
-        self.mock_bullets_group.add.assert_called_with(mock_bullet)
+        # ✅ Verify shooting parameters in event
+        call_args = mock_event_system.dispatch_event.call_args[0][0]
+        shooting_data = call_args.get_data("shooting_data")
+        
+        assert len(shooting_data) == 1  # Single bullet path
+        assert shooting_data[0]["x"] == player.rect.centerx
+        assert shooting_data[0]["y"] == player.rect.top
+        assert shooting_data[0]["speed"] == player.bullet_speed
+        assert shooting_data[0]["owner"] == "player"
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
-    @patch('thunder_fighter.entities.player.player.Bullet')
     @patch('pygame.time.get_ticks')
-    def test_player_multiple_bullet_paths_integration(self, mock_get_ticks, mock_bullet_class, mock_create_player_ship):
+    def test_player_multiple_bullet_paths_integration(self, mock_get_ticks, mock_create_player_ship):
         """Test player with multiple bullet paths creates correct number of bullets."""
         # Setup timing mock
         mock_get_ticks.return_value = 1000
@@ -84,34 +89,38 @@ class TestPlayerProjectileIntegration:
         mock_surface = pygame.Surface((32, 32))
         mock_create_player_ship.return_value = mock_surface
         
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        # Mock event system for event-driven shooting
+        mock_event_system = Mock()
         
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
+            event_system=mock_event_system  # ✅ Event-driven architecture
         )
         
-        # Test different bullet path configurations
+        # ✅ Test different bullet path configurations with event-driven system
         for paths in [1, 2, 3, 4]:
-            mock_bullet_class.reset_mock()
-            self.mock_all_sprites.reset_mock()
-            self.mock_bullets_group.reset_mock()
+            mock_event_system.reset_mock()
             
             player.bullet_paths = paths
             player.last_shot = 0  # Allow immediate shooting
             player.shoot()
             
-            # Should create correct number of bullets
-            assert mock_bullet_class.call_count == paths
+            # ✅ Verify event dispatched with correct bullet count
+            mock_event_system.dispatch_event.assert_called_once()
+            
+            # ✅ Verify shooting parameters match bullet paths
+            call_args = mock_event_system.dispatch_event.call_args[0][0]
+            shooting_data = call_args.get_data("shooting_data")
+            
+            assert len(shooting_data) == paths  # Correct number of bullets
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
-    @patch('thunder_fighter.entities.player.player.Bullet')
     @patch('pygame.time.get_ticks')
-    def test_player_bullet_speed_upgrade_integration(self, mock_get_ticks, mock_bullet_class, mock_create_player_ship):
+    def test_player_bullet_speed_upgrade_integration(self, mock_get_ticks, mock_create_player_ship):
         """Test player bullet speed upgrade affects created bullets."""
         # Setup timing mock
         mock_get_ticks.return_value = 1000
@@ -119,15 +128,16 @@ class TestPlayerProjectileIntegration:
         mock_surface = pygame.Surface((32, 32))
         mock_create_player_ship.return_value = mock_surface
         
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        # Mock event system for event-driven shooting
+        mock_event_system = Mock()
         
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
+            event_system=mock_event_system  # ✅ Event-driven architecture
         )
         
         # Upgrade bullet speed
@@ -137,47 +147,59 @@ class TestPlayerProjectileIntegration:
         
         assert upgraded_speed > initial_speed
         
-        # Shoot bullet with upgraded speed
+        # ✅ Shoot bullet with upgraded speed using event-driven system
         player.last_shot = 0  # Allow immediate shooting
         player.shoot()
         
-        # Verify bullet creation occurred (implementation details not tested)
-        mock_bullet_class.assert_called()  # Just verify bullets were created
+        # ✅ Verify event dispatched with upgraded bullet speed
+        mock_event_system.dispatch_event.assert_called_once()
+        
+        # ✅ Verify shooting parameters contain upgraded speed
+        call_args = mock_event_system.dispatch_event.call_args[0][0]
+        shooting_data = call_args.get_data("shooting_data")
+        
+        assert len(shooting_data) > 0  # Bullets created
+        assert shooting_data[0]["speed"] == upgraded_speed  # Upgraded speed applied
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
-    @patch('thunder_fighter.entities.player.player.Bullet')
     @patch('pygame.time.get_ticks')
-    def test_player_shoot_delay_timing_integration(self, mock_get_ticks, mock_bullet_class, mock_create_player_ship):
+    def test_player_shoot_delay_timing_integration(self, mock_get_ticks, mock_create_player_ship):
         """Test player shoot delay prevents rapid bullet creation."""
         mock_surface = pygame.Surface((32, 32))
         mock_create_player_ship.return_value = mock_surface
         
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        # Mock event system for event-driven shooting
+        mock_event_system = Mock()
         
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
+            event_system=mock_event_system  # ✅ Event-driven architecture
         )
         
-        # First shot should work
+        # ✅ First shot should work
         mock_get_ticks.return_value = 1000
         player.last_shot = 0
         player.shoot()
-        first_shot_calls = mock_bullet_class.call_count
         
-        # Immediate second shot should be blocked (within delay period)
+        # ✅ Verify first shot event dispatched
+        mock_event_system.dispatch_event.assert_called_once()
+        first_shot_call_count = mock_event_system.dispatch_event.call_count
+        
+        # ✅ Immediate second shot should be blocked (within delay period)
         mock_get_ticks.return_value = 1050  # Only 50ms later, within shoot_delay
         player.shoot()
-        assert mock_bullet_class.call_count == first_shot_calls  # No new bullets
+        # No new event should be dispatched (blocked by delay)
+        assert mock_event_system.dispatch_event.call_count == first_shot_call_count
         
-        # Shot after delay should work
+        # ✅ Shot after delay should work
         mock_get_ticks.return_value = 1000 + player.shoot_delay + 10
         player.shoot()
-        assert mock_bullet_class.call_count > first_shot_calls  # New bullets created
+        # New event should be dispatched after delay
+        assert mock_event_system.dispatch_event.call_count > first_shot_call_count
 
 
 class TestWingmanMissileIntegration:
@@ -360,9 +382,8 @@ class TestPlayerUpgradeIntegration:
         self.mock_enemies_group = Mock()
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
-    @patch('thunder_fighter.entities.player.player.Bullet')
     @patch('pygame.time.get_ticks')
-    def test_player_upgrade_affects_combat_performance(self, mock_get_ticks, mock_bullet_class, mock_create_player_ship):
+    def test_player_upgrade_affects_combat_performance(self, mock_get_ticks, mock_create_player_ship):
         """Test player upgrades affect actual combat performance."""
         # Setup timing mock
         mock_get_ticks.return_value = 1000
@@ -370,15 +391,16 @@ class TestPlayerUpgradeIntegration:
         mock_surface = pygame.Surface((32, 32))
         mock_create_player_ship.return_value = mock_surface
         
-        mock_bullet = Mock()
-        mock_bullet_class.return_value = mock_bullet
+        # Mock event system for event-driven shooting
+        mock_event_system = Mock()
         
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
+            event_system=mock_event_system  # ✅ Event-driven architecture
         )
         
         # Test bullet paths upgrade
@@ -388,23 +410,33 @@ class TestPlayerUpgradeIntegration:
         
         assert upgraded_paths == initial_paths + 1
         
-        # Shooting should create more bullets
+        # ✅ Shooting should create more bullets with event-driven system
         player.last_shot = 0  # Allow immediate shooting
         player.shoot()
-        assert mock_bullet_class.call_count == upgraded_paths
         
-        # Test bullet speed upgrade
-        mock_bullet_class.reset_mock()
+        # ✅ Verify event dispatched with upgraded bullet count
+        mock_event_system.dispatch_event.assert_called_once()
+        call_args = mock_event_system.dispatch_event.call_args[0][0]
+        shooting_data = call_args.get_data("shooting_data")
+        assert len(shooting_data) == upgraded_paths  # More bullets
+        
+        # ✅ Test bullet speed upgrade
+        mock_event_system.reset_mock()
         initial_speed = player.bullet_speed
         player.increase_bullet_speed()
         upgraded_speed = player.bullet_speed
         
         assert upgraded_speed > initial_speed
         
-        # New bullets should have upgraded speed
+        # ✅ New bullets should have upgraded speed
         player.last_shot = 0  # Allow immediate shooting again
         player.shoot()
-        # Verify bullets created with new speed (implementation dependent)
+        
+        # ✅ Verify event with upgraded speed parameters
+        mock_event_system.dispatch_event.assert_called_once()
+        call_args = mock_event_system.dispatch_event.call_args[0][0]
+        shooting_data = call_args.get_data("shooting_data")
+        assert all(bullet["speed"] == upgraded_speed for bullet in shooting_data)
 
     @patch('thunder_fighter.graphics.renderers.create_player_ship')
     @patch('thunder_fighter.entities.player.wingman.Wingman')
