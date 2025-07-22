@@ -1230,10 +1230,11 @@ def test_add_wingman_second(self, mock_wingman_class, mock_create_player_ship):
 #### Test Isolation Issues (Systemic Infrastructure Problem)
 
 **Problem Type**: Test infrastructure and state management
-**Affected Tests**: 22 tests across multiple files
+**Affected Tests**: Tests across 7 problematic files (15.6% of test suite)
 **Core Issue**: Tests pass individually but fail when run in full test suite
 **Date Identified**: January 2025
-**Status**: Temporarily skipped pending infrastructure improvement
+**Status**: 2 files fixed (collisions, level_progression), 7 files remaining
+**Comprehensive Analysis**: See **[Test Isolation Analysis](TEST_ISOLATION_ANALYSIS.md)** for complete problem breakdown and repair strategies
 
 **Technical Root Causes**:
 1. **Mock State Pollution**: Mock objects retain state between test runs
