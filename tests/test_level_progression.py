@@ -10,11 +10,6 @@ import pygame
 if TYPE_CHECKING:
     pass
 
-# Mock pygame modules before importing game modules
-pygame.mixer = MagicMock()
-pygame.font = MagicMock()
-pygame.display = MagicMock()
-
 from thunder_fighter.constants import GAME_CONFIG
 from thunder_fighter.game import RefactoredGame as Game
 
@@ -24,9 +19,14 @@ class TestLevelProgression:
 
     def test_initial_game_level(self):
         """Test that game starts at correct level"""
-        with patch("pygame.init"), patch("pygame.display.set_mode"), patch(
-            "thunder_fighter.entities.player.player.Player"
-        ), patch("thunder_fighter.graphics.effects.stars.create_stars"):
+        # Mock pygame modules inside the test method to avoid global pollution
+        with patch("pygame.mixer", MagicMock()), \
+             patch("pygame.font", MagicMock()), \
+             patch("pygame.display", MagicMock()), \
+             patch("pygame.init"), \
+             patch("pygame.display.set_mode"), \
+             patch("thunder_fighter.entities.player.player.Player"), \
+             patch("thunder_fighter.graphics.effects.stars.create_stars"):
             game = Game()
             assert game.game_level == 1
 
