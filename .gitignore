@@ -59,6 +59,7 @@ Thumbs.db
 bak/
 prompt*
 *.png
+*.txt
 # Remove these problematic ignores
 # CLAUDE.md - This is an important project file
 # .gitignore - Should not ignore itself
