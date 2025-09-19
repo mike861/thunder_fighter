@@ -5,7 +5,7 @@ This module provides a factory for creating projectile entities (bullets, missil
 Updated to support clean interfaces with logic/graphics separation.
 """
 
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 from thunder_fighter.entities.projectiles.bullets import Bullet
 from thunder_fighter.entities.projectiles.missile import TrackingMissile
@@ -120,7 +120,10 @@ class ProjectileFactory(ConfigurableEntityFactory):
             Configured projectile instance
         """
         # Get base preset configuration
-        preset_config = self.get_preset(preset_name).copy()
+        preset = self.get_preset(preset_name)
+        if preset is None:
+            raise ValueError(f"Preset '{preset_name}' not found")
+        preset_config = preset.copy()
 
         # Add position parameters
         preset_config.update({"x": x, "y": y})

@@ -296,22 +296,22 @@ class TestUIManagerIntegration:
         with patch("thunder_fighter.utils.resource_manager.get_resource_manager") as mock_get_rm:
             mock_resource_manager = MagicMock()
             mock_get_rm.return_value = mock_resource_manager
-            
+
             # Create mock fonts that behave like real font objects
             mock_font_small = MagicMock()
             mock_font_medium = MagicMock()
             mock_font_large = MagicMock()
-            
+
             # Configure render methods to return surfaces
             mock_font_small.render.return_value = pygame.Surface((50, 20))
             mock_font_medium.render.return_value = pygame.Surface((50, 20))
             mock_font_large.render.return_value = pygame.Surface((50, 20))
-            
+
             # Configure resource manager load_font calls
             mock_resource_manager.load_font.side_effect = [
-                mock_font_small,   # font_small
+                mock_font_small,  # font_small
                 mock_font_medium,  # font_medium
-                mock_font_large    # font_large
+                mock_font_large,  # font_large
             ]
 
             ui_manager = UIManager(screen, player, game)

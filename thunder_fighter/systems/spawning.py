@@ -8,7 +8,7 @@ Integrates calls to various factory classes.
 import random
 from typing import Any, Dict
 
-from thunder_fighter.events.game_events import GameEvent, GameEventType
+from thunder_fighter.events.game_events import GameEvent
 from thunder_fighter.utils.logger import logger
 
 
@@ -188,32 +188,32 @@ class SpawningSystem:
     def handle_player_shoot_event(self, event: GameEvent, game_state: Dict[str, Any]) -> None:
         """
         Handle PLAYER_SHOOT events by creating bullet entities.
-        
+
         Args:
             event: The player shoot event containing shooting data
             game_state: Current game state with sprite groups
         """
         if not self._factories_initialized:
             self._init_factories()
-            
+
         if not self.projectile_factory:
             logger.error("ProjectileFactory not initialized, cannot handle player shoot event")
             return
-            
+
         try:
             shooting_data = event.get_data("shooting_data")
             if not shooting_data:
                 logger.warning("Player shoot event received with no shooting data")
                 return
-                
+
             # Get sprite groups from game state
             all_sprites = game_state.get("all_sprites")
             bullets_group = game_state.get("bullets_group")
-            
+
             if not all_sprites or not bullets_group:
                 logger.error("Required sprite groups not found in game state")
                 return
-                
+
             # Create bullets from shooting data
             bullets_created = 0
             for bullet_data in shooting_data:
@@ -221,9 +221,9 @@ class SpawningSystem:
                 all_sprites.add(bullet)
                 bullets_group.add(bullet)
                 bullets_created += 1
-                
+
             logger.debug(f"Created {bullets_created} bullets from player shoot event")
-            
+
         except Exception as e:
             logger.error(f"Error handling player shoot event: {e}")
 

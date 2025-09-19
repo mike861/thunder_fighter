@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Optional, Tuple, Callable, Any
+from typing import Callable, Optional, Tuple
 
 import pygame
 
@@ -9,9 +9,9 @@ from thunder_fighter.constants import (
     HEIGHT,
     WIDTH,
 )
+from thunder_fighter.entities.projectiles.logic import BulletLogic
 from thunder_fighter.graphics.renderers import create_bullet
 from thunder_fighter.utils.logger import logger
-from thunder_fighter.entities.projectiles.logic import BulletLogic
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -19,24 +19,25 @@ class Bullet(pygame.sprite.Sprite):
 
     def __init__(self, x, y, speed=10, angle=0, renderer: Optional[Callable[[], pygame.Surface]] = None):
         """Initialize bullet with optional renderer injection.
-        
+
         Args:
             x: Initial X position
-            y: Initial Y position  
+            y: Initial Y position
             speed: Movement speed
             angle: Movement angle in degrees
             renderer: Optional graphics renderer function (for testing/injection)
         """
         pygame.sprite.Sprite.__init__(self)
-        
+
         # Initialize pure business logic
         self.logic = BulletLogic(x, y, speed, angle)
-        
+
         # Initialize graphics (with optional injection for testing)
         self._setup_graphics(x, y, angle, renderer)
-    
-    def _setup_graphics(self, x: float, y: float, angle: float, 
-                       renderer: Optional[Callable[[], pygame.Surface]] = None) -> None:
+
+    def _setup_graphics(
+        self, x: float, y: float, angle: float, renderer: Optional[Callable[[], pygame.Surface]] = None
+    ) -> None:
         """Setup graphics components with optional renderer injection."""
         # Use injected renderer or default
         graphics_renderer = renderer or create_bullet
@@ -54,7 +55,7 @@ class Bullet(pygame.sprite.Sprite):
         """Update bullet position using logic layer"""
         # Calculate new position using pure logic
         new_x, new_y = self.logic.update_position()
-        
+
         # Update graphics position
         self.rect.centerx = int(new_x)
         self.rect.centery = int(new_y)
