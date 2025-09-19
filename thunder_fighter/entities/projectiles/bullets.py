@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Callable, Any
 
 import pygame
 
@@ -11,40 +11,56 @@ from thunder_fighter.constants import (
 )
 from thunder_fighter.graphics.renderers import create_bullet
 from thunder_fighter.utils.logger import logger
+from thunder_fighter.entities.projectiles.logic import BulletLogic
 
 
 class Bullet(pygame.sprite.Sprite):
-    """Player bullet class"""
+    """Player bullet class with logic/graphics separation"""
 
-    def __init__(self, x, y, speed=10, angle=0):
+    def __init__(self, x, y, speed=10, angle=0, renderer: Optional[Callable[[], pygame.Surface]] = None):
+        """Initialize bullet with optional renderer injection.
+        
+        Args:
+            x: Initial X position
+            y: Initial Y position  
+            speed: Movement speed
+            angle: Movement angle in degrees
+            renderer: Optional graphics renderer function (for testing/injection)
+        """
         pygame.sprite.Sprite.__init__(self)
-        # Use custom drawn graphics instead of rectangles
-        self.image = create_bullet()
+        
+        # Initialize pure business logic
+        self.logic = BulletLogic(x, y, speed, angle)
+        
+        # Initialize graphics (with optional injection for testing)
+        self._setup_graphics(x, y, angle, renderer)
+    
+    def _setup_graphics(self, x: float, y: float, angle: float, 
+                       renderer: Optional[Callable[[], pygame.Surface]] = None) -> None:
+        """Setup graphics components with optional renderer injection."""
+        # Use injected renderer or default
+        graphics_renderer = renderer or create_bullet
+        self.image = graphics_renderer()
         self.rect = self.image.get_rect()
-        self.rect.centerx = x
-        self.rect.bottom = y
-
-        # Bullet speed and angle
-        self.speed = speed
-        self.angle = angle
+        self.rect.centerx = int(x)
+        self.rect.bottom = int(y)
 
         # Rotate image when angle is not 0
         if angle != 0:
             self.image = pygame.transform.rotate(self.image, -angle)
             self.rect = self.image.get_rect(center=self.rect.center)
 
-        # Calculate x and y speed components
-        rad_angle = math.radians(angle)
-        self.speedy = -self.speed * math.cos(rad_angle)
-        self.speedx = self.speed * math.sin(rad_angle)
-
     def update(self):
-        """Update bullet position"""
-        self.rect.y += self.speedy
-        self.rect.x += self.speedx
+        """Update bullet position using logic layer"""
+        # Calculate new position using pure logic
+        new_x, new_y = self.logic.update_position()
+        
+        # Update graphics position
+        self.rect.centerx = int(new_x)
+        self.rect.centery = int(new_y)
 
-        # Remove bullet if it goes off screen
-        if self.rect.bottom < 0 or self.rect.right < 0 or self.rect.left > WIDTH:
+        # Check boundaries using logic layer
+        if self.logic.is_out_of_bounds(WIDTH, HEIGHT):
             self.kill()
 
 

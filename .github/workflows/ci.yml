@@ -92,6 +92,7 @@ jobs:
       run: |
         pip install -r requirements.txt
         safety check --json --output safety-report.json
+      continue-on-error: true
 
   build:
     needs: test

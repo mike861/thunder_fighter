@@ -4,6 +4,8 @@
 
 Thunder Fighter uses a modern, modular architecture designed for maintainability, testability, and extensibility. The system is built around event-driven communication, systems-based design, and clear separation of concerns.
 
+**Note**: This document provides high-level architectural concepts and system relationships. For detailed class diagrams with method signatures and implementation details, see [UML Class Diagrams](UML_CLASS_DIAGRAMS.md).
+
 ## Architecture Diagrams
 
 ### Core Architecture Overview
@@ -157,93 +159,41 @@ graph TD
 
 ## Core Design Principles
 
+### Interface Quality First Principle
+
+**Core Philosophy**: Thunder Fighter prioritizes clean, well-designed interfaces over backward compatibility. Interface quality takes precedence over maintaining legacy code patterns.
+
+**Key Guidelines**:
+- **Clean Interface Design**: Design intuitive and maintainable interfaces
+- **Technical Debt Reduction**: Eliminate poorly designed interfaces during refactoring
+- **Dependency Injection**: Use optional parameters to support both testing and production environments
+
+### Logic/Interface Separation Principle
+
+**Architecture Pattern**: Separation of business logic from rendering concerns, enabling independent testing and cleaner component design.
+
+**Core Components**:
+1. **Pure Logic Classes**: Mathematical algorithms with minimal external dependencies
+2. **Graphics Integration Layer**: Rendering components with dependency injection support
+3. **Clean Factory Interfaces**: Required parameters eliminate ambiguous object creation
+
 ### Event-Driven Architecture
 Game components communicate through `EventSystem` rather than direct coupling. All game events are defined in `events/game_events.py`.
 
-#### Event System Class Diagram
+#### Event System Architecture
 
-```mermaid
-classDiagram
-    class EventType {
-        <<enumeration>>
-        PLAYER_DIED
-        PLAYER_HEALTH_CHANGED
-        ENEMY_SPAWNED
-        ENEMY_DIED
-        BOSS_SPAWNED
-        BOSS_DEFEATED
-        ITEM_COLLECTED
-        GAME_PAUSED
-        LEVEL_UP
-        GAME_WON
-    }
-    
-    class Event {
-        +type: EventType
-        +data: dict
-        +timestamp: float
-        +handled: bool
-        +source: str
-        +get_data(key: str): any
-        +mark_handled()
-    }
-    
-    class GameEvent {
-        +create_player_died(player_id: str): GameEvent
-        +create_boss_spawned(boss_id: str, level: int): GameEvent
-        +create_item_collected(item_type: str, player_id: str): GameEvent
-        +create_level_up(new_level: int): GameEvent
-    }
-    
-    class EventListener {
-        <<abstract>>
-        +handle_event(event: Event)*
-    }
-    
-    class FunctionListener {
-        +callback: Callable
-        +event_types: list[EventType]
-        +handle_event(event: Event)
-    }
-    
-    class EventSystem {
-        +listeners: dict[EventType, list[EventListener]]
-        +event_queue: list[Event]
-        +max_queue_size: int
-        +register_listener(listener: EventListener, event_type: EventType)
-        +dispatch_event(event: Event)
-        +process_events()
-        +clear_queue()
-    }
-    
-    class CollisionSystem {
-        +handle_event(event: Event)
-    }
-    
-    class ScoringSystem {
-        +handle_event(event: Event)
-    }
-    
-    class UIManager {
-        +handle_event(event: Event)
-    }
-    
-    Event --> EventType : uses
-    GameEvent --|> Event
-    EventListener <|-- FunctionListener
-    EventListener <|-- CollisionSystem
-    EventListener <|-- ScoringSystem
-    EventListener <|-- UIManager
-    
-    EventSystem --> Event : manages
-    EventSystem --> EventListener : notifies
-    
-    GameEvent --> EventType : creates events of
-    
-    note for EventSystem "Central event dispatcher\nDecouples game components"
-    note for GameEvent "Factory methods for\ntype-safe event creation"
-    note for EventListener "Observer pattern\nfor event handling"
+**Core Components**:
+- **EventSystem** - Central event dispatcher decoupling game components
+- **GameEvent** - Factory methods for type-safe event creation
+- **EventListener** - Observer pattern for event handling
+- **Event Types** - Enumerated game events (PLAYER_DIED, BOSS_SPAWNED, etc.)
+
+**Communication Flow**:
 ```
+GameSystems → EventSystem → RegisteredListeners
+```
+
+For detailed class diagrams with method signatures, see [UML Class Diagrams](UML_CLASS_DIAGRAMS.md#event-system-class-diagram).
 
 ### Systems-Based Architecture
 Core game logic is organized into dedicated systems in `systems/`:
@@ -253,9 +203,9 @@ Core game logic is organized into dedicated systems in `systems/`:
 - `PhysicsSystem` - Movement, boundaries, and collision detection for game physics
 
 ### Factory Pattern
-Type-organized entity creation in `entities/`:
+Type-organized entity creation in `entities/` with clean interface design:
 - `entities/enemies/` - `EnemyFactory` and `BossFactory` with difficulty scaling
-- `entities/projectiles/` - `ProjectileFactory` for bullets and missiles
+- `entities/projectiles/` - `ProjectileFactory` with logic/interface separation
 - `entities/items/` - `ItemFactory` for power-ups and collectibles
 - `entities/player/` - Player and wingman entity management
 
@@ -302,155 +252,69 @@ The layered architecture provides:
 - **Event-Driven Architecture**: State change listeners and callbacks
 - **Separation of Concerns**: Each state handles its own logic
 
-#### State Management Class Diagram
+#### State Management Architecture
 
-```mermaid
-classDiagram
-    class State {
-        <<abstract>>
-        +name: str
-        +enter(previous_state: str)*
-        +exit(next_state: str)*
-        +update(dt: float)*
-        +handle_event(event: Event)*
-        +can_transition_to(state_name: str): bool*
-    }
-    
-    class StateMachine {
-        +current_state: State
-        +states: dict[str, State]
-        +transition_history: list[str]
-        +add_state(state: State)
-        +transition_to(state_name: str)
-        +update(dt: float)
-        +handle_event(event: Event)
-        +get_current_state_name(): str
-    }
-    
-    class MenuState {
-        +enter(previous_state: str)
-        +handle_event(event: Event)
-        +update(dt: float)
-    }
-    
-    class PlayingState {
-        +enter(previous_state: str)
-        +exit(next_state: str)
-        +update(dt: float)
-        +handle_event(event: Event)
-    }
-    
-    class PausedState {
-        +enter(previous_state: str)
-        +exit(next_state: str)
-        +handle_event(event: Event)
-    }
-    
-    class GameOverState {
-        +restart_requested: bool
-        +enter(previous_state: str)
-        +handle_event(event: Event)
-        +update(dt: float)
-    }
-    
-    class VictoryState {
-        +final_score: int
-        +completion_time: float
-        +enter(previous_state: str)
-        +handle_event(event: Event)
-    }
-    
-    class LevelTransitionState {
-        +transition_duration: float
-        +target_level: int
-        +enter(previous_state: str)
-        +update(dt: float)
-    }
-    
-    class StateFactory {
-        +create_state(state_name: str, game_instance: Game): State
-        +create_all_states(game_instance: Game): dict[str, State]
-    }
-    
-    StateMachine --> State : manages
-    State <|-- MenuState
-    State <|-- PlayingState
-    State <|-- PausedState
-    State <|-- GameOverState
-    State <|-- VictoryState
-    State <|-- LevelTransitionState
-    
-    StateFactory --> State : creates
-    StateFactory --> MenuState : creates
-    StateFactory --> PlayingState : creates
-    StateFactory --> PausedState : creates
-    StateFactory --> GameOverState : creates
-    StateFactory --> VictoryState : creates
-    StateFactory --> LevelTransitionState : creates
-    
-    note for StateMachine "Manages state transitions\nand event forwarding"
-    note for PlayingState "Main gameplay state\nwith entity spawning"
-    note for LevelTransitionState "3-second level transition\nwith smooth animations"
+**Core Pattern**: State machine framework managing game flow transitions.
+
+**State Hierarchy**:
+- **Abstract State** - Base state with lifecycle methods
+- **Concrete States** - MenuState, PlayingState, PausedState, GameOverState, VictoryState, LevelTransitionState
+- **StateMachine** - Manages transitions and event forwarding
+- **StateFactory** - Creates state instances with game context
+
+**State Flow**:
 ```
+Menu → Playing → [Paused] → [LevelTransition] → GameOver/Victory
+```
+
+For detailed state class diagrams, see [UML Class Diagrams](UML_CLASS_DIAGRAMS.md#state-management-class-diagram).
 
 ### Background System Architecture
 
-**Double-Buffered Dynamic Backgrounds**: Revolutionary visual enhancement system
+**Dynamic Background System**: Advanced visual enhancement with level-based themes.
 
-#### Technical Implementation
-- **Double Buffering Technology**: Pre-rendering with alpha blending
-- **Ultra-Smooth Transitions**: Cubic bezier curve easing with 3-second duration
-- **Level-Based Themes**: Unique visual themes reflecting difficulty progression
-- **Enhanced Special Effects**: Space storms and asteroid fields with alpha support
+**Core Features**:
+- **Double Buffering**: Pre-rendering with smooth transitions
+- **Level Progression**: Visual themes reflecting game difficulty
+- **Performance Optimization**: Hardware-accelerated rendering
 
-#### Visual Themes
-- **Level 1 - Deep Space**: Blue/black color scheme, peaceful atmosphere
-- **Level 2 - Nebula Field**: Purple/blue colors with increased nebula density
-- **Level 3 - Asteroid Belt**: Brown/orange tones with animated asteroid field
-- **Level 4 - Red Zone**: Red/orange colors with space storm particles
-- **Level 5 - Final Battle**: Dark red/black with intense storm effects
-
-#### Performance Optimizations
-- **Buffer Reuse**: Surfaces only recreated on screen size change
-- **Hardware Acceleration**: Uses `pygame.BLEND_ALPHA_SDL2`
-- **Efficient Alpha Handling**: Minimal state changes
+For technical implementation details, see [Technical Details](TECHNICAL_DETAILS.md#advanced-rendering-systems).
 
 ## Component Systems
 
 ### UI System Architecture
 
-**Modular Component-Based UI** in `graphics/ui/`:
-- `HealthBarComponent` - Dynamic health displays with color-coded states
-- `NotificationManager` - Game notifications and achievements system
-- `GameInfoDisplay` - Score, level, and elapsed time display
-- `PlayerStatsDisplay` - Player statistics and upgrades information (with reset method)
-- `BossStatusDisplay` - Boss health and combat modes (with reset method)
-- `ScreenOverlayManager` - Pause, victory, and game over screens
-- `DevInfoDisplay` - Developer debug information (FPS, positions, etc.)
+**Modular Component-Based UI**:
+- **Health Management** - Dynamic health displays and status indicators
+- **Information Systems** - Score, level, and game statistics display
+- **Notification System** - Game events and achievements
+- **Screen Overlays** - Pause, victory, and game over screens
+
+For detailed UI component specifications, see [UML Class Diagrams](UML_CLASS_DIAGRAMS.md#graphics-system-class-diagram).
 
 ### Configuration System
 
-**JSON-Based Configuration**: Stored at `~/.thunder_fighter/config.json`
-- Runtime configuration updates through `config_tool.py`
-- All gameplay parameters configurable through `constants.py`
-- Environment variable support (`THUNDER_FIGHTER_LOG_LEVEL`)
+**Configuration Management**:
+- **JSON Configuration** - User settings stored locally
+- **Runtime Updates** - Dynamic configuration through config_tool
+- **Environment Variables** - Development and deployment settings
 
 ### Resource Management
 
-**Centralized Asset Loading**: `ResourceManager` provides:
-- Asset caching and optimization
-- Font management with platform-specific optimizations
-- Sound and music management with health monitoring
-- Image loading with format support (PNG, JPG, etc.)
+**Resource Management**:
+- **Centralized Asset Loading** - Unified resource management system
+- **Caching Strategy** - Optimized asset loading and memory management
+- **Platform Support** - Cross-platform font and audio handling
 
 ### Pause Management
 
-**Dedicated PauseManager Component**: Extracted pause logic in `utils/pause_manager.py`
-- Pause-aware timing calculations and cooldown mechanisms
-- Comprehensive statistics tracking
-- Dependency injection support for enhanced testability
+**Pause Management**:
+- **Dedicated Component** - Isolated pause logic with timing calculations
+- **Statistics Tracking** - Comprehensive pause session information
+- **Testable Design** - Dependency injection for enhanced testability
 
 ## Entity Architecture
+
 
 ### Base Entity System
 
@@ -467,111 +331,24 @@ classDiagram
 - **items/** - Power-ups and collectibles with configurable effects
 - **player/** - Player and wingman entities with formation management
 
-#### Entity System Class Diagram
+#### Entity System Architecture
 
-```mermaid
-classDiagram
-    class GameObject {
-        <<abstract>>
-        +x: float
-        +y: float
-        +rect: pygame.Rect
-        +image: pygame.Surface
-        +active: bool
-        +update(dt: float)
-        +render(screen: pygame.Surface)
-    }
-    
-    class Entity {
-        +entity_id: str
-        +created_at: float
-        +velocity_x: float
-        +velocity_y: float
-        +update(dt: float)
-        +destroy()
-    }
-    
-    class MovableEntity {
-        +speed: float
-        +direction: float
-        +move(dx: float, dy: float)
-        +set_velocity(vx: float, vy: float)
-    }
-    
-    class LivingEntity {
-        +health: int
-        +max_health: int
-        +is_alive: bool
-        +take_damage(damage: int)
-        +heal(amount: int)
-    }
-    
-    class EntityFactory {
-        <<abstract>>
-        +create_entity(config: dict): Entity
-        +get_preset_config(preset_name: str): dict
-    }
-    
-    class EnemyFactory {
-        +presets: dict
-        +create_for_level(level: int): Enemy
-        +create_wave(size: int): list[Enemy]
-        +create_random_enemy(): Enemy
-    }
-    
-    class BossFactory {
-        +create_boss(level: int): Boss
-        +create_final_boss(): Boss
-    }
-    
-    class ItemFactory {
-        +create_power_up(): PowerUp
-        +create_health_pack(): HealthPack
-        +create_wingman_upgrade(): WingmanUpgrade
-    }
-    
-    class Player {
-        +wingmen: list[Wingman]
-        +shoot(): list[Bullet]
-        +launch_missile(): Missile
-        +handle_input(input_state: dict)
-    }
-    
-    class Enemy {
-        +can_shoot: bool
-        +shoot_delay: float
-        +shoot(): Bullet
-        +get_points(): int
-    }
-    
-    class Boss {
-        +attack_patterns: list
-        +current_pattern: int
-        +phase: int
-        +update_attack_pattern()
-    }
-    
-    pygame.sprite.Sprite <|-- GameObject
-    GameObject <|-- Entity
-    Entity <|-- MovableEntity
-    MovableEntity <|-- LivingEntity
-    LivingEntity <|-- Player
-    LivingEntity <|-- Enemy
-    Enemy <|-- Boss
-    
-    EntityFactory <|-- EnemyFactory
-    EntityFactory <|-- BossFactory
-    EntityFactory <|-- ItemFactory
-    
-    EnemyFactory --> Enemy : creates
-    BossFactory --> Boss : creates
-    ItemFactory --> PowerUp : creates
-    Player --> Wingman : manages
-    
-    note for EntityFactory "Abstract factory pattern\nfor entity creation"
-    note for Player "Manages wingman formation\nand missile system"
-    note for Boss "Multi-phase boss with\ncomplex attack patterns"
+**Hierarchical Entity Structure**:
+- **GameObject** - Base pygame sprite with rendering capabilities
+- **Entity** - Enhanced game objects with lifecycle management
+- **Specialized Entities** - Player, Enemy, Boss, Projectiles, Items
+
+**Factory Pattern Implementation**:
+- **Type-Organized Factories** - EnemyFactory, BossFactory, ItemFactory, ProjectileFactory
+- **Clean Interface Design** - Required parameters for entity creation
+- **Logic/Interface Separation** - Pure logic classes (BulletLogic, TrackingAlgorithm) with dependency injection
+
+**Architecture Benefits**:
 ```
+Factory → PureLogic + GraphicsLayer
+```
+
+For complete entity class diagrams with detailed method signatures, see [UML Class Diagrams](UML_CLASS_DIAGRAMS.md#entity-system-class-diagram).
 
 ## Graphics and Effects
 
@@ -593,19 +370,17 @@ classDiagram
 
 ### Comprehensive Test Coverage
 
-**375 Tests** organized by category:
-- **Unit Tests (90+)**: Entity factories, components, pause system, localization
-- **Integration Tests (9)**: Event system flow, component interactions
-- **End-to-End Tests (9)**: Complete game flow scenarios
-- **Systems Tests**: Core systems architecture validation
-- **Events Tests**: Event-driven architecture testing
-- **Localization Tests**: Multi-language support testing
+**499 Tests** organized by strategic testing approach:
+- **Pure Logic Testing** - Algorithm validation without external dependencies
+- **Integration Testing** - System interaction validation
+- **End-to-End Testing** - Complete workflow scenarios
 
 ### Testing Principles
-- **Interface-Focused Testing**: Tests focus on behavior and public interfaces
-- **Dependency Injection**: Enhanced interfaces for easier testing
-- **Mock External Dependencies**: Pygame surfaces, sounds mocked appropriately
-- **Comprehensive Coverage**: 90%+ coverage for critical systems
+- **Interface-Focused Design** - Tests focus on behavior over implementation
+- **Strategic Testing Approach** - 70% Lightweight Mock, 20% Heavy Mock, 10% Mixed
+- **Logic/Interface Separation** - Pure business logic testable in isolation
+
+For comprehensive testing details, see [Testing Guide](TESTING_GUIDE.md).
 
 ## Performance Considerations
 
@@ -661,8 +436,9 @@ thunder_fighter/
 │   ├── player/             # Player-related entities
 │   │   ├── player.py       # Player entity and controls
 │   │   └── wingman.py      # Wingman companion entities
-│   └── projectiles/        # Bullets and missiles
-│       ├── bullets.py      # Bullet entity implementations
+│   └── projectiles/        # Bullets and missiles with logic/interface separation
+│       ├── logic.py        # Mathematical algorithms and utilities
+│       ├── bullets.py      # Bullet entity implementation
 │       ├── missile.py      # Missile entity with tracking
 │       └── projectile_factory.py # Projectile creation system
 ├── events/                 # Event-driven architecture
@@ -784,9 +560,10 @@ thunder_fighter/
 3. **`config.py`** - Configuration system interface and validation
 
 #### Entity Management
-1. **Factory Classes** - Centralized entity creation with configuration presets
-2. **Entity Implementations** - Core game object behavior and interactions
-3. **Base Classes** - Shared functionality and inheritance hierarchies
+1. **Factory Classes** - Centralized entity creation with clean interfaces
+2. **Logic Classes** - Mathematical algorithms with reduced dependencies
+3. **Entity Implementations** - Core game object behavior
+4. **Base Classes** - Shared functionality and inheritance hierarchies
 
 #### System Architecture
 1. **Core Systems** - Independent, focused systems with clear interfaces
@@ -809,3 +586,43 @@ thunder_fighter/
 ## Conclusion
 
 Thunder Fighter's architecture successfully balances performance, maintainability, and extensibility. The systems-based design with event-driven communication provides a solid foundation for current gameplay while enabling future enhancements and features.
+
+### Architecture Evolution
+
+**Continuous Improvement**: Thunder Fighter's architecture continues to evolve through focused refactoring efforts that improve code quality and maintainability.
+
+**Recent Enhancements (January 2025)**:
+- **Logic/Interface Separation**: Improved separation of concerns in entity systems
+- **Clean Interface Design**: Enhanced factory methods with clear parameter requirements
+- **Dependency Injection**: Optional rendering parameters for better testability
+- **Reduced Coupling**: Minimized dependencies between mathematical logic and graphics rendering
+- **Event-Driven Player Architecture**: Complete elimination of Player-Bullet hard coupling
+- **Strategic Testing Framework**: 70% Lightweight Mock, 20% Heavy Mock, 10% Mixed strategies validated
+- **Interface Quality First**: Technical debt reduction prioritized over backward compatibility
+
+### Major Architectural Achievement: Player System Decoupling
+
+**Problem Solved**: Player class previously contained hard dependencies on projectile graphics classes, violating dependency direction and testing principles.
+
+**Architecture Solution**: Event-driven shooting system with pure logic extraction:
+
+```
+Player (Business Logic) → EventSystem → SpawningSystem → ProjectileFactory
+```
+
+**Core Benefits**:
+- **Dependency Direction Correction**: Business logic no longer depends on graphics entities
+- **Pure Logic Testing**: Shooting parameter calculation testable without pygame
+- **Clean Interface Design**: Event-driven communication replaces direct instantiation
+- **Enhanced Testability**: 91.7% Player test success rate (previously 29.2%)
+
+See [Technical Details](TECHNICAL_DETAILS.md#event-driven-player-architecture) for implementation specifics.
+
+**Future Directions**:
+1. **Component Entity System**: Potential migration to full ECS architecture
+2. **Enhanced Modularity**: Further separation of concerns across system boundaries
+3. **Interface Standardization**: Consistent design patterns across all factory classes
+4. **Testing Integration**: Continued improvement of testable interface design
+5. **Event System Expansion**: Apply event-driven patterns to other entity interactions
+
+The Player system refactoring demonstrates successful application of Interface Quality First and Logic/Interface Separation principles, achieving substantial improvements in code quality and testability.

@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT**: When updating documentation, follow the **Documentation Update Guidelines** section below to ensure proper content placement and appropriate detail levels for each document type.
+
 ## Commands
 
 ### Running the Game
@@ -137,9 +139,48 @@ When fixing MyPy type errors, follow these principles:
 - Use pytest (not unittest) with configuration in pyproject.toml
 - All test files in `tests/` directory with organized structure
 - Maintain test coverage above 90% for critical systems
-- Mock external dependencies (pygame surfaces, sounds) 
+- **Strategic Testing Approach**: Choose testing strategy based on component type
 - Use dependency injection for testable interfaces
 - Follow interface-focused testing over implementation details
+
+### Testing Strategy Selection (CRITICAL)
+
+**Before writing any test, determine the appropriate strategy:**
+
+#### 70% - Lightweight Mock Strategy
+**Use for**: Event systems, configuration, utilities, factory patterns, pure logic
+```python
+# ✅ Pattern: Mock external dependencies, use real business objects
+def setup_method(self):
+    self.event_system = EventSystem()  # Real object
+    self.mock_listener = MagicMock()    # Mock external dependency
+```
+
+#### 20% - Heavy Mock Strategy  
+**Use for**: Player combat, sprite groups, collision detection, pygame integrations
+```python
+# ✅ Pattern: Real pygame objects for integration testing
+def setup_method(self):
+    pygame.init()
+    pygame.display.set_mode((1, 1))
+    self.all_sprites = pygame.sprite.Group()  # Real Group
+    self.screen = pygame.Surface((800, 600))   # Real Surface
+```
+
+#### 10% - Mixed Strategy
+**Use for**: Performance testing, algorithms with performance requirements
+```python
+# ✅ Pattern: Separate algorithm and performance tests
+def test_algorithm_logic(self):    # Lightweight for correctness
+def test_performance_real(self):   # Heavy mock for performance
+```
+
+**Strategy Selection Matrix**:
+- **Event System, Config, Utils** → Lightweight Mock
+- **Player Combat, Sprite Groups** → Heavy Mock  
+- **Collision System, Physics** → Mixed Strategy
+- **UI Rendering** → Heavy Mock
+- **Factory Patterns** → Lightweight Mock
 
 For detailed testing guidelines, patterns, and best practices, see **[Testing Guide](docs/TESTING_GUIDE.md)**.
 
@@ -150,6 +191,28 @@ For detailed testing guidelines, patterns, and best practices, see **[Testing Gu
 - Follow Single Responsibility Principle
 - Pass dependencies through constructors
 - Use dependency injection for better testability
+
+### Core Interface Design Principles (CRITICAL)
+
+**Primary Guidelines for All Interface Design Decisions:**
+
+#### 1. **Interface Quality First Principle** 🎯
+- **No Backward Compatibility Constraints**: Since this project has no inter-service communication, interface quality takes absolute priority over compatibility
+- **Clean Interface Design**: Always design the most logical, intuitive, and maintainable interface possible
+- **Technical Debt Reduction**: Actively eliminate poorly designed interfaces rather than working around them
+- **Breaking Changes Encouraged**: Prefer clean, well-designed interfaces over maintaining compatibility with technical debt
+
+#### 2. **Logic/Interface Separation Principle** 🎯
+- **Pure Business Logic**: Business logic classes must not depend on graphics, UI, or I/O systems
+- **Dependency Direction**: Graphics/UI adapters depend on business logic, never the reverse
+- **Testable Logic**: All algorithms and business logic must be testable without external dependencies
+- **Injectable Dependencies**: Use dependency injection for graphics, file I/O, and external system interactions
+
+**Interface Design Decision Matrix:**
+```
+Option A: Clean interface (requires refactoring)  ✅ CHOOSE THIS
+Option B: Maintain legacy compatibility           ❌ AVOID THIS
+```
 
 ### Design Philosophy & Technical Debt Management
 - **Interface-First Design**: Prioritize clean, well-designed interfaces for all new code
@@ -186,6 +249,78 @@ For detailed test structure, patterns, and comprehensive testing documentation, 
 - **[TESTING_GUIDE.md](docs/TESTING_GUIDE.md)** - Comprehensive testing guide, patterns, and best practices
 - **[CI_CD_GUIDE.md](docs/CI_CD_GUIDE.md)** - Comprehensive CI/CD pipeline documentation and best practices
 - **[DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md)** - Development planning and implementation roadmap
+
+## Documentation Update Guidelines (CRITICAL)
+
+### Document Positioning Matrix
+
+Each document has a specific purpose and content depth. **ALWAYS** respect these boundaries:
+
+| Document | Purpose | Content Depth | Code Examples |
+|----------|---------|---------------|---------------|
+| **ARCHITECTURE.md** | High-level system overview | Conceptual only | Max 5 lines |
+| **TECHNICAL_DETAILS.md** | Implementation strategies | Core algorithms | 10-15 lines + file references |
+| **TESTING_GUIDE.md** | Test strategies & statistics | Test patterns | Full test examples |
+| **Source Code** | Complete implementation | Full details | Complete classes |
+
+### Content Depth Control
+
+**Three-Layer Depth Model**:
+1. **Concept Layer (ARCHITECTURE)**: Design patterns, component relationships, system interactions
+2. **Technical Layer (TECHNICAL_DETAILS)**: Algorithm concepts, implementation references, performance data
+3. **Implementation Layer (Source Code)**: Full code, detailed algorithms, complete tests
+
+### Documentation Update Rules
+
+**ALWAYS Include**:
+- Clear section headings matching document purpose
+- File path references for detailed implementations (e.g., `thunder_fighter/entities/projectiles/logic.py:15-45`)
+- Appropriate depth of technical detail for the document type
+- Cross-references to related documentation when needed
+
+**NEVER Include**:
+- Complete class implementations in ARCHITECTURE.md
+- Duplicate detailed code across multiple documents
+- Performance statistics in ARCHITECTURE.md (use TECHNICAL_DETAILS.md)
+- Test statistics outside of TESTING_GUIDE.md
+- Excessive adjectives like "Revolutionary" or "Game-changing"
+
+### Pre-Update Checklist
+
+Before updating any documentation, verify:
+- [ ] Content matches the document's core purpose
+- [ ] Code examples respect the line limit for that document type
+- [ ] No duplication of content that belongs in another document
+- [ ] Implementation details use file references instead of full code
+- [ ] Technical depth is appropriate for the target audience
+
+### Example Update Patterns
+
+**Good ARCHITECTURE.md Update**:
+```markdown
+### Enhanced Entity System
+The projectile system now implements logic/interface separation for improved testability.
+See `entities/projectiles/logic.py` for implementation details.
+```
+
+**Good TECHNICAL_DETAILS.md Update**:
+```python
+# Core algorithm concept (10 lines max)
+class BulletLogic:
+    def update_position(self):
+        # Pre-calculated vectors for performance
+        self.x += self.speed_x
+        self.y += self.speed_y
+        
+# Full implementation: thunder_fighter/entities/projectiles/logic.py:25-45
+```
+
+**Bad Documentation Update** (avoid):
+```markdown
+# 50+ lines of complete implementation in ARCHITECTURE.md ❌
+# Duplicate code in multiple documents ❌
+# Missing file path references ❌
+```
 
 ## Important Notes
 
