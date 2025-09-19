@@ -4,8 +4,7 @@ Simple Player entity tests following project patterns.
 Following the lightweight mock strategy used in existing tests.
 """
 
-from unittest.mock import MagicMock, Mock, patch
-import pytest
+from unittest.mock import MagicMock, patch
 
 from thunder_fighter.entities.player.player import Player
 
@@ -29,21 +28,21 @@ class TestPlayerEntity:
         """Test player initializes correctly."""
         mock_get_ticks.return_value = 1000
         mock_create_ship.return_value = MagicMock()  # Simple mock, not real Surface
-        
+
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
             enemies_group=self.mock_enemies_group,
-            sound_manager=self.mock_sound_manager
+            sound_manager=self.mock_sound_manager,
         )
-        
+
         # Test interface existence, not specific values
-        assert hasattr(player, 'health')
-        assert hasattr(player, 'speed')
-        assert hasattr(player, 'bullet_speed')
-        assert hasattr(player, 'bullet_paths')
+        assert hasattr(player, "health")
+        assert hasattr(player, "speed")
+        assert hasattr(player, "bullet_speed")
+        assert hasattr(player, "bullet_paths")
         assert player.health > 0
         assert player.speed > 0
 
@@ -53,15 +52,15 @@ class TestPlayerEntity:
         """Test player correctly stores sprite group references."""
         mock_get_ticks.return_value = 1000
         mock_create_ship.return_value = MagicMock()
-        
+
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
         )
-        
+
         assert player.all_sprites == self.mock_all_sprites
         assert player.bullets_group == self.mock_bullets_group
         assert player.missiles_group == self.mock_missiles_group
@@ -72,15 +71,15 @@ class TestPlayerEntity:
         """Test that player has required methods."""
         mock_get_ticks.return_value = 1000
         mock_create_ship.return_value = MagicMock()
-        
+
         player = Player(
             game=self.mock_game,
             all_sprites=self.mock_all_sprites,
             bullets_group=self.mock_bullets_group,
             missiles_group=self.mock_missiles_group,
-            enemies_group=self.mock_enemies_group
+            enemies_group=self.mock_enemies_group,
         )
-        
+
         # Test method existence (following test_physics_system.py pattern)
         required_methods = ["update", "shoot", "take_damage", "heal", "add_wingman"]
         for method_name in required_methods:

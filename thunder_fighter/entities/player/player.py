@@ -20,7 +20,9 @@ from thunder_fighter.utils.logger import logger
 class Player(pygame.sprite.Sprite):
     """Player class"""
 
-    def __init__(self, game, all_sprites, bullets_group, missiles_group, enemies_group, sound_manager=None, event_system=None):
+    def __init__(
+        self, game, all_sprites, bullets_group, missiles_group, enemies_group, sound_manager=None, event_system=None
+    ):
         pygame.sprite.Sprite.__init__(self)
         self.game = game
         self.sound_manager = sound_manager  # Store sound manager instance
@@ -155,7 +157,7 @@ class Player(pygame.sprite.Sprite):
 
             # Calculate shooting parameters using pure logic
             shooting_data = self._calculate_shooting_parameters()
-            
+
             # If no event system available, fall back to legacy behavior
             if self.event_system is None:
                 logger.warning("No event system available, falling back to legacy shooting behavior")
@@ -163,10 +165,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 # Emit event with shooting parameters
                 self.event_system.dispatch_event(
-                    GameEvent.create_player_shoot(
-                        shooting_data=shooting_data,
-                        source="player"
-                    )
+                    GameEvent.create_player_shoot(shooting_data=shooting_data, source="player")
                 )
 
     def _calculate_shooting_parameters(self) -> list[dict]:
@@ -175,92 +174,100 @@ class Player(pygame.sprite.Sprite):
         Returns list of bullet creation parameters.
         """
         bullets_data = []
-        
+
         if self.bullet_paths == 1:
             # Single straight shot
-            bullets_data.append({
-                "x": self.rect.centerx,
-                "y": self.rect.top,
-                "speed": self.bullet_speed,
-                "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                "owner": "player"
-            })
-        elif self.bullet_paths == 2:
-            # Double parallel shots
-            bullets_data.extend([
+            bullets_data.append(
                 {
-                    "x": self.rect.left + 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                    "owner": "player"
-                },
-                {
-                    "x": self.rect.right - 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                    "owner": "player"
-                }
-            ])
-        elif self.bullet_paths == 3:
-            # Three shots: one straight, two angled
-            bullets_data.extend([
-                {  # Center straight
                     "x": self.rect.centerx,
                     "y": self.rect.top,
                     "speed": self.bullet_speed,
                     "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                    "owner": "player"
-                },
-                {  # Left angled
-                    "x": self.rect.left + 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": -int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"]),
-                    "owner": "player"
-                },
-                {  # Right angled
-                    "x": self.rect.right - 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"]),
-                    "owner": "player"
+                    "owner": "player",
                 }
-            ])
+            )
+        elif self.bullet_paths == 2:
+            # Double parallel shots
+            bullets_data.extend(
+                [
+                    {
+                        "x": self.rect.left + 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
+                        "owner": "player",
+                    },
+                    {
+                        "x": self.rect.right - 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
+                        "owner": "player",
+                    },
+                ]
+            )
+        elif self.bullet_paths == 3:
+            # Three shots: one straight, two angled
+            bullets_data.extend(
+                [
+                    {  # Center straight
+                        "x": self.rect.centerx,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
+                        "owner": "player",
+                    },
+                    {  # Left angled
+                        "x": self.rect.left + 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": -int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"]),
+                        "owner": "player",
+                    },
+                    {  # Right angled
+                        "x": self.rect.right - 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_SPREAD_SMALL"]),
+                        "owner": "player",
+                    },
+                ]
+            )
         elif self.bullet_paths >= 4:
             # Four or more shots (max limit is 4): two straight, two angled
-            bullets_data.extend([
-                {  # Left center straight
-                    "x": self.rect.centerx - 8,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                    "owner": "player"
-                },
-                {  # Right center straight
-                    "x": self.rect.centerx + 8,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
-                    "owner": "player"
-                },
-                {  # Left angled
-                    "x": self.rect.left + 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": -int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"]),
-                    "owner": "player"
-                },
-                {  # Right angled
-                    "x": self.rect.right - 5,
-                    "y": self.rect.top,
-                    "speed": self.bullet_speed,
-                    "angle": int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"]),
-                    "owner": "player"
-                }
-            ])
-        
+            bullets_data.extend(
+                [
+                    {  # Left center straight
+                        "x": self.rect.centerx - 8,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
+                        "owner": "player",
+                    },
+                    {  # Right center straight
+                        "x": self.rect.centerx + 8,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_STRAIGHT"]),
+                        "owner": "player",
+                    },
+                    {  # Left angled
+                        "x": self.rect.left + 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": -int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"]),
+                        "owner": "player",
+                    },
+                    {  # Right angled
+                        "x": self.rect.right - 5,
+                        "y": self.rect.top,
+                        "speed": self.bullet_speed,
+                        "angle": int(BULLET_CONFIG["ANGLE_SPREAD_LARGE"]),
+                        "owner": "player",
+                    },
+                ]
+            )
+
         return bullets_data
 
     def _legacy_shoot_fallback(self, shooting_data: list[dict]):
@@ -270,17 +277,12 @@ class Player(pygame.sprite.Sprite):
         """
         # Import here to avoid circular imports and maintain clean architecture
         from thunder_fighter.entities.projectiles.bullets import Bullet
-        
+
         bullets = []
         for bullet_data in shooting_data:
-            bullet = Bullet(
-                bullet_data["x"], 
-                bullet_data["y"], 
-                bullet_data["speed"], 
-                bullet_data["angle"]
-            )
+            bullet = Bullet(bullet_data["x"], bullet_data["y"], bullet_data["speed"], bullet_data["angle"])
             bullets.append(bullet)
-            
+
         # Add to sprite groups
         if bullets:
             self.all_sprites.add(*bullets)

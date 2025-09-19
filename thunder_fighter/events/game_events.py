@@ -117,11 +117,7 @@ class GameEvent(Event):
     @classmethod
     def create_player_shoot(cls, source: str = "player", shooting_data: list = None) -> "GameEvent":
         """Create a player shoot event with shooting parameters."""
-        return cls(
-            GameEventType.PLAYER_SHOOT,
-            source=source,
-            shooting_data=shooting_data or []
-        )
+        return cls(GameEventType.PLAYER_SHOOT, source=source, shooting_data=shooting_data or [])
 
     @classmethod
     def create_enemy_spawned(
