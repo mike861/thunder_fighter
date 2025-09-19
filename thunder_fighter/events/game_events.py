@@ -6,12 +6,11 @@ for the Thunder Fighter game.
 """
 
 from dataclasses import dataclass
-from enum import Enum
 
-from .event_system import Event
+from .event_system import Event, EventType
 
 
-class GameEventType(Enum):
+class GameEventType(EventType):
     """Game-specific event types."""
 
     # Base event
@@ -22,6 +21,7 @@ class GameEventType(Enum):
     PLAYER_LEVELED_UP = "player_leveled_up"
     PLAYER_HEALTH_CHANGED = "player_health_changed"
     PLAYER_MOVED = "player_moved"
+    PLAYER_SHOOT = "player_shoot"
 
     # Enemy events
     ENEMY_SPAWNED = "enemy_spawned"
@@ -73,21 +73,33 @@ class GameEvent(Event):
     functionality and convenience methods.
     """
 
-    def __init__(self, event_type: GameEventType, source: str = "unknown", **data):
+    def __init__(self, event_type: GameEventType, data=None, source: str = "unknown", **kwargs):
         """
         Initialize a game event.
 
         Args:
             event_type: The game event type
+            data: Event data (dict or None)
             source: The source component
-            **data: Event data
+            **kwargs: Additional event data
         """
-        super().__init__(event_type, data, source=source)
+        # Handle both dict data and kwargs
+        if isinstance(data, dict):
+            final_data = data.copy()
+            final_data.update(kwargs)
+        elif data is None:
+            final_data = kwargs
+        else:
+            # For backward compatibility, treat non-dict data as a single value
+            final_data = {"value": data}
+            final_data.update(kwargs)
+
+        super().__init__(event_type, final_data, source=source)
 
     @classmethod
     def create_player_died(cls, source: str = "player", cause: str = "unknown") -> "GameEvent":
         """Create a player died event."""
-        return cls(GameEventType.PLAYER_DIED, source, cause=cause)
+        return cls(GameEventType.PLAYER_DIED, source=source, cause=cause)
 
     @classmethod
     def create_player_health_changed(
@@ -103,35 +115,44 @@ class GameEvent(Event):
         )
 
     @classmethod
+    def create_player_shoot(cls, source: str = "player", shooting_data: list = None) -> "GameEvent":
+        """Create a player shoot event with shooting parameters."""
+        return cls(
+            GameEventType.PLAYER_SHOOT,
+            source=source,
+            shooting_data=shooting_data or []
+        )
+
+    @classmethod
     def create_enemy_spawned(
         cls, source: str = "enemy_factory", enemy_type: str = "basic", level: int = 1
     ) -> "GameEvent":
         """Create an enemy spawned event."""
-        return cls(GameEventType.ENEMY_SPAWNED, source, enemy_type=enemy_type, level=level)
+        return cls(GameEventType.ENEMY_SPAWNED, source=source, enemy_type=enemy_type, level=level)
 
     @classmethod
     def create_enemy_died(cls, source: str = "enemy", enemy_type: str = "basic", score_awarded: int = 0) -> "GameEvent":
         """Create an enemy died event."""
-        return cls(GameEventType.ENEMY_DIED, source, enemy_type=enemy_type, score_awarded=score_awarded)
+        return cls(GameEventType.ENEMY_DIED, source=source, enemy_type=enemy_type, score_awarded=score_awarded)
 
     @classmethod
     def create_boss_spawned(
         cls, source: str = "boss_factory", boss_level: int = 1, boss_type: str = "standard"
     ) -> "GameEvent":
         """Create a boss spawned event."""
-        return cls(GameEventType.BOSS_SPAWNED, source, boss_level=boss_level, boss_type=boss_type)
+        return cls(GameEventType.BOSS_SPAWNED, source=source, boss_level=boss_level, boss_type=boss_type)
 
     @classmethod
     def create_boss_died(cls, source: str = "boss", boss_level: int = 1, score_awarded: int = 0) -> "GameEvent":
         """Create a boss died event."""
-        return cls(GameEventType.BOSS_DIED, source, boss_level=boss_level, score_awarded=score_awarded)
+        return cls(GameEventType.BOSS_DIED, source=source, boss_level=boss_level, score_awarded=score_awarded)
 
     @classmethod
     def create_item_collected(
         cls, source: str = "item", item_type: str = "health", player_id: str = "player"
     ) -> "GameEvent":
         """Create an item collected event."""
-        return cls(GameEventType.ITEM_COLLECTED, source, item_type=item_type, player_id=player_id)
+        return cls(GameEventType.ITEM_COLLECTED, source=source, item_type=item_type, player_id=player_id)
 
     @classmethod
     def create_game_state_changed(cls, source: str = "game", old_state: str = "", new_state: str = "") -> "GameEvent":
@@ -145,26 +166,28 @@ class GameEvent(Event):
         }
 
         event_type = event_type_map.get(new_state, GameEventType.GAME_STARTED)
-        return cls(event_type, source, old_state=old_state, new_state=new_state)
+        return cls(event_type, source=source, old_state=old_state, new_state=new_state)
 
     @classmethod
     def create_score_changed(
         cls, source: str = "score", old_score: int = 0, new_score: int = 0, delta: int = 0
     ) -> "GameEvent":
         """Create a score changed event."""
-        return cls(GameEventType.SCORE_CHANGED, source, old_score=old_score, new_score=new_score, delta=delta)
+        return cls(GameEventType.SCORE_CHANGED, source=source, old_score=old_score, new_score=new_score, delta=delta)
 
     @classmethod
     def create_level_changed(cls, source: str = "game", old_level: int = 1, new_level: int = 1) -> "GameEvent":
         """Create a level changed event."""
-        return cls(GameEventType.LEVEL_CHANGED, source, old_level=old_level, new_level=new_level)
+        return cls(GameEventType.LEVEL_CHANGED, source=source, old_level=old_level, new_level=new_level)
 
     @classmethod
     def create_play_sound(cls, source: str = "audio", sound_name: str = "", volume: float = 1.0) -> "GameEvent":
         """Create a play sound event."""
-        return cls(GameEventType.PLAY_SOUND, source, sound_name=sound_name, volume=volume)
+        return cls(GameEventType.PLAY_SOUND, source=source, sound_name=sound_name, volume=volume)
 
     @classmethod
     def create_notification(cls, source: str = "ui", message: str = "", notification_type: str = "info") -> "GameEvent":
         """Create a notification event."""
-        return cls(GameEventType.NOTIFICATION_ADDED, source, message=message, notification_type=notification_type)
+        return cls(
+            GameEventType.NOTIFICATION_ADDED, source=source, message=message, notification_type=notification_type
+        )

@@ -240,20 +240,27 @@ class TestPauseManager:
         """Test that methods work with default time.time() when no time provided."""
         manager = PauseManager(cooldown_ms=0)
 
-        with patch("time.time") as mock_time:
-            mock_time.side_effect = [1000.0, 1002.0, 1005.0]
+        # Use itertools.cycle to provide repeating values that won't cause StopIteration
+        from itertools import cycle
 
-            # Toggle pause (uses time.time())
+        with patch("time.time") as mock_time:
+            # Provide specific time values for the test logic
+            # 1000.0 - pause time, 1000.0 - calculate game time (same as pause start)
+            # 1002.0 - resume time, and extra values for logging calls
+            time_values = cycle([1000.0, 1000.0, 1002.0, 1003.0, 1004.0])
+            mock_time.side_effect = lambda: next(time_values)
+
+            # Toggle pause (uses time.time() -> 1000.0)
             result = manager.toggle_pause()
             assert result is True
             assert manager.is_paused
 
-            # Calculate game time while paused (uses time.time())
-            # When paused, game time should be frozen at pause start
+            # Calculate game time while paused (uses time.time() -> 1000.0)
+            # Since current_time == pause_start_time, no time has passed
             game_time = manager.calculate_game_time(1000.0)
             assert game_time == 0.0  # Paused immediately, so no game time elapsed
 
-            # Resume (uses time.time())
+            # Resume (uses time.time() -> 1002.0, logging may use 1003.0, 1004.0, etc.)
             result = manager.toggle_pause()
             assert result is True
             assert not manager.is_paused

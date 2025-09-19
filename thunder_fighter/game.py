@@ -16,15 +16,12 @@ from typing import Optional
 import pygame
 
 from thunder_fighter.constants import (
-    BASE_ENEMY_COUNT,
-    BOSS_SPAWN_INTERVAL,
+    BOSS_CONFIG,
+    ENEMY_CONFIG,
     FPS,
+    GAME_CONFIG,
     HEIGHT,
-    INITIAL_GAME_LEVEL,
-    MAX_GAME_LEVEL,
-    PLAYER_HEALTH,
-    PLAYER_INITIAL_WINGMEN,
-    SCORE_THRESHOLD,
+    PLAYER_CONFIG,
     TEXT_GAME_TITLE,
     WHITE,
     WIDTH,
@@ -132,7 +129,7 @@ class RefactoredGame:
         self.all_sprites.add(self.player)
 
         # Add initial wingmen
-        for _ in range(PLAYER_INITIAL_WINGMEN):
+        for _ in range(int(PLAYER_CONFIG["INITIAL_WINGMEN"])):
             self.player.add_wingman()
 
         # Create dynamic background
@@ -144,7 +141,7 @@ class RefactoredGame:
 
         # Game state variables
         self.running = True
-        self.game_level = INITIAL_GAME_LEVEL
+        self.game_level = int(GAME_CONFIG["INITIAL_GAME_LEVEL"])
         self.game_won = False
         self.game_over = False  # New: game over state flag
 
@@ -166,11 +163,11 @@ class RefactoredGame:
         self.input_validation_interval = 10.0  # Check every 10 seconds (reduced frequency)
 
         # Create initial enemies using factory (after game_start_time is set)
-        for _i in range(BASE_ENEMY_COUNT):
+        for _i in range(int(ENEMY_CONFIG["BASE_COUNT"])):
             self._spawn_enemy_via_factory()
 
         # Game configuration
-        self.target_enemy_count = BASE_ENEMY_COUNT
+        self.target_enemy_count = int(ENEMY_CONFIG["BASE_COUNT"])
         self.item_spawn_interval = 30
         self.last_score_checkpoint = 0
 
@@ -204,7 +201,7 @@ class RefactoredGame:
         self.game_won = False
         self.pause_manager.reset()  # Reset pause manager
         self.paused = False  # Keep for backward compatibility
-        self.game_level = INITIAL_GAME_LEVEL
+        self.game_level = int(GAME_CONFIG["INITIAL_GAME_LEVEL"])
 
         # Reset timing
         self.game_start_time = time.time()
@@ -222,7 +219,7 @@ class RefactoredGame:
                 sprite.kill()
 
         # Reset player
-        self.player.health = PLAYER_HEALTH
+        self.player.health = int(PLAYER_CONFIG["HEALTH"])
         self.player.rect.centerx = WIDTH // 2
         self.player.rect.bottom = HEIGHT - 50
         self.player.bullet_paths = 1
@@ -231,7 +228,7 @@ class RefactoredGame:
         self.player.wingmen_list.clear()
 
         # Add initial wingmen
-        for _ in range(PLAYER_INITIAL_WINGMEN):
+        for _ in range(int(PLAYER_CONFIG["INITIAL_WINGMEN"])):
             self.player.add_wingman()
 
         # Reset boss state
@@ -246,11 +243,11 @@ class RefactoredGame:
         self.ui_manager.reset_game_state()
 
         # Create initial enemies
-        for _i in range(BASE_ENEMY_COUNT):
+        for _i in range(int(ENEMY_CONFIG["BASE_COUNT"])):
             self._spawn_enemy_via_factory()
 
         # Reset configuration
-        self.target_enemy_count = BASE_ENEMY_COUNT
+        self.target_enemy_count = int(ENEMY_CONFIG["BASE_COUNT"])
         self.item_spawn_interval = 30
 
         # Play background music
@@ -384,7 +381,9 @@ class RefactoredGame:
     def _spawn_item_via_factory(self, game_time: float) -> bool:
         """Spawn an item using the factory pattern."""
         try:
-            item = self.item_factory.create_random_item(self.all_sprites, self.items, self.player)
+            item = self.item_factory.create_random_item(
+                self.all_sprites, self.items, self.player, game_level=self.game_level
+            )
 
             if item:
                 # Emit event
@@ -392,8 +391,11 @@ class RefactoredGame:
                     GameEvent(GameEventType.ITEM_SPAWNED, {"item": item, "game_time": game_time})
                 )
 
-                logger.debug(f"Factory spawned item at game time {game_time:.1f}m")
+                logger.debug(f"Factory spawned intelligent item at game time {game_time:.1f}m, level {self.game_level}")
                 return True
+            else:
+                logger.debug("No item spawned (intelligent weight system decision)")
+                return False
         except Exception as e:
             logger.error(f"Error spawning item via factory: {e}", exc_info=True)
 
@@ -555,7 +557,7 @@ class RefactoredGame:
         boss_data.get("level", 1)
 
         # Check if this is the final boss
-        if self.game_level >= MAX_GAME_LEVEL:
+        if self.game_level >= int(GAME_CONFIG["MAX_GAME_LEVEL"]):
             self.event_system.dispatch_event(
                 GameEvent(GameEventType.GAME_WON, {"final_score": self.score.value, "level": self.game_level})
             )
@@ -649,7 +651,7 @@ class RefactoredGame:
         """Handle player health changed event for UI updates."""
         health_data = event.data
         self.ui_manager.update_player_info(
-            health=health_data.get("health"), max_health=health_data.get("max_health", PLAYER_HEALTH)
+            health=health_data.get("health"), max_health=health_data.get("max_health", int(PLAYER_CONFIG["HEALTH"]))
         )
 
     def _handle_ui_player_stats_changed(self, event: GameEvent):
@@ -712,7 +714,7 @@ class RefactoredGame:
 
         self.ui_manager.update_player_info(
             health=self.player.health,
-            max_health=PLAYER_HEALTH,
+            max_health=int(PLAYER_CONFIG["HEALTH"]),
             bullet_paths=self.player.bullet_paths,
             bullet_speed=self.player.bullet_speed,
             speed=self.player.speed,
@@ -748,6 +750,20 @@ class RefactoredGame:
                     self.running = False
             return
 
+        # Handle victory state events separately
+        if self.game_won:
+            for event in pygame_events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        # Exit game
+                        self.running = False
+                    elif event.key == pygame.K_r:
+                        # Restart game
+                        self._restart_game()
+                elif event.type == pygame.QUIT:
+                    self.running = False
+            return
+
         # Process events through input manager for normal gameplay
         self.input_manager.update(pygame_events)
 
@@ -770,11 +786,10 @@ class RefactoredGame:
         # self._validate_input_state()
 
         # Check sound system health
-        if hasattr(self, "_last_sound_check"):
-            if time.time() - self._last_sound_check > 2:
-                self._check_sound_system()
-                self._last_sound_check = time.time()
-        else:
+        if not hasattr(self, "_last_sound_check"):
+            self._last_sound_check: float = time.time()
+        elif time.time() - self._last_sound_check > 2:
+            self._check_sound_system()
             self._last_sound_check = time.time()
 
         # Skip updates if paused, game won, or game over
@@ -788,7 +803,7 @@ class RefactoredGame:
         self.all_sprites.update()
 
         # Enemy spawning logic
-        self.target_enemy_count = BASE_ENEMY_COUNT + (self.game_level - 1) // 2
+        self.target_enemy_count = int(ENEMY_CONFIG["BASE_COUNT"]) + (self.game_level - 1) // 2
 
         if len(self.enemies) < self.target_enemy_count:
             if time.time() - self.enemy_spawn_timer > 2:
@@ -797,7 +812,7 @@ class RefactoredGame:
 
         # Boss spawning logic
         boss_elapsed_time = self.pause_manager.calculate_game_time(self.boss_spawn_timer)
-        if self.game_level > 1 and boss_elapsed_time > BOSS_SPAWN_INTERVAL:
+        if self.game_level > 1 and boss_elapsed_time > int(BOSS_CONFIG["SPAWN_INTERVAL"]):
             if not self.boss or not self.boss.alive():
                 self._spawn_boss_via_factory()
 
@@ -810,7 +825,7 @@ class RefactoredGame:
         self._handle_collisions(game_time)
 
         # Score-based level up (only for early levels)
-        if self.game_level <= 1 and self.score.value // SCORE_THRESHOLD >= self.game_level:
+        if self.game_level <= 1 and self.score.value // int(GAME_CONFIG["SCORE_THRESHOLD"]) >= self.game_level:
             self.event_system.dispatch_event(
                 GameEvent(GameEventType.LEVEL_UP, {"old_level": self.game_level, "new_level": self.game_level + 1})
             )
@@ -832,7 +847,7 @@ class RefactoredGame:
             self.all_sprites,
             self.score,
             self.last_score_checkpoint,
-            SCORE_THRESHOLD,
+            int(GAME_CONFIG["SCORE_THRESHOLD"]),
             self.items,
             self.player,
         )
@@ -855,7 +870,8 @@ class RefactoredGame:
         if enemy_hit["was_hit"]:
             self.event_system.dispatch_event(
                 GameEvent(
-                    GameEventType.PLAYER_HEALTH_CHANGED, {"health": self.player.health, "max_health": PLAYER_HEALTH}
+                    GameEventType.PLAYER_HEALTH_CHANGED,
+                    {"health": self.player.health, "max_health": int(PLAYER_CONFIG["HEALTH"])},
                 )
             )
 
@@ -869,7 +885,8 @@ class RefactoredGame:
         if bullet_hit["was_hit"]:
             self.event_system.dispatch_event(
                 GameEvent(
-                    GameEventType.PLAYER_HEALTH_CHANGED, {"health": self.player.health, "max_health": PLAYER_HEALTH}
+                    GameEventType.PLAYER_HEALTH_CHANGED,
+                    {"health": self.player.health, "max_health": int(PLAYER_CONFIG["HEALTH"])},
                 )
             )
 
@@ -899,7 +916,8 @@ class RefactoredGame:
             if boss_bullet_hit["was_hit"]:
                 self.event_system.dispatch_event(
                     GameEvent(
-                        GameEventType.PLAYER_HEALTH_CHANGED, {"health": self.player.health, "max_health": PLAYER_HEALTH}
+                        GameEventType.PLAYER_HEALTH_CHANGED,
+                        {"health": self.player.health, "max_health": int(PLAYER_CONFIG["HEALTH"])},
                     )
                 )
 
@@ -969,7 +987,7 @@ class RefactoredGame:
 
         # Draw special screens
         if self.game_won:
-            self.ui_manager.draw_victory_screen(self.score.value, MAX_GAME_LEVEL)
+            self.ui_manager.draw_victory_screen(self.score.value, int(GAME_CONFIG["MAX_GAME_LEVEL"]))
         elif self.game_over or self.player.health <= 0:
             game_time = self.get_game_time()
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)

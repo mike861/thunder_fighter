@@ -27,7 +27,7 @@ class FontManager:
         self._font_cache: Dict[Tuple[str, int, str], pygame.font.Font] = {}
 
         # Language-specific font configurations
-        self.language_fonts = {
+        self.language_fonts: Dict[str, Dict[str, Optional[str] | list[str]]] = {
             "zh": {
                 "normal": "PingFang SC",  # macOS Chinese font
                 "bold": "PingFang SC",
@@ -72,7 +72,7 @@ class FontManager:
 
         # Try primary font
         font_name = font_config.get(style, None)
-        if font_name:
+        if font_name and isinstance(font_name, str):
             try:
                 # Use resource manager's font loading with system font support
                 font = self.resource_manager.load_font(font_name, size, system_font=True)
@@ -82,13 +82,15 @@ class FontManager:
                 logger.warning(f"Failed to load font '{font_name}': {e}")
 
         # Try fallback fonts
-        for fallback_name in font_config.get("fallback", []):
-            try:
-                font = self.resource_manager.load_font(fallback_name, size, system_font=True)
-                logger.debug(f"Loaded fallback font '{fallback_name}' for language '{language}'")
-                return font
-            except Exception:
-                continue
+        fallback_fonts = font_config.get("fallback", [])
+        if isinstance(fallback_fonts, list):
+            for fallback_name in fallback_fonts:
+                try:
+                    font = self.resource_manager.load_font(fallback_name, size, system_font=True)
+                    logger.debug(f"Loaded fallback font '{fallback_name}' for language '{language}'")
+                    return font
+                except Exception:
+                    continue
 
         # Ultimate fallback to pygame default
         logger.info(f"Using default font for language '{language}'")

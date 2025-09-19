@@ -8,6 +8,7 @@ Integrates calls to various factory classes.
 import random
 from typing import Any, Dict
 
+from thunder_fighter.events.game_events import GameEvent, GameEventType
 from thunder_fighter.utils.logger import logger
 
 
@@ -18,6 +19,7 @@ class SpawningSystem:
         self.enemy_factory = None
         self.boss_factory = None
         self.item_factory = None
+        self.projectile_factory = None  # For handling player shooting events
         self.spawn_timers = {}
         self.spawn_rates = {}
         self.last_spawn_times = {}
@@ -50,10 +52,12 @@ class SpawningSystem:
                 from thunder_fighter.entities.enemies.boss_factory import BossFactory
                 from thunder_fighter.entities.enemies.enemy_factory import EnemyFactory
                 from thunder_fighter.entities.items.item_factory import ItemFactory
+                from thunder_fighter.entities.projectiles.projectile_factory import ProjectileFactory
 
                 self.enemy_factory = EnemyFactory()
                 self.boss_factory = BossFactory()
                 self.item_factory = ItemFactory()
+                self.projectile_factory = ProjectileFactory()
 
                 self._factories_initialized = True
                 logger.info("Spawning system factories initialized")
@@ -180,6 +184,48 @@ class SpawningSystem:
         for entity_type in self.last_spawn_times:
             self.last_spawn_times[entity_type] = current_time
         logger.info("Spawn times reset")
+
+    def handle_player_shoot_event(self, event: GameEvent, game_state: Dict[str, Any]) -> None:
+        """
+        Handle PLAYER_SHOOT events by creating bullet entities.
+        
+        Args:
+            event: The player shoot event containing shooting data
+            game_state: Current game state with sprite groups
+        """
+        if not self._factories_initialized:
+            self._init_factories()
+            
+        if not self.projectile_factory:
+            logger.error("ProjectileFactory not initialized, cannot handle player shoot event")
+            return
+            
+        try:
+            shooting_data = event.get_data("shooting_data")
+            if not shooting_data:
+                logger.warning("Player shoot event received with no shooting data")
+                return
+                
+            # Get sprite groups from game state
+            all_sprites = game_state.get("all_sprites")
+            bullets_group = game_state.get("bullets_group")
+            
+            if not all_sprites or not bullets_group:
+                logger.error("Required sprite groups not found in game state")
+                return
+                
+            # Create bullets from shooting data
+            bullets_created = 0
+            for bullet_data in shooting_data:
+                bullet = self.projectile_factory.create_bullet(**bullet_data)
+                all_sprites.add(bullet)
+                bullets_group.add(bullet)
+                bullets_created += 1
+                
+            logger.debug(f"Created {bullets_created} bullets from player shoot event")
+            
+        except Exception as e:
+            logger.error(f"Error handling player shoot event: {e}")
 
     def get_spawn_statistics(self) -> Dict[str, Any]:
         """Gets spawn statistics."""

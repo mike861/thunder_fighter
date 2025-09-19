@@ -68,7 +68,7 @@ class FileLanguageLoader(LanguageLoader):
             with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
             logger.info(f"Loaded language file: {file_path}")
-            return data
+            return data if isinstance(data, dict) else None
 
         except FileNotFoundError:
             logger.error(f"Language file not found: {file_path}")

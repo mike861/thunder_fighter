@@ -6,7 +6,7 @@ This module provides the core game state data structures and management function
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from thunder_fighter.utils.logger import logger
 
@@ -231,7 +231,7 @@ class GameStateManager:
         """
         self.state.score = new_score
 
-    def update_enemy_count(self, count: int, target: int = None):
+    def update_enemy_count(self, count: int, target: Optional[int] = None):
         """
         Update enemy count information.
 

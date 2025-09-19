@@ -10,7 +10,9 @@ import time
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-from thunder_fighter.constants import BOSS_SPAWN_INTERVAL
+from thunder_fighter.constants import BOSS_CONFIG
+
+BOSS_SPAWN_INTERVAL = int(BOSS_CONFIG["SPAWN_INTERVAL"])
 from thunder_fighter.utils.pause_manager import PauseManager
 
 if TYPE_CHECKING:

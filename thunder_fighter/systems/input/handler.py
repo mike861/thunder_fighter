@@ -367,11 +367,13 @@ class InputHandler:
         for event in pygame_events:
             # Look for window focus events that indicate actual focus loss/gain
             if hasattr(pygame, "WINDOWEVENT") and event.type == pygame.WINDOWEVENT:
-                if hasattr(event, "event") and event.event in [
-                    pygame.WINDOWEVENT_FOCUS_LOST,
-                    pygame.WINDOWEVENT_FOCUS_GAINED,
-                ]:
-                    has_actual_focus_events = True
+                # Check if the specific window event constants exist
+                focus_lost = getattr(pygame, "WINDOWEVENT_FOCUS_LOST", None)
+                focus_gained = getattr(pygame, "WINDOWEVENT_FOCUS_GAINED", None)
+
+                if hasattr(event, "event") and focus_lost is not None and focus_gained is not None:
+                    if event.event in [focus_lost, focus_gained]:
+                        has_actual_focus_events = True
                     logger.debug(f"Detected actual window focus event: {event.event}")
                     break
             elif hasattr(pygame, "ACTIVEEVENT") and event.type == pygame.ACTIVEEVENT:
@@ -417,8 +419,8 @@ class InputHandler:
             actions_to_remove = []
             for action in self._active_continuous_actions:
                 # Get the key for this action
-                key = self.key_bindings.get_key_for_action(action)
-                if key is not None and not current_pressed[key]:
+                action_key: Optional[int] = self.key_bindings.get_key_for_action(action)
+                if action_key is not None and not current_pressed[action_key]:
                     actions_to_remove.append(action)
                     logger.debug(f"Action {action} no longer active - removing")
 

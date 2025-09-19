@@ -19,6 +19,8 @@ __test__ = False
 class MockEventSourceAdapter(EventSource):
     """Test Event Source - Fully controllable event queue"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(self):
         """Initializes the test event source."""
         self.events: List[Event] = []
@@ -36,7 +38,7 @@ class MockEventSourceAdapter(EventSource):
             event.timestamp = self._current_time
         self.events.append(event)
 
-    def add_key_down(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def add_key_down(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """
         Convenience method to add a key down event.
 
@@ -52,7 +54,7 @@ class MockEventSourceAdapter(EventSource):
             )
         )
 
-    def add_key_up(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def add_key_up(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """
         Convenience method to add a key up event.
 
@@ -114,6 +116,8 @@ class MockEventSourceAdapter(EventSource):
 
 class MockKeyboardStateAdapter(KeyboardState):
     """Test Keyboard State - Fully controllable keyboard state simulation"""
+
+    __test__ = False  # Tell pytest this is not a test class
 
     def __init__(self):
         """Initializes the test keyboard state."""
@@ -207,6 +211,8 @@ class MockKeyboardStateAdapter(KeyboardState):
 class MockClockAdapter(Clock):
     """Test Clock - Fully controllable time flow"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(self, initial_time: float = 0.0):
         """
         Initializes the test clock.
@@ -286,6 +292,8 @@ class MockClockAdapter(Clock):
 
 class MockLoggerAdapter(Logger):
     """Test Logger - Collects log messages for validation"""
+
+    __test__ = False  # Tell pytest this is not a test class
 
     def __init__(self, print_logs: bool = False):
         """
@@ -373,6 +381,8 @@ def create_test_environment(
 class MockScenarioBuilder:
     """Test Scenario Builder - Simplifies the creation of complex test scenarios"""
 
+    __test__ = False  # Tell pytest this is not a test class
+
     def __init__(
         self, event_source: MockEventSourceAdapter, clock: MockClockAdapter, keyboard: MockKeyboardStateAdapter
     ):
@@ -395,7 +405,7 @@ class MockScenarioBuilder:
         self._current_time = time
         return self
 
-    def press_key(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def press_key(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """Presses a key at the current time."""
         self.clock.set_time(self._current_time)
         self.event_source.set_time(self._current_time)
@@ -403,7 +413,7 @@ class MockScenarioBuilder:
         self.keyboard.press_key(key_code)
         return self
 
-    def release_key(self, key_code: int, modifiers: Dict[str, bool] = None):
+    def release_key(self, key_code: int, modifiers: Optional[Dict[str, bool]] = None):
         """Releases a key at the current time."""
         self.clock.set_time(self._current_time)
         self.event_source.set_time(self._current_time)

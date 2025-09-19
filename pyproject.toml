@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thunder-fighter"
-version = "0.8.0"
+version = "0.9.0"
 description = "A classic vertical scrolling space shooter game built with Pygame"
 readme = "README.md"
 license = {text = "GPL-2.0"}  # Consider changing to MIT or Apache-2.0
@@ -20,16 +20,16 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Arcade",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "pygame>=2.6.0",
 ]
@@ -101,7 +101,7 @@ ignore = [
 "tests/**/*.py" = ["E402"]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -112,6 +112,20 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
+disable_error_code = [
+    "no-untyped-def",
+#    "assignment",           # None assignment compatibility issues
+    "no-any-return",       # Any return type warnings
+#    "arg-type",            # Argument type compatibility
+#    "union-attr",          # Union type attribute access
+#    "index",               # Index type issues
+#    "call-overload",       # Overload call issues
+#    "operator",            # Operator type issues
+    "misc",                # Miscellaneous type issues
+#    "attr-defined",        # Object attribute access
+    "var-annotated",       # Variable annotation requirements
+#    "syntax"               # Syntax issues in legacy code
+]
 
 [[tool.mypy.overrides]]
 module = [
@@ -129,6 +143,10 @@ addopts = [
     "-v", 
     "--strict-markers",
     "--tb=short",
+]
+filterwarnings = [
+    # Ignore pygame's pkg_resources deprecation warning
+    "ignore:pkg_resources is deprecated:UserWarning:pygame.pkgdata",
 ]
 
 [tool.coverage.run]

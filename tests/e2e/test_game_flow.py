@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 if TYPE_CHECKING:
     pass
 
-from thunder_fighter.constants import INITIAL_GAME_LEVEL, PLAYER_HEALTH
+from thunder_fighter.constants import GAME_CONFIG, PLAYER_CONFIG
 from thunder_fighter.events.game_events import GameEvent
 
 
@@ -32,7 +32,7 @@ class TestGameFlow:
         mock_player = Mock()
 
         # Basic attributes
-        mock_player.health = PLAYER_HEALTH
+        mock_player.health = int(PLAYER_CONFIG["HEALTH"])
         mock_player.speed = 5  # Numeric value for mathematical operations
         mock_player.x = 100
         mock_player.y = 200
@@ -152,7 +152,7 @@ class TestGameFlow:
         # Verify initialization
         assert game.running is True
         assert game.paused is False
-        assert game.game_level == INITIAL_GAME_LEVEL
+        assert game.game_level == int(GAME_CONFIG["INITIAL_GAME_LEVEL"])
         assert game.game_won is False
         assert game.boss is None
         assert game.boss_active is False
@@ -412,7 +412,7 @@ class TestGameFlow:
                 # Test initial state
                 assert game.running is True
                 assert game.paused is False
-                assert game.game_level == INITIAL_GAME_LEVEL
+                assert game.game_level == int(GAME_CONFIG["INITIAL_GAME_LEVEL"])
                 assert game.game_won is False
 
                 # Test that event system maintains state

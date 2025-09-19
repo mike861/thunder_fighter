@@ -15,7 +15,7 @@ Thank you for your interest in contributing to Thunder Fighter! This document pr
 
 ## Code of Conduct
 
-This project adheres to a Code of Conduct that all contributors are expected to follow. Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+This project adheres to a Code of Conduct that all contributors are expected to follow. Please be respectful and constructive in all interactions.
 
 ## Getting Started
 
@@ -52,8 +52,8 @@ Feature suggestions are welcome! Please provide:
 1. **Find an Issue**: Look for issues labeled `good first issue` or `help wanted`
 2. **Claim an Issue**: Comment on the issue to let others know you're working on it
 3. **Create a Branch**: Use a descriptive branch name (e.g., `feature/add-power-up` or `fix/collision-bug`)
-4. **Write Code**: Follow our coding standards
-5. **Test**: Ensure all tests pass and add new tests for your changes
+4. **Write Code**: Follow our coding standards and architecture patterns
+5. **Test**: Ensure all tests pass and add comprehensive tests for your changes
 6. **Document**: Update documentation if needed
 7. **Submit PR**: Create a pull request with a clear description
 
@@ -61,7 +61,7 @@ Feature suggestions are welcome! Please provide:
 
 ### Prerequisites
 
-- Python 3.7 or higher
+- Python 3.12 or higher
 - Git
 - Virtual environment tool (venv, virtualenv, or uv)
 
@@ -69,7 +69,7 @@ Feature suggestions are welcome! Please provide:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/thunder_fighter.git
+   git clone https://github.com/mike861/thunder_fighter.git
    cd thunder_fighter
    ```
 
@@ -87,24 +87,27 @@ Feature suggestions are welcome! Please provide:
 
 4. **Run tests**
    ```bash
-   pytest tests/ -v
+   ./venv/bin/python -m pytest tests/ -v
    ```
 
 5. **Run the game**
    ```bash
-   python main.py
+   ./venv/bin/python main.py
    ```
 
 ## Coding Standards
 
 ### Python Style Guide
 
-We follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) with the following specifications:
+We follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) with project-specific requirements:
 
 - Use 4 spaces for indentation (no tabs)
 - Maximum line length: 120 characters
 - Use descriptive variable and function names
 - Add type hints for all function parameters and return values
+- Python 3.7+ compatibility (no walrus operator `:=`)
+- All functions and classes must have docstrings (Google style)
+- All comments, logs, and docstrings must be in English
 
 ### Code Formatting
 
@@ -120,16 +123,19 @@ ruff check .
 
 ### Documentation
 
-- All functions and classes must have docstrings (Google style)
-- Complex logic should have inline comments
 - Update relevant documentation files for significant changes
+- Complex logic should have inline comments
+- Follow existing documentation patterns and structure
 
 ### Testing
 
 - Write tests for all new functionality
-- Maintain or improve test coverage
+- Maintain or improve test coverage (target: >90% for critical systems)
 - Tests should be in the appropriate directory under `tests/`
 - Use pytest fixtures when appropriate
+- Mock external dependencies (pygame surfaces, audio)
+- Follow interface-focused testing over implementation details
+- See [Testing Guide](docs/TESTING_GUIDE.md) for detailed patterns and best practices
 
 ## Commit Guidelines
 
@@ -173,11 +179,35 @@ refactor(ui): separate health bar into its own component
 1. **Update your branch**: Ensure your branch is up to date with the main branch
 2. **Run tests**: All tests must pass
 3. **Check code style**: Run Ruff and fix any issues
-4. **Update documentation**: If applicable
-5. **Create PR**: Use a clear, descriptive title
-6. **Fill out template**: Complete the PR template
-7. **Wait for review**: Address any feedback from reviewers
-8. **Merge**: Once approved, your PR will be merged
+4. **Check type safety**: Run MyPy to ensure type safety
+5. **Update documentation**: If applicable
+6. **Create PR**: Use a clear, descriptive title
+7. **Fill out template**: Complete the PR template
+8. **Wait for CI**: All GitHub Actions checks must pass
+9. **Wait for review**: Address any feedback from reviewers
+10. **Merge**: Once approved, your PR will be merged
+
+### Pre-PR Checklist
+
+Before submitting your pull request, ensure:
+
+- [ ] All tests pass locally: `./venv/bin/python -m pytest tests/ -v`
+- [ ] Code is properly formatted: `ruff format .`
+- [ ] No linting errors: `ruff check .`
+- [ ] Type checking passes: `mypy thunder_fighter/`
+- [ ] Documentation is updated if needed
+- [ ] Commit messages follow conventional format
+- [ ] Changes are covered by tests
+
+### GitHub Actions CI Pipeline
+
+Our CI pipeline runs automatically on every push and pull request with three main jobs:
+
+- **Test Job**: Linting, type checking, and comprehensive test execution with coverage reporting
+- **Security Job**: Security scanning and dependency vulnerability checks  
+- **Build Job**: Package build verification and artifact generation
+
+All CI checks must pass before your PR can be merged. If any check fails, review the error output and fix the issues locally before pushing updates.
 
 ### PR Title Format
 
@@ -189,9 +219,9 @@ Follow the same convention as commit messages:
 
 ### Before Submitting an Issue
 
-1. Check the [FAQ](docs/FAQ.md) (if available)
-2. Search existing issues (including closed ones)
-3. Try to reproduce the issue with the latest version
+1. Search existing issues (including closed ones)
+2. Try to reproduce the issue with the latest version
+3. Check the documentation for relevant information
 
 ### Issue Template
 
@@ -207,8 +237,8 @@ When creating an issue, please use the appropriate template and provide:
 
 If you have questions about contributing, feel free to:
 
-- Open a discussion in GitHub Discussions
-- Ask in our community chat (if available)
 - Create an issue with the `question` label
+- Check the project documentation for additional guidance
+- Review similar pull requests for examples
 
 Thank you for contributing to Thunder Fighter! 🚀 

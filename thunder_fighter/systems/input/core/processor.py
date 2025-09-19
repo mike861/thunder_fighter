@@ -143,6 +143,10 @@ class InputProcessor:
         key_code = event.key_code
         current_time = event.timestamp
 
+        # Skip if key_code is None
+        if key_code is None:
+            return None
+
         # Add to the set of held keys
         self.held_keys.add(key_code)
         self.last_key_times[key_code] = current_time
@@ -166,7 +170,7 @@ class InputProcessor:
         return Command(
             type=command_type,
             timestamp=current_time,
-            data={"key": key_code, "modifiers": event.modifiers.copy(), "continuous": False},
+            data={"key": key_code, "modifiers": event.modifiers.copy() if event.modifiers else {}, "continuous": False},
         )
 
     def _handle_key_up(self, event: Event) -> Optional[Command]:
@@ -180,6 +184,10 @@ class InputProcessor:
             The generated command (if any).
         """
         key_code = event.key_code
+
+        # Skip if key_code is None
+        if key_code is None:
+            return None
 
         # Remove from the set of held keys
         self.held_keys.discard(key_code)

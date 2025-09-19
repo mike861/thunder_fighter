@@ -260,15 +260,6 @@ thunder_fighter/
 │   ├── zh.json            # 中文翻译
 │   ├── font_support.py    # 字体管理系统
 │   └── loader.py          # 语言加载抽象
-├── sprites/                # 旧版精灵类 (为兼容性保留)
-│   ├── boss.py            # 旧版 Boss 精灵
-│   ├── bullets.py         # 旧版子弹精灵
-│   ├── enemy.py           # 旧版敌人精灵
-│   ├── explosion.py       # 旧版爆炸精灵
-│   ├── items.py           # 旧版物品精灵
-│   ├── missile.py         # 旧版导弹精灵
-│   ├── player.py          # 旧版玩家精灵
-│   └── wingman.py         # 旧版僚机精灵
 ├── state/                  # 游戏状态管理
 │   ├── game_state.py      # 游戏状态数据结构
 │   ├── game_states.py     # 具体状态实现

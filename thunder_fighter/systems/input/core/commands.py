@@ -7,7 +7,7 @@ achieving complete decoupling between the input system and game logic.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 class CommandType(Enum):
@@ -46,7 +46,7 @@ class Command:
 
     type: CommandType
     timestamp: float
-    data: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         """Post-initialization processing to ensure the data dictionary always exists."""
@@ -55,10 +55,12 @@ class Command:
 
     def get_data(self, key: str, default=None):
         """Safely gets command data."""
-        return self.data.get(key, default)
+        return self.data.get(key, default) if self.data else default
 
     def set_data(self, key: str, value: Any):
         """Sets command data."""
+        if self.data is None:
+            self.data = {}
         self.data[key] = value
 
     def is_movement_command(self) -> bool:

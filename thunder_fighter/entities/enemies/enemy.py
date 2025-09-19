@@ -4,14 +4,7 @@ import pygame
 import pygame.time as ptime
 
 from thunder_fighter.constants import (
-    ENEMY_HORIZONTAL_MOVE_MAX,
-    ENEMY_HORIZONTAL_MOVE_MIN,
-    ENEMY_MIN_SHOOT_DELAY,
-    ENEMY_ROTATION_UPDATE,
-    ENEMY_SCREEN_BOUNDS,
-    ENEMY_SHOOT_LEVEL,
-    ENEMY_SPAWN_Y_MAX,
-    ENEMY_SPAWN_Y_MIN,
+    ENEMY_CONFIG,
     HEIGHT,
     WIDTH,
 )
@@ -33,17 +26,19 @@ class Enemy(pygame.sprite.Sprite):
         self.image = create_enemy_ship(self.level)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-        self.rect.y = random.randrange(ENEMY_SPAWN_Y_MIN, ENEMY_SPAWN_Y_MAX)
+        self.rect.y = random.randrange(int(ENEMY_CONFIG["SPAWN_Y_MIN"]), int(ENEMY_CONFIG["SPAWN_Y_MAX"]))
 
         # Add detailed logging here
-        logger.debug(f"Enemy spawned - Level: {self.level}, ENEMY_SHOOT_LEVEL: {ENEMY_SHOOT_LEVEL}")
+        logger.debug(f"Enemy spawned - Level: {self.level}, ENEMY_SHOOT_LEVEL: {int(ENEMY_CONFIG['SHOOT_LEVEL'])}")
 
         # Adjust speed based on game time and level
         base_speed_factor = min(3.0, 1.0 + game_time / 60.0)
         level_speed_bonus = self.level * 0.2
         total_speed_factor = base_speed_factor + level_speed_bonus
         self.speedy = random.randrange(1, int(3 + 3 * total_speed_factor))
-        self.speedx = random.randrange(ENEMY_HORIZONTAL_MOVE_MIN, ENEMY_HORIZONTAL_MOVE_MAX)
+        self.speedx = random.randrange(
+            int(ENEMY_CONFIG["HORIZONTAL_MOVE_MIN"]), int(ENEMY_CONFIG["HORIZONTAL_MOVE_MAX"])
+        )
 
         # Rotation animation properties
         self.rot = 0
@@ -54,7 +49,7 @@ class Enemy(pygame.sprite.Sprite):
         # Shooting capability - ensure enemies only shoot if they're level 2 or higher
         # Since we use 0-based indexing in _determine_level (levels 0-10),
         # and ENEMY_SHOOT_LEVEL=2 means "from level 2", we need to check if level >= 2
-        self.can_shoot = self.level >= ENEMY_SHOOT_LEVEL
+        self.can_shoot = self.level >= int(ENEMY_CONFIG["SHOOT_LEVEL"])
         logger.debug(f"Enemy ID:{id(self)} Level: {self.level}, Can Shoot: {self.can_shoot}")
 
         # Sprite groups for bullets
@@ -65,7 +60,7 @@ class Enemy(pygame.sprite.Sprite):
         # Initialize shooting properties for all enemies (even non-shooting ones)
         base_delay = 800
         level_reduction = self.level * 50
-        self.shoot_delay = max(ENEMY_MIN_SHOOT_DELAY, base_delay - level_reduction)
+        self.shoot_delay = max(int(ENEMY_CONFIG["MIN_SHOOT_DELAY"]), base_delay - level_reduction)
         if self.level >= 5:
             self.shoot_delay = max(300, self.shoot_delay - 100)
         self.last_shot = pygame.time.get_ticks() - self.shoot_delay + random.randint(0, 1000)
@@ -79,7 +74,7 @@ class Enemy(pygame.sprite.Sprite):
         About level meanings:
         - Enemy levels are integers from 0-10, where 0 is the lowest and 10 is the highest
         - Level 0-1 enemies cannot shoot
-        - Level 2 and above enemies can shoot (determined by ENEMY_SHOOT_LEVEL=2 constant)
+        - Level 2 and above enemies can shoot (determined by ENEMY_CONFIG["SHOOT_LEVEL"]=2 constant)
         - Higher level enemies have more health, speed and attack power
         """
         # Base probabilities (based on game time)
@@ -152,7 +147,7 @@ class Enemy(pygame.sprite.Sprite):
         # Rotation animation (only for fast-moving enemies)
         if abs(self.speedx) > 1:
             now = pygame.time.get_ticks()
-            if now - self.last_update > ENEMY_ROTATION_UPDATE:
+            if now - self.last_update > int(ENEMY_CONFIG["ROTATION_UPDATE"]):
                 self.last_update = now
                 self.rot = (self.rot + self.rot_speed) % 360
                 self.image = pygame.transform.rotate(self.original_image, self.rot)
@@ -162,9 +157,9 @@ class Enemy(pygame.sprite.Sprite):
 
         # If enemy goes off-screen, remove it
         if (
-            self.rect.top > HEIGHT + ENEMY_SCREEN_BOUNDS
-            or self.rect.left < -ENEMY_SCREEN_BOUNDS
-            or self.rect.right > WIDTH + ENEMY_SCREEN_BOUNDS
+            self.rect.top > HEIGHT + int(ENEMY_CONFIG["SCREEN_BOUNDS"])
+            or self.rect.left < -int(ENEMY_CONFIG["SCREEN_BOUNDS"])
+            or self.rect.right > WIDTH + int(ENEMY_CONFIG["SCREEN_BOUNDS"])
         ):
             logger.debug(f"Enemy ID:{id(self)} killed (off-screen).")
             self.kill()
@@ -188,9 +183,9 @@ class Enemy(pygame.sprite.Sprite):
                 return False
 
             # Double-check shooting capability and level requirement
-            if not self.can_shoot or self.level < ENEMY_SHOOT_LEVEL:
+            if not self.can_shoot or self.level < int(ENEMY_CONFIG["SHOOT_LEVEL"]):
                 logger.warning(
-                    f"Enemy ID:{id(self)} attempted to shoot but can_shoot={self.can_shoot}, level={self.level}, required level={ENEMY_SHOOT_LEVEL}"
+                    f"Enemy ID:{id(self)} attempted to shoot but can_shoot={self.can_shoot}, level={self.level}, required level={int(ENEMY_CONFIG['SHOOT_LEVEL'])}"
                 )
                 return False
 

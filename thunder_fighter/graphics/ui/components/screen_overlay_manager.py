@@ -31,9 +31,9 @@ class ScreenOverlayManager:
         self.font_large = fonts.get("large")
 
         # Animation timers
-        self.level_change_timer = 0
+        self.level_change_timer = 0.0
         self.level_change_active = False
-        self.blink_timer = 0
+        self.blink_timer = 0.0
         self.show_blink_text = True
 
         # Victory screen flag

@@ -5,7 +5,8 @@ import pygame
 import pygame.time as ptime
 
 from thunder_fighter.constants import (
-    BOSS_SHOOT_DELAY,
+    BOSS_COMBAT,
+    BOSS_CONFIG,
     WIDTH,
 )
 from thunder_fighter.graphics.renderers import create_boss_ship, draw_health_bar
@@ -56,7 +57,9 @@ class Boss(pygame.sprite.Sprite):
         self.health = self.max_health
 
         # Adjust shooting based on level
-        self.shoot_delay = max(300, BOSS_SHOOT_DELAY - (self.level - 1) * 150)  # Higher levels shoot faster
+        self.shoot_delay = float(
+            max(300, int(BOSS_CONFIG["SHOOT_DELAY"]) - (self.level - 1) * 150)
+        )  # Higher levels shoot faster
 
         # Set initial attack mode
         self.shoot_pattern = "normal"
@@ -71,7 +74,7 @@ class Boss(pygame.sprite.Sprite):
 
         # Define base movement speed and range
         self.base_speedx = 2
-        self.move_margin = 10  # Minimum margin from screen edge
+        self.move_margin = BOSS_COMBAT["MOVE_MARGIN"]  # Minimum margin from screen edge
 
         # Sprite groups
         self.all_sprites = all_sprites
@@ -122,24 +125,36 @@ class Boss(pygame.sprite.Sprite):
             bool: Returns True if Boss is destroyed, otherwise False
         """
         self.health -= amount
-        self.damage_flash = 12  # Increase flash frames for more obvious effect
+        self.damage_flash = int(BOSS_COMBAT["DAMAGE_FLASH_FRAMES"])  # Increase flash frames for more obvious effect
 
         # Determine attack mode transitions based on Boss level and health percentage
         health_percentage = self.health / self.max_health
 
         # Level 2+ Bosses can enter aggressive mode
-        if health_percentage <= 0.5 and self.shoot_pattern == "normal" and self.level >= 2:
+        if (
+            health_percentage <= BOSS_COMBAT["AGGRESSIVE_THRESHOLD"]
+            and self.shoot_pattern == "normal"
+            and self.level >= 2
+        ):
             self.shoot_pattern = "aggressive"
             # When health decreases, reduce shooting delay to increase attack frequency
-            self.shoot_delay = max(150, self.shoot_delay * 0.7)
+            self.shoot_delay = max(
+                BOSS_COMBAT["MIN_AGGRESSIVE_DELAY"], self.shoot_delay * BOSS_COMBAT["AGGRESSIVE_DELAY_MULTIPLIER"]
+            )
             # Boss entering aggressive mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered aggressive mode! Shoot delay: {self.shoot_delay}")
 
         # Level 3+ Bosses can enter final mode
-        if health_percentage <= 0.25 and self.shoot_pattern == "aggressive" and self.level >= 3:
+        if (
+            health_percentage <= BOSS_COMBAT["FINAL_THRESHOLD"]
+            and self.shoot_pattern == "aggressive"
+            and self.level >= 3
+        ):
             self.shoot_pattern = "final"
             # Reduce shooting delay again
-            self.shoot_delay = max(100, self.shoot_delay * 0.8)
+            self.shoot_delay = max(
+                BOSS_COMBAT["MIN_FINAL_DELAY"], self.shoot_delay * BOSS_COMBAT["FINAL_DELAY_MULTIPLIER"]
+            )
             # Boss entering final mode info should be displayed in game UI
             logger.debug(f"Level {self.level} Boss entered final mode! Shoot delay: {self.shoot_delay}")
 
@@ -153,12 +168,12 @@ class Boss(pygame.sprite.Sprite):
     def update(self):
         """Update Boss state"""
         # Boss entrance animation
-        if self.rect.top < 50:
-            self.rect.y += 2
+        if self.rect.top < BOSS_COMBAT["ENTRANCE_TARGET_Y"]:
+            self.rect.y += BOSS_COMBAT["ENTRANCE_SPEED"]
         else:
             # Left-right movement
             self.move_counter += 1
-            if self.move_counter >= 100:  # Change direction periodically
+            if self.move_counter >= BOSS_COMBAT["DIRECTION_CHANGE_INTERVAL"]:  # Change direction periodically
                 self.direction *= -1
                 self.move_counter = 0
 

@@ -1,5 +1,6 @@
 import math
 import random
+from typing import cast
 
 import pygame
 
@@ -10,8 +11,8 @@ class Star:
     """Enhanced background star class with multiple layers and effects"""
 
     def __init__(self, layer=1):
-        self.x = random.randint(0, WIDTH)
-        self.y = random.randint(-HEIGHT, 0)  # Start above screen
+        self.x = float(random.randint(0, WIDTH))
+        self.y = float(random.randint(-HEIGHT, 0))  # Start above screen
         self.layer = layer
 
         # Different speeds for parallax effect
@@ -68,8 +69,8 @@ class Nebula:
     """Background nebula cloud effect"""
 
     def __init__(self):
-        self.x = random.randint(-100, WIDTH + 100)
-        self.y = random.randint(-200, HEIGHT + 200)
+        self.x = float(random.randint(-100, WIDTH + 100))
+        self.y = float(random.randint(-200, HEIGHT + 200))
         self.speed = random.uniform(0.1, 0.3)
         self.size = random.randint(80, 200)
         self.color = random.choice(
@@ -81,7 +82,7 @@ class Nebula:
             ]
         )
         self.alpha = random.randint(10, 30)
-        self.rotation = 0
+        self.rotation = 0.0
         self.rotation_speed = random.uniform(-0.01, 0.01)
 
     def update(self):
@@ -259,8 +260,8 @@ class Planet:
     """Background planet object"""
 
     def __init__(self):
-        self.x = random.randint(-50, WIDTH + 50)
-        self.y = random.randint(-300, -100)
+        self.x = float(random.randint(-50, WIDTH + 50))
+        self.y = float(random.randint(-300, -100))
         self.speed = random.uniform(0.2, 0.5)
         self.size = random.randint(30, 80)
         self.color = random.choice(
@@ -393,12 +394,12 @@ class DynamicBackground:
         }
 
         # Animation variables
-        self.color_phase = 0
+        self.color_phase = 0.0
         self.color_speed = 0.01
 
         # Transition effect variables
         self.transition_duration = 3.0  # Increased duration for smoother transition
-        self.transition_start_time = 0
+        self.transition_start_time = 0.0
 
         # Initialize buffers (will be created when screen size is known)
         self._screen_size = None
@@ -432,15 +433,16 @@ class DynamicBackground:
 
         # Prepare target nebulae
         self.target_nebulae = []
-        target_nebula_count = theme["nebula_count"]
+        target_nebula_count = cast(int, theme.get("nebula_count", 2))
         for _ in range(target_nebula_count):
             nebula = Nebula()
-            nebula.color = random.choice(theme["nebula_colors"])
+            nebula_colors = cast(list, theme.get("nebula_colors", [(20, 50, 80), (50, 20, 80)]))
+            nebula.color = random.choice(nebula_colors)
             self.target_nebulae.append(nebula)
 
         # Prepare target planets
         self.target_planets = []
-        target_planet_count = theme["planet_count"]
+        target_planet_count = cast(int, theme.get("planet_count", 1))
         for _ in range(target_planet_count):
             self.target_planets.append(Planet())
 
@@ -467,7 +469,8 @@ class DynamicBackground:
 
         # Adjust nebula count
         current_nebula_count = len(self.nebulae)
-        target_nebula_count = theme["nebula_count"]
+        nebula_count_val = theme.get("nebula_count", 3)
+        target_nebula_count = int(nebula_count_val) if isinstance(nebula_count_val, (int, float, str)) else 3
 
         if current_nebula_count < target_nebula_count:
             for _ in range(target_nebula_count - current_nebula_count):
@@ -477,11 +480,12 @@ class DynamicBackground:
 
         # Update nebula colors
         for nebula in self.nebulae:
-            nebula.color = random.choice(theme["nebula_colors"])
+            nebula_colors = cast(list, theme.get("nebula_colors", [(20, 50, 80), (50, 20, 80)]))
+            nebula.color = random.choice(nebula_colors)
 
         # Adjust planet count
         current_planet_count = len(self.planets)
-        target_planet_count = theme["planet_count"]
+        target_planet_count = cast(int, theme.get("planet_count", 1))
 
         if current_planet_count < target_planet_count:
             for _ in range(target_planet_count - current_planet_count):
@@ -593,7 +597,8 @@ class DynamicBackground:
             asteroid_field.alpha = original_alpha
 
         # Draw stars with level-appropriate brightness
-        brightness_factor = theme["star_brightness"]
+        brightness_val = theme.get("star_brightness", 1.0)
+        brightness_factor = float(brightness_val) if isinstance(brightness_val, (int, float, str)) else 1.0
 
         for star in self.stars_layer1:
             original_brightness = star.brightness
@@ -710,11 +715,11 @@ class DynamicBackground:
 
         # Overlay target level background with alpha blending
         target_alpha = int(255 * smooth_progress)
-        self.target_background_buffer.set_alpha(target_alpha)
-        screen.blit(self.target_background_buffer, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
-
-        # Restore target buffer alpha
-        self.target_background_buffer.set_alpha(255)
+        if self.target_background_buffer is not None:
+            self.target_background_buffer.set_alpha(target_alpha)
+            screen.blit(self.target_background_buffer, (0, 0), special_flags=pygame.BLEND_ALPHA_SDL2)
+            # Restore target buffer alpha
+            self.target_background_buffer.set_alpha(255)
 
     def _draw_level_indicator(self, screen):
         """Draw level transition indicator with improved effects"""

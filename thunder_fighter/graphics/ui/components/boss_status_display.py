@@ -94,7 +94,7 @@ class BossStatusDisplay:
         # Draw boss mode indicator if not normal
         if self.boss_info["mode"] != "normal":
             mode_y = bar_y + self.bar_height + 5
-            mode_text = f"[{self.boss_info['mode'].upper()}]"
+            mode_text = f"[{str(self.boss_info['mode']).upper()}]"
             mode_color = RED if self.boss_info["mode"] == "final" else (255, 165, 0)  # Orange for aggressive
             mode_surface = self.font.render(mode_text, True, mode_color)
             mode_rect = mode_surface.get_rect(center=(WIDTH // 2, mode_y))

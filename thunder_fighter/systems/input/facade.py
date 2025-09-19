@@ -53,6 +53,11 @@ class InputSystem:
             self.clock = clock or default_clock
             self.logger = logger or default_logger
         else:
+            # These should not be None if we reach this branch
+            assert event_source is not None
+            assert keyboard_state is not None
+            assert clock is not None
+            assert logger is not None
             self.event_source = event_source
             self.keyboard_state = keyboard_state
             self.clock = clock

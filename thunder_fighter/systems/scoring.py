@@ -5,7 +5,7 @@ Manages game score, level, achievements, and related logic in a unified way.
 Refactored from utils/score.py.
 """
 
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import pygame
 
@@ -23,9 +23,9 @@ class ScoringSystem:
         self.achievement_callbacks: List[Callable] = []
 
         # Display related
-        self.font = None
-        self.text = None
-        self.rect = None
+        self.font: Optional[pygame.font.Font] = None
+        self.text: Optional[pygame.Surface] = None
+        self.rect: Optional[pygame.Rect] = None
 
         self._init_display()
         self.update_display()
@@ -111,13 +111,20 @@ class ScoringSystem:
         from thunder_fighter.localization import _
 
         score_text = _("SCORE_DISPLAY", self.score)
-        self.text = self.font.render(score_text, True, WHITE)
+        if self.font is not None:
+            self.text = self.font.render(score_text, True, WHITE)
+        else:
+            # Fallback if font is None
+            import pygame
+
+            default_font = pygame.font.Font(None, 24)
+            self.text = default_font.render(score_text, True, WHITE)
         self.rect = self.text.get_rect()
         self.rect.topleft = (10, 10)
 
     def draw(self, screen: pygame.Surface):
         """Draws the score."""
-        if self.text:
+        if self.text and self.rect:
             screen.blit(self.text, self.rect)
 
     @property

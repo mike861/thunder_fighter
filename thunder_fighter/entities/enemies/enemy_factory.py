@@ -160,7 +160,7 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         preset_can_shoot = config.get("can_shoot")
 
         # Final shooting ability must satisfy both preset intent and level requirement
-        if preset_can_shoot is True and enemy.level >= 2:  # ENEMY_SHOOT_LEVEL = 2
+        if preset_can_shoot is True and enemy.level >= 2:  # ENEMY_CONFIG["SHOOT_LEVEL"] = 2
             enemy.can_shoot = True
         elif enemy.level >= 2:
             # Level qualifies for shooting, keep the level-based decision

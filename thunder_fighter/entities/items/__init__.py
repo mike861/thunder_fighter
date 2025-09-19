@@ -4,4 +4,4 @@ Item Entity Module
 Contains all classes and factories related to items.
 """
 
-__all__ = []
+__all__: list[str] = []

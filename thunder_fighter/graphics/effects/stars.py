@@ -9,8 +9,8 @@ class Star:
     """Background star class"""
 
     def __init__(self):
-        self.x = random.randint(0, WIDTH)
-        self.y = random.randint(0, HEIGHT)
+        self.x = float(random.randint(0, WIDTH))
+        self.y = float(random.randint(0, HEIGHT))
         self.speed = random.uniform(0.5, 2)
         self.size = random.randint(1, 3)
         self.brightness = random.randint(100, 255)
@@ -19,8 +19,8 @@ class Star:
         """Update star position"""
         self.y += self.speed
         if self.y > HEIGHT:
-            self.y = 0
-            self.x = random.randint(0, WIDTH)
+            self.y = 0.0
+            self.x = float(random.randint(0, WIDTH))
 
     def draw(self, screen):
         """Draw star"""

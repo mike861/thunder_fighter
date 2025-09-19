@@ -23,35 +23,97 @@ This document outlines planned improvements, missing implementations, and techni
 
 **Estimated Effort**: 2-4 hours
 
-#### Dynamic Item Weight System
-**Status**: Missing Implementation  
+#### Dynamic Item Weight System (Phase 1 & 2)
+**Status**: Ready for Implementation  
 **Current State**: Simple `random.choice()` selection  
-**Required Implementation**:
-- Implement weight-based item selection in `ItemFactory.create_random_item()`
-- Add configurable weight system that adjusts based on:
-  - Player health percentage
-  - Current game level
-  - Time since last item of each type
-  - Player progression needs
+**Implementation Strategy**: Phased approach for risk management
+
+**Phase 1 - Core Intelligent Weights** (Current Sprint):
+- Health-based weight adaptation (critical/injured/healthy states)
+- Level-based item gating (Wingman at Level 3+)
+- Ability cap detection (prevent useless items)
+
+**Phase 2 - Duplicate Prevention** (Current Sprint):
+- Time-based same-item suppression
+- Burst prevention mechanisms
+- Cooling period implementation
 
 **Files to Modify**:
 - `thunder_fighter/entities/items/item_factory.py` (line 69)
-- `thunder_fighter/constants.py` (add ITEM_WEIGHTS configuration)
+- `thunder_fighter/constants.py` (add BASIC_ITEM_WEIGHTS configuration)
+- `thunder_fighter/game.py` (pass game_level parameter)
 
-**Implementation Plan**:
+**Basic Configuration**:
 ```python
-ITEM_WEIGHTS = {
-    'HEALTH_ITEM': {'base': 15, 'health_modifier': 2.0},
-    'BULLET_SPEED_ITEM': {'base': 12, 'level_modifier': 0.8},
-    'BULLET_PATH_ITEM': {'base': 10, 'progression_modifier': 1.2},
-    'PLAYER_SPEED_ITEM': {'base': 8, 'balance_modifier': 1.0},
-    'WINGMAN_ITEM': {'base': 5, 'level_threshold': 3}
+BASIC_ITEM_WEIGHTS = {
+    'health_critical_threshold': 0.3,
+    'health_boost_multiplier': 2.5,
+    'wingman_level_requirement': 3,
+    'min_same_item_interval': 15
 }
 ```
 
-**Estimated Effort**: 4-6 hours
+**Advanced Implementation**: See [Advanced Item System Strategy](ADVANCED_ITEM_SYSTEM.md) for comprehensive Phase 3-5 roadmap
 
-### 2. **Critical Configuration Improvements**
+**Estimated Effort**: 3-5 hours (Phase 1-2 only)
+
+### 2. **Interface Architecture Refactoring** 🚨
+**Status**: Critical - Blocking Test Coverage Improvement  
+**Priority**: High (Architecture Foundation)  
+**Identified Issue**: Code violates logic/interface separation principle, making testing complex
+
+**Problem Summary**:
+- Projectile classes mix mathematical logic with pygame rendering in constructors
+- Business algorithms coupled with graphics operations in update methods
+- Cannot test pure logic without pygame dependencies
+- 19/40 projectile tests failing due to architecture violations
+
+**Impact**:
+- Test success rate limited to 85.8% (could reach >95% with proper separation)
+- Slow development cycle due to complex test mocking requirements
+- Difficult to isolate algorithm bugs from graphics issues
+- Poor code reusability across different rendering contexts
+
+**Implementation Phases**:
+
+**Phase 1: Logic Layer Extraction** (1-2 days, Low Risk)
+- Create `BulletLogic` and `TrackingAlgorithm` classes alongside existing code
+- Add injectable renderer constructors (backward compatible)
+- Immediate: 100% test coverage for pure algorithms
+- **Risk**: ⚠️ Very Low (no existing code changes)
+
+**Phase 2: Internal Refactoring** (1 week, Medium Risk)
+- Refactor `Bullet` and `TrackingMissile` internals to use logic layers
+- Preserve all public APIs (no breaking changes)
+- Migrate failing tests to logic layer testing
+- **Target**: All 19 failing projectile tests pass
+- **Risk**: ⚠️ Medium (internal changes only)
+
+**Phase 3: API Enhancement** (2-3 weeks, Higher Risk)
+- Enhanced factory methods with dependency injection
+- Performance optimization and object pooling
+- Documentation and architecture validation
+- **Risk**: ⚠️ Higher (public API improvements)
+
+**Files Requiring Changes**:
+- `thunder_fighter/entities/projectiles/bullets.py` - Extract BulletLogic
+- `thunder_fighter/entities/projectiles/missile.py` - Extract TrackingAlgorithm
+- `thunder_fighter/entities/projectiles/projectile_factory.py` - Add injection support
+- `tests/unit/entities/projectiles/` - Migrate to logic layer testing
+
+**Success Criteria**:
+- Phase 1: Pure logic classes with 100% test coverage
+- Phase 2: Test success rate increases to >90%
+- Phase 3: Clean architecture validated by external review
+
+**Detailed Analysis**: See [Interface Refactoring Plan](INTERFACE_REFACTORING_PLAN.md)
+
+**Estimated Effort**: 
+- Phase 1: 1-2 days (immediate impact)
+- Phase 2: 1 week (major test improvement)
+- Phase 3: 2-3 weeks (architectural excellence)
+
+### 3. **Critical Configuration Improvements**
 
 #### Extract Hardcoded Boss Combat Parameters
 **Status**: Technical Debt  
@@ -106,14 +168,14 @@ ENEMY_SYSTEM = {
 
 **Files to Modify**:
 - `thunder_fighter/constants.py`
-- `thunder_fighter/sprites/enemy.py`
+- `thunder_fighter/entities/enemies/enemy.py`
 - `thunder_fighter/game.py`
 
 **Estimated Effort**: 4-5 hours
 
 ## 🟡 Medium Priority Items
 
-### 3. **Player System Enhancements**
+### 4. **Player System Enhancements**
 
 #### Extract Player Animation Parameters
 **Required Changes**:
@@ -134,7 +196,7 @@ PLAYER_ANIMATION = {
 
 **Estimated Effort**: 2-3 hours
 
-### 4. **Visual Effects System Improvements**
+### 5. **Visual Effects System Improvements**
 
 #### Extract Animation and Visual Parameters
 **Required Changes**:
@@ -157,7 +219,7 @@ VISUAL_EFFECTS = {
 
 **Estimated Effort**: 3-4 hours
 
-### 5. **Background System Optimization**
+### 6. **Background System Optimization**
 
 #### Extract Background Parameters
 **Required Changes**:
@@ -183,7 +245,7 @@ BACKGROUND_SYSTEM = {
 
 ## 🟢 Low Priority Items
 
-### 6. **UI System Improvements**
+### 7. **UI System Improvements**
 
 #### Extract UI Parameters
 ```python
@@ -203,7 +265,7 @@ UI_SYSTEM = {
 
 **Estimated Effort**: 2-3 hours
 
-### 7. **Enemy Level Probability System**
+### 8. **Enemy Level Probability System**
 
 #### Improve Enemy Level Distribution
 **Current State**: Complex hardcoded probability arrays in enemy.py  
@@ -223,17 +285,20 @@ ENEMY_LEVEL_SYSTEM = {
 
 ## 📋 Implementation Timeline
 
-### Phase 1: Core Features (Week 1)
+### Phase 1: Core Features & Architecture (Week 1)
 - ✅ Victory Sound System Enhancement
-- ✅ Dynamic Item Weight System
+- ✅ Dynamic Item Weight System  
+- 🚨 **Interface Architecture Refactoring (Phase 1)** - Logic layer extraction
 - ✅ Boss Combat Parameters Extraction
 
-### Phase 2: System Parameters (Week 2)
+### Phase 2: System Parameters & Refactoring (Week 2)
+- 🚨 **Interface Architecture Refactoring (Phase 2)** - Internal refactoring  
 - ✅ Enemy System Parameters
 - ✅ Player Animation Parameters
 - ✅ Visual Effects Parameters
 
-### Phase 3: Optimization (Week 3)
+### Phase 3: Optimization & Architecture Completion (Week 3-5)
+- 🚨 **Interface Architecture Refactoring (Phase 3)** - API enhancement (optional)
 - ✅ Background System Parameters
 - ✅ UI System Parameters
 - ✅ Enemy Level Probability System
