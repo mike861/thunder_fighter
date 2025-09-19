@@ -120,7 +120,10 @@ class ProjectileFactory(ConfigurableEntityFactory):
             Configured projectile instance
         """
         # Get base preset configuration
-        preset_config = self.get_preset(preset_name).copy()
+        preset = self.get_preset(preset_name)
+        if preset is None:
+            raise ValueError(f"Preset '{preset_name}' not found")
+        preset_config = preset.copy()
 
         # Add position parameters
         preset_config.update({"x": x, "y": y})
