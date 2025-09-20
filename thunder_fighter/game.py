@@ -36,6 +36,11 @@ from thunder_fighter.events import EventSystem, GameEvent, GameEventType
 from thunder_fighter.graphics.background import DynamicBackground
 from thunder_fighter.graphics.effects import flash_manager
 from thunder_fighter.graphics.ui.manager import UIManager
+
+# Import 3D rendering system
+from thunder_fighter.graphics.depth_renderer import DepthSortedGroup, DepthRenderer
+from thunder_fighter.graphics.performance_monitor import get_performance_monitor, get_debug_overlay
+from thunder_fighter.config.pseudo_3d_config import PSEUDO_3D_CONFIG
 from thunder_fighter.localization import change_language
 from thunder_fighter.systems.collision import (
     check_boss_bullet_player_collisions,
@@ -98,14 +103,33 @@ class RefactoredGame:
         self.input_manager = InputManager()
         self._setup_input_callbacks()
 
-        # Create sprite groups
-        self.all_sprites = pygame.sprite.Group()
-        self.bullets = pygame.sprite.Group()
-        self.enemies = pygame.sprite.Group()
-        self.boss_bullets = pygame.sprite.Group()
-        self.enemy_bullets = pygame.sprite.Group()
-        self.items = pygame.sprite.Group()
-        self.missiles = pygame.sprite.Group()
+        # Initialize 3D rendering system
+        self.use_3d_rendering = PSEUDO_3D_CONFIG.get("enabled", True)
+        self.depth_renderer = DepthRenderer()
+
+        # Initialize performance monitoring
+        self.performance_monitor = get_performance_monitor()
+        self.debug_overlay = get_debug_overlay()
+
+        # Create sprite groups (3D-aware if enabled)
+        if self.use_3d_rendering:
+            self.all_sprites = DepthSortedGroup()
+            self.bullets = DepthSortedGroup()
+            self.enemies = DepthSortedGroup()
+            self.boss_bullets = DepthSortedGroup()
+            self.enemy_bullets = DepthSortedGroup()
+            self.items = DepthSortedGroup()
+            self.missiles = DepthSortedGroup()
+            logger.info("3D rendering enabled - using DepthSortedGroup")
+        else:
+            self.all_sprites = pygame.sprite.Group()
+            self.bullets = pygame.sprite.Group()
+            self.enemies = pygame.sprite.Group()
+            self.boss_bullets = pygame.sprite.Group()
+            self.enemy_bullets = pygame.sprite.Group()
+            self.items = pygame.sprite.Group()
+            self.missiles = pygame.sprite.Group()
+            logger.info("3D rendering disabled - using standard sprite groups")
 
         # Enemy level tracking
         self.enemy_levels = dict.fromkeys(range(11), 0)
@@ -123,7 +147,7 @@ class RefactoredGame:
         self.sound_manager = SoundManager(config_manager.sound)
 
         # Create player
-        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies, self.sound_manager)
+        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies, self.sound_manager, self.event_system)
         # Apply difficulty-based speed modifier
         self.player.speed = int(self.player.speed * difficulty_multipliers["player_speed"])
         self.all_sprites.add(self.player)
@@ -266,6 +290,7 @@ class RefactoredGame:
         self.event_system.register_listener(GameEventType.GAME_WON, self._handle_game_won_event)
 
         # Entity events
+        self.event_system.register_listener(GameEventType.PLAYER_SHOOT, self._handle_player_shoot)
         self.event_system.register_listener(GameEventType.ENEMY_SPAWNED, self._handle_enemy_spawned)
         self.event_system.register_listener(GameEventType.ITEM_COLLECTED, self._handle_item_collected)
 
@@ -624,6 +649,31 @@ class RefactoredGame:
 
         logger.debug(f"Enemy spawned: level {level}")
 
+    def _handle_player_shoot(self, event: GameEvent):
+        """Handle player shoot event by creating bullet entities."""
+        try:
+            from thunder_fighter.entities.projectiles.bullets import Bullet
+
+            shooting_data = event.get_data("shooting_data")
+            if not shooting_data:
+                logger.warning("Player shoot event received but no shooting data provided")
+                return
+
+            bullets = []
+            for bullet_data in shooting_data:
+                bullet = Bullet(bullet_data["x"], bullet_data["y"], bullet_data["speed"], bullet_data["angle"])
+                bullets.append(bullet)
+
+            # Add to sprite groups
+            if bullets:
+                self.all_sprites.add(*bullets)
+                self.bullets.add(*bullets)
+
+            logger.debug(f"Created {len(bullets)} bullets from player shoot event")
+
+        except Exception as e:
+            logger.error(f"Error handling player shoot event: {e}")
+
     def _handle_item_collected(self, event: GameEvent):
         """Handle item collected event."""
         item_data = event.data
@@ -955,18 +1005,24 @@ class RefactoredGame:
             self.sound_manager.ensure_music_playing()
 
     def render(self):
-        """Render the game."""
+        """Render the game with optional 3D depth effects."""
         # Draw background
         self.background.draw(self.screen)
 
-        # Draw sprites
-        self.all_sprites.draw(self.screen)
+        # Draw sprites with 3D depth rendering if enabled
+        if self.use_3d_rendering:
+            # Use depth renderer for 3D rendering
+            sprite_groups = [self.all_sprites]
+            self.depth_renderer.render_scene(self.screen, sprite_groups)
+        else:
+            # Fallback to standard 2D rendering
+            self.all_sprites.draw(self.screen)
 
-        # Draw boss health bar if active
+        # Draw boss health bar if active (always on top)
         if self.boss and self.boss.alive():
             self.boss.draw_health_bar(self.screen)
 
-        # Draw UI
+        # Draw UI elements (always on top of 3D content)
         self.ui_manager.draw_player_stats()
         self.ui_manager.draw_game_info()
         self.ui_manager.draw_notifications()
@@ -978,14 +1034,31 @@ class RefactoredGame:
             enemy_count = len(self.enemies)
             self.ui_manager.draw_dev_info(fps, enemy_count, self.target_enemy_count, player_pos)
 
-            # Draw level text next to enemies
+            # Draw level text next to enemies (with 3D-aware positioning)
             dev_font = self.resource_manager.load_font(None, 18)
             for enemy in self.enemies:
                 level_text = f"L{enemy.get_level()}"
-                text_surf = dev_font.render(level_text, True, WHITE)
-                self.screen.blit(text_surf, (enemy.rect.right + 2, enemy.rect.top))
 
-        # Draw special screens
+                # Use 3D position if available
+                if hasattr(enemy, 'get_screen_position') and self.use_3d_rendering:
+                    screen_pos = enemy.get_screen_position()
+                    visual_size = enemy.get_visual_size()
+                    text_pos = (screen_pos[0] + visual_size[0] // 2 + 2, screen_pos[1] - 20)
+
+                    # Add depth info for 3D entities
+                    depth_info = f" Z:{enemy.z:.0f}" if hasattr(enemy, 'z') else ""
+                    level_text += depth_info
+                else:
+                    text_pos = (enemy.rect.right + 2, enemy.rect.top)
+
+                text_surf = dev_font.render(level_text, True, WHITE)
+                self.screen.blit(text_surf, text_pos)
+
+            # Draw 3D performance info if enabled
+            if self.use_3d_rendering:
+                self._draw_3d_debug_info()
+
+        # Draw special screens (always on top)
         if self.game_won:
             self.ui_manager.draw_victory_screen(self.score.value, int(GAME_CONFIG["MAX_GAME_LEVEL"]))
         elif self.game_over or self.player.health <= 0:
@@ -995,22 +1068,90 @@ class RefactoredGame:
         if self.paused:
             self.ui_manager.draw_pause_screen()
 
+        # Draw performance debug overlay if enabled
+        if self.use_3d_rendering:
+            self.debug_overlay.render(self.screen)
+
         pygame.display.flip()
 
+    def _draw_3d_debug_info(self):
+        """Draw 3D-specific debug information."""
+        try:
+            from thunder_fighter.graphics.image_cache import get_cache_stats
+            from thunder_fighter.config.pseudo_3d_config import DEBUG_3D_CONFIG
+
+            if not DEBUG_3D_CONFIG.get("cache_statistics", False):
+                return
+
+            # Get cache statistics
+            cache_stats = get_cache_stats()
+            depth_stats = self.depth_renderer.get_performance_stats()
+
+            # Render debug text
+            if pygame.font.get_init():
+                font = pygame.font.Font(None, 20)
+                y_offset = 50
+
+                debug_lines = [
+                    f"3D FPS: {depth_stats.get('fps', 0):.1f}",
+                    f"Cache Hit: {cache_stats.get('hit_rate_percent', 0):.1f}%",
+                    f"Cache Size: {cache_stats.get('size', 0)}/{cache_stats.get('max_size', 0)}",
+                    f"Sprite Groups: {len([g for g in [self.enemies, self.bullets, self.missiles] if g])}",
+                ]
+
+                for line in debug_lines:
+                    text_surf = font.render(line, True, WHITE)
+                    self.screen.blit(text_surf, (10, HEIGHT - 200 + y_offset))
+                    y_offset += 25
+
+        except Exception as e:
+            logger.error(f"Error drawing 3D debug info: {e}")
+
     def run(self):
-        """Main game loop."""
-        logger.info("Starting refactored game loop")
+        """Main game loop with performance monitoring."""
+        logger.info("Starting refactored game loop with 3D rendering")
 
         while self.running:
+            # Start frame timing
+            if self.use_3d_rendering:
+                self.performance_monitor.start_frame()
+
             self.clock.tick(FPS)
             self.handle_events()
+
+            # Time the update phase
+            if self.use_3d_rendering:
+                update_start = time.time()
+
             self.update()
+
+            if self.use_3d_rendering:
+                update_time = (time.time() - update_start) * 1000
+                self.performance_monitor.record_update_time(update_time)
+
             self.render()
+
+            # End frame timing
+            if self.use_3d_rendering:
+                self.performance_monitor.end_frame()
 
             # Exit if victory achieved and player wants to quit
             if self.game_won:
                 continue
 
         logger.info("Game loop ended")
+        self._log_final_performance_stats()
         pygame.quit()
         sys.exit()
+
+    def _log_final_performance_stats(self):
+        """Log final performance statistics."""
+        if self.use_3d_rendering:
+            summary = self.performance_monitor.get_performance_summary()
+            logger.info("Final 3D Performance Statistics:")
+            logger.info(f"  Average FPS: {summary['fps']['current']:.1f}")
+            logger.info(f"  Average Frame Time: {summary['fps']['average_frame_time_ms']:.1f}ms")
+            logger.info(f"  Cache Hit Rate: {summary['cache']['hit_rate']:.1%}")
+            logger.info(f"  Sprites Rendered: {summary['rendering']['sprites_rendered']}")
+            logger.info(f"  Sprites Culled: {summary['rendering']['sprites_culled']} ({summary['rendering']['cull_rate']:.1%})")
+            logger.info(f"  Total Warnings: {summary['warnings']['active_warnings']}")

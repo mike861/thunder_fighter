@@ -11,17 +11,22 @@ from typing import Any, Dict
 import pygame
 
 from thunder_fighter.constants import BULLET_CONFIG, RED, WHITE
+from thunder_fighter.config.pseudo_3d_config import GAMEPLAY_3D_CONFIG
 from thunder_fighter.utils.logger import logger
 
 # SCORE_THRESHOLD moved to GAME_CONFIG in constants.py
 
 
 class CollisionSystem:
-    """Collision Detection System Class"""
+    """Collision Detection System Class with 3D depth awareness"""
 
     def __init__(self):
         self.collision_handlers = {}
         self._setup_collision_handlers()
+
+        # 3D collision settings
+        self.depth_collision_enabled = GAMEPLAY_3D_CONFIG.get("preserve_2d_collision", True)
+        self.collision_depth_tolerance = GAMEPLAY_3D_CONFIG.get("collision_depth_tolerance", 100)
 
     def _setup_collision_handlers(self):
         """Sets up the collision handler mapping."""
@@ -34,6 +39,121 @@ class CollisionSystem:
             "enemy_bullet_player": self.check_enemy_bullet_player_collisions,
             "items_player": self.check_items_player_collisions,
         }
+
+    def _check_depth_collision(self, sprite1, sprite2) -> bool:
+        """
+        Check if two sprites can collide based on their depth.
+
+        Args:
+            sprite1: First sprite
+            sprite2: Second sprite
+
+        Returns:
+            True if sprites can collide considering depth
+        """
+        # If depth collision is disabled, always allow collision
+        if not self.depth_collision_enabled:
+            return True
+
+        # Get depth values (default to 0 for 2D sprites)
+        z1 = getattr(sprite1, 'z', 0)
+        z2 = getattr(sprite2, 'z', 0)
+
+        # Check if depth difference is within tolerance
+        depth_diff = abs(z1 - z2)
+        return depth_diff <= self.collision_depth_tolerance
+
+    def _get_collision_position(self, sprite1, sprite2):
+        """
+        Get the collision position considering 3D depth.
+
+        Args:
+            sprite1: First sprite
+            sprite2: Second sprite
+
+        Returns:
+            Collision position tuple (x, y) or sprite center
+        """
+        # Use visual position if sprites have 3D capabilities
+        if hasattr(sprite1, 'get_screen_position'):
+            pos1 = sprite1.get_screen_position()
+        else:
+            pos1 = sprite1.rect.center
+
+        if hasattr(sprite2, 'get_screen_position'):
+            pos2 = sprite2.get_screen_position()
+        else:
+            pos2 = sprite2.rect.center
+
+        # Return midpoint between the two positions
+        return ((pos1[0] + pos2[0]) // 2, (pos1[1] + pos2[1]) // 2)
+
+    def _calculate_depth_score_bonus(self, sprite) -> int:
+        """
+        Calculate score bonus based on sprite depth.
+
+        Args:
+            sprite: Sprite to calculate bonus for
+
+        Returns:
+            Bonus points for hitting distant targets
+        """
+        if not GAMEPLAY_3D_CONFIG.get("depth_score_bonus", False):
+            return 0
+
+        depth = getattr(sprite, 'z', 0)
+        if depth > 600:
+            return int((depth - 600) / 50)  # +1 point per 50 depth units
+        return 0
+
+    def _check_3d_sprite_collision(self, sprite1, sprite2) -> bool:
+        """
+        Check collision between two sprites with 3D depth awareness.
+
+        Args:
+            sprite1: First sprite
+            sprite2: Second sprite
+
+        Returns:
+            True if sprites collide considering both 2D rect and depth
+        """
+        # First check 2D collision
+        if not sprite1.rect.colliderect(sprite2.rect):
+            return False
+
+        # Then check depth collision if enabled
+        return self._check_depth_collision(sprite1, sprite2)
+
+    def _group_collide_3d(self, group1, group2, kill_sprite1=False, kill_sprite2=False):
+        """
+        3D-aware version of pygame.sprite.groupcollide.
+
+        Args:
+            group1: First sprite group
+            group2: Second sprite group
+            kill_sprite1: Whether to kill sprites from group1 on collision
+            kill_sprite2: Whether to kill sprites from group2 on collision
+
+        Returns:
+            Dictionary of collisions similar to pygame.sprite.groupcollide
+        """
+        hits = {}
+
+        for sprite1 in group1:
+            for sprite2 in group2:
+                if self._check_3d_sprite_collision(sprite1, sprite2):
+                    if sprite1 not in hits:
+                        hits[sprite1] = []
+                    hits[sprite1].append(sprite2)
+
+                    # Kill sprites if requested
+                    if kill_sprite2:
+                        sprite2.kill()
+
+            if sprite1 in hits and kill_sprite1:
+                sprite1.kill()
+
+        return hits
 
     def check_all_collisions(self, game_state: Dict[str, Any]) -> Dict[str, Any]:
         """Checks all collisions."""
@@ -68,8 +188,8 @@ class CollisionSystem:
         return results
 
     def check_missile_enemy_collisions(self, missiles, enemies, all_sprites, score):
-        """Checks missile-enemy collisions and creates appropriate effects."""
-        hits = pygame.sprite.groupcollide(missiles, enemies, True, False)
+        """Checks missile-enemy collisions and creates appropriate effects with 3D awareness."""
+        hits = self._group_collide_3d(missiles, enemies, kill_sprite1=True, kill_sprite2=False)
 
         for missile, hit_enemies in hits.items():
             for enemy in hit_enemies:
@@ -78,23 +198,36 @@ class CollisionSystem:
                     if enemy.damage(50):  # damage() returns True if boss is defeated
                         from thunder_fighter.graphics.effects import create_explosion
 
-                        explosion = create_explosion(enemy.rect.center, "lg")
+                        explosion_pos = self._get_collision_position(missile, enemy)
+                        explosion = create_explosion(explosion_pos, "lg")
                         all_sprites.add(explosion)
-                        score.update(500)  # Bonus for boss kill with missile
+
+                        # Add depth bonus for boss kill
+                        base_score = 500
+                        depth_bonus = self._calculate_depth_score_bonus(enemy)
+                        total_score = base_score + depth_bonus
+                        score.update(total_score)
                     else:
                         # Hit but not destroyed - still use explosion for missile
                         from thunder_fighter.graphics.effects import create_explosion
 
-                        explosion = create_explosion(missile.rect.center, "md")
+                        explosion_pos = self._get_collision_position(missile, enemy)
+                        explosion = create_explosion(explosion_pos, "md")
                         all_sprites.add(explosion)
                 else:
                     # It's a regular enemy, kill it.
                     enemy.kill()
                     from thunder_fighter.graphics.effects import create_explosion
 
-                    explosion = create_explosion(enemy.rect.center, "md")
+                    explosion_pos = self._get_collision_position(missile, enemy)
+                    explosion = create_explosion(explosion_pos, "md")
                     all_sprites.add(explosion)
-                    score.update(25)  # More points for missile kill
+
+                    # Add depth bonus for missile kill
+                    base_score = 25
+                    depth_bonus = self._calculate_depth_score_bonus(enemy)
+                    total_score = base_score + depth_bonus
+                    score.update(total_score)
 
     def check_bullet_enemy_collisions(
         self, enemies, bullets, all_sprites, score, last_score_checkpoint, score_threshold, items_group, player
@@ -109,21 +242,30 @@ class CollisionSystem:
                 "generated_item": False,  # Whether item was generated
             }
 
-            hits = pygame.sprite.groupcollide(enemies, bullets, True, True)
+            # Use 3D-aware collision detection
+            hits = self._group_collide_3d(enemies, bullets, kill_sprite1=True, kill_sprite2=True)
             result["enemy_count"] = len(hits)
             result["enemy_hit"] = bool(hits)  # Set to True if there were hits
 
-            for hit in hits:
-                # Add score based on enemy level
-                enemy_level = getattr(hit, "level", 0)
-                score_value = 10 + enemy_level * 2
-                score.update(score_value)
+            for enemy in hits:
+                # Add score based on enemy level with depth bonus
+                enemy_level = getattr(enemy, "level", 0)
+                base_score = 10 + enemy_level * 2
+                depth_bonus = self._calculate_depth_score_bonus(enemy)
+                total_score = base_score + depth_bonus
+                score.update(total_score)
 
-                # Create explosion effect
+                # Create explosion effect at 3D-aware position
                 from thunder_fighter.graphics.effects.explosion import Explosion
 
-                explosion = Explosion(hit.rect.center)
+                explosion_pos = self._get_collision_position(enemy, hits[enemy][0])
+                explosion_depth = getattr(enemy, 'z', 0)
+                explosion = Explosion(explosion_pos)  # TODO: Add 3D depth support to Explosion in Phase 2
                 all_sprites.add(explosion)
+
+                # Log depth-aware hit
+                if depth_bonus > 0:
+                    logger.debug(f"Depth hit! Enemy at z={explosion_depth:.0f}, bonus: +{depth_bonus} points")
 
                 # Check if we need to generate item based on score checkpoints
                 current_score_checkpoint = score.value // score_threshold

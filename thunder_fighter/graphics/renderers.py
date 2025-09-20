@@ -115,9 +115,18 @@ def create_player_surface():
 
 def create_enemy_surface(level=0):
     """Create alien/biomechanical enemy ship with organic design to contrast player's tech fighter"""
-    # Slightly larger and different aspect ratio: 45x45 (more square/organic)
-    surface = pygame.Surface((45, 45))
-    surface.set_colorkey((0, 0, 0))  # Set black as transparent
+    # Check if pygame is initialized
+    if not pygame.get_init():
+        print(f"WARNING: pygame not initialized when creating enemy surface for level {level}")
+        pygame.init()
+
+    try:
+        # Slightly larger and different aspect ratio: 45x45 (more square/organic)
+        surface = pygame.Surface((45, 45))
+        surface.set_colorkey((0, 0, 0))  # Set black as transparent
+    except Exception as e:
+        print(f"ERROR: Failed to create enemy surface for level {level}: {e}")
+        return None
 
     # Choose color scheme based on level - darker, more organic colors
     if level < 3:
@@ -224,7 +233,11 @@ def create_enemy_surface(level=0):
         pygame.draw.circle(surface, (255, 200, 100), (25, 38), 3)
 
     # Flip enemy ship 180 degrees so engines point toward player (front-facing)
-    surface = pygame.transform.rotate(surface, 180)
+    try:
+        surface = pygame.transform.rotate(surface, 180)
+    except Exception as e:
+        print(f"ERROR: Failed to rotate enemy surface for level {level}: {e}")
+        return None
 
     # After rotation, add organic outline for visibility against background
     # Calculate rotated positions for new organic design (45x45 surface)
