@@ -75,6 +75,7 @@ def collision_mocks():
     mocks["enemy"].rect.center = (50, 50)
     mocks["enemy"].level = 1
     mocks["enemy"].alive.return_value = True
+    mocks["enemy"].z = 300.0  # 3D depth for collision system
 
     # Configure bullet
     mocks["bullet"].rect = MagicMock()
@@ -162,35 +163,34 @@ class TestBulletEnemyCollisions(CollisionTestBase):
         # Import the actual function
         from thunder_fighter.systems.collision import check_bullet_enemy_collisions
 
-        # ✅ CRITICAL: Use both module-level and function-level patching for complete isolation
-        with patch("thunder_fighter.systems.collision.pygame.sprite.groupcollide") as mock_groupcollide:
-            with patch("pygame.sprite.groupcollide", mock_groupcollide):
-                with patch("thunder_fighter.graphics.effects.explosion.Explosion"):
-                    with patch("thunder_fighter.entities.items.items.create_random_item") as mock_create_item:
-                        # ✅ Configure collision result as real dict with mock objects as keys/values
-                        collision_result = {collision_mocks["enemy"]: [collision_mocks["bullet"]]}
-                        mock_groupcollide.return_value = collision_result
+        # ✅ CRITICAL: Mock the 3D-aware collision system method instead of pygame's groupcollide
+        with patch("thunder_fighter.systems.collision.CollisionSystem._group_collide_3d") as mock_group_collide_3d:
+            with patch("thunder_fighter.graphics.effects.explosion.Explosion"):
+                with patch("thunder_fighter.entities.items.items.create_random_item") as mock_create_item:
+                    # ✅ Configure collision result as real dict with mock objects as keys/values
+                    collision_result = {collision_mocks["enemy"]: [collision_mocks["bullet"]]}
+                    mock_group_collide_3d.return_value = collision_result
 
-                        # Execute the function
-                        result = check_bullet_enemy_collisions(
-                            collision_mocks["enemies_group"],
-                            collision_mocks["bullets_group"],
-                            collision_mocks["all_sprites"],
-                            collision_mocks["score"],
-                            0,  # last_score_checkpoint
-                            200,  # score_threshold
-                            collision_mocks["items_group"],
-                            collision_mocks["player"],
-                        )
+                    # Execute the function
+                    result = check_bullet_enemy_collisions(
+                        collision_mocks["enemies_group"],
+                        collision_mocks["bullets_group"],
+                        collision_mocks["all_sprites"],
+                        collision_mocks["score"],
+                        0,  # last_score_checkpoint
+                        200,  # score_threshold
+                        collision_mocks["items_group"],
+                        collision_mocks["player"],
+                    )
 
-                        # Verify results
-                        assert result["enemy_hit"] is True
-                        assert result["enemy_count"] == 1
-                        assert result["generated_item"] is False
+                    # Verify results
+                    assert result["enemy_hit"] is True
+                    assert result["enemy_count"] == 1
+                    assert result["generated_item"] is False
 
-                        # Verify function calls
-                        collision_mocks["score"].update.assert_called_once_with(10 + collision_mocks["enemy"].level * 2)
-                        mock_create_item.assert_not_called()
+                    # Verify function calls
+                    collision_mocks["score"].update.assert_called_once_with(10 + collision_mocks["enemy"].level * 2)
+                    mock_create_item.assert_not_called()
 
 
 class TestItemPlayerCollisions(CollisionTestBase):

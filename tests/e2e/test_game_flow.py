@@ -28,32 +28,38 @@ class TestGameFlow:
         pass
 
     def _create_mock_player(self):
-        """Create a properly configured mock player with all necessary attributes."""
-        mock_player = Mock()
+        """Create a properly configured mock player that inherits from pygame.sprite.Sprite."""
+        # Import here to avoid circular imports
+        from unittest.mock import Mock
+        import pygame
 
-        # Basic attributes
-        mock_player.health = int(PLAYER_CONFIG["HEALTH"])
-        mock_player.speed = 5  # Numeric value for mathematical operations
-        mock_player.x = 100
-        mock_player.y = 200
-        mock_player.width = 32
-        mock_player.height = 32
+        # Create a real sprite-based mock that pygame.sprite.Group can handle
+        class MockPlayer(pygame.sprite.Sprite):
+            def __init__(self):
+                super().__init__()
+                # Basic attributes
+                self.health = int(PLAYER_CONFIG["HEALTH"])
+                self.speed = 5  # Numeric value for mathematical operations
+                self.x = 100
+                self.y = 200
+                self.width = 32
+                self.height = 32
 
-        # Player-specific attributes
-        mock_player.bullet_paths = 1
-        mock_player.bullet_speed = 10
-        mock_player.wingmen_list = []
+                # Create minimal image and rect for pygame sprite compatibility
+                self.image = pygame.Surface((32, 32))
+                self.rect = pygame.Rect(100, 200, 32, 32)
 
-        # Sprite behavior - make it behave like a pygame Sprite
-        mock_player.alive.return_value = True
-        mock_player.kill.return_value = None
-        mock_player.add_internal = Mock()
-        mock_player.groups.return_value = []
+                # Player-specific attributes
+                self.bullet_paths = 1
+                self.bullet_speed = 10
+                self.wingmen_list = []
 
-        # Methods
-        mock_player.add_wingman = Mock()
+                # Mock methods
+                self.add_wingman = Mock()
+                self.update = Mock()
+                self.shoot = Mock()
 
-        return mock_player
+        return MockPlayer()
 
     def _create_mock_ui_manager(self):
         """Create a properly configured mock UI manager."""

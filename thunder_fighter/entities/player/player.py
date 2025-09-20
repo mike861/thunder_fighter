@@ -10,6 +10,7 @@ from thunder_fighter.constants import (
     WHITE,
     WIDTH,
 )
+from thunder_fighter.entities.base_3d import Entity3D
 from thunder_fighter.entities.player.wingman import Wingman
 from thunder_fighter.events.game_events import GameEvent
 from thunder_fighter.graphics.effects import create_explosion, create_flash_effect
@@ -17,13 +18,21 @@ from thunder_fighter.graphics.renderers import create_player_ship
 from thunder_fighter.utils.logger import logger
 
 
-class Player(pygame.sprite.Sprite):
-    """Player class"""
+class Player(Entity3D):
+    """Player class with 3D perspective support"""
 
     def __init__(
         self, game, all_sprites, bullets_group, missiles_group, enemies_group, sound_manager=None, event_system=None
     ):
-        pygame.sprite.Sprite.__init__(self)
+        # Initialize 3D entity with player position (z=0 for closest to camera)
+        super().__init__(
+            x=float(WIDTH // 2),
+            y=float(HEIGHT - 10),
+            width=60,  # Match player ship size
+            height=50,
+            z=0.0  # Player stays at front depth
+        )
+
         self.game = game
         self.sound_manager = sound_manager  # Store sound manager instance
         self.event_system = event_system  # For event-driven shooting
@@ -32,15 +41,13 @@ class Player(pygame.sprite.Sprite):
         self.image = create_player_ship()
         self.rect = self.image.get_rect()
 
-        # Position (float for precision)
-        self.x = float(WIDTH // 2)
-        self.y = float(HEIGHT - 10)
-        self.rect.centerx = int(self.x)
-        self.rect.bottom = int(self.y)
+        # Set initial rect position based on 3D coordinates
+        screen_pos = self.get_screen_position()
+        self.rect.centerx = int(screen_pos[0])
+        self.rect.bottom = int(screen_pos[1])
         self.speed = int(PLAYER_CONFIG["SPEED"])  # Use self.speed for current player speed
         self.max_speed = int(PLAYER_CONFIG["MAX_SPEED"])
-        self.speedx = 0
-        self.speedy = 0
+        # velocity_x and velocity_y are inherited from GameObject
         self.health = int(PLAYER_CONFIG["HEALTH"])
         self.shoot_delay = int(PLAYER_CONFIG["SHOOT_DELAY"])
         self.last_shot = ptime.get_ticks()
@@ -73,22 +80,27 @@ class Player(pygame.sprite.Sprite):
         self.last_missile_shot = ptime.get_ticks()
         self.missile_shoot_delay = 2000  # 2 seconds
 
-    def update(self):
-        """Update player state"""
-        # Reset movement speed
-        self.speedx = 0
-        self.speedy = 0
+        # Enable subtle 3D breathing/floating effect
+        self.enable_depth_oscillation(amplitude=2.0, frequency=1.5)
+
+    def update(self, dt: float = 1/60):
+        """Update player state with 3D perspective support"""
+        # Reset movement velocity
+        self.velocity_x = 0
+        self.velocity_y = 0
 
         # Get key states
         keystate = pygame.key.get_pressed()
+        # Convert speed from pixels/frame to pixels/second (multiply by 60 FPS)
+        speed_per_second = self.speed * 60
         if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
-            self.speedx = -self.speed  # Use current speed
+            self.velocity_x = -speed_per_second
         if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
-            self.speedx = self.speed  # Use current speed
+            self.velocity_x = speed_per_second
         if keystate[pygame.K_UP] or keystate[pygame.K_w]:
-            self.speedy = -self.speed  # Use current speed
+            self.velocity_y = -speed_per_second
         if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
-            self.speedy = self.speed  # Use current speed
+            self.velocity_y = speed_per_second
 
         # Shooting
         if keystate[pygame.K_SPACE]:
@@ -97,32 +109,37 @@ class Player(pygame.sprite.Sprite):
         # Fire missiles
         self.shoot_missiles()
 
-        # Move player
-        self.x += self.speedx
-        self.y += self.speedy
+        # Apply movement using 3D base class (handles depth and perspective)
+        super().update(dt)
 
         # Slight floating animation for the aircraft
         self.angle = (self.angle + 1) % 360
-        dy = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
-        self.y += dy
+        floating_offset = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
+        self.y += floating_offset
 
-        # Update final rect position
-        self.rect.centerx = int(self.x)
-        self.rect.centery = int(self.y)
+        # Update rect position using 3D screen coordinates
+        screen_pos = self.get_screen_position()
+        visual_size = self.get_visual_size()
 
-        # Keep player within bounds
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
-            self.x = self.rect.centerx
-        if self.rect.left < 0:
-            self.rect.left = 0
-            self.x = self.rect.centerx
-        if self.rect.top < 0:
-            self.rect.top = 0
-            self.y = self.rect.centery
-        if self.rect.bottom > HEIGHT:
-            self.rect.bottom = HEIGHT
-            self.y = self.rect.centery
+        self.rect.centerx = int(screen_pos[0])
+        self.rect.centery = int(screen_pos[1])
+        self.rect.width = visual_size[0]
+        self.rect.height = visual_size[1]
+
+        # Keep player within bounds (in world coordinates)
+        if self.x < 30:  # Account for half-width
+            self.x = 30
+        if self.x > WIDTH - 30:
+            self.x = WIDTH - 30
+        if self.y < 25:  # Account for half-height
+            self.y = 25
+        if self.y > HEIGHT - 25:
+            self.y = HEIGHT - 25
+
+        # Update rect after boundary check
+        screen_pos = self.get_screen_position()
+        self.rect.centerx = int(screen_pos[0])
+        self.rect.centery = int(screen_pos[1])
 
         # Update thruster animation
         self.thrust = (self.thrust + 1) % 10

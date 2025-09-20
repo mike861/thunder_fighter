@@ -7,20 +7,20 @@ the existing 2D entity system.
 """
 
 import math
-from typing import Tuple, Optional
+from typing import Tuple
 
 import pygame
 
-from thunder_fighter.constants import WIDTH, HEIGHT
-from thunder_fighter.entities.base import GameObject
 from thunder_fighter.config.pseudo_3d_config import (
     DEPTH_SETTINGS,
     VISUAL_EFFECTS_CONFIG,
-    get_quantized_scale,
     get_lod_level,
+    get_quantized_scale,
     get_update_frequency,
     should_render_entity,
 )
+from thunder_fighter.constants import HEIGHT, WIDTH
+from thunder_fighter.entities.base import GameObject
 from thunder_fighter.utils.logger import logger
 
 
@@ -248,16 +248,24 @@ class Entity3D(GameObject3D):
         self.x += self.velocity_x * dt
         self.y += self.velocity_y * dt
 
-        # Depth movement
+        # Depth movement and oscillation
+        new_z = self.z
+        depth_changed = False
+
+        # Apply z_velocity movement
         if self.z_velocity != 0:
-            new_z = self.z + self.z_velocity * dt
+            new_z += self.z_velocity * dt
+            depth_changed = True
 
-            # Add depth oscillation if enabled
-            if self.depth_oscillation_enabled:
-                self.depth_oscillation_phase += dt * self.depth_oscillation_frequency * 2 * math.pi
-                oscillation = math.sin(self.depth_oscillation_phase) * self.depth_oscillation_amplitude
-                new_z += oscillation
+        # Apply depth oscillation if enabled (independent of z_velocity)
+        if self.depth_oscillation_enabled:
+            self.depth_oscillation_phase += dt * self.depth_oscillation_frequency * 2 * math.pi
+            oscillation = math.sin(self.depth_oscillation_phase) * self.depth_oscillation_amplitude
+            new_z += oscillation
+            depth_changed = True
 
+        # Update depth if any changes occurred
+        if depth_changed:
             self.set_depth(new_z)
 
         # Update rect for collision detection (use screen position)
