@@ -10,6 +10,7 @@ from thunder_fighter.constants import (
 )
 from thunder_fighter.entities.projectiles.bullets import EnemyBullet
 from thunder_fighter.graphics.renderers import create_enemy_ship
+from thunder_fighter.graphics.visual_3d.fast_3d_effects import Fast3DEffects
 from thunder_fighter.utils.logger import logger
 
 
@@ -22,8 +23,9 @@ class Enemy(pygame.sprite.Sprite):
         # Determine level based on game time and game level
         self.level = self._determine_level(game_time, game_level)
 
-        # Create image based on level
-        self.image = create_enemy_ship(self.level)
+        # Create image based on level with fast dramatic 3D visual enhancement
+        base_enemy = create_enemy_ship(self.level)
+        self.image = Fast3DEffects.create_enemy_3d_effect(base_enemy, self.level)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(int(ENEMY_CONFIG["SPAWN_Y_MIN"]), int(ENEMY_CONFIG["SPAWN_Y_MAX"]))
@@ -44,7 +46,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rot = 0
         self.rot_speed = random.randrange(-8, 8)
         self.last_update = pygame.time.get_ticks()
-        self.original_image = self.image.copy()
+        self.original_image = self.image.copy()  # Store enhanced image for rotation
 
         # Shooting capability - ensure enemies only shoot if they're level 2 or higher
         # Since we use 0-based indexing in _determine_level (levels 0-10),

@@ -13,11 +13,11 @@ class Visual3DConfig:
 
     # Player ship 3D appearance
     PLAYER_SHIP = {
-        "shadow_offset": (3, 3),           # Bottom-right shadow offset in pixels
-        "shadow_alpha": 120,               # Shadow transparency (0-255)
+        "shadow_offset": (4, 4),           # Bottom-right shadow offset in pixels
+        "shadow_alpha": 180,               # Shadow transparency (0-255) - increased for visibility
         "shadow_color": (0, 0, 0),         # Shadow color (RGB)
 
-        "highlight_intensity": 0.4,        # Highlight brightness multiplier
+        "highlight_intensity": 0.8,        # Highlight brightness multiplier - increased
         "highlight_color": (255, 255, 255), # Highlight color (RGB)
         "highlight_positions": [           # Highlight positions as ratios (0.0-1.0)
             (0.3, 0.2),  # Left wing highlight
@@ -30,24 +30,24 @@ class Visual3DConfig:
         "engine_glow": {
             "enabled": True,
             "color": (255, 150, 100),      # Orange-red glow
-            "intensity": 0.6,
-            "radius": 4,                   # Glow radius in pixels
+            "intensity": 0.9,              # Increased intensity
+            "radius": 6,                   # Larger glow radius
         }
     }
 
     # Enemy ship 3D appearance
     ENEMY_SHIP = {
         "organic_shading": True,           # Use organic/biological shading
-        "shadow_offset": (2, 2),           # Smaller shadow for enemies
-        "shadow_alpha": 100,
-        "shadow_color": (20, 0, 0),        # Dark red shadow for organic feel
+        "shadow_offset": (3, 3),           # Increased shadow for visibility
+        "shadow_alpha": 160,               # Increased alpha for more visible shadow
+        "shadow_color": (40, 0, 0),        # Darker red shadow for organic feel
 
         "bio_highlights": [                # Organic highlight positions
             (0.5, 0.3),  # Center highlight
             (0.2, 0.6),  # Left bio-panel
             (0.8, 0.6),  # Right bio-panel
         ],
-        "highlight_color": (180, 60, 60),  # Reddish organic highlights
+        "highlight_color": (220, 80, 80),  # Brighter reddish organic highlights
 
         "surface_texture": {
             "enabled": True,

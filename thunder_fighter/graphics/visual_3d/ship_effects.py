@@ -147,7 +147,7 @@ class ShipVisualEnhancer:
 
                         # Calculate metallic intensity (higher near center)
                         intensity = max(0, 1 - (distance / max_distance))
-                        metallic_alpha = int(intensity * 30)  # Subtle metallic overlay
+                        metallic_alpha = int(intensity * 80)  # More visible metallic overlay
 
                         if metallic_alpha > 5:  # Only apply if significant
                             metallic_color = (200, 200, 255, metallic_alpha)  # Cool metallic tint
@@ -239,7 +239,7 @@ class ShipVisualEnhancer:
                         left_pixel = surface.get_at((x - 1, y))
                         if left_pixel[3] == 0:  # Left is transparent = left edge
                             # Add highlight to left edge
-                            edge_color = (255, 255, 255, 60)  # Subtle white edge
+                            edge_color = (255, 255, 255, 120)  # More visible white edge
                             edge_surface.set_at((x, y), edge_color)
 
             # Blend edge lighting
