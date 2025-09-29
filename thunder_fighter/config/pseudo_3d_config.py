@@ -5,7 +5,7 @@ This module contains all configuration parameters for the depth scaling system,
 performance settings, and visual effects parameters.
 """
 
-from typing import Dict, Tuple, Any
+from typing import Any, Dict, Tuple
 
 # Core 3D rendering settings
 PSEUDO_3D_CONFIG: Dict[str, Any] = {
@@ -18,7 +18,7 @@ PSEUDO_3D_CONFIG: Dict[str, Any] = {
 
 # Depth calculation parameters
 DEPTH_SETTINGS: Dict[str, float] = {
-    "depth_factor": 0.002,           # Perspective scaling factor
+    "depth_factor": 0.004,           # Perspective scaling factor (slightly increased for more visible 3D effect)
     "vanish_point_x": 0.5,           # Vanishing point X (0.0-1.0 screen ratio)
     "vanish_point_y": 0.6,           # Vanishing point Y (0.0-1.0 screen ratio) - moved down for screen entry
     "perspective_x_factor": 0.2,     # Horizontal perspective strength
@@ -29,9 +29,9 @@ DEPTH_SETTINGS: Dict[str, float] = {
 
 # Spawning depth ranges
 SPAWN_DEPTH_CONFIG: Dict[str, float] = {
-    "enemy_min_depth": 200,          # Minimum enemy spawn depth (reduced for larger sprites)
-    "enemy_max_depth": 400,          # Maximum enemy spawn depth (reduced for larger sprites)
-    "enemy_depth_variation": 100,    # Random depth variation (reduced)
+    "enemy_min_depth": 150,          # Minimum enemy spawn depth (closer for larger appearance)
+    "enemy_max_depth": 300,          # Maximum enemy spawn depth (closer for larger appearance)
+    "enemy_depth_variation": 80,     # Random depth variation (adjusted for new range)
     "boss_spawn_depth": 600,         # Boss spawn depth
     "item_spawn_depth": 400,         # Item spawn depth
     "bullet_start_depth": 100,       # Player bullet starting depth
@@ -59,7 +59,7 @@ PERFORMANCE_CONFIG: Dict[str, Any] = {
 
 # Visual effects settings
 VISUAL_EFFECTS_CONFIG: Dict[str, Any] = {
-    "fog_enabled": True,             # Enable distance fog effects
+    "fog_enabled": False,            # Disable distance fog to avoid haze/blur in Phase 1
     "fog_color": (20, 30, 50),       # RGB color for distance fog
     "fog_intensity_max": 80,         # Maximum fog alpha value
     "fog_start_distance": 0.8,       # Scale value where fog starts
@@ -67,6 +67,17 @@ VISUAL_EFFECTS_CONFIG: Dict[str, Any] = {
     "particle_depth_scaling": True,  # Scale particle effects by depth
     "depth_blur_enabled": False,     # Disable blur effects for Phase 1
     "glow_effects_enabled": True,    # Enable glow for near objects
+    # Ship visual style (2.5D arcade rendering cues)
+    "ship_style_enabled": True,
+    "ship_style": "arcade_rim",      # Options: "arcade_rim", "classic_3d", None
+    "ship_style_params": {
+        "arcade_rim": {
+            "base_shadow_offset_px": 6,  # Shadow offset at scale=1.0
+            "shadow_alpha": 140,
+            "rim_alpha": 60,
+            "rim_radius_max": 2,
+        }
+    },
 }
 
 # Debug settings (Phase 1 focus on core performance monitoring)
@@ -92,27 +103,47 @@ GAMEPLAY_3D_CONFIG: Dict[str, Any] = {
 
 # Movement and animation settings
 MOVEMENT_3D_CONFIG: Dict[str, float] = {
-    "enemy_z_velocity_min": 0.0,     # Disabled enemy Z movement for stable 2D gameplay
-    "enemy_z_velocity_max": 0.0,     # Disabled enemy Z movement for stable 2D gameplay
+    "enemy_z_velocity_min": -60.0,   # Enable gentle forward movement to enhance 3D feel
+    "enemy_z_velocity_max": -30.0,   # Enemies slowly approach the camera
     "bullet_z_velocity": 150.0,      # Bullet depth movement speed
-    "depth_oscillation_enabled": False,  # Disable depth oscillation for stable movement
+    "depth_oscillation_enabled": True,   # Slight depth oscillation for richer perspective
     "oscillation_amplitude_min": 5.0,   # Minimum oscillation amplitude
     "oscillation_amplitude_max": 20.0,  # Maximum oscillation amplitude
     "oscillation_frequency": 2.0,       # Oscillation frequency (Hz)
 }
 
 # Scale quantization buckets for caching optimization
+# Dynamic scale buckets based on performance configuration
+def get_scale_buckets() -> Tuple[float, ...]:
+    """Get scale buckets based on current performance configuration."""
+    try:
+        from thunder_fighter.config.performance_config import get_cache_strategy_config
+        config = get_cache_strategy_config()
+        bucket_count = config["scale_buckets"]
+        bucket_interval = config["bucket_interval"]
+    except ImportError:
+        # Fallback to original configuration
+        bucket_count = 64
+        bucket_interval = 0.015
+
+    return tuple(
+        round(0.05 + i * bucket_interval, 3) for i in range(bucket_count)
+    )
+
+# Default scale buckets (for backward compatibility)
 SCALE_BUCKETS: Tuple[float, ...] = tuple(
-    round(0.05 + i * 0.015, 3) for i in range(64)  # 64 buckets from 0.05 to ~1.0
+    round(0.05 + i * 0.02, 3) for i in range(48)  # Conservative: 48 buckets with 0.02 interval
 )
 
-# Performance monitoring thresholds
+# Performance monitoring thresholds (optimized for realistic gameplay)
 PERFORMANCE_THRESHOLDS: Dict[str, float] = {
-    "fps_warning": 45.0,             # Warn if FPS drops below this
-    "fps_critical": 30.0,            # Critical performance threshold
-    "cache_miss_rate_warning": 0.25, # Warn if cache miss rate exceeds this
-    "memory_warning_mb": 100.0,      # Warn if cache memory exceeds this
-    "frame_time_warning_ms": 16.67,  # Warn if frame time exceeds this (60 FPS)
+    "fps_warning": 40.0,             # More realistic FPS warning threshold
+    "fps_critical": 25.0,            # Critical performance threshold
+    "cache_miss_rate_warning": 0.50, # More lenient cache miss rate (50% instead of 25%)
+    "cache_miss_rate_critical": 0.70, # Critical cache miss rate threshold
+    "memory_warning_mb": 150.0,      # Higher memory threshold
+    "frame_time_warning_ms": 25.0,   # 40FPS standard (more realistic than 60FPS)
+    "frame_time_critical_ms": 33.33, # 30FPS critical threshold
 }
 
 # Auto-performance mode switching thresholds
@@ -148,19 +179,26 @@ def get_quantized_scale(scale: float) -> float:
         scale: Original scale value
 
     Returns:
-        Quantized scale value from SCALE_BUCKETS
+        Quantized scale value from dynamic scale buckets
     """
-    if scale <= SCALE_BUCKETS[0]:
-        return SCALE_BUCKETS[0]
-    if scale >= SCALE_BUCKETS[-1]:
-        return SCALE_BUCKETS[-1]
+    # Use dynamic scale buckets for better performance
+    try:
+        scale_buckets = get_scale_buckets()
+    except Exception:
+        # Fallback to static buckets
+        scale_buckets = SCALE_BUCKETS
+
+    if scale <= scale_buckets[0]:
+        return scale_buckets[0]
+    if scale >= scale_buckets[-1]:
+        return scale_buckets[-1]
 
     # Find closest bucket
-    for bucket in SCALE_BUCKETS:
+    for bucket in scale_buckets:
         if scale <= bucket:
             return bucket
 
-    return SCALE_BUCKETS[-1]
+    return scale_buckets[-1]
 
 
 def get_lod_level(scale: float) -> str:

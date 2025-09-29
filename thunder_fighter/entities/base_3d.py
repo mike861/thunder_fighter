@@ -296,15 +296,47 @@ class Entity3D(GameObject3D):
             visual_size = self.get_visual_size()
 
             # Get scaled image from cache
-            from thunder_fighter.graphics.image_cache import get_scaling_cache
+            from thunder_fighter.graphics.image_cache import get_scaling_cache, get_styled_cache
+            from thunder_fighter.config.pseudo_3d_config import VISUAL_EFFECTS_CONFIG
             cache = get_scaling_cache()
+            styled_cache = get_styled_cache()
             scaled_image = cache.get_scaled_image(self.image, scale)
 
             if scaled_image:
                 self._render_stats["cache_hits"] += 1
 
-                # Apply depth effects
-                final_image = self._apply_depth_effects(scaled_image, scale)
+                # Apply optional ship visual style (e.g., arcade_rim)
+                final_image = scaled_image
+                try:
+                    if VISUAL_EFFECTS_CONFIG.get("ship_style_enabled", False):
+                        style = VISUAL_EFFECTS_CONFIG.get("ship_style", None)
+                        if style == "arcade_rim":
+                            params = VISUAL_EFFECTS_CONFIG.get("ship_style_params", {}).get("arcade_rim", {})
+                            base_offset = max(1, int(params.get("base_shadow_offset_px", 6)))
+                            rim_radius_max = max(1, int(params.get("rim_radius_max", 2)))
+
+                            # Scale-aware adjustments
+                            scale_clamped = max(0.3, min(1.2, scale))
+                            offset = max(1, int(round(base_offset * scale_clamped)))
+                            alpha_scale = max(0.4, min(1.0, scale * 1.2))
+
+                            shadow_alpha = int(params.get("shadow_alpha", 140) * alpha_scale)
+                            rim_alpha = int(params.get("rim_alpha", 60) * alpha_scale)
+                            rim_radius = max(1, min(rim_radius_max, int(round(scale * rim_radius_max))))
+
+                            final_image = styled_cache.get_arcade_rim(
+                                scaled_image,
+                                shadow_offset=(offset, offset),
+                                shadow_alpha=shadow_alpha,
+                                rim_alpha=rim_alpha,
+                                rim_radius=rim_radius,
+                            )
+                except Exception as _e:
+                    # Fallback silently if styling fails
+                    final_image = scaled_image
+
+                # Apply depth effects (e.g., fog) after styling
+                final_image = self._apply_depth_effects(final_image, scale)
 
                 # Calculate centered render position
                 render_x = screen_pos[0] - visual_size[0] // 2

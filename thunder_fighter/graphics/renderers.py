@@ -39,8 +39,9 @@ def load_image(name, colorkey=None):
 def create_player_surface():
     """Create player aircraft surface with modern fighter jet design"""
     # Keep improved size: 60x50
-    surface = pygame.Surface((60, 50))
-    surface.set_colorkey((0, 0, 0))  # Set black as transparent
+    # Use SRCALPHA for proper alpha transparency support
+    surface = pygame.Surface((60, 50), pygame.SRCALPHA)
+    # Note: No need for set_colorkey with SRCALPHA, background is transparent by default
 
     # Color scheme for player fighter jet
     main_color = (120, 170, 255)  # Light blue main body
@@ -122,8 +123,9 @@ def create_enemy_surface(level=0):
 
     try:
         # Slightly larger and different aspect ratio: 45x45 (more square/organic)
-        surface = pygame.Surface((45, 45))
-        surface.set_colorkey((0, 0, 0))  # Set black as transparent
+        # Use SRCALPHA for proper alpha transparency support
+        surface = pygame.Surface((45, 45), pygame.SRCALPHA)
+        # Note: No need for set_colorkey with SRCALPHA, background is transparent by default
     except Exception as e:
         print(f"ERROR: Failed to create enemy surface for level {level}: {e}")
         return None
@@ -507,8 +509,9 @@ def create_player_speed_item():
 def create_wingman():
     """Create wingman surface - mini version of player fighter"""
     # Smaller size: 35x30 (scaled down from player's 60x50)
-    surface = pygame.Surface((35, 30))
-    surface.set_colorkey((0, 0, 0))  # Set black as transparent
+    # Use SRCALPHA for proper alpha transparency support
+    surface = pygame.Surface((35, 30), pygame.SRCALPHA)
+    # Note: No need for set_colorkey with SRCALPHA, background is transparent by default
 
     # Slightly different color scheme - lighter blue to distinguish from main player
     main_color = (140, 190, 255)  # Lighter blue main body

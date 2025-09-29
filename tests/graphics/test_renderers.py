@@ -45,10 +45,11 @@ class TestPlayerRenderer:
         pygame.init()
         surface = create_player_surface()
 
-        # Check that black is set as transparent color (may include alpha)
-        colorkey = surface.get_colorkey()
-        assert colorkey is not None
-        assert colorkey[:3] == (0, 0, 0)  # RGB should be black
+        # Check that surface has alpha transparency support
+        assert surface.get_flags() & pygame.SRCALPHA
+        # Verify background corners are transparent (alpha = 0)
+        corner_pixel = surface.get_at((0, 0))
+        assert corner_pixel[3] == 0  # Alpha channel should be 0 (transparent)
 
     def test_player_surface_visual_content(self):
         """Test that player surface contains visual content (not all black)"""
@@ -83,9 +84,11 @@ class TestEnemyRenderer:
         assert surface is not None
         assert isinstance(surface, pygame.Surface)
         assert surface.get_size() == (45, 45)  # Expected size for new organic design
-        colorkey = surface.get_colorkey()
-        assert colorkey is not None
-        assert colorkey[:3] == (0, 0, 0)  # RGB should be black
+        # Verify alpha transparency support (SRCALPHA flag)
+        assert surface.get_flags() & pygame.SRCALPHA
+        # Verify background corners are transparent (alpha = 0)
+        corner_pixel = surface.get_at((0, 0))
+        assert corner_pixel[3] == 0  # Alpha channel should be 0 (transparent)
 
     @pytest.mark.parametrize("level", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     def test_enemy_surface_all_levels(self, level):
@@ -306,9 +309,11 @@ class TestWingmanRenderer:
         assert surface is not None
         assert isinstance(surface, pygame.Surface)
         assert surface.get_size() == (35, 30)  # New mini fighter size
-        colorkey = surface.get_colorkey()
-        assert colorkey is not None
-        assert colorkey[:3] == (0, 0, 0)  # RGB should be black
+        # Verify alpha transparency support (SRCALPHA flag)
+        assert surface.get_flags() & pygame.SRCALPHA
+        # Verify background corners are transparent (alpha = 0)
+        corner_pixel = surface.get_at((0, 0))
+        assert corner_pixel[3] == 0  # Alpha channel should be 0 (transparent)
 
     def test_wingman_visual_content(self):
         """Test that wingman has visual content"""

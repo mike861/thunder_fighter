@@ -15,6 +15,7 @@ from typing import Optional
 
 import pygame
 
+from thunder_fighter.config.pseudo_3d_config import PSEUDO_3D_CONFIG
 from thunder_fighter.constants import (
     BOSS_CONFIG,
     ENEMY_CONFIG,
@@ -34,13 +35,12 @@ from thunder_fighter.entities.player.player import Player
 # Import event system
 from thunder_fighter.events import EventSystem, GameEvent, GameEventType
 from thunder_fighter.graphics.background import DynamicBackground
-from thunder_fighter.graphics.effects import flash_manager
-from thunder_fighter.graphics.ui.manager import UIManager
 
 # Import 3D rendering system
-from thunder_fighter.graphics.depth_renderer import DepthSortedGroup, DepthRenderer
-from thunder_fighter.graphics.performance_monitor import get_performance_monitor, get_debug_overlay
-from thunder_fighter.config.pseudo_3d_config import PSEUDO_3D_CONFIG
+from thunder_fighter.graphics.depth_renderer import DepthRenderer, DepthSortedGroup
+from thunder_fighter.graphics.effects import flash_manager
+from thunder_fighter.graphics.performance_monitor import get_debug_overlay, get_performance_monitor
+from thunder_fighter.graphics.ui.manager import UIManager
 from thunder_fighter.localization import change_language
 from thunder_fighter.systems.collision import (
     check_boss_bullet_player_collisions,
@@ -106,6 +106,12 @@ class RefactoredGame:
         # Initialize 3D rendering system
         self.use_3d_rendering = PSEUDO_3D_CONFIG.get("enabled", True)
         self.depth_renderer = DepthRenderer()
+
+        # Clear image cache to prevent color flashing issues after cache key improvements
+        if self.use_3d_rendering:
+            from thunder_fighter.graphics.image_cache import clear_scaling_cache
+            clear_scaling_cache()
+            logger.info("Cleared image scaling cache for 3D rendering")
 
         # Initialize performance monitoring
         self.performance_monitor = get_performance_monitor()
@@ -1006,6 +1012,15 @@ class RefactoredGame:
 
     def render(self):
         """Render the game with optional 3D depth effects."""
+        # Handle paused state first to avoid unnecessary rendering
+        if self.paused:
+            # Clear screen with background color for clean pause display
+            self.screen.fill((0, 0, 0))
+            # Only draw pause UI, skip all game scene rendering
+            self.ui_manager.draw_pause_screen()
+            pygame.display.flip()
+            return
+
         # Draw background
         self.background.draw(self.screen)
 
@@ -1065,9 +1080,6 @@ class RefactoredGame:
             game_time = self.get_game_time()
             self.ui_manager.draw_game_over_screen(self.score.value, self.game_level, game_time)
 
-        if self.paused:
-            self.ui_manager.draw_pause_screen()
-
         # Draw performance debug overlay if enabled
         if self.use_3d_rendering:
             self.debug_overlay.render(self.screen)
@@ -1077,8 +1089,8 @@ class RefactoredGame:
     def _draw_3d_debug_info(self):
         """Draw 3D-specific debug information."""
         try:
-            from thunder_fighter.graphics.image_cache import get_cache_stats
             from thunder_fighter.config.pseudo_3d_config import DEBUG_3D_CONFIG
+            from thunder_fighter.graphics.image_cache import get_cache_stats
 
             if not DEBUG_3D_CONFIG.get("cache_statistics", False):
                 return

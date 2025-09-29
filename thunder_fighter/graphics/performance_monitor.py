@@ -7,14 +7,12 @@ and debug visualization tools for the 3D rendering pipeline.
 
 import time
 from collections import deque
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import pygame
 
 from thunder_fighter.config.pseudo_3d_config import (
     DEBUG_3D_CONFIG,
-    PERFORMANCE_THRESHOLDS,
-    PERFORMANCE_CONFIG,
 )
 from thunder_fighter.utils.logger import logger
 
@@ -57,14 +55,14 @@ class PerformanceMonitor:
         # Warning tracking
         self.performance_warnings = []
         self.last_warning_time = 0.0
-        self.warning_cooldown = 5.0  # 5 seconds between identical warnings
+        self.warning_cooldown = 10.0  # 10 seconds between identical warnings (reduced spam)
 
-        # Bottleneck detection
+        # Bottleneck detection (more realistic thresholds)
         self.bottleneck_thresholds = {
-            "frame_time_ms": 20.0,  # Above 20ms (50 FPS)
-            "render_time_ms": 10.0,  # Render taking more than 10ms
-            "cache_miss_rate": 0.30,  # Cache miss rate above 30%
-            "cull_rate": 0.80,  # More than 80% sprites culled
+            "frame_time_ms": 25.0,  # Above 25ms (40 FPS) - more realistic
+            "render_time_ms": 15.0,  # Render taking more than 15ms
+            "cache_miss_rate": 0.50,  # Cache miss rate above 50% (was 30%)
+            "cull_rate": 0.85,  # More than 85% sprites culled (slightly higher)
         }
 
         # Performance mode tracking

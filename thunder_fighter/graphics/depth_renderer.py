@@ -50,22 +50,44 @@ class DepthSortedGroup(pygame.sprite.Group):
 
     def add(self, *sprites):
         """
-        Add sprites and mark for re-sorting.
+        Add sprites with optimized sorting for known z-values.
 
         Args:
             *sprites: Sprites to add
         """
         super().add(*sprites)
-        self._sort_dirty = True
+
+        # Try to optimize for sprites with known z-values (like explosions)
+        can_use_fast_insert = True
+        for sprite in sprites:
+            sprite_z = getattr(sprite, 'z', 0)
+            # Check if this is a common z-value that we can handle efficiently
+            if sprite_z not in [-10, 0]:  # Explosion and default z-values
+                can_use_fast_insert = False
+                break
+
+        if can_use_fast_insert and hasattr(self, '_sorted_sprites') and len(self._sorted_sprites) > 0:
+            # Use incremental insertion for better performance
+            self._incremental_sort_insert(sprites)
+        else:
+            # Fall back to full re-sort
+            self._sort_dirty = True
 
     def remove(self, *sprites):
         """
-        Remove sprites and mark for re-sorting.
+        Remove sprites and update cached sorted list.
 
         Args:
             *sprites: Sprites to remove
         """
         super().remove(*sprites)
+
+        # Also remove from cached sorted list if it exists
+        if hasattr(self, '_sorted_sprites') and self._sorted_sprites:
+            for sprite in sprites:
+                if sprite in self._sorted_sprites:
+                    self._sorted_sprites.remove(sprite)
+
         self._sort_dirty = True
 
     def _sort_by_depth(self):
@@ -74,6 +96,8 @@ class DepthSortedGroup(pygame.sprite.Group):
 
         # Only sort if needed and enough time has passed
         if not self._sort_dirty or (current_time - self._last_sort_time) < self._sort_interval:
+            # Still clean dead sprites even if we skip sorting
+            self._cleanup_dead_sprites()
             return
 
         sort_start = time.time()
@@ -87,9 +111,56 @@ class DepthSortedGroup(pygame.sprite.Group):
         self._sort_dirty = False
         self._last_sort_time = current_time
 
+        # Clean up any dead sprites that might have been included
+        self._cleanup_dead_sprites()
+
         # Track sort performance
         sort_time = (time.time() - sort_start) * 1000
         self._render_stats["sort_time_ms"] = sort_time
+
+    def _incremental_sort_insert(self, sprites):
+        """
+        Insert sprites into sorted list with optimized placement for common z-values.
+
+        Args:
+            sprites: Sprites to insert
+        """
+        for sprite in sprites:
+            sprite_z = getattr(sprite, 'z', 0)
+
+            # For common z-values, use direct placement to avoid sorting complexity
+            if sprite_z == -10:  # Explosion z-value (foreground)
+                # Insert at the end (nearest to camera)
+                self._sorted_sprites.append(sprite)
+            elif sprite_z == 0:  # Default z-value
+                # Find first sprite with z < 0 and insert before it
+                insert_index = 0
+                for i, existing_sprite in enumerate(self._sorted_sprites):
+                    existing_z = getattr(existing_sprite, 'z', 0)
+                    if existing_z < 0:
+                        insert_index = i
+                        break
+                else:
+                    insert_index = len(self._sorted_sprites)
+                self._sorted_sprites.insert(insert_index, sprite)
+            else:
+                # For uncommon z-values, fall back to full re-sort
+                self._sort_dirty = True
+                return
+
+        # Update last sort time to prevent immediate full re-sort
+        self._last_sort_time = time.time()
+
+    def _cleanup_dead_sprites(self):
+        """Remove dead sprites from cached sorted list."""
+        if hasattr(self, '_sorted_sprites') and self._sorted_sprites:
+            # Filter out dead sprites
+            alive_sprites = [s for s in self._sorted_sprites
+                           if s.alive() and hasattr(s, 'groups') and len(s.groups()) > 0]
+
+            # Update cache if any sprites were removed
+            if len(alive_sprites) != len(self._sorted_sprites):
+                self._sorted_sprites = alive_sprites
 
     def render_with_depth(self, screen: pygame.Surface):
         """
@@ -120,6 +191,11 @@ class DepthSortedGroup(pygame.sprite.Group):
 
         for sprite in self._sorted_sprites:
             try:
+                # Skip dead/removed sprites
+                if not sprite.alive() or not hasattr(sprite, 'groups') or len(sprite.groups()) == 0:
+                    skipped += 1
+                    continue
+
                 # Check if sprite should render based on LOD
                 if hasattr(sprite, 'should_render') and not sprite.should_render():
                     skipped += 1
@@ -363,6 +439,10 @@ class DepthRenderer:
         rendered = 0
         for sprite in all_sprites:
             try:
+                # Skip dead/removed sprites
+                if not sprite.alive() or not hasattr(sprite, 'groups') or len(sprite.groups()) == 0:
+                    continue
+
                 if hasattr(sprite, 'should_render') and not sprite.should_render():
                     continue
 

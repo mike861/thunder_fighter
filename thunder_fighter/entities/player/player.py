@@ -3,6 +3,13 @@ import math
 import pygame
 import pygame.time as ptime
 
+# Performance optimization imports
+from thunder_fighter.config.performance_config import (
+    OPTIMIZATION_FLAGS,
+    get_player_animation_config,
+    quantize_value,
+    should_update_visuals,
+)
 from thunder_fighter.constants import (
     BULLET_CONFIG,
     HEIGHT,
@@ -80,8 +87,23 @@ class Player(Entity3D):
         self.last_missile_shot = ptime.get_ticks()
         self.missile_shoot_delay = 2000  # 2 seconds
 
-        # Enable subtle 3D breathing/floating effect
-        self.enable_depth_oscillation(amplitude=2.0, frequency=1.5)
+        # Performance optimization variables
+        self.frame_count = 0
+        self.performance_config = get_player_animation_config()
+        self.last_visual_update_frame = 0
+        self.last_quantized_x = 0.0
+        self.last_quantized_y = 0.0
+        self.last_quantized_z = 0.0
+
+        # Adjust 3D effects based on performance configuration
+        if OPTIMIZATION_FLAGS["enable_player_animation_optimization"]:
+            # Apply performance-aware amplitude and frequency
+            amplitude = 2.0 * self.performance_config["amplitude_reduction"]
+            frequency = 1.5 * self.performance_config["frequency_reduction"]
+            self.enable_depth_oscillation(amplitude=amplitude, frequency=frequency)
+        else:
+            # Original settings
+            self.enable_depth_oscillation(amplitude=2.0, frequency=1.5)
 
     def update(self, dt: float = 1/60):
         """Update player state with 3D perspective support"""
@@ -109,15 +131,15 @@ class Player(Entity3D):
         # Fire missiles
         self.shoot_missiles()
 
-        # Apply movement using 3D base class (handles depth and perspective)
-        super().update(dt)
+        # Performance optimization: frame counting and intelligent updates
+        self.frame_count += 1
 
-        # Slight floating animation for the aircraft
-        self.angle = (self.angle + 1) % 360
-        floating_offset = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
-        self.y += floating_offset
+        if OPTIMIZATION_FLAGS["enable_player_animation_optimization"]:
+            self._update_with_performance_optimization(dt)
+        else:
+            self._update_original(dt)
 
-        # Update rect position using 3D screen coordinates
+        # Update rect position (always needed for collision detection)
         screen_pos = self.get_screen_position()
         visual_size = self.get_visual_size()
 
@@ -126,15 +148,8 @@ class Player(Entity3D):
         self.rect.width = visual_size[0]
         self.rect.height = visual_size[1]
 
-        # Keep player within bounds (in world coordinates)
-        if self.x < 30:  # Account for half-width
-            self.x = 30
-        if self.x > WIDTH - 30:
-            self.x = WIDTH - 30
-        if self.y < 25:  # Account for half-height
-            self.y = 25
-        if self.y > HEIGHT - 25:
-            self.y = HEIGHT - 25
+        # Enforce boundaries
+        self._enforce_boundaries()
 
         # Update rect after boundary check
         screen_pos = self.get_screen_position()
@@ -450,3 +465,62 @@ class Player(Entity3D):
         self.speed = min(self.max_speed, self.speed + amount)
         logger.info(f"Player speed increased to: {self.speed}")
         return self.speed
+
+    def _update_with_performance_optimization(self, dt: float):
+        """Update with performance optimization enabled."""
+        # Check if we should update visual effects this frame
+        update_interval = self.performance_config["visual_update_interval"]
+        should_update = should_update_visuals(self.frame_count, update_interval)
+
+        if should_update:
+            # Apply movement using 3D base class (handles depth and perspective)
+            super().update(dt)
+
+            # Apply quantization to reduce cache fragmentation
+            depth_quant = self.performance_config["depth_quantization"]
+            pos_quant = self.performance_config["position_quantization"]
+
+            # Quantize position changes
+            if abs(self.x - self.last_quantized_x) >= pos_quant:
+                self.last_quantized_x = quantize_value(self.x, pos_quant)
+            if abs(self.y - self.last_quantized_y) >= pos_quant:
+                self.last_quantized_y = quantize_value(self.y, pos_quant)
+            if abs(self.z - self.last_quantized_z) >= depth_quant:
+                self.last_quantized_z = quantize_value(self.z, depth_quant)
+
+            # Optimized floating animation (reduced frequency)
+            if self.performance_config["preserve_oscillation"]:
+                self.angle = (self.angle + 1) % 360
+                floating_offset = math.sin(math.radians(self.angle)) * 0.3  # Reduced amplitude
+                self.y += floating_offset
+
+            self.last_visual_update_frame = self.frame_count
+        else:
+            # Skip expensive 3D calculations, just update basic position
+            self.x += self.velocity_x * dt
+            self.y += self.velocity_y * dt
+
+            # Keep player within bounds
+            self._enforce_boundaries()
+
+    def _update_original(self, dt: float):
+        """Original update method without optimization."""
+        # Apply movement using 3D base class (handles depth and perspective)
+        super().update(dt)
+
+        # Slight floating animation for the aircraft
+        self.angle = (self.angle + 1) % 360
+        floating_offset = math.sin(math.radians(self.angle)) * 0.5  # Small up and down float
+        self.y += floating_offset
+
+    def _enforce_boundaries(self):
+        """Enforce player boundaries - extracted for reuse."""
+        # Keep player within bounds (in world coordinates)
+        if self.x < 30:  # Account for half-width
+            self.x = 30
+        if self.x > WIDTH - 30:
+            self.x = WIDTH - 30
+        if self.y < 25:  # Account for half-height
+            self.y = 25
+        if self.y > HEIGHT - 25:
+            self.y = HEIGHT - 25

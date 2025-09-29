@@ -12,6 +12,7 @@ import pygame
 
 from thunder_fighter.constants import BULLET_CONFIG, RED, WHITE
 from thunder_fighter.config.pseudo_3d_config import GAMEPLAY_3D_CONFIG
+from thunder_fighter.graphics.effects import create_explosion
 from thunder_fighter.utils.logger import logger
 
 # SCORE_THRESHOLD moved to GAME_CONFIG in constants.py
@@ -196,8 +197,6 @@ class CollisionSystem:
                 if hasattr(enemy, "damage"):
                     # It's a boss, apply damage.
                     if enemy.damage(50):  # damage() returns True if boss is defeated
-                        from thunder_fighter.graphics.effects import create_explosion
-
                         explosion_pos = self._get_collision_position(missile, enemy)
                         explosion = create_explosion(explosion_pos, "lg")
                         all_sprites.add(explosion)
@@ -209,16 +208,12 @@ class CollisionSystem:
                         score.update(total_score)
                     else:
                         # Hit but not destroyed - still use explosion for missile
-                        from thunder_fighter.graphics.effects import create_explosion
-
                         explosion_pos = self._get_collision_position(missile, enemy)
                         explosion = create_explosion(explosion_pos, "md")
                         all_sprites.add(explosion)
                 else:
                     # It's a regular enemy, kill it.
                     enemy.kill()
-                    from thunder_fighter.graphics.effects import create_explosion
-
                     explosion_pos = self._get_collision_position(missile, enemy)
                     explosion = create_explosion(explosion_pos, "md")
                     all_sprites.add(explosion)

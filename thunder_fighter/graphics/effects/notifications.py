@@ -127,16 +127,25 @@ class WarningNotification(Notification):
 
     def __init__(self, text, duration=3000, color=YELLOW, size=28, position="top"):
         super().__init__(text, duration, color, size, position)
-        self.flash_speed = 200  # Flash speed (milliseconds)
+        # Performance-aware flash speed
+        self.base_flash_speed = 200  # Base flash speed (milliseconds)
+        self.flash_speed = self.base_flash_speed
         self.flash_colors = [YELLOW, RED]  # Flash colors
         self.current_color_index = 0
         self.last_flash = self.creation_time
+        self.performance_check_interval = 1000  # Check performance every second
+        self.last_performance_check = self.creation_time
 
     def update(self):
-        """Update warning notification state, add flashing effect"""
+        """Update warning notification state with performance-aware flashing"""
         current_time = pygame.time.get_ticks()
 
-        # Handle flashing effect
+        # Adjust flash speed based on performance (reduce CPU load during warnings)
+        if current_time - self.last_performance_check > self.performance_check_interval:
+            self._adjust_flash_speed_for_performance()
+            self.last_performance_check = current_time
+
+        # Handle flashing effect with dynamic speed
         if current_time - self.last_flash > self.flash_speed:
             self.last_flash = current_time
             self.current_color_index = (self.current_color_index + 1) % len(self.flash_colors)
@@ -144,6 +153,35 @@ class WarningNotification(Notification):
 
         # Call parent update to handle fade and time check
         return super().update()
+
+    def _adjust_flash_speed_for_performance(self):
+        """Adjust flash speed based on current performance situation."""
+        try:
+            # Try to get performance monitor if available
+            from thunder_fighter.graphics.performance_monitor import get_performance_monitor
+            monitor = get_performance_monitor()
+
+            if monitor:
+                # Get current performance metrics
+                fps = monitor.get_current_fps()
+                cache_hit_rate = monitor.get_cache_hit_rate()
+
+                # Adjust flash speed based on performance
+                if fps < 30 or cache_hit_rate < 0.4:
+                    # Very poor performance - slow down flashing significantly
+                    self.flash_speed = self.base_flash_speed * 5  # 1 flash per second
+                elif fps < 45 or cache_hit_rate < 0.6:
+                    # Poor performance - slow down flashing moderately
+                    self.flash_speed = self.base_flash_speed * 2.5  # 2 flashes per second
+                else:
+                    # Good performance - use normal flashing
+                    self.flash_speed = self.base_flash_speed  # 5 flashes per second
+            else:
+                # No performance monitor available - use conservative flashing
+                self.flash_speed = self.base_flash_speed * 2
+        except:
+            # Fallback to conservative flashing on any error
+            self.flash_speed = self.base_flash_speed * 2
 
 
 class AchievementNotification(Notification):

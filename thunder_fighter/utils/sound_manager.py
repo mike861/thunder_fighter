@@ -132,34 +132,31 @@ class SoundManager:
                 logger.error(f"Failed to load sound {sound_name}: {e}")
 
     def play_sound(self, sound_name):
-        """Play the specified sound effect"""
-        if not self._initialized or not pygame.mixer.get_init():
-            logger.warning("Sound manager not ready, attempting to recover.")
-            self.reinitialize()
-            if not self._initialized:
-                logger.error("Recovery failed. Cannot play sound.")
-                return
-
+        """Play the specified sound effect with optimized initialization checks"""
+        # Early exit for disabled sound
         if not self.sound_enabled:
             return
 
+        # Single initialization check with recovery
+        mixer_initialized = pygame.mixer.get_init()
+        if not self._initialized or not mixer_initialized:
+            logger.warning("Sound manager not ready, attempting to recover.")
+            self.reinitialize()
+            if not self._initialized or not pygame.mixer.get_init():
+                logger.error("Recovery failed. Cannot play sound.")
+                return
+
         if sound_name in self.sounds:
             try:
-                # Check if mixer is still working
-                if not pygame.mixer.get_init():
-                    logger.warning("pygame.mixer not initialized, attempting to reinitialize")
-                    self._init_pygame_mixer()
-                    if not self._initialized:
-                        return
-
-                # Play the sound
+                # Direct play without redundant checks - mixer is verified above
                 self.sounds[sound_name].play()
                 logger.debug(f"Played sound: {sound_name}")
 
             except Exception as e:
                 logger.error(f"Error playing sound {sound_name}: {e}")
-                # Try to reinitialize on error
-                self.reinitialize()
+                # Only reinitialize on actual playback errors
+                if "mixer" in str(e).lower():
+                    self.reinitialize()
         else:
             logger.warning(f"Sound not found: {sound_name}")
 
