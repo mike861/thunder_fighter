@@ -64,3 +64,4 @@ prompt*
 # CLAUDE.md - This is an important project file
 # .gitignore - Should not ignore itself
 # *.png - Game assets should be tracked
+.VSCodeCounter/
