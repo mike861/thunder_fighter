@@ -123,7 +123,9 @@ class RefactoredGame:
         self.sound_manager = SoundManager(config_manager.sound)
 
         # Create player
-        self.player = Player(self, self.all_sprites, self.bullets, self.missiles, self.enemies, self.sound_manager)
+        self.player = Player(
+            self, self.all_sprites, self.bullets, self.missiles, self.enemies, self.sound_manager, self.event_system
+        )
         # Apply difficulty-based speed modifier
         self.player.speed = int(self.player.speed * difficulty_multipliers["player_speed"])
         self.all_sprites.add(self.player)
@@ -268,6 +270,7 @@ class RefactoredGame:
         # Entity events
         self.event_system.register_listener(GameEventType.ENEMY_SPAWNED, self._handle_enemy_spawned)
         self.event_system.register_listener(GameEventType.ITEM_COLLECTED, self._handle_item_collected)
+        self.event_system.register_listener(GameEventType.PLAYER_SHOOT, self._handle_player_shoot_event)
 
         logger.debug("Event listeners set up")
 
@@ -401,34 +404,52 @@ class RefactoredGame:
 
         return False
 
+    # Input processing methods
+    def _update_player_movement(self):
+        """Update player movement and shooting based on current input state."""
+        # Reset player movement speed
+        self.player.speedx = 0
+        self.player.speedy = 0
+
+        # Get currently active input actions from InputManager
+        active_actions = self.input_manager.get_active_actions()
+
+        # Apply movement based on active actions
+        if "move_up" in active_actions:
+            self.player.speedy = -self.player.speed
+        if "move_down" in active_actions:
+            self.player.speedy = self.player.speed
+        if "move_left" in active_actions:
+            self.player.speedx = -self.player.speed
+        if "move_right" in active_actions:
+            self.player.speedx = self.player.speed
+
+        # Handle shooting (continuous action)
+        if "shoot" in active_actions:
+            self.player.shoot()
+
     # Input event handlers
     def _handle_movement_input(self, event: InputEvent):
-        """Handle movement input events."""
-        if self.paused or self.game_won:
-            return
+        """
+        Handle movement input events.
 
-        direction = event.get_data("direction")
-        pressed = event.get_data("pressed", True)
-
-        # Apply movement to player
-        if direction == "up":
-            self.player.speedy = -self.player.speed if pressed else 0
-        elif direction == "down":
-            self.player.speedy = self.player.speed if pressed else 0
-        elif direction == "left":
-            self.player.speedx = -self.player.speed if pressed else 0
-        elif direction == "right":
-            self.player.speedx = self.player.speed if pressed else 0
+        Note: Movement is now handled by _update_player_movement() which checks
+        active_actions every frame. This callback exists only to maintain the
+        event system registration, but doesn't need to do anything since
+        InputHandler tracks active continuous actions automatically.
+        """
+        pass
 
     def _handle_shoot_input(self, event: InputEvent):
-        """Handle shooting input events."""
-        if self.paused or self.game_won:
-            return
+        """
+        Handle shooting input events.
 
-        pressed = event.get_data("pressed", True)
-
-        if pressed:
-            self.player.shoot()
+        Note: Shooting is now handled by _update_player_movement() which checks
+        active_actions every frame. This callback exists only to maintain the
+        event system registration, but doesn't need to do anything since
+        InputHandler tracks active continuous actions automatically.
+        """
+        pass
 
     def _handle_missile_input(self, event: InputEvent):
         """Handle missile launch input events."""
@@ -646,6 +667,27 @@ class RefactoredGame:
             )
         )
 
+    def _handle_player_shoot_event(self, event: GameEvent):
+        """Handle player shoot event by creating bullets."""
+        shooting_data = event.get_data("shooting_data")
+        if not shooting_data:
+            logger.warning("Player shoot event received with no shooting data")
+            return
+
+        # Create bullets using projectile factory
+        for bullet_data in shooting_data:
+            bullet = self.projectile_factory.create_bullet(
+                x=bullet_data["x"],
+                y=bullet_data["y"],
+                speed=bullet_data["speed"],
+                angle=bullet_data["angle"],
+                owner=bullet_data.get("owner", "player"),
+            )
+
+            if bullet:
+                self.all_sprites.add(bullet)
+                self.bullets.add(bullet)
+
     # UI event handlers
     def _handle_ui_player_health_changed(self, event: GameEvent):
         """Handle player health changed event for UI updates."""
@@ -795,6 +837,9 @@ class RefactoredGame:
         # Skip updates if paused, game won, or game over
         if self.paused or self.game_won or self.game_over:
             return
+
+        # Update player movement based on current input state
+        self._update_player_movement()
 
         # Update background
         self.background.update()

@@ -5,6 +5,7 @@ from typing import cast
 import pygame
 
 from thunder_fighter.constants import HEIGHT, WHITE, WIDTH
+from thunder_fighter.graphics.visual_3d.background_3d import BackgroundVisual3D
 
 
 class Star:
@@ -257,7 +258,7 @@ class AsteroidField:
 
 
 class Planet:
-    """Background planet object"""
+    """Background planet object with 3D visual effects"""
 
     def __init__(self):
         self.x = float(random.randint(-50, WIDTH + 50))
@@ -274,6 +275,23 @@ class Planet:
         )
         self.has_rings = random.choice([True, False])
         self.ring_color = (150, 150, 150)
+        self.light_angle = random.uniform(0, 360)  # Random light direction
+
+        # Create 3D visual generator
+        self.visual_3d = BackgroundVisual3D()
+
+        # Pre-render the 3D planet surface for performance
+        self._render_3d_surface()
+
+    def _render_3d_surface(self):
+        """Pre-render the 3D planet surface."""
+        # Create the 3D planet surface with atmosphere
+        self.planet_surface = self.visual_3d.create_3d_planet(
+            radius=self.size,
+            base_color=self.color,
+            light_angle=self.light_angle,
+            atmosphere=True  # Add atmospheric glow
+        )
 
     def update(self):
         """Update planet position"""
@@ -282,30 +300,56 @@ class Planet:
         if self.y > HEIGHT + 100:
             self.y = random.randint(-400, -100)
             self.x = random.randint(-50, WIDTH + 50)
+            # Generate new light angle when repositioning
+            self.light_angle = random.uniform(0, 360)
+            # Re-render with new light angle
+            self._render_3d_surface()
 
     def draw(self, screen):
-        """Draw planet with optional rings"""
-        # Draw planet body
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.size)
-
-        # Add shading for 3D effect
-        shadow_color = tuple(c // 2 for c in self.color)
-        pygame.draw.circle(
-            screen, shadow_color, (int(self.x + self.size // 3), int(self.y + self.size // 3)), self.size // 3
-        )
-
-        # Add highlight
-        highlight_color = tuple(min(255, c + 50) for c in self.color)
-        pygame.draw.circle(
-            screen, highlight_color, (int(self.x - self.size // 4), int(self.y - self.size // 4)), self.size // 6
-        )
+        """Draw planet with 3D effects and optional rings"""
+        # Draw the pre-rendered 3D planet
+        planet_rect = self.planet_surface.get_rect(center=(int(self.x), int(self.y)))
+        screen.blit(self.planet_surface, planet_rect.topleft)
 
         # Draw rings if planet has them
         if self.has_rings:
-            ring_width = self.size + 20
-            ring_height = self.size // 3
-            ring_rect = pygame.Rect(self.x - ring_width // 2, self.y - ring_height // 2, ring_width, ring_height)
-            pygame.draw.ellipse(screen, self.ring_color, ring_rect, 2)
+            self._draw_rings(screen)
+
+    def _draw_rings(self, screen):
+        """Draw 3D-looking planetary rings."""
+        # Create multiple ring layers for depth
+        ring_layers = [
+            (self.size + 30, self.size // 4, (*self.ring_color, 40)),  # Outer ring - transparent
+            (self.size + 25, self.size // 4, (*self.ring_color, 60)),  # Middle ring
+            (self.size + 20, self.size // 3, (*self.ring_color, 80)),  # Inner ring - more opaque
+        ]
+
+        for ring_width, ring_height, ring_color_alpha in ring_layers:
+            # Create surface for ring with alpha
+            ring_surface = pygame.Surface((ring_width * 2, ring_height * 2), pygame.SRCALPHA)
+
+            # Draw elliptical ring
+            pygame.draw.ellipse(
+                ring_surface,
+                ring_color_alpha,
+                (0, 0, ring_width * 2, ring_height * 2),
+                2
+            )
+
+            # Apply light gradient to rings based on planet's light angle
+            if self.light_angle < 180:
+                # Light from top - upper part of ring brighter
+                gradient_rect = pygame.Rect(0, 0, ring_width * 2, ring_height)
+                pygame.draw.ellipse(
+                    ring_surface,
+                    (*self.ring_color, 100),
+                    gradient_rect,
+                    1
+                )
+
+            # Position and draw ring
+            ring_rect = ring_surface.get_rect(center=(int(self.x), int(self.y)))
+            screen.blit(ring_surface, ring_rect.topleft, special_flags=pygame.BLEND_ALPHA_SDL2)
 
 
 class DynamicBackground:

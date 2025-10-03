@@ -29,9 +29,9 @@ class Player(pygame.sprite.Sprite):
         self.sound_manager = sound_manager  # Store sound manager instance
         self.event_system = event_system  # For event-driven shooting
 
-        # Use custom graphics with fast dramatic 3D visual enhancement
-        base_ship = create_player_ship()
-        self.image = Fast3DEffects.create_player_3d_effect(base_ship)
+        # Load player ship (PNG with 3D effects already applied)
+        self.image = create_player_ship()
+        # Note: No need for additional 3D effects as the PNG already has them
         self.rect = self.image.get_rect()
 
         # Position (float for precision)
@@ -77,26 +77,10 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         """Update player state"""
-        # Reset movement speed
-        self.speedx = 0
-        self.speedy = 0
+        # Note: Movement and shooting are now handled by the InputManager system
+        # Speed values (self.speedx, self.speedy) are set by game's input event handlers
 
-        # Get key states
-        keystate = pygame.key.get_pressed()
-        if keystate[pygame.K_LEFT] or keystate[pygame.K_a]:
-            self.speedx = -self.speed  # Use current speed
-        if keystate[pygame.K_RIGHT] or keystate[pygame.K_d]:
-            self.speedx = self.speed  # Use current speed
-        if keystate[pygame.K_UP] or keystate[pygame.K_w]:
-            self.speedy = -self.speed  # Use current speed
-        if keystate[pygame.K_DOWN] or keystate[pygame.K_s]:
-            self.speedy = self.speed  # Use current speed
-
-        # Shooting
-        if keystate[pygame.K_SPACE]:
-            self.shoot()
-
-        # Fire missiles
+        # Fire missiles (auto-targeting system)
         self.shoot_missiles()
 
         # Move player

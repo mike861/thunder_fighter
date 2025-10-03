@@ -10,6 +10,7 @@ from thunder_fighter.constants import (
     WIDTH,
 )
 from thunder_fighter.graphics.renderers import create_boss_ship, draw_health_bar
+from thunder_fighter.graphics.visual_3d.bloom_boss_effect import BloomBossEffect
 from thunder_fighter.utils.logger import logger
 
 
@@ -36,9 +37,15 @@ class Boss(pygame.sprite.Sprite):
         self.game_level = game_level
         self.player = player  # Store player reference for tracking
 
+        # Create boss ship with advanced bloom effects
+        base_boss_surface = create_boss_ship(self.level)
+        # Apply all advanced effects (bloom, glow, energy, shadow, shield)
+        self.image = BloomBossEffect.apply_all_effects(base_boss_surface, self.level, 0.0)
         # Store original image - used to restore during flash effects
-        self.image = create_boss_ship(self.level)
         self.original_image = self.image.copy()
+        # Store base for animation
+        self.base_surface = base_boss_surface
+        self.animation_time = 0.0
 
         # Adjust attributes based on level
         self.rect = self.image.get_rect()
@@ -167,6 +174,17 @@ class Boss(pygame.sprite.Sprite):
 
     def update(self):
         """Update Boss state"""
+        # Update animation time for effects
+        self.animation_time += 0.01  # Slower animation
+
+        # Periodically update visual effects for animation
+        if int(self.animation_time * 10) % 10 == 0:  # Update every ~10 frames (less frequent)
+            if self.damage_flash <= 0:  # Don't update during damage flash
+                self.image = BloomBossEffect.apply_all_effects(
+                    self.base_surface, self.level, self.animation_time
+                )
+                self.original_image = self.image.copy()
+
         # Boss entrance animation
         if self.rect.top < BOSS_COMBAT["ENTRANCE_TARGET_Y"]:
             self.rect.y += BOSS_COMBAT["ENTRANCE_SPEED"]

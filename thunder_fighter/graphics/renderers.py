@@ -36,8 +36,8 @@ def load_image(name, colorkey=None):
         return placeholder
 
 
-def create_player_surface():
-    """Create player aircraft surface with modern fighter jet design"""
+def create_player_surface_original():
+    """Create player aircraft surface with modern fighter jet design (procedural)"""
     # Keep improved size: 60x50
     surface = pygame.Surface((60, 50))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
@@ -111,6 +111,19 @@ def create_player_surface():
     pygame.draw.line(surface, accent_color, (24, 38), (36, 38), 1)  # Rear line
 
     return surface
+
+
+def create_player_surface():
+    """Create player aircraft surface by loading fighter PNG with 3D effects"""
+    try:
+        # Try to load the new fighter PNG with 3D effects
+        image = load_image("fighters_3d/fighter_game_medium.png")
+        return image
+    except Exception as e:
+        print(f"Warning: Could not load fighter_game_medium.png: {e}")
+        print("Falling back to procedural player ship")
+        # Fall back to procedural generation
+        return create_player_surface_original()
 
 
 def create_enemy_surface(level=0):
