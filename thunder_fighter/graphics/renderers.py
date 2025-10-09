@@ -126,8 +126,8 @@ def create_player_surface():
         return create_player_surface_original()
 
 
-def create_enemy_surface(level=0):
-    """Create alien/biomechanical enemy ship with organic design to contrast player's tech fighter"""
+def create_enemy_surface_procedural(level=0):
+    """Create alien/biomechanical enemy ship with organic design (procedural fallback)"""
     # Slightly larger and different aspect ratio: 45x45 (more square/organic)
     surface = pygame.Surface((45, 45))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
@@ -279,6 +279,31 @@ def create_enemy_surface(level=0):
             pygame.draw.ellipse(surface, glow_color[:3], (spot_x, 2, 2, 3), 1)  # Glow outline
 
     return surface
+
+
+def create_enemy_surface(level=0):
+    """Create enemy ship surface by loading PNG textures"""
+    try:
+        # Choose enemy texture based on level
+        if level < 3:
+            # Level 0-2: Small scouts (40x40)
+            image = load_image("enemies_3d/enemy_p1_resized.png")
+        elif level < 6:
+            # Level 3-5: Medium fighters (50x50)
+            image = load_image("enemies_3d/enemy_p2_resized.png")
+        elif level < 9:
+            # Level 6-8: Heavy attackers (60x60)
+            image = load_image("enemies_3d/enemy_ufo1_resized.png")
+        else:
+            # Level 9-10: Elite command ships (70x70)
+            image = load_image("enemies_3d/enemy_ufo2_resized.png")
+
+        return image
+    except Exception as e:
+        print(f"Warning: Could not load enemy PNG for level {level}: {e}")
+        print("Falling back to procedural enemy ship")
+        # Fall back to procedural generation
+        return create_enemy_surface_procedural(level)
 
 
 def create_boss_surface(level=1):
