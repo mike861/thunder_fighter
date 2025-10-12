@@ -137,11 +137,4 @@ class ScoringSystem:
         self.add_score(points)
 
 
-# Compatibility function: create a traditional Score class instance
-def create_legacy_score():
-    """Creates an instance compatible with the original Score class."""
-    return ScoringSystem()
-
-
-# Compatibility alias
 Score = ScoringSystem

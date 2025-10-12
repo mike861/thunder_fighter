@@ -134,24 +134,22 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         """Fire bullets using event-driven architecture"""
         now = ptime.get_ticks()
-        if now - self.last_shot > self.shoot_delay:
-            self.last_shot = now
+        if now - self.last_shot <= self.shoot_delay:
+            return
 
-            # Play shooting sound effect
-            # self.sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
+        self.last_shot = now
 
-            # Calculate shooting parameters using pure logic
-            shooting_data = self._calculate_shooting_parameters()
+        # Play shooting sound effect
+        # self.sound_manager.play_sound('player_shoot')  # Commented out - sound file doesn't exist
 
-            # If no event system available, fall back to legacy behavior
-            if self.event_system is None:
-                logger.warning("No event system available, falling back to legacy shooting behavior")
-                self._legacy_shoot_fallback(shooting_data)
-            else:
-                # Emit event with shooting parameters
-                self.event_system.dispatch_event(
-                    GameEvent.create_player_shoot(shooting_data=shooting_data, source="player")
-                )
+        # Calculate shooting parameters using pure logic
+        shooting_data = self._calculate_shooting_parameters()
+
+        if self.event_system is None:
+            raise RuntimeError("Player.shoot called without an event system. Inject EventSystem before using Player.")
+
+        # Emit event with shooting parameters
+        self.event_system.dispatch_event(GameEvent.create_player_shoot(shooting_data=shooting_data, source="player"))
 
     def _calculate_shooting_parameters(self) -> list[dict]:
         """
@@ -254,24 +252,6 @@ class Player(pygame.sprite.Sprite):
             )
 
         return bullets_data
-
-    def _legacy_shoot_fallback(self, shooting_data: list[dict]):
-        """
-        Legacy fallback when no event system is available.
-        This maintains backward compatibility.
-        """
-        # Import here to avoid circular imports and maintain clean architecture
-        from thunder_fighter.entities.projectiles.bullets import Bullet
-
-        bullets = []
-        for bullet_data in shooting_data:
-            bullet = Bullet(bullet_data["x"], bullet_data["y"], bullet_data["speed"], bullet_data["angle"])
-            bullets.append(bullet)
-
-        # Add to sprite groups
-        if bullets:
-            self.all_sprites.add(*bullets)
-            self.bullets_group.add(*bullets)
 
     def shoot_missiles(self):
         """Fires missiles from wingmen with intelligent targeting."""

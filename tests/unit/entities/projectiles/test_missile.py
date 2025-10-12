@@ -59,22 +59,6 @@ class TestTrackingMissileInitialization:
         assert missile.target is None
         assert missile.algorithm.last_target_position is None
 
-    @pytest.mark.skip(reason="Graphics integration test - logic covered in test_logic.py")
-    @patch("thunder_fighter.graphics.renderers.create_tracking_missile")
-    def test_missile_position_initialization(self, mock_create_missile):
-        """Test missile initializes at correct position."""
-        mock_surface = pygame.Surface((6, 12))
-        mock_create_missile.return_value = mock_surface
-
-        mock_target = Mock()
-        mock_target.rect = pygame.Rect(200, 150, 32, 32)  # Use real Rect
-        mock_target.rect.center = (200, 150)
-
-        missile = TrackingMissile(x=100, y=200, target=mock_target)
-
-        assert missile.rect.center == (100, 200)
-
-
 class TestTrackingMissileTargeting:
     """Test missile targeting and tracking behavior."""
 
@@ -169,31 +153,6 @@ class TestTrackingMissileMovement:
         pygame.sprite = Mock()
         pygame.sprite.Sprite = Mock()
         # Keep pygame.math, pygame.transform real for mathematical operations
-
-    @pytest.mark.skip(reason="Graphics integration test - logic covered in test_logic.py")
-    @patch("thunder_fighter.graphics.renderers.create_tracking_missile")
-    def test_missile_movement_toward_target(self, mock_create_missile):
-        """Test missile moves toward target position."""
-        mock_surface = pygame.Surface((6, 12))
-        mock_create_missile.return_value = mock_surface
-
-        mock_target = Mock()
-        mock_target.alive.return_value = True
-        mock_target.rect = pygame.Rect(200, 150, 32, 32)
-        mock_target.rect.center = (200, 150)
-
-        missile = TrackingMissile(x=100, y=200, target=mock_target)
-        original_center = missile.rect.center
-
-        missile.update()
-
-        # Should move toward target (position should change)
-        assert missile.rect.center != original_center
-        # Missile should be closer to target after update
-
-        original_distance = math.sqrt((200 - 100) ** 2 + (150 - 200) ** 2)
-        new_distance = math.sqrt((200 - missile.rect.center[0]) ** 2 + (150 - missile.rect.center[1]) ** 2)
-        assert new_distance < original_distance
 
     @patch("thunder_fighter.graphics.renderers.create_tracking_missile")
     def test_missile_angle_calculation(self, mock_create_missile):

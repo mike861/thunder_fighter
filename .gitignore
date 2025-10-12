@@ -57,11 +57,15 @@ Thumbs.db
 .cursorrules
 *.bak
 bak/
+tmp/
 prompt*
 *.png
 *.txt
+*.log
 # Remove these problematic ignores
 # CLAUDE.md - This is an important project file
 # .gitignore - Should not ignore itself
 # *.png - Game assets should be tracked
 .VSCodeCounter/
+docs/3d_samples
+demos/
