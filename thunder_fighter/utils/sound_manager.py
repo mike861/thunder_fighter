@@ -56,8 +56,12 @@ class SoundManager:
             sound.set_volume(self.sound_volume)
 
         # Update music volume if music is playing
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.set_volume(self.music_volume)
+        if self._mixer_ready():
+            try:
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.set_volume(self.music_volume)
+            except Exception as exc:
+                logger.error(f"Error adjusting music volume during config update: {exc}")
 
         logger.debug(
             f"Sound manager configuration updated: volume={self.sound_volume}, music_volume={self.music_volume}"
@@ -101,6 +105,10 @@ class SoundManager:
             logger.error(f"Failed to initialize pygame.mixer: {e}")
             self._initialized = False  # Explicitly set to false on error
 
+    def _mixer_ready(self) -> bool:
+        """Return True if pygame.mixer is initialized and usable."""
+        return self._initialized and pygame.mixer.get_init() is not None
+
     def _load_sounds(self):
         """Load all sound effects using the resource manager."""
         from thunder_fighter.utils.resource_manager import get_resource_manager
@@ -133,10 +141,10 @@ class SoundManager:
 
     def play_sound(self, sound_name):
         """Play the specified sound effect"""
-        if not self._initialized or not pygame.mixer.get_init():
+        if not self._mixer_ready():
             logger.warning("Sound manager not ready, attempting to recover.")
             self.reinitialize()
-            if not self._initialized:
+            if not self._mixer_ready():
                 logger.error("Recovery failed. Cannot play sound.")
                 return
 
@@ -146,10 +154,10 @@ class SoundManager:
         if sound_name in self.sounds:
             try:
                 # Check if mixer is still working
-                if not pygame.mixer.get_init():
+                if not self._mixer_ready():
                     logger.warning("pygame.mixer not initialized, attempting to reinitialize")
                     self._init_pygame_mixer()
-                    if not self._initialized:
+                    if not self._mixer_ready():
                         return
 
                 # Play the sound
@@ -192,10 +200,10 @@ class SoundManager:
         for attempt in range(max_retries):
             try:
                 # Check if mixer is still working
-                if not pygame.mixer.get_init():
+                if not self._mixer_ready():
                     logger.warning("pygame.mixer not initialized, attempting to reinitialize")
                     self._init_pygame_mixer()
-                    if not self._initialized:
+                    if not self._mixer_ready():
                         return
 
                 # Stop current music if playing
@@ -221,6 +229,9 @@ class SoundManager:
 
     def stop_music(self):
         """Stop background music"""
+        if not self._mixer_ready():
+            logger.debug("Skipping stop_music; mixer not initialized.")
+            return
         try:
             pygame.mixer.music.stop()
             logger.debug("Background music stopped.")
@@ -229,6 +240,9 @@ class SoundManager:
 
     def fadeout_music(self, time_ms):
         """Fade out background music over specified time"""
+        if not self._mixer_ready():
+            logger.debug("Skipping fadeout_music; mixer not initialized.")
+            return
         try:
             pygame.mixer.music.fadeout(time_ms)
             logger.debug(f"Music fading out over {time_ms}ms")
@@ -248,18 +262,36 @@ class SoundManager:
     def set_music_volume(self, volume):
         """Set background music volume"""
         self.music_volume = max(0.0, min(1.0, volume))
-        pygame.mixer.music.set_volume(self.music_volume)
-        logger.debug(f"Music volume set to: {self.music_volume}")
+        if not self._mixer_ready():
+            logger.debug("Skipping set_music_volume; mixer not initialized.")
+            return
+        try:
+            pygame.mixer.music.set_volume(self.music_volume)
+            logger.debug(f"Music volume set to: {self.music_volume}")
+        except Exception as e:
+            logger.error(f"Error setting music volume: {e}")
 
     def pause_music(self):
         """Pause background music"""
-        pygame.mixer.music.pause()
-        logger.debug("Music paused.")
+        if not self._mixer_ready():
+            logger.debug("Skipping pause_music; mixer not initialized.")
+            return
+        try:
+            pygame.mixer.music.pause()
+            logger.debug("Music paused.")
+        except Exception as e:
+            logger.error(f"Error pausing music: {e}")
 
     def unpause_music(self):
         """Resume background music"""
-        pygame.mixer.music.unpause()
-        logger.debug("Music resumed.")
+        if not self._mixer_ready():
+            logger.debug("Skipping unpause_music; mixer not initialized.")
+            return
+        try:
+            pygame.mixer.music.unpause()
+            logger.debug("Music resumed.")
+        except Exception as e:
+            logger.error(f"Error resuming music: {e}")
 
     def toggle_sound(self):
         """Toggle sound effects on/off"""
@@ -287,8 +319,7 @@ class SoundManager:
 
         try:
             # Check if pygame.mixer is still initialized
-            mixer_init = pygame.mixer.get_init()
-            if not mixer_init:
+            if not self._mixer_ready():
                 return False
 
             # Check if we have loaded sounds (allow empty sounds dict during testing)

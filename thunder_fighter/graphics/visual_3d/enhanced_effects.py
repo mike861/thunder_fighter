@@ -6,8 +6,9 @@ fixing transparency issues and adding dramatic visual enhancements.
 """
 
 import math
-import pygame
 from typing import Tuple
+
+import pygame
 
 from thunder_fighter.utils.logger import logger
 
@@ -16,10 +17,12 @@ class Enhanced3DEffects:
     """Enhanced 3D effects with dramatic visual impact."""
 
     @staticmethod
-    def create_dramatic_shadow(surface: pygame.Surface,
-                              offset: Tuple[int, int] = (6, 6),
-                              color: Tuple[int, int, int] = (0, 0, 0),
-                              blur_radius: int = 3) -> pygame.Surface:
+    def create_dramatic_shadow(
+        surface: pygame.Surface,
+        offset: Tuple[int, int] = (6, 6),
+        color: Tuple[int, int, int] = (0, 0, 0),
+        blur_radius: int = 3,
+    ) -> pygame.Surface:
         """
         Create a dramatic shadow with proper transparency handling.
 
@@ -53,7 +56,7 @@ class Enhanced3DEffects:
                     shadow.set_at((x, y), (*color, 200))  # Strong shadow
 
         # Apply blur to shadow for soft edges
-        for blur_pass in range(blur_radius):
+        for _blur_pass in range(blur_radius):
             blurred = pygame.Surface((width, height), pygame.SRCALPHA)
             blurred.fill((0, 0, 0, 0))
 
@@ -85,10 +88,12 @@ class Enhanced3DEffects:
         return result
 
     @staticmethod
-    def add_3d_bevel(surface: pygame.Surface,
-                     bevel_size: int = 3,
-                     highlight_color: Tuple[int, int, int] = (255, 255, 255),
-                     shadow_color: Tuple[int, int, int] = (0, 0, 0)) -> pygame.Surface:
+    def add_3d_bevel(
+        surface: pygame.Surface,
+        bevel_size: int = 3,
+        highlight_color: Tuple[int, int, int] = (255, 255, 255),
+        shadow_color: Tuple[int, int, int] = (0, 0, 0),
+    ) -> pygame.Surface:
         """
         Add 3D bevel effect to edges.
 
@@ -152,8 +157,7 @@ class Enhanced3DEffects:
         return result
 
     @staticmethod
-    def add_metallic_gradient(surface: pygame.Surface,
-                             gradient_type: str = "vertical") -> pygame.Surface:
+    def add_metallic_gradient(surface: pygame.Surface, gradient_type: str = "vertical") -> pygame.Surface:
         """
         Add metallic gradient overlay.
 
@@ -180,7 +184,7 @@ class Enhanced3DEffects:
 
         elif gradient_type == "radial":
             center_x, center_y = width // 2, height // 2
-            max_dist = math.sqrt(center_x ** 2 + center_y ** 2)
+            max_dist = math.sqrt(center_x**2 + center_y**2)
 
             for x in range(width):
                 for y in range(height):
@@ -195,10 +199,12 @@ class Enhanced3DEffects:
         return result
 
     @staticmethod
-    def add_outer_glow(surface: pygame.Surface,
-                       glow_color: Tuple[int, int, int] = (100, 200, 255),
-                       glow_radius: int = 5,
-                       glow_intensity: float = 0.8) -> pygame.Surface:
+    def add_outer_glow(
+        surface: pygame.Surface,
+        glow_color: Tuple[int, int, int] = (100, 200, 255),
+        glow_radius: int = 5,
+        glow_intensity: float = 0.8,
+    ) -> pygame.Surface:
         """
         Add outer glow effect.
 
@@ -251,8 +257,11 @@ class Enhanced3DEffects:
             for offset_x in range(-radius, radius + 1):
                 for offset_y in range(-radius, radius + 1):
                     if offset_x * offset_x + offset_y * offset_y <= radius * radius:
-                        result.blit(glow_surf, (glow_radius + offset_x, glow_radius + offset_y),
-                                  special_flags=pygame.BLEND_RGBA_MAX)
+                        result.blit(
+                            glow_surf,
+                            (glow_radius + offset_x, glow_radius + offset_y),
+                            special_flags=pygame.BLEND_RGBA_MAX,
+                        )
 
         # Draw original on top
         result.blit(surface, (glow_radius, glow_radius))
@@ -279,26 +288,17 @@ class Enhanced3DEffects:
 
             # 2. Add 3D bevel for depth
             enhanced = Enhanced3DEffects.add_3d_bevel(
-                enhanced,
-                bevel_size=2,
-                highlight_color=(255, 255, 255),
-                shadow_color=(0, 0, 50)
+                enhanced, bevel_size=2, highlight_color=(255, 255, 255), shadow_color=(0, 0, 50)
             )
 
             # 3. Add outer glow for energy effect
             enhanced = Enhanced3DEffects.add_outer_glow(
-                enhanced,
-                glow_color=(100, 150, 255),
-                glow_radius=4,
-                glow_intensity=0.9
+                enhanced, glow_color=(100, 150, 255), glow_radius=4, glow_intensity=0.9
             )
 
             # 4. Add dramatic shadow last
             enhanced = Enhanced3DEffects.create_dramatic_shadow(
-                enhanced,
-                offset=(5, 5),
-                color=(0, 0, 50),
-                blur_radius=2
+                enhanced, offset=(5, 5), color=(0, 0, 50), blur_radius=2
             )
 
             return enhanced
@@ -327,27 +327,18 @@ class Enhanced3DEffects:
 
             # 2. Add organic bevel with red tints
             enhanced = Enhanced3DEffects.add_3d_bevel(
-                enhanced,
-                bevel_size=2,
-                highlight_color=(255, 150, 150),
-                shadow_color=(50, 0, 0)
+                enhanced, bevel_size=2, highlight_color=(255, 150, 150), shadow_color=(50, 0, 0)
             )
 
             # 3. Add bio-glow for high level enemies
             if level >= 5:
                 enhanced = Enhanced3DEffects.add_outer_glow(
-                    enhanced,
-                    glow_color=(255, 50, 50),
-                    glow_radius=3,
-                    glow_intensity=0.7
+                    enhanced, glow_color=(255, 50, 50), glow_radius=3, glow_intensity=0.7
                 )
 
             # 4. Add organic shadow
             enhanced = Enhanced3DEffects.create_dramatic_shadow(
-                enhanced,
-                offset=(4, 4),
-                color=(50, 0, 0),
-                blur_radius=2
+                enhanced, offset=(4, 4), color=(50, 0, 0), blur_radius=2
             )
 
             return enhanced

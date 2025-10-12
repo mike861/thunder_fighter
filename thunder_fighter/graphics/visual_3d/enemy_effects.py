@@ -7,12 +7,12 @@ depth effects contrasting with the player's mechanical/metallic appearance.
 
 import math
 import random
-from typing import Tuple
 
 import pygame
 
-from .effect_config import Visual3DConfig, blend_colors, adjust_brightness
 from thunder_fighter.utils.logger import logger
+
+from .effect_config import Visual3DConfig
 
 
 class EnemyVisualEnhancer:
@@ -100,9 +100,8 @@ class EnemyVisualEnhancer:
 
             # Apply shadow with offset
             temp_surface = pygame.Surface(
-                (surface.get_width() + abs(shadow_offset[0]),
-                 surface.get_height() + abs(shadow_offset[1])),
-                pygame.SRCALPHA
+                (surface.get_width() + abs(shadow_offset[0]), surface.get_height() + abs(shadow_offset[1])),
+                pygame.SRCALPHA,
             )
 
             shadow_rect = shadow_surface.get_rect()
@@ -139,7 +138,7 @@ class EnemyVisualEnhancer:
             base_intensity = 0.3 + (enemy_level * 0.05)  # Higher level = more intense
             base_intensity = min(base_intensity, 0.8)  # Cap at 0.8
 
-            for i, pos_ratio in enumerate(bio_highlights):
+            for _i, pos_ratio in enumerate(bio_highlights):
                 x = int(pos_ratio[0] * width)
                 y = int(pos_ratio[1] * height)
 
@@ -160,7 +159,7 @@ class EnemyVisualEnhancer:
                                     highlight_x = x + offset_x
                                     highlight_y = y + offset_y
 
-                                    if (0 <= highlight_x < width and 0 <= highlight_y < height):
+                                    if 0 <= highlight_x < width and 0 <= highlight_y < height:
                                         current_pixel = surface.get_at((highlight_x, highlight_y))
                                         if current_pixel[3] > 0:  # Only on existing pixels
                                             bio_color = (*highlight_color, alpha)
@@ -172,7 +171,7 @@ class EnemyVisualEnhancer:
                                             surface.blit(
                                                 highlight_surf,
                                                 (highlight_x, highlight_y),
-                                                special_flags=pygame.BLEND_ALPHA_SDL2
+                                                special_flags=pygame.BLEND_ALPHA_SDL2,
                                             )
 
             return surface
@@ -280,8 +279,10 @@ class EnemyVisualEnhancer:
                                         target_x = x + glow_x + 2
                                         target_y = y + glow_y + 2
 
-                                        if (0 <= target_x < glow_surface.get_width() and
-                                            0 <= target_y < glow_surface.get_height()):
+                                        if (
+                                            0 <= target_x < glow_surface.get_width()
+                                            and 0 <= target_y < glow_surface.get_height()
+                                        ):
                                             glow_surface.set_at((target_x, target_y), glow_pixel)
 
             # Combine glow with original

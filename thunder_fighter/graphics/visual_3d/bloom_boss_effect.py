@@ -7,8 +7,10 @@ Based on popular game development techniques.
 """
 
 import math
+from typing import Tuple
+
 import pygame
-from typing import Tuple, Optional
+
 from thunder_fighter.utils.logger import logger
 
 
@@ -99,8 +101,9 @@ class BloomBossEffect:
         return result
 
     @staticmethod
-    def create_rim_lighting(surface: pygame.Surface, rim_color: Tuple[int, int, int] = (100, 150, 255),
-                           rim_width: int = 2) -> pygame.Surface:
+    def create_rim_lighting(
+        surface: pygame.Surface, rim_color: Tuple[int, int, int] = (100, 150, 255), rim_width: int = 2
+    ) -> pygame.Surface:
         """
         Create rim lighting effect (outline glow).
 
@@ -146,8 +149,7 @@ class BloomBossEffect:
         return result
 
     @staticmethod
-    def create_energy_core(surface: pygame.Surface, level: int = 1,
-                          pulse_phase: float = 0.0) -> pygame.Surface:
+    def create_energy_core(surface: pygame.Surface, level: int = 1, pulse_phase: float = 0.0) -> pygame.Surface:
         """
         Create pulsing energy core effect.
 
@@ -172,7 +174,7 @@ class BloomBossEffect:
         level_colors = {
             1: [(150, 50, 200), (200, 100, 255)],  # Purple
             2: [(50, 100, 200), (100, 150, 255)],  # Blue
-            3: [(200, 50, 50), (255, 100, 100)]    # Red
+            3: [(200, 50, 50), (255, 100, 100)],  # Red
         }
 
         colors = level_colors.get(level, level_colors[1])
@@ -193,7 +195,7 @@ class BloomBossEffect:
                     int(colors[0][0] * intensity + colors[1][0] * (1 - intensity)),
                     int(colors[0][1] * intensity + colors[1][1] * (1 - intensity)),
                     int(colors[0][2] * intensity + colors[1][2] * (1 - intensity)),
-                    int(alpha * intensity)
+                    int(alpha * intensity),
                 )
                 pygame.draw.circle(energy_layer, color, (cx, cy), r)
 
@@ -206,9 +208,13 @@ class BloomBossEffect:
         return result
 
     @staticmethod
-    def create_shadow(surface: pygame.Surface, offset_x: int = 5, offset_y: int = 6,
-                     shadow_color: Tuple[int, int, int] = (0, 0, 30),
-                     shadow_alpha: int = 60) -> pygame.Surface:
+    def create_shadow(
+        surface: pygame.Surface,
+        offset_x: int = 5,
+        offset_y: int = 6,
+        shadow_color: Tuple[int, int, int] = (0, 0, 30),
+        shadow_alpha: int = 60,
+    ) -> pygame.Surface:
         """
         Create drop shadow effect.
 
@@ -225,8 +231,7 @@ class BloomBossEffect:
         width, height = surface.get_size()
 
         # Create result with extra space for shadow
-        result = pygame.Surface((width + abs(offset_x) + 10,
-                                height + abs(offset_y) + 10), pygame.SRCALPHA)
+        result = pygame.Surface((width + abs(offset_x) + 10, height + abs(offset_y) + 10), pygame.SRCALPHA)
 
         # Create shadow
         shadow = surface.copy()
@@ -249,8 +254,9 @@ class BloomBossEffect:
         return result
 
     @staticmethod
-    def create_shield_shimmer(surface: pygame.Surface, shield_strength: float = 1.0,
-                             shimmer_phase: float = 0.0) -> pygame.Surface:
+    def create_shield_shimmer(
+        surface: pygame.Surface, shield_strength: float = 1.0, shimmer_phase: float = 0.0
+    ) -> pygame.Surface:
         """
         Create shield shimmer effect.
 
@@ -285,7 +291,7 @@ class BloomBossEffect:
                         (x + hex_size // 2, y),
                         (x + hex_size, y + hex_size // 2),
                         (x + hex_size // 2, y + hex_size),
-                        (x, y + hex_size // 2)
+                        (x, y + hex_size // 2),
                     ]
                     pygame.draw.polygon(shield_layer, (100, 150, 255, intensity), points, 1)
 
@@ -295,8 +301,7 @@ class BloomBossEffect:
         return result
 
     @staticmethod
-    def apply_all_effects(surface: pygame.Surface, level: int = 1,
-                         animation_time: float = 0.0) -> pygame.Surface:
+    def apply_all_effects(surface: pygame.Surface, level: int = 1, animation_time: float = 0.0) -> pygame.Surface:
         """
         Apply all boss effects in sequence.
 
@@ -319,7 +324,7 @@ class BloomBossEffect:
             rim_colors = {
                 1: (150, 50, 200),  # Purple
                 2: (50, 100, 200),  # Blue
-                3: (200, 50, 50)    # Red
+                3: (200, 50, 50),  # Red
             }
             rim_color = rim_colors.get(level, rim_colors[1])
             result = BloomBossEffect.create_rim_lighting(result, rim_color)

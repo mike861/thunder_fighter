@@ -6,12 +6,13 @@ like planets, nebulae, and other space objects without complex transformations.
 """
 
 import math
-from typing import Tuple, Optional
+from typing import Tuple
 
 import pygame
 
-from .effect_config import Visual3DConfig, blend_colors, adjust_brightness
 from thunder_fighter.utils.logger import logger
+
+from .effect_config import Visual3DConfig, adjust_brightness
 
 
 class BackgroundVisual3D:
@@ -23,11 +24,9 @@ class BackgroundVisual3D:
         self.planet_cache = {}  # Cache for generated planets
         logger.debug("BackgroundVisual3D initialized")
 
-    def create_3d_planet(self,
-                        radius: int,
-                        base_color: Tuple[int, int, int],
-                        light_angle: float = 45.0,
-                        atmosphere: bool = True) -> pygame.Surface:
+    def create_3d_planet(
+        self, radius: int, base_color: Tuple[int, int, int], light_angle: float = 45.0, atmosphere: bool = True
+    ) -> pygame.Surface:
         """
         Create a 3D planet with spherical shading and atmosphere.
 
@@ -69,25 +68,18 @@ class BackgroundVisual3D:
 
             # Draw planet surface with spherical shading
             self._draw_planet_surface(
-                surface, center_x, center_y, radius,
-                base_color, light_dir_x, light_dir_y,
-                gradient_steps
+                surface, center_x, center_y, radius, base_color, light_dir_x, light_dir_y, gradient_steps
             )
 
             # Add specular highlight
             if specular_intensity > 0:
                 self._add_specular_highlight(
-                    surface, center_x, center_y, radius,
-                    light_dir_x, light_dir_y, specular_intensity,
-                    specular_size
+                    surface, center_x, center_y, radius, light_dir_x, light_dir_y, specular_intensity, specular_size
                 )
 
             # Add atmospheric rim
             if atmosphere:
-                self._add_atmospheric_rim(
-                    surface, center_x, center_y, radius,
-                    base_color, atmosphere_thickness
-                )
+                self._add_atmospheric_rim(surface, center_x, center_y, radius, base_color, atmosphere_thickness)
 
             # Cache the result
             if len(self.planet_cache) < 20:  # Limit cache size
@@ -100,12 +92,17 @@ class BackgroundVisual3D:
             # Fallback: create simple circle
             return self._create_fallback_planet(radius, base_color)
 
-    def _draw_planet_surface(self,
-                            surface: pygame.Surface,
-                            center_x: int, center_y: int, radius: int,
-                            base_color: Tuple[int, int, int],
-                            light_dir_x: float, light_dir_y: float,
-                            gradient_steps: int):
+    def _draw_planet_surface(
+        self,
+        surface: pygame.Surface,
+        center_x: int,
+        center_y: int,
+        radius: int,
+        base_color: Tuple[int, int, int],
+        light_dir_x: float,
+        light_dir_y: float,
+        gradient_steps: int,
+    ):
         """Draw planet surface with spherical lighting."""
 
         # Draw planet pixel by pixel for realistic sphere shading
@@ -141,9 +138,7 @@ class BackgroundVisual3D:
                         light_unit_z = light_z / light_length
 
                         # Dot product for lighting intensity
-                        lighting = (normal_x * light_unit_x +
-                                  normal_y * light_unit_y +
-                                  normal_z * light_unit_z)
+                        lighting = normal_x * light_unit_x + normal_y * light_unit_y + normal_z * light_unit_z
 
                         # Clamp lighting to [0, 1]
                         lighting = max(0, min(1, lighting))
@@ -156,17 +151,23 @@ class BackgroundVisual3D:
                         final_color = (
                             int(base_color[0] * final_lighting),
                             int(base_color[1] * final_lighting),
-                            int(base_color[2] * final_lighting)
+                            int(base_color[2] * final_lighting),
                         )
 
                         # Set pixel
                         surface.set_at((x, y), final_color)
 
-    def _add_specular_highlight(self,
-                              surface: pygame.Surface,
-                              center_x: int, center_y: int, radius: int,
-                              light_dir_x: float, light_dir_y: float,
-                              intensity: float, size: float):
+    def _add_specular_highlight(
+        self,
+        surface: pygame.Surface,
+        center_x: int,
+        center_y: int,
+        radius: int,
+        light_dir_x: float,
+        light_dir_y: float,
+        intensity: float,
+        size: float,
+    ):
         """Add specular highlight to simulate reflective surface."""
 
         # Calculate highlight position (where light reflects directly toward viewer)
@@ -184,25 +185,24 @@ class BackgroundVisual3D:
 
             # Create small surface for this highlight ring
             highlight_surf = pygame.Surface((highlight_r * 2, highlight_r * 2), pygame.SRCALPHA)
-            pygame.draw.circle(
-                highlight_surf,
-                highlight_color,
-                (highlight_r, highlight_r),
-                highlight_r
-            )
+            pygame.draw.circle(highlight_surf, highlight_color, (highlight_r, highlight_r), highlight_r)
 
             # Blit with blending
             surface.blit(
                 highlight_surf,
                 (highlight_x - highlight_r, highlight_y - highlight_r),
-                special_flags=pygame.BLEND_ALPHA_SDL2
+                special_flags=pygame.BLEND_ALPHA_SDL2,
             )
 
-    def _add_atmospheric_rim(self,
-                            surface: pygame.Surface,
-                            center_x: int, center_y: int, radius: int,
-                            base_color: Tuple[int, int, int],
-                            thickness: float):
+    def _add_atmospheric_rim(
+        self,
+        surface: pygame.Surface,
+        center_x: int,
+        center_y: int,
+        radius: int,
+        base_color: Tuple[int, int, int],
+        thickness: float,
+    ):
         """Add atmospheric rim glow around planet."""
 
         # Calculate atmospheric layer
@@ -228,14 +228,14 @@ class BackgroundVisual3D:
                     (*atmo_color, alpha),
                     (ring_radius, ring_radius),
                     ring_radius,
-                    1  # Ring thickness
+                    1,  # Ring thickness
                 )
 
                 # Blit centered
                 surface.blit(
                     ring_surface,
                     (center_x - ring_radius, center_y - ring_radius),
-                    special_flags=pygame.BLEND_ALPHA_SDL2
+                    special_flags=pygame.BLEND_ALPHA_SDL2,
                 )
 
     def _create_fallback_planet(self, radius: int, base_color: Tuple[int, int, int]) -> pygame.Surface:
@@ -244,10 +244,9 @@ class BackgroundVisual3D:
         pygame.draw.circle(surface, base_color, (radius, radius), radius)
         return surface
 
-    def create_nebula_layer(self,
-                           width: int, height: int,
-                           base_color: Tuple[int, int, int],
-                           depth_factor: float = 1.0) -> pygame.Surface:
+    def create_nebula_layer(
+        self, width: int, height: int, base_color: Tuple[int, int, int], depth_factor: float = 1.0
+    ) -> pygame.Surface:
         """
         Create nebula background layer with depth effect.
 
@@ -274,8 +273,9 @@ class BackgroundVisual3D:
                     noise_x = x * 0.01
                     noise_y = y * 0.01
 
-                    noise_value = (math.sin(noise_x) * math.cos(noise_y) +
-                                  math.sin(noise_x * 2.3) * math.cos(noise_y * 1.7)) * 0.5
+                    noise_value = (
+                        math.sin(noise_x) * math.cos(noise_y) + math.sin(noise_x * 2.3) * math.cos(noise_y * 1.7)
+                    ) * 0.5
 
                     if abs(noise_value) > 0.3:  # Only draw significant noise
                         alpha = int(base_alpha * abs(noise_value))
@@ -315,10 +315,9 @@ def get_background_3d() -> BackgroundVisual3D:
     return _background_3d
 
 
-def create_3d_planet(radius: int,
-                    base_color: Tuple[int, int, int],
-                    light_angle: float = 45.0,
-                    atmosphere: bool = True) -> pygame.Surface:
+def create_3d_planet(
+    radius: int, base_color: Tuple[int, int, int], light_angle: float = 45.0, atmosphere: bool = True
+) -> pygame.Surface:
     """
     Convenience function to create 3D planet.
 

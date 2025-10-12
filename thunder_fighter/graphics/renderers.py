@@ -26,20 +26,21 @@ def load_image(name, colorkey=None):
 
     try:
         # Use resource manager to load image with caching
-        image = resource_manager.load_image(name, colorkey=colorkey, alpha=False)
+        image = resource_manager.load_image(name, colorkey=colorkey, alpha=True)
         return image
     except Exception as e:
         print(f"Cannot load image: {name} - {e}")
         # Create fallback placeholder
-        placeholder = pygame.Surface((32, 32))
-        placeholder.fill((255, 0, 255))  # Magenta placeholder
+        placeholder = pygame.Surface((32, 32), pygame.SRCALPHA)
+        placeholder.fill((255, 0, 255, 255))  # Magenta placeholder
         return placeholder
 
 
 def create_player_surface_original():
     """Create player aircraft surface with modern fighter jet design (procedural)"""
     # Keep improved size: 60x50
-    surface = pygame.Surface((60, 50))
+    surface = pygame.Surface((60, 50), pygame.SRCALPHA)
+    surface.fill((0, 0, 0, 0))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
 
     # Color scheme for player fighter jet
@@ -129,7 +130,8 @@ def create_player_surface():
 def create_enemy_surface_procedural(level=0):
     """Create alien/biomechanical enemy ship with organic design (procedural fallback)"""
     # Slightly larger and different aspect ratio: 45x45 (more square/organic)
-    surface = pygame.Surface((45, 45))
+    surface = pygame.Surface((45, 45), pygame.SRCALPHA)
+    surface.fill((0, 0, 0, 0))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
 
     # Choose color scheme based on level - darker, more organic colors
@@ -532,7 +534,8 @@ def create_player_speed_item():
 def create_wingman():
     """Create wingman surface - mini version of player fighter"""
     # Smaller size: 35x30 (scaled down from player's 60x50)
-    surface = pygame.Surface((35, 30))
+    surface = pygame.Surface((35, 30), pygame.SRCALPHA)
+    surface.fill((0, 0, 0, 0))
     surface.set_colorkey((0, 0, 0))  # Set black as transparent
 
     # Slightly different color scheme - lighter blue to distinguish from main player

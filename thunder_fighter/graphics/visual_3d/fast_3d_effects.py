@@ -6,6 +6,7 @@ using efficient Pygame operations with proper beveling and depth.
 """
 
 import pygame
+
 from thunder_fighter.utils.logger import logger
 
 
@@ -100,9 +101,86 @@ class Fast3DEffects:
             return base_surface
 
     @staticmethod
+    def create_enemy_3d_effect_clean(base_surface: pygame.Surface, level: int = 0) -> pygame.Surface:
+        """
+        Create clean 3D effect preserving original PNG colors.
+
+        Only adds neutral shadows and highlights without color tinting.
+        This preserves the original colors from enemy PNG textures.
+
+        Args:
+            base_surface: Original enemy PNG surface
+            level: Enemy level (affects glow intensity)
+
+        Returns:
+            Enhanced surface with clean 3D effects preserving original colors
+        """
+        try:
+            width, height = base_surface.get_size()
+
+            # Create result surface with padding for effects
+            result = pygame.Surface((width + 10, height + 10), pygame.SRCALPHA)
+
+            # 1. NEUTRAL DROP SHADOW (gray-black, no color tint)
+            for i in range(3, 0, -1):
+                shadow = base_surface.copy()
+                # Neutral dark shadow
+                shadow.fill((20, 20, 20, 255), special_flags=pygame.BLEND_RGBA_MULT)
+                shadow.set_alpha(100 - i * 20)
+                result.blit(shadow, (5 + i, 5 + i))
+
+            # 2. MAIN SPRITE (preserve original PNG colors)
+            main_sprite = base_surface.copy()
+
+            # 3. SUBTLE EDGE HIGHLIGHT (white, top-left)
+            highlight = base_surface.copy()
+            highlight.fill((255, 255, 255, 0), special_flags=pygame.BLEND_RGBA_ADD)
+            highlight.set_alpha(40)
+            result.blit(highlight, (4, 4))
+
+            # 4. SUBTLE EDGE SHADOW (dark, bottom-right)
+            edge_shadow = base_surface.copy()
+            edge_shadow.fill((10, 10, 10, 0), special_flags=pygame.BLEND_RGBA_SUB)
+            edge_shadow.set_alpha(50)
+            result.blit(edge_shadow, (6, 6))
+
+            # 5. BRIGHTNESS BOOST (neutral, slight increase)
+            brightness = base_surface.copy()
+            brightness.fill((30, 30, 30, 0), special_flags=pygame.BLEND_RGBA_ADD)
+            brightness.set_alpha(20)
+            main_sprite.blit(brightness, (0, 0))
+
+            # 6. OPTIONAL: Subtle glow for high-level enemies (white/neutral)
+            if level >= 7:
+                glow = pygame.Surface((width, height), pygame.SRCALPHA)
+                # Neutral white glow at center
+                glow_intensity = min(80, 40 + (level - 7) * 10)
+                pygame.draw.circle(glow, (255, 255, 255, glow_intensity), (width // 2, height // 2), width // 3)
+                main_sprite.blit(glow, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+
+            # 7. Place main sprite on result
+            result.blit(main_sprite, (5, 5))
+
+            # 8. OUTER GLOW for visibility (very subtle white)
+            outer_glow = base_surface.copy()
+            outer_glow.fill((200, 200, 200, 0), special_flags=pygame.BLEND_RGBA_ADD)
+            outer_glow.set_alpha(20)
+            result.blit(outer_glow, (4, 4))
+            result.blit(outer_glow, (6, 6))
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Error creating clean enemy 3D effect: {e}")
+            return base_surface
+
+    @staticmethod
     def create_enemy_3d_effect(base_surface: pygame.Surface, level: int = 0) -> pygame.Surface:
         """
-        Create fast, dramatic 3D effect for enemy ship.
+        Create fast, dramatic 3D effect for enemy ship with red/organic tinting.
+
+        NOTE: This adds red/orange color tinting to the original surface.
+        Use create_enemy_3d_effect_clean() to preserve original PNG colors.
 
         Args:
             base_surface: Original enemy surface
@@ -209,9 +287,9 @@ class Fast3DEffects:
 
             # 1. MULTI-LAYER SHADOW for massive depth
             shadow_layers = [
-                (10, 12, 80, (0, 0, 20)),   # Deep shadow
-                (7, 9, 100, (20, 0, 30)),   # Mid shadow with purple tint
-                (4, 5, 120, (40, 0, 40)),   # Close shadow
+                (10, 12, 80, (0, 0, 20)),  # Deep shadow
+                (7, 9, 100, (20, 0, 30)),  # Mid shadow with purple tint
+                (4, 5, 120, (40, 0, 40)),  # Close shadow
             ]
 
             for offset_x, offset_y, alpha, color in shadow_layers:
@@ -270,9 +348,9 @@ class Fast3DEffects:
 
             # Wing weapons
             weapon_positions = [
-                (width // 4, height // 2),      # Left wing
+                (width // 4, height // 2),  # Left wing
                 (3 * width // 4, height // 2),  # Right wing
-                (width // 2, height // 4),      # Top cannon
+                (width // 2, height // 4),  # Top cannon
             ]
 
             for wx, wy in weapon_positions:
@@ -330,8 +408,7 @@ class Fast3DEffects:
             # 10. SPECULAR HIGHLIGHTS for metallic finish
             specular = pygame.Surface((width, height), pygame.SRCALPHA)
             # Main highlight
-            pygame.draw.ellipse(specular, (255, 255, 255, 100),
-                              (width // 2 - 15, height // 4 - 10, 30, 20))
+            pygame.draw.ellipse(specular, (255, 255, 255, 100), (width // 2 - 15, height // 4 - 10, 30, 20))
             result.blit(specular, (padding, padding), special_flags=pygame.BLEND_RGBA_ADD)
 
             return result

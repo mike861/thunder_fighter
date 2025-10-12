@@ -48,8 +48,9 @@ class TestPlayerRenderer:
         corner_pixel = surface.get_at((0, 0))
         has_per_pixel_alpha = len(corner_pixel) == 4 and corner_pixel[3] < 255
 
-        assert has_alpha_flag or has_colorkey or has_per_pixel_alpha, \
+        assert has_alpha_flag or has_colorkey or has_per_pixel_alpha, (
             "Surface must support transparency (SRCALPHA, colorkey, or per-pixel alpha)"
+        )
 
     def test_player_surface_transparency(self):
         """Test player surface has proper transparency setup"""
@@ -65,15 +66,16 @@ class TestPlayerRenderer:
         # Check for per-pixel alpha by sampling pixels
         width, height = surface.get_size()
         transparent_pixels_found = False
-        for x, y in [(0, 0), (width-1, 0), (0, height-1), (width-1, height-1)]:
+        for x, y in [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]:
             pixel = surface.get_at((x, y))
             if len(pixel) == 4 and pixel[3] < 128:  # Has alpha and is somewhat transparent
                 transparent_pixels_found = True
                 break
 
         # Must have one form of transparency
-        assert has_alpha_flag or has_colorkey or transparent_pixels_found, \
+        assert has_alpha_flag or has_colorkey or transparent_pixels_found, (
             "Surface must have transparency (flag, colorkey, or per-pixel alpha)"
+        )
 
         # If using colorkey, verify it's black
         if has_colorkey:
@@ -129,14 +131,15 @@ class TestEnemyRenderer:
 
         # Check for per-pixel alpha by sampling corners
         transparent_pixels_found = False
-        for x, y in [(0, 0), (width-1, 0), (0, height-1), (width-1, height-1)]:
+        for x, y in [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]:
             pixel = surface.get_at((x, y))
             if len(pixel) == 4 and pixel[3] < 128:
                 transparent_pixels_found = True
                 break
 
-        assert has_alpha_flag or colorkey is not None or transparent_pixels_found, \
+        assert has_alpha_flag or colorkey is not None or transparent_pixels_found, (
             "Enemy surface must have transparency"
+        )
 
         if colorkey is not None:
             assert colorkey[:3] == (0, 0, 0), "Colorkey should be black"

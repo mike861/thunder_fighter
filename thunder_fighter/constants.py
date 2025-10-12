@@ -8,8 +8,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
 # Game window size
-WIDTH = 480
-HEIGHT = 600
+WIDTH = 1080  # 480
+HEIGHT = 800  # 600
 FPS = 60
 
 # Define colors

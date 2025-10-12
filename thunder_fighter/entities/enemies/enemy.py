@@ -23,9 +23,9 @@ class Enemy(pygame.sprite.Sprite):
         # Determine level based on game time and game level
         self.level = self._determine_level(game_time, game_level)
 
-        # Create image based on level with fast dramatic 3D visual enhancement
+        # Create image based on level with clean 3D visual enhancement (preserves PNG colors)
         base_enemy = create_enemy_ship(self.level)
-        self.image = Fast3DEffects.create_enemy_3d_effect(base_enemy, self.level)
+        self.image = Fast3DEffects.create_enemy_3d_effect_clean(base_enemy, self.level)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(int(ENEMY_CONFIG["SPAWN_Y_MIN"]), int(ENEMY_CONFIG["SPAWN_Y_MAX"]))

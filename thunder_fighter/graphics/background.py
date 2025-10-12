@@ -12,8 +12,9 @@ class Star:
     """Enhanced background star class with multiple layers and effects"""
 
     def __init__(self, layer=1):
+        self.display_height = self._resolve_display_height()
         self.x = float(random.randint(0, WIDTH))
-        self.y = float(random.randint(-HEIGHT, 0))  # Start above screen
+        self.y = float(random.randint(-self.display_height, 0))  # Start above screen
         self.layer = layer
 
         # Different speeds for parallax effect
@@ -37,12 +38,37 @@ class Star:
         # Color variation
         self.color_type = random.choice(["white", "blue", "cyan"])
 
+    @staticmethod
+    def _resolve_display_height() -> int:
+        """Resolve active display height from configuration, falling back to constants."""
+        try:
+            from thunder_fighter.utils.config_manager import config_manager
+
+            configured_height = int(getattr(config_manager.display, "height", HEIGHT))
+            if configured_height > 0:
+                return configured_height
+        except Exception:
+            # Configuration not available or invalid, fall back to constant HEIGHT
+            pass
+        return HEIGHT
+
+    def _reset_position(self) -> None:
+        """Reposition star above the viewport with slight randomness."""
+        self.display_height = self._resolve_display_height()
+        # Use a height-relative offset to keep densities consistent across resolutions.
+        offset = max(int(self.display_height * 0.25), 50)
+        self.y = float(random.randint(-offset, -10))
+        self.x = float(random.randint(0, WIDTH))
+        # Refresh twinkle cycle so respawned stars feel organic.
+        self.twinkle_phase = random.uniform(0, math.pi * 2)
+
     def update(self):
         """Update star position and effects"""
         self.y += self.speed
-        if self.y > HEIGHT + 10:
-            self.y = random.randint(-50, -10)
-            self.x = random.randint(0, WIDTH)
+        self.display_height = self._resolve_display_height()
+        reset_threshold = self.display_height + 10
+        if self.y > reset_threshold:
+            self._reset_position()
 
         # Update twinkling
         self.twinkle_phase += self.twinkle_speed
@@ -290,7 +316,7 @@ class Planet:
             radius=self.size,
             base_color=self.color,
             light_angle=self.light_angle,
-            atmosphere=True  # Add atmospheric glow
+            atmosphere=True,  # Add atmospheric glow
         )
 
     def update(self):
@@ -329,23 +355,13 @@ class Planet:
             ring_surface = pygame.Surface((ring_width * 2, ring_height * 2), pygame.SRCALPHA)
 
             # Draw elliptical ring
-            pygame.draw.ellipse(
-                ring_surface,
-                ring_color_alpha,
-                (0, 0, ring_width * 2, ring_height * 2),
-                2
-            )
+            pygame.draw.ellipse(ring_surface, ring_color_alpha, (0, 0, ring_width * 2, ring_height * 2), 2)
 
             # Apply light gradient to rings based on planet's light angle
             if self.light_angle < 180:
                 # Light from top - upper part of ring brighter
                 gradient_rect = pygame.Rect(0, 0, ring_width * 2, ring_height)
-                pygame.draw.ellipse(
-                    ring_surface,
-                    (*self.ring_color, 100),
-                    gradient_rect,
-                    1
-                )
+                pygame.draw.ellipse(ring_surface, (*self.ring_color, 100), gradient_rect, 1)
 
             # Position and draw ring
             ring_rect = ring_surface.get_rect(center=(int(self.x), int(self.y)))

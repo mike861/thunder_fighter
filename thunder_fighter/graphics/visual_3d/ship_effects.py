@@ -6,12 +6,12 @@ like shadows, highlights, metallic sheen, and engine glow without runtime scalin
 """
 
 import math
-from typing import Optional, Tuple
 
 import pygame
 
-from .effect_config import Visual3DConfig, blend_colors, adjust_brightness
 from thunder_fighter.utils.logger import logger
+
+from .effect_config import Visual3DConfig
 
 
 class ShipVisualEnhancer:
@@ -102,9 +102,8 @@ class ShipVisualEnhancer:
 
             # Draw shadow first (behind the ship)
             temp_surface = pygame.Surface(
-                (surface.get_width() + abs(shadow_offset[0]),
-                 surface.get_height() + abs(shadow_offset[1])),
-                pygame.SRCALPHA
+                (surface.get_width() + abs(shadow_offset[0]), surface.get_height() + abs(shadow_offset[1])),
+                pygame.SRCALPHA,
             )
             temp_surface.blit(shadow_surface, shadow_rect)
             temp_surface.blit(surface, (0, 0))  # Original ship on top
@@ -142,7 +141,7 @@ class ShipVisualEnhancer:
                     original_pixel = surface.get_at((x, y))
                     if original_pixel[3] > 0:
                         # Calculate distance from light center
-                        distance = math.sqrt((x - center_x)**2 + (y - center_y)**2)
+                        distance = math.sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
                         max_distance = math.sqrt(width**2 + height**2) / 2
 
                         # Calculate metallic intensity (higher near center)
@@ -191,19 +190,10 @@ class ShipVisualEnhancer:
                 for radius in range(highlight_radius, 0, -1):
                     alpha = int(highlight_alpha * (radius / highlight_radius))
                     highlight_surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-                    pygame.draw.circle(
-                        highlight_surf,
-                        (*highlight_color, alpha),
-                        (radius, radius),
-                        radius
-                    )
+                    pygame.draw.circle(highlight_surf, (*highlight_color, alpha), (radius, radius), radius)
 
                     # Blit centered on highlight position
-                    surface.blit(
-                        highlight_surf,
-                        (x - radius, y - radius),
-                        special_flags=pygame.BLEND_ALPHA_SDL2
-                    )
+                    surface.blit(highlight_surf, (x - radius, y - radius), special_flags=pygame.BLEND_ALPHA_SDL2)
 
             return surface
 
@@ -283,17 +273,12 @@ class ShipVisualEnhancer:
                     alpha = int(255 * glow_intensity * (radius / glow_radius) * 0.5)
                     glow_surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
 
-                    pygame.draw.circle(
-                        glow_surf,
-                        (*glow_color, alpha),
-                        (radius, radius),
-                        radius
-                    )
+                    pygame.draw.circle(glow_surf, (*glow_color, alpha), (radius, radius), radius)
 
                     surface.blit(
                         glow_surf,
                         (int(engine_x - radius), int(engine_y - radius)),
-                        special_flags=pygame.BLEND_ALPHA_SDL2
+                        special_flags=pygame.BLEND_ALPHA_SDL2,
                     )
 
             return surface

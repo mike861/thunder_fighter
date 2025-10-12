@@ -33,7 +33,7 @@ class LightingProfile:
     specular_intensity: int
 
 
-def _normalise(vec: Tuple[float, float]) -> Tuple[float, float]:
+def _normalise(vec: tuple[float, float]) -> tuple[float, float]:
     x, y = vec
     length = math.hypot(x, y) or 1.0
     return (x / length, y / length)
@@ -42,7 +42,7 @@ def _normalise(vec: Tuple[float, float]) -> Tuple[float, float]:
 class Cinematic3DEffects:
     """Generate stylised 3D sprites using layered 2D operations."""
 
-    def __init__(self, light_direction: Tuple[float, float] = LIGHT_VEC):
+    def __init__(self, light_direction: tuple[float, float] = LIGHT_VEC):
         self.light_dir = _normalise(light_direction)
         self.player_profile = LightingProfile(
             highlight_color=(180, 210, 255),
@@ -119,7 +119,7 @@ class Cinematic3DEffects:
         self,
         surface: pygame.Surface,
         profile: LightingProfile,
-        position_ratio: Tuple[float, float],
+        position_ratio: tuple[float, float],
     ) -> pygame.Surface:
         width, height = surface.get_size()
         cx = int(position_ratio[0] * width)
@@ -176,7 +176,7 @@ class Cinematic3DEffects:
         engine_y = height - 6
         colors = [(255, 200, 90, 90), (140, 200, 255, 60)]
         offsets = (-width // 4, width // 4)
-        for idx, dx in enumerate(offsets):
+        for _idx, dx in enumerate(offsets):
             cx = width // 2 + dx
             for radius, color in zip((8, 4), colors):
                 pygame.draw.circle(glow, color, (cx, engine_y), radius)
@@ -210,7 +210,7 @@ class Cinematic3DEffects:
         base_surface: pygame.Surface,
         shaded_surface: pygame.Surface,
         profile: LightingProfile,
-        shadow_offset: Tuple[int, int],
+        shadow_offset: tuple[int, int],
     ) -> pygame.Surface:
         width, height = base_surface.get_size()
         padding = profile.glow_expand + 8
@@ -237,8 +237,8 @@ class Cinematic3DEffects:
     def _create_soft_shadow(
         self,
         base_surface: pygame.Surface,
-        offset: Tuple[int, int],
-    ) -> Tuple[pygame.Surface, int]:
+        offset: tuple[int, int],
+    ) -> tuple[pygame.Surface, int]:
         mask = pygame.mask.from_surface(base_surface, 10)
         width, height = base_surface.get_size()
         padding = 12
@@ -254,7 +254,7 @@ class Cinematic3DEffects:
         self,
         base_surface: pygame.Surface,
         profile: LightingProfile,
-    ) -> Tuple[pygame.Surface, int]:
+    ) -> tuple[pygame.Surface, int]:
         mask = pygame.mask.from_surface(base_surface, 10)
         width, height = base_surface.get_size()
         padding = profile.glow_expand // 2 + 6

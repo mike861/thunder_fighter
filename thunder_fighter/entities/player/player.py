@@ -14,7 +14,6 @@ from thunder_fighter.entities.player.wingman import Wingman
 from thunder_fighter.events.game_events import GameEvent
 from thunder_fighter.graphics.effects import create_explosion, create_flash_effect
 from thunder_fighter.graphics.renderers import create_player_ship
-from thunder_fighter.graphics.visual_3d.fast_3d_effects import Fast3DEffects
 from thunder_fighter.utils.logger import logger
 
 
