@@ -154,9 +154,11 @@ class Fast3DEffects:
             if level >= 7:
                 glow = pygame.Surface((width, height), pygame.SRCALPHA)
                 # Neutral white glow at center
-                glow_intensity = min(80, 40 + (level - 7) * 10)
-                pygame.draw.circle(glow, (255, 255, 255, glow_intensity), (width // 2, height // 2), width // 3)
-                main_sprite.blit(glow, (0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+                glow_intensity = min(70, 30 + (level - 7) * 10)
+                glow_radius = max(1, width // 3)
+                pygame.draw.circle(glow, (255, 255, 255, glow_intensity), (width // 2, height // 2), glow_radius)
+                # Rely on per-pixel alpha so highlights do not blow out original PNG colors
+                main_sprite.blit(glow, (0, 0))
 
             # 7. Place main sprite on result
             result.blit(main_sprite, (5, 5))

@@ -226,9 +226,32 @@ class TestEnemyEntity:
         assert low_level_enemy.shoot_delay > 0
         assert high_level_enemy.shoot_delay > 0
 
-        # Higher level enemies should generally shoot faster (lower delay)
-        # (This is a general expectation, allowing some variance)
-        assert high_level_enemy.shoot_delay <= low_level_enemy.shoot_delay + 200
+        # Higher level enemies should generally shoot faster on average.
+        # Because shoot_delay now includes a random component, we only verify
+        # that the expected value decreases meaningfully with level rather than
+        # relying on a single random sample.
+        from statistics import mean
+
+        def sample_delay(level: int, iterations: int = 200) -> float:
+            delays = []
+            for _ in range(iterations):
+                with patch.object(Enemy, "_determine_level", return_value=level):
+                    enemy = Enemy(
+                        game_time=1,
+                        game_level=level,
+                        all_sprites=self.mock_all_sprites,
+                        enemy_bullets_group=self.mock_enemy_bullets,
+                    )
+                delays.append(enemy.shoot_delay)
+            return mean(delays)
+
+        low_average = sample_delay(level=2)
+        high_average = sample_delay(level=7)
+
+        assert high_average < low_average, (
+            f"Expected higher level enemies to have lower average shoot delay, "
+            f"got low_level={low_average:.1f}ms high_level={high_average:.1f}ms"
+        )
 
     def test_enemy_get_level_method(self):
         """Test that enemy has a get_level method that returns correct value."""

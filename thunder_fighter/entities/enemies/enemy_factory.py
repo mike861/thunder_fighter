@@ -10,6 +10,7 @@ from typing import Any, Dict
 
 import pygame
 
+from thunder_fighter.constants import ENEMY_CONFIG
 from thunder_fighter.entities.enemies.enemy import Enemy
 from thunder_fighter.utils.logger import logger
 
@@ -160,9 +161,11 @@ class EnemyFactory(ConfigurableEntityFactory[Enemy]):
         preset_can_shoot = config.get("can_shoot")
 
         # Final shooting ability must satisfy both preset intent and level requirement
-        if preset_can_shoot is True and enemy.level >= 2:  # ENEMY_CONFIG["SHOOT_LEVEL"] = 2
+        shoot_threshold = int(ENEMY_CONFIG["SHOOT_LEVEL"])
+
+        if preset_can_shoot is True and enemy.level >= shoot_threshold:
             enemy.can_shoot = True
-        elif enemy.level >= 2:
+        elif enemy.level >= shoot_threshold:
             # Level qualifies for shooting, keep the level-based decision
             pass  # enemy.can_shoot is already set correctly by Enemy.__init__
         else:

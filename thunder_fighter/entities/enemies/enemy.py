@@ -62,10 +62,26 @@ class Enemy(pygame.sprite.Sprite):
         # Initialize shooting properties for all enemies (even non-shooting ones)
         base_delay = 800
         level_reduction = self.level * 50
-        self.shoot_delay = max(int(ENEMY_CONFIG["MIN_SHOOT_DELAY"]), base_delay - level_reduction)
-        if self.level >= 5:
-            self.shoot_delay = max(300, self.shoot_delay - 100)
-        self.last_shot = pygame.time.get_ticks() - self.shoot_delay + random.randint(0, 1000)
+        min_random_delay = int(ENEMY_CONFIG["MIN_SHOOT_DELAY"])
+        max_random_delay = int(ENEMY_CONFIG["MAX_SHOOT_DELAY"])
+        absolute_min_delay = int(ENEMY_CONFIG.get("ABSOLUTE_MIN_SHOOT_DELAY", 300))
+        level_step = int(ENEMY_CONFIG.get("SHOOT_DELAY_LEVEL_STEP", 0))
+        high_level_threshold = int(ENEMY_CONFIG.get("SHOOT_DELAY_HIGH_LEVEL_THRESHOLD", 0))
+        high_level_bonus = int(ENEMY_CONFIG.get("SHOOT_DELAY_HIGH_LEVEL_BONUS", 0))
+        spawn_jitter = max(0, int(ENEMY_CONFIG.get("SHOOT_DELAY_SPAWN_JITTER", 0)))
+
+        if max_random_delay < min_random_delay:
+            max_random_delay = min_random_delay
+
+        base_delay = random.randint(min_random_delay, max_random_delay)
+        # Apply level-based bias after the random roll
+        biased_delay = base_delay - self.level * level_step
+        if self.level >= high_level_threshold:
+            biased_delay -= high_level_bonus
+
+        self.shoot_delay = max(absolute_min_delay, biased_delay)
+        initial_offset = random.randint(0, spawn_jitter) if spawn_jitter > 0 else 0
+        self.last_shot = pygame.time.get_ticks() - self.shoot_delay + initial_offset
 
         if self.can_shoot:
             logger.debug(f"Enemy ID:{id(self)} Level:{self.level} Ready to shoot, Delay:{self.shoot_delay}ms")

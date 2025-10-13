@@ -80,7 +80,6 @@ class Boss(pygame.sprite.Sprite):
 
         self.last_shot = ptime.get_ticks()
         self.direction = 1  # Movement direction
-        self.move_counter = 0
         self.damage_flash = 0
 
         # Pre-create flash images
@@ -199,11 +198,6 @@ class Boss(pygame.sprite.Sprite):
             self.rect.y += BOSS_COMBAT["ENTRANCE_SPEED"]
         else:
             # Left-right movement
-            self.move_counter += 1
-            if self.move_counter >= BOSS_COMBAT["DIRECTION_CHANGE_INTERVAL"]:  # Change direction periodically
-                self.direction *= -1
-                self.move_counter = 0
-
             # Calculate dynamic movement boundaries based on game_level
             # Higher game_level allows moving closer to the edges
             # Reduce margin based on game level, but keep at least a small margin
@@ -218,14 +212,12 @@ class Boss(pygame.sprite.Sprite):
             self.rect.x += current_speedx * self.direction
 
             # Prevent Boss from flying out of dynamic boundaries
-            if self.rect.left < left_boundary:
+            if self.rect.left <= left_boundary:
                 self.rect.left = left_boundary
                 self.direction = 1  # Force move right
-                self.move_counter = 0  # Reset move counter to prevent getting stuck
-            if self.rect.right > right_boundary:
+            elif self.rect.right >= right_boundary:
                 self.rect.right = right_boundary
                 self.direction = -1  # Force move left
-                self.move_counter = 0  # Reset move counter
 
         # Boss shooting
         now = ptime.get_ticks()

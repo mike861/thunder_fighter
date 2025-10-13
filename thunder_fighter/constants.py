@@ -77,10 +77,15 @@ BULLET_CONFIG: Dict[str, Any] = {
 
 # ===== Enemy Configuration (Extended) =====
 ENEMY_CONFIG: Dict[str, Any] = {
-    "BASE_COUNT": 4,
-    "MIN_SHOOT_DELAY": 500,
-    "MAX_SHOOT_DELAY": 2000,
-    "SHOOT_LEVEL": 2,
+    "BASE_COUNT": 2,
+    "MIN_SHOOT_DELAY": 1200,  # Lower bound for random spawn delay (ms)
+    "MAX_SHOOT_DELAY": 3000,  # Upper bound for random spawn delay (ms)
+    "ABSOLUTE_MIN_SHOOT_DELAY": 500,  # Clamp so high-level enemies cannot go below this
+    "SHOOT_DELAY_LEVEL_STEP": 130,  # Reduction applied per enemy level (after random roll)
+    "SHOOT_DELAY_HIGH_LEVEL_THRESHOLD": 7,  # Levels above this get an extra reduction
+    "SHOOT_DELAY_HIGH_LEVEL_BONUS": 200,  # Extra reduction for high-level enemies
+    "SHOOT_DELAY_SPAWN_JITTER": 800,  # Additional randomness applied to first shot timing
+    "SHOOT_LEVEL": 1,
     "SPAWN_Y_MIN": -80,
     "SPAWN_Y_MAX": -20,
     "HORIZONTAL_MOVE_MIN": -3,

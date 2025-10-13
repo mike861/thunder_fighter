@@ -12,12 +12,7 @@ from typing import TYPE_CHECKING
 import pygame
 import pytest
 
-from thunder_fighter.graphics.renderers import (
-    create_boss_surface,
-    create_enemy_surface,
-    create_player_surface,
-    create_wingman,
-)
+from thunder_fighter.graphics.renderers import create_boss_surface, create_enemy_surface, create_player_surface, create_wingman
 
 if TYPE_CHECKING:
     pass
@@ -107,6 +102,20 @@ class TestPlayerRenderer:
         assert len(unique_colors) >= 3
 
 
+def _expected_enemy_size_bounds(level: int) -> tuple[int, int]:
+    """Return dynamic size bounds for enemy sprites based on level tiers."""
+    if level < 0:
+        level = 0
+
+    if level < 3:
+        return 45, 85  # Enlarged scouts with 3D padding
+    if level < 6:
+        return 60, 95  # Front-line fighters
+    if level < 9:
+        return 75, 110  # Heavy attackers
+    return 85, 130  # Elite command ships and beyond
+
+
 class TestEnemyRenderer:
     """Test enemy aircraft rendering functionality"""
 
@@ -122,8 +131,9 @@ class TestEnemyRenderer:
 
         # Size should be reasonable (varies by level with 3D effects)
         width, height = surface.get_size()
-        assert 30 <= width <= 80, f"Enemy width {width} out of reasonable range"
-        assert 30 <= height <= 80, f"Enemy height {height} out of reasonable range"
+        min_size, max_size = _expected_enemy_size_bounds(level=0)
+        assert min_size <= width <= max_size, f"Enemy width {width} out of reasonable range"
+        assert min_size <= height <= max_size, f"Enemy height {height} out of reasonable range"
 
         # Check transparency (flag, colorkey, or per-pixel alpha)
         has_alpha_flag = bool(surface.get_flags() & pygame.SRCALPHA)
@@ -155,8 +165,9 @@ class TestEnemyRenderer:
 
         # Size varies by level with 3D effects: level 0-2:(40,40), 3-5:(50,50), 6-8:(60,60), 9+:(70,70)
         width, height = surface.get_size()
-        assert 30 <= width <= 80, f"Enemy level {level} width {width} out of reasonable range"
-        assert 30 <= height <= 80, f"Enemy level {level} height {height} out of reasonable range"
+        min_size, max_size = _expected_enemy_size_bounds(level)
+        assert min_size <= width <= max_size, f"Enemy level {level} width {width} out of reasonable range"
+        assert min_size <= height <= max_size, f"Enemy level {level} height {height} out of reasonable range"
 
         # Verify visual content exists
         center_x, center_y = width // 2, height // 2
@@ -214,12 +225,13 @@ class TestEnemyRenderer:
             surface = create_enemy_surface(level=level)
 
             # Check pixels around the aircraft for unwanted black artifacts
-            # Sample edge pixels that might show glow/shadow effects (updated for 45x45 surface)
+            # Sample edge pixels that might show glow/shadow effects
+            width, height = surface.get_size()
             edge_pixels = [
-                surface.get_at((5, 22)),  # Far left edge
-                surface.get_at((40, 22)),  # Far right edge
-                surface.get_at((22, 5)),  # Top edge
-                surface.get_at((22, 40)),  # Bottom edge
+                surface.get_at((5, height // 2)),  # Far left edge
+                surface.get_at((width - 6, height // 2)),  # Far right edge
+                surface.get_at((width // 2, 5)),  # Top edge
+                surface.get_at((width // 2, height - 6)),  # Bottom edge
             ]
 
             for pixel in edge_pixels:
@@ -240,15 +252,17 @@ class TestEnemyRenderer:
         surface = create_enemy_surface(level=-1)
         assert surface is not None
         width, height = surface.get_size()
-        assert 30 <= width <= 80, f"Enemy negative level width {width} out of range"
-        assert 30 <= height <= 80, f"Enemy negative level height {height} out of range"
+        min_size, max_size = _expected_enemy_size_bounds(-1)
+        assert min_size <= width <= max_size, f"Enemy negative level width {width} out of range"
+        assert min_size <= height <= max_size, f"Enemy negative level height {height} out of range"
 
         # Test very high level (should not crash)
         surface = create_enemy_surface(level=100)
         assert surface is not None
         width, height = surface.get_size()
-        assert 30 <= width <= 80, f"Enemy high level width {width} out of range"
-        assert 30 <= height <= 80, f"Enemy high level height {height} out of range"
+        min_size, max_size = _expected_enemy_size_bounds(100)
+        assert min_size <= width <= max_size, f"Enemy high level width {width} out of range"
+        assert min_size <= height <= max_size, f"Enemy high level height {height} out of range"
 
     def test_enemy_visual_complexity_by_level(self):
         """Test that higher level enemies have more visual complexity"""
